@@ -6,7 +6,7 @@ import pf_dynamic_cart as pfc
 class PolaronHamiltonian:
         # """ This is a class that stores information about the Hamiltonian"""
 
-    def __init__(self, coherent_state, Params):
+    def __init__(self, coherent_state, Params, toggleDict):
 
         # Params = [P, aIBi, mI, mB, n0, gBB]
 
@@ -18,6 +18,9 @@ class PolaronHamiltonian:
         self.k0mask = coherent_state.k0mask
 
         self.k2 = coherent_state.k2_flat
+
+        self.dynamicsType = toggleDict['Dynamics']
+        self.couplingType = toggleDict['Coupling']
 
         if(self.coordinate_system == "SPHERICAL_2D"):
             self.gnum = pfs.g(self.grid, *Params[1:])
@@ -65,23 +68,23 @@ class PolaronHamiltonian:
 
         PB = np.dot(self.kz * np.abs(amplitude)**2, dVk)
 
-        # # FOR FROLICH:
+        # FOR FROLICH:
+        if self.couplingType == 'frohlich':
+            self.gnum = (2 * np.pi / pfs.ur(mI, mB)) * (1 / aIBi)
+            xp = 0
+            xm = 0
 
-        # self.gnum = (2 * np.pi / pfs.ur(mI, mB)) * (1 / aIBi)
-        # xp = 0
-        # xm = 0
+        if self.dynamicsType == 'real':
+            # FOR REAL TIME DYNAMICS:
+            amplitude_new_temp = -1j * (self.gnum * np.sqrt(n0) * self.Wk_grid +
+                                        amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
+                                        self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
 
-        # # FOR REAL TIME DYNAMICS:
-
-        # amplitude_new_temp = -1j * (self.gnum * np.sqrt(n0) * self.Wk_grid +
-        #                             amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
-        #                             self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
-
-        # FOR IMAGINARY TIME DYNAMICS
-
-        amplitude_new_temp = -1 * (self.gnum * np.sqrt(n0) * self.Wk_grid +
-                                   amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
-                                   self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
+        elif self.dynamicsType == 'imaginary':
+            # FOR IMAGINARY TIME DYNAMICS
+            amplitude_new_temp = -1 * (self.gnum * np.sqrt(n0) * self.Wk_grid +
+                                       amplitude * (self.Omega0_grid - self.kz * (P - PB) / mI) +
+                                       self.gnum * (self.Wk_grid * xp + self.Wki_grid * xm))
 
         amplitude_new_temp[self.k0mask] = 0  # ensure Beta_k remains equal to 0 where |k| = 0 to avoid numerical issues (this is an unphysical point)
         amplitude_phase_new[0:-1] = amplitude_new_temp

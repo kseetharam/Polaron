@@ -61,17 +61,33 @@ if __name__ == "__main__":
 
     sParams = [mI, mB, n0, gBB]
 
+    # Toggle parameters
+
+    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+
     # ---- SET OUTPUT DATA FOLDER ----
 
-    # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    # datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    if toggleDict['Location'] == 'home':
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+    elif toggleDict['Location'] == 'work':
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+    elif toggleDict['Location'] == 'cluster':
+        datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
 
-    # innerdatapath = datapath
-    # innerdatapath = datapath + '/redyn_spherical'
-    innerdatapath = datapath + '/imdyn_spherical'
-    # innerdatapath = datapath + '/redyn_spherical_frohlich'
-    # innerdatapath = datapath + '/imdyn_spherical_frohlich'
+    if toggleDict['Dynamics'] == 'real':
+        innerdatapath = datapath + '/redyn'
+    elif toggleDict['Dynamics'] == 'imaginary':
+        innerdatapath = datapath + '/imdyn'
+
+    if toggleDict['Grid'] == 'cartesian':
+        innerdatapath = innerdatapath + '_cart'
+    elif toggleDict['Grid'] == 'spherical':
+        innerdatapath = innerdatapath + '_spherical'
+
+    if toggleDict['Coupling'] == 'frohlich':
+        innerdatapath = innerdatapath + '_froh'
+    elif toggleDict['Coupling'] == 'twophonon':
+        innerdatapath = innerdatapath
 
     if os.path.isdir(datapath) is False:
         os.mkdir(datapath)
@@ -91,7 +107,7 @@ if __name__ == "__main__":
 
     # cParams = [P, aIBi]
 
-    # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
+    # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
     # dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     # end = timer()
@@ -121,7 +137,7 @@ if __name__ == "__main__":
     for ind, cParams in enumerate(cParams_List):
         loopstart = timer()
         [P, aIBi] = cParams
-        dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
+        dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
         dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
         loopend = timer()
         print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
@@ -145,7 +161,7 @@ if __name__ == "__main__":
     #     cParams = cParams_List[taskID]
     #     [P, aIBi] = cParams
 
-    # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams)
+    # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
     # dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     # end = timer()
