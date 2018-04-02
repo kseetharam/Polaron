@@ -97,8 +97,8 @@ if __name__ == "__main__":
 
     runstart = timer()
 
-    P = 2.4
-    aIBi = -5
+    P = 2.166
+    aIBi = -4.9
     cParams = [P, aIBi]
 
     dyncart_ds = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
