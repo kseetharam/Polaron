@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 import Grid
+import scipy.interpolate as spi
 from timeit import default_timer as timer
 
 err = 1e-5
@@ -59,16 +60,6 @@ def ImpMomGrid_from_PhononMomGrid(kgrid, P):
     PIgrid = Grid.Grid('CARTESIAN_3D')
     PIgrid.initArray_premade('kx', PI_x_ord); PIgrid.initArray_premade('ky', PI_y_ord); PIgrid.initArray_premade('kz', PI_z_ord)
     return PIgrid
-
-
-def FWHM(x, f):
-    # f is function of x -> f(x)
-    if np.abs(np.max(f) - np.min(f)) < 1e-2:
-        return 0
-    else:
-        D = f - np.max(f) / 2
-        indices = np.where(D > 0)[0]
-        return x[indices[-1]] - x[indices[0]]
 
 
 def xyzDist_ProjSlices(phonon_pos_dist, phonon_mom_dist, grid_size_args, grid_diff_args):
@@ -173,9 +164,39 @@ def xyzDist_To_magDist(kgrid, phonon_mom_dist, P):
 
     return mag_dist_List
 
+# ---- ANALYSIS FUNCTIONS ----
+
+
+def FWHM(x, f):
+    # f is function of x -> f(x)
+    if np.abs(np.max(f) - np.min(f)) < 1e-2:
+        return 0
+    else:
+        D = f - np.max(f) / 2
+        indices = np.where(D > 0)[0]
+        return x[indices[-1]] - x[indices[0]]
+
+
+def xinterp2D(xdataset, coord1, coord2, mult):
+    # xdataset is the desired xarray dataset with the desired plotting quantity already selected
+    # coord1 and coord2 are the two coordinates making the 2d plot
+    # mul is the multiplicative factor by which you wish to increase the resolution of the grid
+    # e.g. xdataset = qds['nPI_xz_slice'].sel(P=P,aIBi=aIBi).dropna('PI_z'), coord1 = 'PI_x', coord2 = 'PI_z'
+    # returns meshgrid values for C1_interp and C2_interp as well as the function value on this 2D grid -> these are ready to plot
+    C1 = xdataset.coords[coord1].values
+    C2 = xdataset.coords[coord2].values
+    C1g, C2g = np.meshgrid(C1, C2, indexing='ij')
+    C1_interp = np.linspace(np.min(C1), np.max(C1), mult * C1.size)
+    C2_interp = np.linspace(np.min(C2), np.max(C2), mult * C2.size)
+    C1g_interp, C2g_interp = np.meshgrid(C1_interp, C2_interp, indexing='ij')
+    interp_vals = spi.griddata((C1g.flatten(), C2g.flatten()), xdataset.values.flatten(), (C1g_interp, C2g_interp), method='cubic')
+    return interp_vals, C1g_interp, C2g_interp
+
 
 # ---- DATA GENERATION ----
 # @profile
+
+
 def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
     #
     # do not run this inside CoherentState or PolaronHamiltonian

@@ -136,8 +136,8 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
     Phase_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
     ReAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
     ImAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
-    ReDeltaAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
-    ImDeltaAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
+    # ReDeltaAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
+    # ImDeltaAmp_da = xr.DataArray(np.full((tgrid.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid, kVec, thVec], dims=['t', 'k', 'th'])
 
     start = timer()
     for ind, t in enumerate(tgrid):
@@ -158,20 +158,20 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
         ReAmp_da[ind] = np.real(Amp)
         ImAmp_da[ind] = np.imag(Amp)
 
-        amplitude = cs.get_Amplitude()
-        PB = np.dot(ham.kz * np.abs(amplitude)**2, cs.dVk)
-        betaSum = amplitude + np.conjugate(amplitude)
-        xp = 0.5 * np.dot(ham.Wk_grid, betaSum * cs.dVk)
-        betaDiff = amplitude - np.conjugate(amplitude)
-        xm = 0.5 * np.dot(ham.Wki_grid, betaDiff * cs.dVk)
+        # amplitude = cs.get_Amplitude()
+        # PB = np.dot(ham.kz * np.abs(amplitude)**2, cs.dVk)
+        # betaSum = amplitude + np.conjugate(amplitude)
+        # xp = 0.5 * np.dot(ham.Wk_grid, betaSum * cs.dVk)
+        # betaDiff = amplitude - np.conjugate(amplitude)
+        # xm = 0.5 * np.dot(ham.Wki_grid, betaDiff * cs.dVk)
 
-        damp = -1j * (ham.gnum * np.sqrt(n0) * ham.Wk_grid +
-                      amplitude * (ham.Omega0_grid - ham.kz * (P - PB) / mI) +
-                      ham.gnum * (ham.Wk_grid * xp + ham.Wki_grid * xm))
+        # damp = -1j * (ham.gnum * np.sqrt(n0) * ham.Wk_grid +
+        #               amplitude * (ham.Omega0_grid - ham.kz * (P - PB) / mI) +
+        #               ham.gnum * (ham.Wk_grid * xp + ham.Wki_grid * xm))
 
-        DeltaAmp = damp.reshape(len(kVec), len(thVec))
-        ReDeltaAmp_da[ind] = np.real(DeltaAmp)
-        ImDeltaAmp_da[ind] = np.imag(DeltaAmp)
+        # DeltaAmp = damp.reshape(len(kVec), len(thVec))
+        # ReDeltaAmp_da[ind] = np.real(DeltaAmp)
+        # ImDeltaAmp_da[ind] = np.imag(DeltaAmp)
 
         end = timer()
         print('t: {:.2f}, cst: {:.2f}, dt: {:.3f}, runtime: {:.3f}'.format(t, cs.time, dt, end - start))
@@ -179,7 +179,8 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
 
     # Create Data Set
 
-    data_dict = {'Pph': PB_da, 'Nph': NB_da, 'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'Real_Delta_CSAmp': ReDeltaAmp_da, 'Imag_Delta_CSAmp': ImDeltaAmp_da}
+    data_dict = {'Pph': PB_da, 'Nph': NB_da, 'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da}
+    # data_dict = {'Pph': PB_da, 'Nph': NB_da, 'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'Real_Delta_CSAmp': ReDeltaAmp_da, 'Imag_Delta_CSAmp': ImDeltaAmp_da}
     coords_dict = {'t': tgrid}
     attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB}
 

@@ -41,8 +41,8 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 99
-    dt = 1
+    tMax = 1000
+    dt = 10
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -89,21 +89,21 @@ if __name__ == "__main__":
     elif toggleDict['Coupling'] == 'twophonon':
         innerdatapath = innerdatapath
 
-    if os.path.isdir(datapath) is False:
-        os.mkdir(datapath)
+    # if os.path.isdir(datapath) is False:
+    #     os.mkdir(datapath)
 
-    if os.path.isdir(innerdatapath) is False:
-        os.mkdir(innerdatapath)
+    # if os.path.isdir(innerdatapath) is False:
+    #     os.mkdir(innerdatapath)
 
     # # # ---- SINGLE FUNCTION RUN ----
 
     # runstart = timer()
 
-    # P = 2.4
-    # aIBi = -10
+    # P = 1.4
+    # aIBi = -2
 
-    # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi = aIBi - aSi
-    # print(aIBi)
+    # # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi = aIBi - aSi
+    # # print(aIBi)
 
     # cParams = [P, aIBi]
 
@@ -117,11 +117,11 @@ if __name__ == "__main__":
 
     cParams_List = []
 
-    aIBi_Vals = np.array([-10.0, -5.0])
+    aIBi_Vals = np.array([-10.0, -5.0, -2.0])
     # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi_Vals = aIBi_Vals - aSi
 
     # P_Vals = np.array([0.4])
-    P_Vals = np.linspace(0.1, 5.0, 50)
+    P_Vals = np.concatenate((np.array([0.1, 0.4, 0.6]), np.linspace(0.8, 2.8, 20), np.linspace(3.0, 5.0, 3)))
 
     for ind, aIBi in enumerate(aIBi_Vals):
         for P in P_Vals:
