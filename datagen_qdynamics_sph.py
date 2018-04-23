@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Coupling': 'frohlich', 'Grid': 'spherical'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
