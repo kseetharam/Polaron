@@ -8,6 +8,10 @@ import matplotlib.colors as colors
 import os
 import itertools
 import pf_dynamic_cart as pfc
+import pf_dynamic_sph as pfs
+import Grid
+from scipy import interpolate
+
 
 if __name__ == "__main__":
 
@@ -15,28 +19,25 @@ if __name__ == "__main__":
 
     # matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
 
-    # gParams
+    # ---- INITIALIZE GRIDS ----
 
     (Lx, Ly, Lz) = (21, 21, 21)
     (dx, dy, dz) = (0.375, 0.375, 0.375)
 
-    # (Lx, Ly, Lz) = (20, 20, 20)
-    # (dx, dy, dz) = (0.5, 0.5, 0.5)
-
-    NGridPoints = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
+    NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'cartesian', 'Coupling': 'frohlich'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'frohlich'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
     if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
     elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
     elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+        datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
 
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
@@ -89,15 +90,73 @@ if __name__ == "__main__":
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_cart.nc')
     PVals = qds['P'].values
     tVals = qds['t'].values
-    nu = pfc.nu(qds.attrs['gBB'])
+    n0 = qds.attrs['n0']
+    gBB = qds.attrs['gBB']
+    nu = pfc.nu(gBB)
     mI = qds.attrs['mI']
-
-    print(PVals)
+    mB = qds.attrs['mB']
 
     aIBi = -10
     qds_aIBi = qds.sel(aIBi=aIBi)
 
-    # GROUND STATE DISTRIBUTION CHARACTERIZATION
+    # # # Z-FACTOR (SPHERICAL)
+
+    # Zfac_ds = np.exp(-1 * qds_aIBi['Nph'])
+    # Zfac_Vals = np.zeros((PVals.size, tVals.size))
+    # for Pind, P in enumerate(PVals):
+    #     for tind, t in enumerate(tVals):
+    #         Zfac_Vals[Pind, tind] = Zfac_ds.sel(P=P, t=t).values
+
+    # fig, ax = plt.subplots()
+    # ax.plot(PVals, Zfac_Vals[:, -1], 'k-')
+    # ax.set_title('Z-Factor (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+    # ax.set_xlabel('P')
+    # ax.set_ylabel('Z-Factor (' + r'$e^{- N_{ph}}$' + ')')
+
+    # fig2, ax2 = plt.subplots()
+    # quadZ = ax2.pcolormesh(tVals, PVals, Zfac_Vals, norm=colors.LogNorm())
+    # ax2.set_xscale('log')
+    # ax2.set_xlabel('Imaginary Time')
+    # ax2.set_ylabel('P')
+    # ax2.set_title('Z-Factor (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+    # fig2.colorbar(quadZ, ax=ax2, extend='max')
+    # plt.show()
+
+    # # # ENERGY CHARACTERIZATION (SPHERICAL)
+
+    # CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+
+    # Energy_Vals = np.zeros((PVals.size, tVals.size))
+    # for Pind, P in enumerate(PVals):
+    #     for tind, t in enumerate(tVals):
+    #         CSAmp = CSAmp_ds.sel(P=P, t=t).values
+    #         Energy_Vals[Pind, tind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+
+    # Energy_Vals_inf = Energy_Vals[:, -1]
+    # Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+
+    # Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
+    # Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+    # Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+
+    # fig, ax = plt.subplots()
+    # ax.plot(Pinf_Vals, Einf_Vals, 'k-', label='Energy')
+    # ax.plot(Pinf_Vals, Einf_2ndderiv_Vals, 'ro', label='2nd Derivative of Energy')
+    # ax.legend()
+    # ax.set_title('Ground State Energy (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+    # ax.set_xlabel('P')
+
+    # fig2, ax2 = plt.subplots()
+    # quadEnergy = ax2.pcolormesh(tVals, PVals, Energy_Vals, norm=colors.SymLogNorm(linthresh=0.03))
+    # ax2.set_xscale('log')
+    # ax2.set_xlabel('Imaginary Time')
+    # ax2.set_ylabel('P')
+    # ax2.set_title('Energy (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+    # fig2.colorbar(quadEnergy, ax=ax2, extend='max')
+    # plt.show()
+
+    # # GROUND STATE DISTRIBUTION CHARACTERIZATION (CARTESIAN)
 
     # nPIm_FWHM_Vals = np.zeros(PVals.size)
     # nPIm_distPeak_Vals = np.zeros(PVals.size)
