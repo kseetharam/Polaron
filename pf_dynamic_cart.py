@@ -169,8 +169,8 @@ def xyzDist_To_magDist(kgrid, phonon_mom_dist, P):
 
 def FWHM(x, f):
     # f is function of x -> f(x)
-    if np.abs(np.max(f) - np.min(f)) < 1e-2:
-        return 0
+    if np.abs(np.max(f) - np.min(f)) < 1e-5:
+        return np.abs(np.max(x) - np.min(x))
     else:
         D = f - np.max(f) / 2
         indices = np.where(D > 0)[0]
