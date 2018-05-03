@@ -148,7 +148,7 @@ if __name__ == "__main__":
     # ax.plot(Pinf_Vals, Einf_Vals, 'k-', label='Energy')
     # ax.plot(Pinf_Vals, Einf_2ndderiv_Vals, 'ro', label='2nd Derivative of Energy')
     # ax.legend()
-    # ax.set_title('Ground State Energy (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+    # ax.set_title('Ground State Energy (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
     # ax.set_xlabel('P')
 
     # fig2, ax2 = plt.subplots()
@@ -156,8 +156,42 @@ if __name__ == "__main__":
     # ax2.set_xscale('log')
     # ax2.set_xlabel('Imaginary Time')
     # ax2.set_ylabel('P')
-    # ax2.set_title('Energy (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+    # ax2.set_title('Energy (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
     # fig2.colorbar(quadEnergy, ax=ax2, extend='max')
+    # plt.show()
+
+    # # # POLARON SOUND VELOCITY (SPHERICAL)
+
+    # # Check to see if linear part of polaron (total system) energy spectrum has slope equal to sound velocity
+
+    # aIBi_Vals = qds.coords['aIBi'].values
+    # vsound_Vals = np.zeros(aIBi_Vals.size)
+    # for aind, aIBi in enumerate(aIBi_Vals):
+    #     qds_aIBi = qds.sel(aIBi=aIBi)
+    #     CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+    #     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    #     Energy_Vals_inf = np.zeros(PVals.size)
+    #     for Pind, P in enumerate(PVals):
+    #         CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
+    #         Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+
+    #     Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+    #     Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
+    #     Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+    #     Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+
+    #     sound_mask = np.abs(Einf_2ndderiv_Vals) <= 5e-3
+    #     Einf_sound = Einf_Vals[sound_mask]
+    #     Pinf_sound = Pinf_Vals[sound_mask]
+    #     [vsound_Vals[aind], vs_const] = np.polyfit(Pinf_sound, Einf_sound, deg=1)
+
+    # fig, ax = plt.subplots()
+    # ax.plot(aIBi_Vals, vsound_Vals, 'ro', label='Polaron Velocity')
+    # ax.plot(aIBi_Vals, nu * np.ones(aIBi_Vals.size), 'k--', label='BEC Sound Speed')
+    # ax.legend()
+    # ax.set_title('Post-Transition Polaron Sound Velocity')
+    # ax.set_ylabel('Polaron Sound Velocity (' + r'$\frac{\partial E}{\partial P}$' + ')')
+    # ax.set_xlabel(r'$a_{IB}^{-1}$')
     # plt.show()
 
     # # # PHONON MODE CHARACTERIZATION (SPHERICAL)
