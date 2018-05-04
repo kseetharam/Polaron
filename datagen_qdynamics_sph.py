@@ -13,10 +13,11 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (30, 30, 30)
-    # (Lx, Ly, Lz) = (21, 21, 21)
+    # (Lx, Ly, Lz) = (30, 30, 30)
+    (Lx, Ly, Lz) = (21, 21, 21)
     # (Lx, Ly, Lz) = (12, 12, 12)
     (dx, dy, dz) = (0.375, 0.375, 0.375)
+    # (dx, dy, dz) = (0.75, 0.75, 0.75)
 
     # (Lx, Ly, Lz) = (21, 21, 21)
     # (dx, dy, dz) = (0.25, 0.25, 0.25)
@@ -67,7 +68,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'imaginary', 'Coupling': 'twophonon', 'Grid': 'spherical'}
+    toggleDict = {'Location': 'home', 'Dynamics': 'imaginary', 'Coupling': 'twophonon', 'Grid': 'spherical'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -131,39 +132,39 @@ if __name__ == "__main__":
         for P in P_Vals:
             cParams_List.append([P, aIBi])
 
-    # # ---- COMPUTE DATA ON COMPUTER ----
-
-    # runstart = timer()
-
-    # for ind, cParams in enumerate(cParams_List):
-    #     loopstart = timer()
-    #     [P, aIBi] = cParams
-    #     dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
-    #     dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
-    #     loopend = timer()
-    #     print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
-
-    # end = timer()
-    # print('Total Time: {:.2f}'.format(end - runstart))
-
-    # ---- COMPUTE DATA ON CLUSTER ----
+    # ---- COMPUTE DATA ON COMPUTER ----
 
     runstart = timer()
 
-    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
-
-    if(taskCount != len(cParams_List)):
-        print('ERROR: TASK COUNT MISMATCH')
-        P = float('nan')
-        aIBi = float('nan')
-        sys.exit()
-    else:
-        cParams = cParams_List[taskID]
+    for ind, cParams in enumerate(cParams_List):
+        loopstart = timer()
         [P, aIBi] = cParams
-
-    dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
-    dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+        dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
+        dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+        loopend = timer()
+        print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
 
     end = timer()
-    print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))
+    print('Total Time: {:.2f}'.format(end - runstart))
+
+    # # ---- COMPUTE DATA ON CLUSTER ----
+
+    # runstart = timer()
+
+    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    # if(taskCount != len(cParams_List)):
+    #     print('ERROR: TASK COUNT MISMATCH')
+    #     P = float('nan')
+    #     aIBi = float('nan')
+    #     sys.exit()
+    # else:
+    #     cParams = cParams_List[taskID]
+    #     [P, aIBi] = cParams
+
+    # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
+    # dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+
+    # end = timer()
+    # print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))

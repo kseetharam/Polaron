@@ -21,9 +21,11 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    # (Lx, Ly, Lz) = (21, 21, 21)
-    (Lx, Ly, Lz) = (12, 12, 12)
+    # (Lx, Ly, Lz) = (30, 30, 30)
+    (Lx, Ly, Lz) = (21, 21, 21)
+    # (Lx, Ly, Lz) = (12, 12, 12)
     (dx, dy, dz) = (0.375, 0.375, 0.375)
+    # (dx, dy, dz) = (0.75, 0.75, 0.75)
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
