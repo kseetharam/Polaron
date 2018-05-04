@@ -21,14 +21,15 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (21, 21, 21)
+    # (Lx, Ly, Lz) = (21, 21, 21)
+    (Lx, Ly, Lz) = (12, 12, 12)
     (dx, dy, dz) = (0.375, 0.375, 0.375)
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon'}
+    toggleDict = {'Location': 'home', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -160,46 +161,48 @@ if __name__ == "__main__":
     # fig2.colorbar(quadEnergy, ax=ax2, extend='max')
     # plt.show()
 
-    # # POLARON SOUND VELOCITY (SPHERICAL)
+    # POLARON SOUND VELOCITY (SPHERICAL)
 
-    # # Check to see if linear part of polaron (total system) energy spectrum has slope equal to sound velocity
+    # Check to see if linear part of polaron (total system) energy spectrum has slope equal to sound velocity
 
-    # aIBi_Vals = qds.coords['aIBi'].values
-    # vsound_Vals = np.zeros(aIBi_Vals.size)
-    # vI_Vals = np.zeros(aIBi_Vals.size)
-    # for aind, aIBi in enumerate(aIBi_Vals):
-    #     qds_aIBi = qds.sel(aIBi=aIBi).isel(t=-1)
-    #     CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
-    #     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
-    #     Energy_Vals_inf = np.zeros(PVals.size)
-    #     PI_Vals = np.zeros(PVals.size)
-    #     for Pind, P in enumerate(PVals):
-    #         CSAmp = CSAmp_ds.sel(P=P).values
-    #         Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
-    #         PI_Vals[Pind] = P - qds_aIBi.sel(P=P)['Pph'].values
+    aIBi_Vals = qds.coords['aIBi'].values
+    vsound_Vals = np.zeros(aIBi_Vals.size)
+    vI_Vals = np.zeros(aIBi_Vals.size)
+    for aind, aIBi in enumerate(aIBi_Vals):
+        qds_aIBi = qds.sel(aIBi=aIBi).isel(t=-1)
+        CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+        kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+        Energy_Vals_inf = np.zeros(PVals.size)
+        PI_Vals = np.zeros(PVals.size)
+        for Pind, P in enumerate(PVals):
+            CSAmp = CSAmp_ds.sel(P=P).values
+            Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+            PI_Vals[Pind] = P - qds_aIBi.sel(P=P)['Pph'].values
 
-    #     Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
-    #     Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
-    #     Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
-    #     Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+        Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+        Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
+        Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+        Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
 
-    #     sound_mask = np.abs(Einf_2ndderiv_Vals) <= 5e-3
-    #     Einf_sound = Einf_Vals[sound_mask]
-    #     Pinf_sound = Pinf_Vals[sound_mask]
-    #     [vsound_Vals[aind], vs_const] = np.polyfit(Pinf_sound, Einf_sound, deg=1)
+        sound_mask = np.abs(Einf_2ndderiv_Vals) <= 5e-3
+        Einf_sound = Einf_Vals[sound_mask]
+        Pinf_sound = Pinf_Vals[sound_mask]
+        [vsound_Vals[aind], vs_const] = np.polyfit(Pinf_sound, Einf_sound, deg=1)
 
-    #     vI_inf_tck = interpolate.splrep(PVals, PI_Vals / mI, s=0)
-    #     vI_inf_Vals = 1 * interpolate.splev(Pinf_Vals, vI_inf_tck, der=0)
-    #     vI_Vals[aind] = np.polyfit(Pinf_sound, vI_inf_Vals[sound_mask], deg=0)
+        vI_inf_tck = interpolate.splrep(PVals, PI_Vals / mI, s=0)
+        vI_inf_Vals = 1 * interpolate.splev(Pinf_Vals, vI_inf_tck, der=0)
+        vI_Vals[aind] = np.polyfit(Pinf_sound, vI_inf_Vals[sound_mask], deg=0)
 
-    # fig, ax = plt.subplots()
-    # ax.plot(aIBi_Vals, vsound_Vals, 'ro', label='Post-Transition Polaron Sound Velocity (' + r'$\frac{\partial E}{\partial P}$' + ')')
-    # ax.plot(aIBi_Vals, vI_Vals, 'go', label='Post-Transition Impurity Velocity (' + r'$\frac{P-P_{ph}}{m_{I}}$' + ')')
-    # ax.plot(aIBi_Vals, nu * np.ones(aIBi_Vals.size), 'k--', label='BEC Sound Speed')
-    # ax.legend()
-    # ax.set_title('Velocity Comparison')
-    # ax.set_xlabel(r'$a_{IB}^{-1}$')
-    # plt.show()
+    print(vsound_Vals)
+
+    fig, ax = plt.subplots()
+    ax.plot(aIBi_Vals, vsound_Vals, 'ro', label='Post-Transition Polaron Sound Velocity (' + r'$\frac{\partial E}{\partial P}$' + ')')
+    ax.plot(aIBi_Vals, vI_Vals, 'go', label='Post-Transition Impurity Velocity (' + r'$\frac{P-P_{ph}}{m_{I}}$' + ')')
+    ax.plot(aIBi_Vals, nu * np.ones(aIBi_Vals.size), 'k--', label='BEC Sound Speed')
+    ax.legend()
+    ax.set_title('Velocity Comparison')
+    ax.set_xlabel(r'$a_{IB}^{-1}$')
+    plt.show()
 
     # # # PHONON MODE CHARACTERIZATION (SPHERICAL)
 
