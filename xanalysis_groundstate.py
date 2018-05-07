@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'cartesian', 'Coupling': 'twophonon'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -291,75 +291,75 @@ if __name__ == "__main__":
     # plt.draw()
     # plt.show()
 
-    # GROUND STATE DISTRIBUTION CHARACTERIZATION (CARTESIAN)
+    # # IMPURITY DISTRIBUTION CHARACTERIZATION (CARTESIAN)
 
-    nPIm_FWHM_Vals = np.zeros(PVals.size)
-    nPIm_distPeak_Vals = np.zeros(PVals.size)
-    nPIm_deltaPeak_Vals = np.zeros(PVals.size)
-    nPIm_Tot_Vals = np.zeros(PVals.size)
-    nPIm_Vec = np.empty(PVals.size, dtype=np.object)
-    PIm_Vec = np.empty(PVals.size, dtype=np.object)
-    fig, ax = plt.subplots()
-    for ind, P in enumerate(PVals):
-        qds_nPIm_inf = qds_aIBi['nPI_mag'].sel(P=P).isel(t=-1).dropna('PI_mag')
-        PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
-        dPIm = PIm_Vals[1] - PIm_Vals[0]
+    # nPIm_FWHM_Vals = np.zeros(PVals.size)
+    # nPIm_distPeak_Vals = np.zeros(PVals.size)
+    # nPIm_deltaPeak_Vals = np.zeros(PVals.size)
+    # nPIm_Tot_Vals = np.zeros(PVals.size)
+    # nPIm_Vec = np.empty(PVals.size, dtype=np.object)
+    # PIm_Vec = np.empty(PVals.size, dtype=np.object)
+    # fig, ax = plt.subplots()
+    # for ind, P in enumerate(PVals):
+    #     qds_nPIm_inf = qds_aIBi['nPI_mag'].sel(P=P).isel(t=-1).dropna('PI_mag')
+    #     PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
+    #     dPIm = PIm_Vals[1] - PIm_Vals[0]
 
-        # # Plot nPIm(t=inf)
-        qds_nPIm_inf.plot(ax=ax, label='P: {:.1f}'.format(P))
-        nPIm_Vec[ind] = qds_nPIm_inf.values
-        PIm_Vec[ind] = PIm_Vals
+    #     # # Plot nPIm(t=inf)
+    #     qds_nPIm_inf.plot(ax=ax, label='P: {:.1f}'.format(P))
+    #     nPIm_Vec[ind] = qds_nPIm_inf.values
+    #     PIm_Vec[ind] = PIm_Vals
 
-        # # Calculate nPIm(t=inf) normalization
-        nPIm_Tot_Vals[ind] = np.sum(qds_nPIm_inf.values * dPIm) + qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
+    #     # # Calculate nPIm(t=inf) normalization
+    #     nPIm_Tot_Vals[ind] = np.sum(qds_nPIm_inf.values * dPIm) + qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
 
-        # Calculate FWHM, distribution peak, and delta peak
-        nPIm_FWHM_Vals[ind] = pfc.FWHM(PIm_Vals, qds_nPIm_inf.values)
-        nPIm_distPeak_Vals[ind] = np.max(qds_nPIm_inf.values)
-        nPIm_deltaPeak_Vals[ind] = qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
+    #     # Calculate FWHM, distribution peak, and delta peak
+    #     nPIm_FWHM_Vals[ind] = pfc.FWHM(PIm_Vals, qds_nPIm_inf.values)
+    #     nPIm_distPeak_Vals[ind] = np.max(qds_nPIm_inf.values)
+    #     nPIm_deltaPeak_Vals[ind] = qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
 
-    # Plot nPIm(t=inf)
-    ax.plot(mI * nu * np.ones(PIm_Vals.size), np.linspace(0, 1, PIm_Vals.size), 'k--', label=r'$m_{I}c$')
-    ax.legend()
-    ax.set_xlabel(r'$|P_{I}|$')
-    ax.set_ylabel(r'$n_{|P_{I}|}$')
-    ax.set_title('Ground state impurity distribution (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    # plt.show()
-
-    # # Plot characterization of nPIm(t=inf)
-    # ax.plot(PVals, nPIm_FWHM_Vals, 'b-', label='Incoherent Dist FWHM')
-    # ax.plot(PVals, nPIm_distPeak_Vals, 'g-', label='Incoherent Dist Peak')
-    # ax.plot(PVals, nPIm_deltaPeak_Vals, 'r-', label='Delta Peak (Z-factor)')
+    # # Plot nPIm(t=inf)
+    # ax.plot(mI * nu * np.ones(PIm_Vals.size), np.linspace(0, 1, PIm_Vals.size), 'k--', label=r'$m_{I}c$')
     # ax.legend()
-    # ax.set_xlabel('$P$')
-    # ax.set_title(r'$n_{|P_{I}|}$' + ' Characterization (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    # plt.show()
+    # ax.set_xlabel(r'$|P_{I}|$')
+    # ax.set_ylabel(r'$n_{|P_{I}|}$')
+    # ax.set_title('Ground state impurity distribution (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+    # # plt.show()
 
-    fig2, ax2 = plt.subplots()
-    ax2.plot(mI * nu * np.ones(PIm_Vals.size), np.linspace(0, 1, PIm_Vals.size), 'k--', label=r'$m_{I}c$')
-    curve = ax2.plot(PIm_Vec[0], nPIm_Vec[0], color='k', lw=2)[0]
-    line = ax.plot(PVals[0] * np.ones(PIm_Vals.size), np.linspace(0, nPIm_deltaPeak_Vals[0], PIm_Vals.size), 'go')[0]
-    P_text = ax2.text(0.85, 0.9, 'P: {:.2f}'.format(PVals[0]), transform=ax2.transAxes, color='r')
-    norm_text = ax.text(0.02, 0.9, r'$\int n_{|\vec{P_{I}}|} d|\vec{P_{I}}| = $' + '{:.3f}'.format(nPIm_Tot_Vals[0]), transform=ax.transAxes, color='b')
+    # # # Plot characterization of nPIm(t=inf)
+    # # ax.plot(PVals, nPIm_FWHM_Vals, 'b-', label='Incoherent Dist FWHM')
+    # # ax.plot(PVals, nPIm_distPeak_Vals, 'g-', label='Incoherent Dist Peak')
+    # # ax.plot(PVals, nPIm_deltaPeak_Vals, 'r-', label='Delta Peak (Z-factor)')
+    # # ax.legend()
+    # # ax.set_xlabel('$P$')
+    # # ax.set_title(r'$n_{|P_{I}|}$' + ' Characterization (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+    # # plt.show()
 
-    ax2.set_xlim([-0.01, np.max(PIm_Vec[0])])
-    # ax2.set_ylim([0, 5])
-    ax2.set_title('Impurity Momentum Magnitude Distribution (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    ax2.set_ylabel(r'n_{|\vec{P_{I}}|}')
+    # fig2, ax2 = plt.subplots()
+    # ax2.plot(mI * nu * np.ones(PIm_Vals.size), np.linspace(0, 1, PIm_Vals.size), 'k--', label=r'$m_{I}c$')
+    # curve = ax2.plot(PIm_Vec[0], nPIm_Vec[0], color='k', lw=2, label='')[0]
+    # line = ax2.plot(PVals[0] * np.ones(PIm_Vals.size), np.linspace(0, nPIm_deltaPeak_Vals[0], PIm_Vals.size), 'go', label='')[0]
+    # P_text = ax2.text(0.85, 0.85, 'P: {:.2f}'.format(PVals[0]), transform=ax2.transAxes, color='r')
+    # norm_text = ax2.text(0.7, 0.8, r'$\int n_{|\vec{P_{I}}|} d|\vec{P_{I}}| = $' + '{:.3f}'.format(nPIm_Tot_Vals[0]), transform=ax.transAxes, color='b')
 
-    ax2.set_xlabel(r'$|\vec{k}|$')
+    # ax2.legend()
+    # ax2.set_xlim([-0.01, np.max(PIm_Vec[0])])
+    # ax2.set_ylim([0, 1.2])
+    # ax2.set_title('Impurity Momentum Magnitude Distribution (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+    # ax2.set_ylabel(r'$n_{|\vec{P_{I}}|}$')
+    # ax2.set_xlabel(r'$|\vec{P_{I}}|$')
 
-    def animate2(i):
-        curve.set_xdata(PIm_Vec[i])
-        curve.set_ydata(nPIm_Vec[i])
-        line.set_xdata(PVals[i])
-        line.set_ydata(np.linspace(0, nPIm_deltaPeak_Vals[i], PIm_Vals.size))
-        P_text.set_text('P: {:.2f}'.format(PVals[i]))
-        norm_text.set_text(r'$\int n_{|\vec{P_{I}}|} d|\vec{P_{I}}| = $' + '{:.3f}'.format(nPIm_Tot_Vals[i]))
+    # def animate2(i):
+    #     curve.set_xdata(PIm_Vec[i])
+    #     curve.set_ydata(nPIm_Vec[i])
+    #     line.set_xdata(PVals[i])
+    #     line.set_ydata(np.linspace(0, nPIm_deltaPeak_Vals[i], PIm_Vals.size))
+    #     P_text.set_text('P: {:.2f}'.format(PVals[i]))
+    #     norm_text.set_text(r'$\int n_{|\vec{P_{I}}|} d|\vec{P_{I}}| = $' + '{:.3f}'.format(nPIm_Tot_Vals[i]))
 
-    anim2 = FuncAnimation(fig2, animate2, interval=1000, frames=range(PVals.size))
+    # anim2 = FuncAnimation(fig2, animate2, interval=1000, frames=range(PVals.size))
     # anim2.save(animpath + '/aIBi_{0}'.format(aIBi) + '_ImpDist.gif', writer='imagemagick')
-    plt.show()
+    # # plt.show()
 
     # # DISTRIBUTION CHARACTERIZATION SATURATION
 
