@@ -28,6 +28,7 @@ if __name__ == "__main__":
     # (dx, dy, dz) = (0.75, 0.75, 0.75)
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
+    # NGridPoints_cart = 1.37e5
 
     # Toggle parameters
 

@@ -30,6 +30,11 @@ if __name__ == "__main__":
     Ntheta = 50
     Nk = np.ceil(NGridPoints_desired / Ntheta)
 
+    # # adjust num theta points
+    # Ntheta = 25
+    # Nk = 85
+    # NGridPoints_cart = 0.5 * NGridPoints_cart
+
     theta_max = np.pi
     thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
 
