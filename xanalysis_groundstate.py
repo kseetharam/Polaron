@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'cartesian', 'Coupling': 'twophonon'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -164,48 +164,48 @@ if __name__ == "__main__":
     # fig2.colorbar(quadEnergy, ax=ax2, extend='max')
     # plt.show()
 
-    # POLARON SOUND VELOCITY (SPHERICAL)
+    # # POLARON SOUND VELOCITY (SPHERICAL)
 
-    # Check to see if linear part of polaron (total system) energy spectrum has slope equal to sound velocity
+    # # Check to see if linear part of polaron (total system) energy spectrum has slope equal to sound velocity
 
-    aIBi_Vals = qds.coords['aIBi'].values
-    vsound_Vals = np.zeros(aIBi_Vals.size)
-    vI_Vals = np.zeros(aIBi_Vals.size)
-    for aind, aIBi in enumerate(aIBi_Vals):
-        qds_aIBi = qds.sel(aIBi=aIBi).isel(t=-1)
-        CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
-        kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
-        Energy_Vals_inf = np.zeros(PVals.size)
-        PI_Vals = np.zeros(PVals.size)
-        for Pind, P in enumerate(PVals):
-            CSAmp = CSAmp_ds.sel(P=P).values
-            Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
-            PI_Vals[Pind] = P - qds_aIBi.sel(P=P)['Pph'].values
+    # aIBi_Vals = qds.coords['aIBi'].values
+    # vsound_Vals = np.zeros(aIBi_Vals.size)
+    # vI_Vals = np.zeros(aIBi_Vals.size)
+    # for aind, aIBi in enumerate(aIBi_Vals):
+    #     qds_aIBi = qds.sel(aIBi=aIBi).isel(t=-1)
+    #     CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+    #     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    #     Energy_Vals_inf = np.zeros(PVals.size)
+    #     PI_Vals = np.zeros(PVals.size)
+    #     for Pind, P in enumerate(PVals):
+    #         CSAmp = CSAmp_ds.sel(P=P).values
+    #         Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+    #         PI_Vals[Pind] = P - qds_aIBi.sel(P=P)['Pph'].values
 
-        Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
-        Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
-        Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
-        Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+    #     Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+    #     Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
+    #     Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+    #     Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
 
-        sound_mask = np.abs(Einf_2ndderiv_Vals) <= 5e-3
-        Einf_sound = Einf_Vals[sound_mask]
-        Pinf_sound = Pinf_Vals[sound_mask]
-        [vsound_Vals[aind], vs_const] = np.polyfit(Pinf_sound, Einf_sound, deg=1)
+    #     sound_mask = np.abs(Einf_2ndderiv_Vals) <= 5e-3
+    #     Einf_sound = Einf_Vals[sound_mask]
+    #     Pinf_sound = Pinf_Vals[sound_mask]
+    #     [vsound_Vals[aind], vs_const] = np.polyfit(Pinf_sound, Einf_sound, deg=1)
 
-        vI_inf_tck = interpolate.splrep(PVals, PI_Vals / mI, s=0)
-        vI_inf_Vals = 1 * interpolate.splev(Pinf_Vals, vI_inf_tck, der=0)
-        vI_Vals[aind] = np.polyfit(Pinf_sound, vI_inf_Vals[sound_mask], deg=0)
+    #     vI_inf_tck = interpolate.splrep(PVals, PI_Vals / mI, s=0)
+    #     vI_inf_Vals = 1 * interpolate.splev(Pinf_Vals, vI_inf_tck, der=0)
+    #     vI_Vals[aind] = np.polyfit(Pinf_sound, vI_inf_Vals[sound_mask], deg=0)
 
-    print(vsound_Vals)
+    # print(vsound_Vals)
 
-    fig, ax = plt.subplots()
-    ax.plot(aIBi_Vals, vsound_Vals, 'ro', label='Post-Transition Polaron Sound Velocity (' + r'$\frac{\partial E}{\partial P}$' + ')')
-    ax.plot(aIBi_Vals, vI_Vals, 'go', label='Post-Transition Impurity Velocity (' + r'$\frac{P-P_{ph}}{m_{I}}$' + ')')
-    ax.plot(aIBi_Vals, nu * np.ones(aIBi_Vals.size), 'k--', label='BEC Sound Speed')
-    ax.legend()
-    ax.set_title('Velocity Comparison')
-    ax.set_xlabel(r'$a_{IB}^{-1}$')
-    plt.show()
+    # fig, ax = plt.subplots()
+    # ax.plot(aIBi_Vals, vsound_Vals, 'ro', label='Post-Transition Polaron Sound Velocity (' + r'$\frac{\partial E}{\partial P}$' + ')')
+    # ax.plot(aIBi_Vals, vI_Vals, 'go', label='Post-Transition Impurity Velocity (' + r'$\frac{P-P_{ph}}{m_{I}}$' + ')')
+    # ax.plot(aIBi_Vals, nu * np.ones(aIBi_Vals.size), 'k--', label='BEC Sound Speed')
+    # ax.legend()
+    # ax.set_title('Velocity Comparison')
+    # ax.set_xlabel(r'$a_{IB}^{-1}$')
+    # plt.show()
 
     # # # PHONON MODE CHARACTERIZATION (SPHERICAL)
 
@@ -291,34 +291,39 @@ if __name__ == "__main__":
     # plt.draw()
     # plt.show()
 
-    # # GROUND STATE DISTRIBUTION CHARACTERIZATION (CARTESIAN)
+    # GROUND STATE DISTRIBUTION CHARACTERIZATION (CARTESIAN)
 
-    # nPIm_FWHM_Vals = np.zeros(PVals.size)
-    # nPIm_distPeak_Vals = np.zeros(PVals.size)
-    # nPIm_deltaPeak_Vals = np.zeros(PVals.size)
-    # fig, ax = plt.subplots()
-    # for ind, P in enumerate(PVals):
-    #     qds_nPIm_inf = qds_aIBi['nPI_mag'].sel(P=P).isel(t=-1).dropna('PI_mag')
-    #     PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
-    #     dPIm = PIm_Vals[1] - PIm_Vals[0]
+    nPIm_FWHM_Vals = np.zeros(PVals.size)
+    nPIm_distPeak_Vals = np.zeros(PVals.size)
+    nPIm_deltaPeak_Vals = np.zeros(PVals.size)
+    nPIm_Tot_Vals = np.zeros(PVals.size)
+    nPIm_Vec = np.empty(PVals.size, dtype=np.object)
+    PIm_Vec = np.empty(PVals.size, dtype=np.object)
+    fig, ax = plt.subplots()
+    for ind, P in enumerate(PVals):
+        qds_nPIm_inf = qds_aIBi['nPI_mag'].sel(P=P).isel(t=-1).dropna('PI_mag')
+        PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
+        dPIm = PIm_Vals[1] - PIm_Vals[0]
 
-    #     # # Plot nPIm(t=inf)
-    #     # qds_nPIm_inf.plot(ax=ax, label='P: {:.1f}'.format(P))
+        # # Plot nPIm(t=inf)
+        qds_nPIm_inf.plot(ax=ax, label='P: {:.1f}'.format(P))
+        nPIm_Vec[ind] = qds_nPIm_inf.values
+        PIm_Vec[ind] = PIm_Vals
 
-    #     # # Calculate nPIm(t=inf) normalization
-    #     nPIm_Tot = np.sum(qds_nPIm_inf.values * dPIm) + qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
+        # # Calculate nPIm(t=inf) normalization
+        nPIm_Tot_Vals[ind] = np.sum(qds_nPIm_inf.values * dPIm) + qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
 
-    #     # Calculate FWHM, distribution peak, and delta peak
-    #     nPIm_FWHM_Vals[ind] = pfc.FWHM(PIm_Vals, qds_nPIm_inf.values)
-    #     nPIm_distPeak_Vals[ind] = np.max(qds_nPIm_inf.values)
-    #     nPIm_deltaPeak_Vals[ind] = qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
+        # Calculate FWHM, distribution peak, and delta peak
+        nPIm_FWHM_Vals[ind] = pfc.FWHM(PIm_Vals, qds_nPIm_inf.values)
+        nPIm_distPeak_Vals[ind] = np.max(qds_nPIm_inf.values)
+        nPIm_deltaPeak_Vals[ind] = qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
 
-    # # Plot nPIm(t=inf)
-    # ax.plot(mI * nu * np.ones(PIm_Vals.size), np.linspace(0, 1, PIm_Vals.size), 'k--', label=r'$m_{I}c$')
-    # ax.legend()
-    # ax.set_xlabel(r'$|P_{I}|$')
-    # ax.set_ylabel(r'$n_{|P_{I}|}$')
-    # ax.set_title('Ground state impurity distribution (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+    # Plot nPIm(t=inf)
+    ax.plot(mI * nu * np.ones(PIm_Vals.size), np.linspace(0, 1, PIm_Vals.size), 'k--', label=r'$m_{I}c$')
+    ax.legend()
+    ax.set_xlabel(r'$|P_{I}|$')
+    ax.set_ylabel(r'$n_{|P_{I}|}$')
+    ax.set_title('Ground state impurity distribution (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
     # plt.show()
 
     # # Plot characterization of nPIm(t=inf)
@@ -329,6 +334,32 @@ if __name__ == "__main__":
     # ax.set_xlabel('$P$')
     # ax.set_title(r'$n_{|P_{I}|}$' + ' Characterization (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
     # plt.show()
+
+    fig2, ax2 = plt.subplots()
+    ax2.plot(mI * nu * np.ones(PIm_Vals.size), np.linspace(0, 1, PIm_Vals.size), 'k--', label=r'$m_{I}c$')
+    curve = ax2.plot(PIm_Vec[0], nPIm_Vec[0], color='k', lw=2)[0]
+    line = ax.plot(PVals[0] * np.ones(PIm_Vals.size), np.linspace(0, nPIm_deltaPeak_Vals[0], PIm_Vals.size), 'go')[0]
+    P_text = ax2.text(0.85, 0.9, 'P: {:.2f}'.format(PVals[0]), transform=ax2.transAxes, color='r')
+    norm_text = ax.text(0.02, 0.9, r'$\int n_{|\vec{P_{I}}|} d|\vec{P_{I}}| = $' + '{:.3f}'.format(nPIm_Tot_Vals[0]), transform=ax.transAxes, color='b')
+
+    ax2.set_xlim([-0.01, np.max(PIm_Vec[0])])
+    # ax2.set_ylim([0, 5])
+    ax2.set_title('Impurity Momentum Magnitude Distribution (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+    ax2.set_ylabel(r'n_{|\vec{P_{I}}|}')
+
+    ax2.set_xlabel(r'$|\vec{k}|$')
+
+    def animate2(i):
+        curve.set_xdata(PIm_Vec[i])
+        curve.set_ydata(nPIm_Vec[i])
+        line.set_xdata(PVals[i])
+        line.set_ydata(np.linspace(0, nPIm_deltaPeak_Vals[i], PIm_Vals.size))
+        P_text.set_text('P: {:.2f}'.format(PVals[i]))
+        norm_text.set_text(r'$\int n_{|\vec{P_{I}}|} d|\vec{P_{I}}| = $' + '{:.3f}'.format(nPIm_Tot_Vals[i]))
+
+    anim2 = FuncAnimation(fig2, animate2, interval=1000, frames=range(PVals.size))
+    # anim2.save(animpath + '/aIBi_{0}'.format(aIBi) + '_ImpDist.gif', writer='imagemagick')
+    plt.show()
 
     # # DISTRIBUTION CHARACTERIZATION SATURATION
 
