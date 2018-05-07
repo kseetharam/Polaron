@@ -164,11 +164,11 @@ if __name__ == "__main__":
     # fig2.colorbar(quadEnergy, ax=ax2, extend='max')
 
     fig3, ax3 = plt.subplots()
-    Econv = Energy_Vals[5, :]
-    print(PVals[5])
-    ax3.plot(tVals, Econv, 'k-')
+    Pind = 8
+    ax3.plot(tVals, Energy_Vals[Pind, :], 'k-')
     ax3.set_xscale('log')
-    # ax3.set_yscale('symlog')
+    ax3.set_title('Ground State Energy (' + r'$a_{IB}^{-1}=$' + '{0}, '.format(aIBi) + r'$P=$' + '{:.2f})'.format(PVals[Pind]))
+    ax3.set_xlabel('Imaginary time')
     plt.show()
 
     # # POLARON SOUND VELOCITY (SPHERICAL)
