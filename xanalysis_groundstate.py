@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon'}
+    toggleDict = {'Location': 'home', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Longtime': 'true'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -61,6 +61,11 @@ if __name__ == "__main__":
     elif toggleDict['Coupling'] == 'twophonon':
         innerdatapath = innerdatapath
         animpath = animpath + '_twophonon'
+
+    if toggleDict['Longtime'] == 'true':
+        innerdatapath = innerdatapath + '_longtime'
+    elif toggleDict['Longtime'] == 'false':
+        innerdatapath = innerdatapath
 
     # # # Concatenate Individual Datasets
 
@@ -107,6 +112,26 @@ if __name__ == "__main__":
     aIBi = -10
     qds_aIBi = qds.sel(aIBi=aIBi)
 
+    # # # ENERGY AND IMPURITY VELOCITY DATA CONVERSION FOR MATHEMATICA
+
+    # mmdatapath = innerdatapath + '/mm/aIBi_{0}'.format(aIBi)
+
+    # CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+
+    # Energy_Vals = np.zeros((PVals.size, tVals.size))
+    # vI_Vals = np.zeros((PVals.size, tVals.size))
+
+    # for Pind, P in enumerate(PVals):
+    #     for tind, t in enumerate(tVals):
+    #         CSAmp = CSAmp_ds.sel(P=P, t=t).values
+    #         Energy_Vals[Pind, tind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+    #         vI_Vals[Pind, tind] = (P - qds_aIBi.sel(P=P, t=t)['Pph'].values) / mI
+
+    # for Pind, P in enumerate(PVals):
+    #     data = np.concatenate((P * np.ones(tVals.size)[:, np.newaxis], tVals[:, np.newaxis], Energy_Vals[Pind, :][:, np.newaxis], vI_Vals[Pind, :][:, np.newaxis]), axis=1)
+    #     np.savetxt(mmdatapath + '/aIBi_{:d}_P_{:.2f}.dat'.format(aIBi, P), data)
+
     # # # Z-FACTOR (SPHERICAL)
 
     # Zfac_ds = np.exp(-1 * qds_aIBi['Nph'])
@@ -130,46 +155,47 @@ if __name__ == "__main__":
     # fig2.colorbar(quadZ, ax=ax2, extend='max')
     # plt.show()
 
-    # # ENERGY CHARACTERIZATION (SPHERICAL)
+    # # # ENERGY CHARACTERIZATION (SPHERICAL)
 
-    CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
-    kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    # CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
 
-    Energy_Vals = np.zeros((PVals.size, tVals.size))
-    for Pind, P in enumerate(PVals):
-        for tind, t in enumerate(tVals):
-            CSAmp = CSAmp_ds.sel(P=P, t=t).values
-            Energy_Vals[Pind, tind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+    # Energy_Vals = np.zeros((PVals.size, tVals.size))
+    # for Pind, P in enumerate(PVals):
+    #     for tind, t in enumerate(tVals):
+    #         CSAmp = CSAmp_ds.sel(P=P, t=t).values
+    #         Energy_Vals[Pind, tind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
 
-    Energy_Vals_inf = Energy_Vals[:, -1]
-    Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+    # Energy_Vals_inf = Energy_Vals[:, -1]
+    # Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
 
-    Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
-    Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
-    Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+    # Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
+    # Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+    # Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
 
-    fig, ax = plt.subplots()
-    ax.plot(Pinf_Vals, Einf_Vals, 'k-', label='Energy')
-    ax.plot(Pinf_Vals, Einf_2ndderiv_Vals, 'ro', label='2nd Derivative of Energy')
-    ax.legend()
-    ax.set_title('Ground State Energy (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    ax.set_xlabel('P')
+    # fig, ax = plt.subplots()
+    # ax.plot(Pinf_Vals, Einf_Vals, 'k-', label='Energy')
+    # ax.plot(Pinf_Vals, Einf_2ndderiv_Vals, 'ro', label='2nd Derivative of Energy')
+    # ax.legend()
+    # ax.set_title('Ground State Energy (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    # ax.set_xlabel('P')
 
-    # fig2, ax2 = plt.subplots()
-    # quadEnergy = ax2.pcolormesh(tVals, PVals, Energy_Vals, norm=colors.SymLogNorm(linthresh=0.03))
-    # ax2.set_xscale('log')
-    # ax2.set_xlabel('Imaginary Time')
-    # ax2.set_ylabel('P')
-    # ax2.set_title('Energy (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    # fig2.colorbar(quadEnergy, ax=ax2, extend='max')
+    # # fig2, ax2 = plt.subplots()
+    # # quadEnergy = ax2.pcolormesh(tVals, PVals, Energy_Vals, norm=colors.SymLogNorm(linthresh=0.03))
+    # # ax2.set_xscale('log')
+    # # ax2.set_xlabel('Imaginary Time')
+    # # ax2.set_ylabel('P')
+    # # ax2.set_title('Energy (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    # # fig2.colorbar(quadEnergy, ax=ax2, extend='max')
 
-    fig3, ax3 = plt.subplots()
-    Pind = 8
-    ax3.plot(tVals, Energy_Vals[Pind, :], 'k-')
-    ax3.set_xscale('log')
-    ax3.set_title('Ground State Energy (' + r'$a_{IB}^{-1}=$' + '{0}, '.format(aIBi) + r'$P=$' + '{:.2f})'.format(PVals[Pind]))
-    ax3.set_xlabel('Imaginary time')
-    plt.show()
+    # fig3, ax3 = plt.subplots()
+    # Pind = 8
+    # ax3.plot(tVals, np.abs(Energy_Vals[Pind, :]), 'k-')
+    # ax3.set_yscale('log')
+    # ax3.set_xscale('log')
+    # ax3.set_title('Ground State Energy (' + r'$a_{IB}^{-1}=$' + '{0}, '.format(aIBi) + r'$P=$' + '{:.2f})'.format(PVals[Pind]))
+    # ax3.set_xlabel('Imaginary time')
+    # plt.show()
 
     # # POLARON SOUND VELOCITY (SPHERICAL)
 
@@ -204,7 +230,7 @@ if __name__ == "__main__":
     #     vI_Vals[aind] = np.polyfit(Pinf_sound, vI_inf_Vals[sound_mask], deg=0)
 
     # print(vsound_Vals)
-
+    # print(100 * (vsound_Vals - nu) / nu)
     # fig, ax = plt.subplots()
     # ax.plot(aIBi_Vals, vsound_Vals, 'ro', label='Post-Transition Polaron Sound Velocity (' + r'$\frac{\partial E}{\partial P}$' + ')')
     # ax.plot(aIBi_Vals, vI_Vals, 'go', label='Post-Transition Impurity Velocity (' + r'$\frac{P-P_{ph}}{m_{I}}$' + ')')
