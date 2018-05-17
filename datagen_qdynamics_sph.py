@@ -16,11 +16,9 @@ if __name__ == "__main__":
     # (Lx, Ly, Lz) = (30, 30, 30)
     (Lx, Ly, Lz) = (21, 21, 21)
     # (Lx, Ly, Lz) = (12, 12, 12)
-    (dx, dy, dz) = (0.375, 0.375, 0.375)
     # (dx, dy, dz) = (0.75, 0.75, 0.75)
-
-    # (Lx, Ly, Lz) = (21, 21, 21)
-    # (dx, dy, dz) = (0.25, 0.25, 0.25)
+    # (dx, dy, dz) = (0.375, 0.375, 0.375)
+    (dx, dy, dz) = (0.25, 0.25, 0.25)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -50,8 +48,16 @@ if __name__ == "__main__":
     kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    tMax = 1e5
-    dt = 10
+    # # for imdyn evolution
+    # tMax = 1e5
+    # dt = 10
+    # CoarseGrainRate = 100
+
+    # for realdyn evolution
+    tMax = 200
+    dt = 0.2
+    CoarseGrainRate = 1
+
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -73,7 +79,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'imaginary', 'Coupling': 'twophonon', 'Grid': 'spherical', 'Longtime': 'true', 'CoarseGrainRate': 100}
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical', 'Longtime': 'false', 'CoarseGrainRate': CoarseGrainRate}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -104,11 +110,11 @@ if __name__ == "__main__":
     elif toggleDict['Longtime'] == 'false':
         innerdatapath = innerdatapath
 
-    # if os.path.isdir(datapath) is False:
-    #     os.mkdir(datapath)
+    if os.path.isdir(datapath) is False:
+        os.mkdir(datapath)
 
-    # if os.path.isdir(innerdatapath) is False:
-    #     os.mkdir(innerdatapath)
+    if os.path.isdir(innerdatapath) is False:
+        os.mkdir(innerdatapath)
 
     # # # ---- SINGLE FUNCTION RUN ----
 
