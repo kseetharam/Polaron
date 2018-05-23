@@ -99,7 +99,7 @@ if __name__ == "__main__":
 
     # # # Analysis of Total Dataset
 
-    # qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
+    qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
     # # qds = xr.open_dataset(innerdatapath + '/P_0.900_aIBi_-6.23.nc')
     # tVals = qds['t'].values
     # dt = tVals[1] - tVals[0]
@@ -131,7 +131,8 @@ if __name__ == "__main__":
     # thVec = kgrid.getArray('th')
     # list_of_unit_vectors = list(kgrid.arrays.keys())
     # list_of_functions = [lambda k: (2 * np.pi)**(-2) * k**2, np.sin]
-    # sphfac = kgrid.function_prod(list_of_unit_vectors, list_of_functions)
+    # # sphfac = kgrid.function_prod(list_of_unit_vectors, list_of_functions)
+    # sphfac = 1
     # kDiff = kgrid.diffArray('k')
     # thDiff = kgrid.diffArray('th')
     # dkMat, dthMat = np.meshgrid(kDiff, thDiff, indexing='ij')
@@ -166,6 +167,7 @@ if __name__ == "__main__":
     # # INDIVDUAL PHONON MOMENTUM DISTRIBUTION DATASET ANALYSIS
 
     nk_ds = xr.open_dataset(innerdatapath + '/nk_ind_Dataset.nc')
+    # nk_ds = xr.open_dataset(innerdatapath + '/nk_ind_Dataset_withjac.nc')
     tVals = nk_ds['t'].values
     dt = tVals[1] - tVals[0]
     PVals = nk_ds['P'].values
@@ -222,14 +224,20 @@ if __name__ == "__main__":
     # ANIMATIONS
 
     aIBi = -10
-    P = 0.4
+    # P = 0.4
     # P = 1.4
+    P = 5
 
-    tmax = 30
+    tmax = 40
     tmax_ind = (np.abs(tVals - tmax)).argmin()
 
     nk = nk_ds.sel(aIBi=aIBi).sel(P=P, method='nearest')['nk_ind']
+    Delta_nk = nk_ds.sel(aIBi=aIBi).sel(P=P, method='nearest')['Delta_nk_ind']
+
     P = 1 * nk['P'].values
+
+    Pph = qds.sel(aIBi=aIBi).sel(P=P)['Pph'].values
+    Pimp = P - Pph
 
     # Phonon probability
 
@@ -246,8 +254,8 @@ if __name__ == "__main__":
     #             vmax = np.max(vec)
 
     vmin = 0
-    # vmax = 11
-    vmax = 6
+    vmax = 700
+    # vmax = 4
 
     nk0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(nk.isel(t=0), 'k', 'th', 5)
     xg_interp = kg_interp * np.sin(thg_interp)
@@ -255,11 +263,17 @@ if __name__ == "__main__":
 
     quad1 = ax1.pcolormesh(zg_interp, xg_interp, nk0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
     quad1m = ax1.pcolormesh(zg_interp, -1 * xg_interp, nk0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
+    curve1 = ax1.plot(Pph[0], 0, marker='x', markersize=10, color="magenta", label=r'$P_{ph}$')[0]
+    curve1m = ax1.plot(Pimp[0], 0, marker='o', markersize=10, color="red", label=r'$P_{imp}$')[0]
+
     t_text = ax1.text(0.81, 0.9, r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tVals[0] / tscale), transform=ax1.transAxes, color='r')
+    # ax1.set_xlim([-2, 2])
+    # ax1.set_ylim([-2, 2])
     ax1.set_xlim([-3, 3])
     ax1.set_ylim([-3, 3])
+    ax1.legend(loc=2)
     ax1.grid(True, linewidth=0.5)
-    ax1.set_title('Individual Phonon Momentum Distribution (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$P=$' + '{:.2f})'.format(P))
+    ax1.set_title('Ind Phonon Distribution (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$P=$' + '{:.2f})'.format(P))
     ax1.set_xlabel(r'$k_{z}$')
     ax1.set_ylabel(r'$k_{x}$')
     fig1.colorbar(quad1, ax=ax1, extend='both')
@@ -268,6 +282,8 @@ if __name__ == "__main__":
         nk_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(nk.isel(t=i), 'k', 'th', 5)
         quad1.set_array(nk_interp_vals[:-1, :-1].ravel())
         quad1m.set_array(nk_interp_vals[:-1, :-1].ravel())
+        curve1.set_xdata(Pph[i])
+        curve1m.set_xdata(Pimp[i])
         t_text.set_text(r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tVals[i] / tscale))
     anim1 = FuncAnimation(fig1, animate1, interval=1e-5, frames=range(tmax_ind + 1), blit=False)
     anim1.save(animpath + '/aIBi_{:d}_P_{:.2f}'.format(aIBi, P) + '_indPhononDist_2D.gif', writer='imagemagick')
@@ -290,9 +306,11 @@ if __name__ == "__main__":
     #         if np.max(vec) > vmax:
     #             vmax = np.max(vec)
 
-    vmin = -0.9
-    vmax = 0.82
+    # vmin = -0.9
+    # vmax = 0.82
     # vmax = 0.6
+    vmin = -25
+    vmax = 110
 
     dnk0 = (nk.isel(t=1) - nk.isel(t=0)) / dt
     dnk0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(dnk0, 'k', 'th', 5)
@@ -301,11 +319,16 @@ if __name__ == "__main__":
 
     quad2 = ax2.pcolormesh(zg_interp, xg_interp, dnk0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
     quad2m = ax2.pcolormesh(zg_interp, -1 * xg_interp, dnk0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
+    curve2 = ax2.plot(Pph[0], 0, marker='x', markersize=10, color="magenta", label=r'$P_{ph}$')[0]
+    curve2m = ax2.plot(Pimp[0], 0, marker='o', markersize=10, color="red", label=r'$P_{imp}$')[0]
     t_text = ax2.text(0.81, 0.9, r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tVals[0] / tscale), transform=ax2.transAxes, color='r')
+    # ax2.set_xlim([-2, 2])
+    # ax2.set_ylim([-2, 2])
     ax2.set_xlim([-3, 3])
     ax2.set_ylim([-3, 3])
+    ax2.legend(loc=2)
     ax2.grid(True, linewidth=0.5)
-    ax2.set_title('Individual Phonon Momentum Distribution (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$P=$' + '{:.2f})'.format(P))
+    ax2.set_title('Ind Phonon Distribution Time Derivative (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$P=$' + '{:.2f})'.format(P))
     ax2.set_xlabel(r'$k_{z}$')
     ax2.set_ylabel(r'$k_{x}$')
     fig2.colorbar(quad2, ax=ax2, extend='both')
@@ -315,9 +338,54 @@ if __name__ == "__main__":
         dnk_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(dnk, 'k', 'th', 5)
         quad2.set_array(dnk_interp_vals[:-1, :-1].ravel())
         quad2m.set_array(dnk_interp_vals[:-1, :-1].ravel())
+        curve2.set_xdata(Pph[i])
+        curve2m.set_xdata(Pimp[i])
         t_text.set_text(r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tVals[i] / tscale))
     anim2 = FuncAnimation(fig2, animate2, interval=1e-5, frames=range(tmax_ind + 1), blit=False)
-    anim2.save(animpath + '/aIBi_{:d}_P_{:.2f}'.format(aIBi, P) + '_indPhononDistDeriv_2D.gif', writer='imagemagick')
+    anim2.save(animpath + '/aIBi_{:d}_P_{:.2f}'.format(aIBi, P) + '_indPhononDistDeriv_2D_num.gif', writer='imagemagick')
+
+    # fig3, ax3 = plt.subplots()
+    # # vmin = 1
+    # # vmax = 0
+    # # for Pind, Pv in enumerate(PVals):
+    # #     for tind, t in enumerate(tVals):
+    # #         vec = nk_ds.sel(aIBi=aIBi, P=Pv, t=t)['nk_ind'].values
+    # #         # vec = nk.sel(t=t).values
+    # #         if np.min(vec) < vmin:
+    # #             vmin = np.min(vec)
+    # #         if np.max(vec) > vmax:
+    # #             vmax = np.max(vec)
+
+    # vmin = -0.9
+    # vmax = 0.82
+
+    # Delta_nk0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Delta_nk.isel(t=0), 'k', 'th', 5)
+    # xg_interp = kg_interp * np.sin(thg_interp)
+    # zg_interp = kg_interp * np.cos(thg_interp)
+
+    # quad3 = ax3.pcolormesh(zg_interp, xg_interp, Delta_nk0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
+    # quad3m = ax3.pcolormesh(zg_interp, -1 * xg_interp, Delta_nk0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
+    # curve3 = ax3.plot(Pph[0], 0, marker='x', markersize=10, color="magenta", label=r'$P_{ph}$')[0]
+    # curve3m = ax3.plot(Pimp[0], 0, marker='o', markersize=10, color="red", label=r'$P_{imp}$')[0]
+    # t_text = ax3.text(0.81, 0.9, r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tVals[0] / tscale), transform=ax3.transAxes, color='r')
+    # ax3.set_xlim([-2, 2])
+    # ax3.set_ylim([-2, 2])
+    # ax3.legend(loc=2)
+    # ax3.grid(True, linewidth=0.5)
+    # ax3.set_title('Ind Phonon Distribution Time Derivative (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$P=$' + '{:.2f})'.format(P))
+    # ax3.set_xlabel(r'$k_{z}$')
+    # ax3.set_ylabel(r'$k_{x}$')
+    # fig3.colorbar(quad3, ax=ax3, extend='both')
+
+    # def animate3(i):
+    #     Delta_nk_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Delta_nk.isel(t=i), 'k', 'th', 5)
+    #     quad3.set_array(Delta_nk_interp_vals[:-1, :-1].ravel())
+    #     quad3m.set_array(Delta_nk_interp_vals[:-1, :-1].ravel())
+    #     curve3.set_xdata(Pph[i])
+    #     curve3m.set_xdata(Pimp[i])
+    #     t_text.set_text(r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tVals[i] / tscale))
+    # anim3 = FuncAnimation(fig3, animate3, interval=1e-5, frames=range(tmax_ind + 1), blit=False)
+    # anim3.save(animpath + '/aIBi_{:d}_P_{:.2f}'.format(aIBi, P) + '_indPhononDistDeriv_2D_an.gif', writer='imagemagick')
 
     # plt.draw()
     # plt.show()
