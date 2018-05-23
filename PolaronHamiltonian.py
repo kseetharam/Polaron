@@ -23,7 +23,7 @@ class PolaronHamiltonian:
         self.couplingType = toggleDict['Coupling']
 
         if(self.coordinate_system == "SPHERICAL_2D"):
-            self.gnum = pfs.g(self.grid, *Params[1:])
+            self.gnum = pfs.gIB(self.grid, *Params[1:])
             self.Omega0_grid = pfs.Omega(self.grid, 0, *Params[2:])
             # self.Wk_grid = pf.Wk(self.grid, *Params)
             self.Wk_grid = pfs.Wk(self.grid, *Params[3:])
@@ -36,7 +36,7 @@ class PolaronHamiltonian:
 
         if(self.coordinate_system == "CARTESIAN_3D"):
             self.kxg, self.kyg, self.kzg = coherent_state.kxg, coherent_state.kyg, coherent_state.kzg
-            self.gnum = pfc.g(self.kxg, self.kyg, self.kzg, coherent_state.dVk[0], *Params[1:])
+            self.gnum = pfc.gIB(self.kxg, self.kyg, self.kzg, coherent_state.dVk[0], *Params[1:])
             self.Omega0_grid = pfc.Omega(self.kxg, self.kyg, self.kzg, 0, *Params[2:]).flatten()
             self.Wk_grid = pfc.Wk(self.kxg, self.kyg, self.kzg, *Params[3:]).flatten(); self.Wk_grid[self.k0mask] = 1  # this is where |k| = 0 -> changing this value to 1 arbitrarily shouldn't affect the actual calculation as we are setting Beta_k = 0 here too
             self.Wki_grid = 1 / self.Wk_grid

@@ -57,8 +57,8 @@ def Wk(kgrid, mB, n0, gBB):
     return kgrid.function_prod(names, functions_Wk)
 
 
-def g(kgrid, aIBi, mI, mB, n0, gBB):
-    # gives bare interaction strength constant
+def gIB(kgrid, aIBi, mI, mB, n0, gBB):
+    # gives bare interaction strength constant gIB
     k_max = kgrid.getArray('k')[-1]
     mR = ur(mI, mB)
     return 1 / ((mR / (2 * np.pi)) * aIBi - (mR / np.pi**2) * k_max)
@@ -110,16 +110,39 @@ def Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB):
     PB = np.dot(kzg_flat * np.abs(amplitude)**2, dVk).real.astype(float)
     DP = P - PB
     Omega_grid = Omega(kgrid, DP, mI, mB, n0, gBB)
-    gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
+    gnum = gIB(kgrid, aIBi, mI, mB, n0, gBB)
 
     xp = 0.5 * np.dot(Wk_grid, amplitude * dVk)
     xm = 0.5 * np.dot(Wki_grid, amplitude * dVk)
     En = ((P**2 - PB**2) / (2 * mI) +
           np.dot(dVk * Omega_grid, np.abs(amplitude)**2) +
-          gIB * (2 * np.real(xp) + np.sqrt(n0))**2 -
-          gIB * (2 * np.imag(xm))**2)
+          gnum * (2 * np.real(xp) + np.sqrt(n0))**2 -
+          gnum * (2 * np.imag(xm))**2)
 
     return En.real.astype(float)
+
+
+def CSAmp_timederiv(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB):
+    # takes coherent state amplitude CSAmp in flattened form and returns d(CSAmp)/dt in flattened form
+    dVk = kgrid.dV()
+    kzg_flat = kcos_func(kgrid)
+    Wk_grid = Wk(kgrid, mB, n0, gBB)
+    Wki_grid = 1 / Wk_grid
+    Omega0_grid = Omega(kgrid, 0, mI, mB, n0, gBB)
+    gnum = gIB(kgrid, aIBi, mI, mB, n0, gBB)
+
+    PB = np.dot(kzg_flat * np.abs(CSAmp)**2, dVk)
+    betaSum = CSAmp + np.conjugate(CSAmp)
+    xp = 0.5 * np.dot(Wk_grid, betaSum * dVk)
+    betaDiff = CSAmp - np.conjugate(CSAmp)
+    xm = 0.5 * np.dot(Wki_grid, betaDiff * dVk)
+
+    damp = -1j * (gnum * np.sqrt(n0) * Wk_grid +
+                  CSAmp * (Omega0_grid - kzg_flat * (P - PB) / mI) +
+                  gnum * (Wk_grid * xp + Wki_grid * xm))
+
+    # DeltaAmp = damp.reshape(len(kgrid.getArray('k')), len(kgrid.getArray('th')))
+    return damp
 
 
 def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
@@ -139,7 +162,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
 
     # calculate some parameters
     nu_const = nu(gBB)
-    gIB = g(kgrid, aIBi, mI, mB, n0, gBB)
+    gnum = gIB(kgrid, aIBi, mI, mB, n0, gBB)
 
     # Initialization CoherentState
     cs = CoherentState.CoherentState(kgrid, xgrid)
@@ -221,7 +244,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
     data_dict = {'Pph': PB_da, 'Nph': NB_da, 'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da}
     # data_dict = {'Pph': PB_da, 'Nph': NB_da, 'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'Real_Delta_CSAmp': ReDeltaAmp_da, 'Imag_Delta_CSAmp': ImDeltaAmp_da}
     coords_dict = {'t': tgrid_coarse}
-    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB}
+    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gnum}
 
     dynsph_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
 

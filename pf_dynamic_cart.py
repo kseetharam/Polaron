@@ -40,7 +40,7 @@ def Wk(kx, ky, kz, mB, n0, gBB):
     return output
 
 
-def g(kxg, kyg, kzg, dVk, aIBi, mI, mB, n0, gBB):
+def gIB(kxg, kyg, kzg, dVk, aIBi, mI, mB, n0, gBB):
     # gives bare interaction strength constant
     old_settings = np.seterr(); np.seterr(all='ignore')
     mR = ur(mI, mB)
@@ -227,7 +227,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
     ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params, toggleDict)
     # calculate some parameters
     nu_const = nu(gBB)
-    gIB = g(cs.kxg, cs.kyg, cs.kzg, cs.dVk[0], aIBi, mI, mB, n0, gBB)
+    gnum = gIB(cs.kxg, cs.kyg, cs.kzg, cs.dVk[0], aIBi, mI, mB, n0, gBB)
     # Other book-keeping
     PIgrid = ImpMomGrid_from_PhononMomGrid(kgrid, P)
     PB_x = kx; PB_y = ky; PB_z = kz
@@ -314,7 +314,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
                   'nPB_x_int': nPB_x_da, 'nPB_y_int': nPB_y_da, 'nPB_z_int': nPB_z_da, 'nPB_x_slice': nPB_x_slice_da, 'nPB_y_slice': nPB_y_slice_da, 'nPB_z_slice': nPB_z_slice_da, 'nPB_xz_slice': nPB_xz_slice_da, 'nPB_xy_slice': nPB_xy_slice_da, 'nPB_mag': nPBm_da,
                   'nPI_x_int': nPI_x_da, 'nPI_y_int': nPI_y_da, 'nPI_z_int': nPI_z_da, 'nPI_x_slice': nPI_x_slice_da, 'nPI_y_slice': nPI_y_slice_da, 'nPI_z_slice': nPI_z_slice_da, 'nPI_xz_slice': nPI_xz_slice_da, 'nPI_xy_slice': nPI_xy_slice_da, 'nPI_mag': nPIm_da})
     coords_dict = {'t': tgrid, 'x': x, 'y': y, 'z': z, 'PB_x': PB_x, 'PB_y': PB_y, 'PB_z': PB_z, 'PI_x': PI_x, 'PI_y': PI_y, 'PI_z': PI_z, 'PB_mag': PBm, 'PI_mag': PIm}
-    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gIB}
+    attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gnum}
 
     dyncart_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
 
