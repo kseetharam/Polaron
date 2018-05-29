@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
     # Basic parameters
 
-    mI = 1
+    mI = 2
     mB = 1
     n0 = 1
     gBB = (4 * np.pi / mB) * 0.05
@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'cartesian'}
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'cartesian'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -93,19 +93,19 @@ if __name__ == "__main__":
     if os.path.isdir(innerdatapath) is False:
         os.mkdir(innerdatapath)
 
-    # ---- SINGLE FUNCTION RUN ----
+    # # ---- SINGLE FUNCTION RUN ----
 
-    runstart = timer()
+    # runstart = timer()
 
-    P = 1.1
-    aIBi = -2
-    cParams = [P, aIBi]
+    # P = 1.1
+    # aIBi = -2
+    # cParams = [P, aIBi]
 
-    dyncart_ds = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
-    dyncart_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    # dyncart_ds = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
+    # dyncart_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
-    end = timer()
-    print('Time: {:.2f}'.format(end - runstart))
+    # end = timer()
+    # print('Time: {:.2f}'.format(end - runstart))
 
     # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 
@@ -120,24 +120,24 @@ if __name__ == "__main__":
         for P in P_Vals:
             cParams_List.append([P, aIBi])
 
-    # # ---- COMPUTE DATA ON CLUSTER ----
+    # ---- COMPUTE DATA ON CLUSTER ----
 
-    # runstart = timer()
+    runstart = timer()
 
-    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    # if(taskCount > len(cParams_List)):
-    #     print('ERROR: TASK COUNT MISMATCH')
-    #     P = float('nan')
-    #     aIBi = float('nan')
-    #     sys.exit()
-    # else:
-    #     cParams = cParams_List[taskID]
-    #     [P, aIBi] = cParams
+    if(taskCount > len(cParams_List)):
+        print('ERROR: TASK COUNT MISMATCH')
+        P = float('nan')
+        aIBi = float('nan')
+        sys.exit()
+    else:
+        cParams = cParams_List[taskID]
+        [P, aIBi] = cParams
 
-    # dyncart_ds = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
-    # dyncart_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    dyncart_ds = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
+    dyncart_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
-    # end = timer()
-    # print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))
+    end = timer()
+    print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))
