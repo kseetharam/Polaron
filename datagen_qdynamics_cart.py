@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
     # Basic parameters
 
-    mI = 10
+    mI = 1
     mB = 1
     n0 = 1
     gBB = (4 * np.pi / mB) * 0.05
