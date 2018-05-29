@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'cartesian'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'cartesian'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -97,8 +97,8 @@ if __name__ == "__main__":
 
     runstart = timer()
 
-    P = 2.166
-    aIBi = -4.9
+    P = 1.1
+    aIBi = -2
     cParams = [P, aIBi]
 
     dyncart_ds = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
@@ -107,17 +107,18 @@ if __name__ == "__main__":
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))
 
-    # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
+    # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 
-    # cParams_List = []
-    # # aIBi_Vals = np.array([-5.0, -2.0, -0.1])
-    # # P_Vals = np.array([5.0, 10.0])
-    # aIBi_Vals = np.array([-10.0, -5.0, -2.0])
+    cParams_List = []
+    # aIBi_Vals = np.array([-5.0, -2.0, -0.1])
+    # P_Vals = np.array([5.0, 10.0])
+    aIBi_Vals = np.array([-10.0, -5.0, -2.0])
     # P_Vals = np.array([0.1, 0.4, 0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 2.0, 2.4, 2.7, 3.0, 4.0, 5.0])
+    P_Vals = np.array([0.1, 0.4, 0.6, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 2.0, 2.2, 2.4, 2.7, 3.0, 4.0, 5.0])
 
-    # for ind, aIBi in enumerate(aIBi_Vals):
-    #     for P in P_Vals:
-    #         cParams_List.append([P, aIBi])
+    for ind, aIBi in enumerate(aIBi_Vals):
+        for P in P_Vals:
+            cParams_List.append([P, aIBi])
 
     # # ---- COMPUTE DATA ON CLUSTER ----
 

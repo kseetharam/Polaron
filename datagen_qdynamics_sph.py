@@ -17,8 +17,8 @@ if __name__ == "__main__":
     (Lx, Ly, Lz) = (21, 21, 21)
     # (Lx, Ly, Lz) = (12, 12, 12)
     # (dx, dy, dz) = (0.75, 0.75, 0.75)
-    # (dx, dy, dz) = (0.375, 0.375, 0.375)
-    (dx, dy, dz) = (0.25, 0.25, 0.25)
+    (dx, dy, dz) = (0.375, 0.375, 0.375)
+    # (dx, dy, dz) = (0.25, 0.25, 0.25)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
