@@ -32,15 +32,15 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Longtime': 'false'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'cartesian', 'Coupling': 'twophonon', 'Longtime': 'false'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
     if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, 1)
         animpath = '/home/kis/Dropbox/VariationalResearch/DataAnalysis/figs'
     elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, 1)
         animpath = '/media/kis/Storage/Dropbox/VariationalResearch/DataAnalysis/figs'
 
     if toggleDict['Dynamics'] == 'real':
@@ -99,7 +99,6 @@ if __name__ == "__main__":
     # ds_tot.to_netcdf(innerdatapath + '/quench_Dataset_cart.nc')
 
     # # Analysis of Total Dataset
-
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
     PVals = qds['P'].values
     tVals = qds['t'].values
@@ -325,31 +324,97 @@ if __name__ == "__main__":
     # plt.draw()
     # plt.show()
 
-    # # PHONON MODE CHARACTERIZATION - 2D PLOTS (SPHERICAL)
+    # # # PHONON MODE CHARACTERIZATION - 2D PLOTS (SPHERICAL)
 
-    CSAmp_ds = (qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']).isel(t=-1)
-    kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
-    kVec = kgrid.getArray('k')
-    thVec = kgrid.getArray('th')
-    list_of_unit_vectors = list(kgrid.arrays.keys())
-    list_of_functions = [lambda k: (2 * np.pi)**(-2) * k**2, np.sin]
-    # sphfac = kgrid.function_prod(list_of_unit_vectors, list_of_functions)
-    sphfac = 1
-    kDiff = kgrid.diffArray('k')
-    thDiff = kgrid.diffArray('th')
+    # CSAmp_ds = (qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']).isel(t=-1)
+    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    # kVec = kgrid.getArray('k')
+    # thVec = kgrid.getArray('th')
+    # list_of_unit_vectors = list(kgrid.arrays.keys())
+    # list_of_functions = [lambda k: (2 * np.pi)**(-2) * k**2, np.sin]
+    # # sphfac = kgrid.function_prod(list_of_unit_vectors, list_of_functions)
+    # sphfac = 1
+    # kDiff = kgrid.diffArray('k')
+    # thDiff = kgrid.diffArray('th')
 
-    PphVals = qds_aIBi.isel(t=-1)['Pph'].values
-    PimpVals = PVals - PphVals
-    nk = xr.DataArray(np.full((PVals.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[PVals, kVec, thVec], dims=['P', 'k', 'th'])
-    for Pind, P in enumerate(PVals):
-        CSAmp_Vals = CSAmp_ds.sel(P=P).values
-        CSAmp_flat = CSAmp_Vals.reshape(CSAmp_Vals.size)
-        Nph = qds_aIBi.isel(t=-1).sel(P=P)['Nph'].values
-        # Nph = 1
-        PhDen = (1 / Nph) * sphfac * np.abs(CSAmp_flat)**2
-        nk.sel(P=P)[:] = PhDen.reshape((len(kVec), len(thVec))).real.astype(float)
+    # PphVals = qds_aIBi.isel(t=-1)['Pph'].values
+    # PimpVals = PVals - PphVals
+    # nk = xr.DataArray(np.full((PVals.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[PVals, kVec, thVec], dims=['P', 'k', 'th'])
+    # for Pind, P in enumerate(PVals):
+    #     CSAmp_Vals = CSAmp_ds.sel(P=P).values
+    #     CSAmp_flat = CSAmp_Vals.reshape(CSAmp_Vals.size)
+    #     Nph = qds_aIBi.isel(t=-1).sel(P=P)['Nph'].values
+    #     # Nph = 1
+    #     PhDen = (1 / Nph) * sphfac * np.abs(CSAmp_flat)**2
+    #     nk.sel(P=P)[:] = PhDen.reshape((len(kVec), len(thVec))).real.astype(float)
 
-    # # Full transition
+    # # # Full transition
+
+    # # fig1, ax1 = plt.subplots()
+    # # vmin = 1
+    # # vmax = 0
+    # # for Pind, Pv in enumerate(PVals):
+    # #     vec = nk.sel(P=Pv).values
+    # #     if np.min(vec) < vmin:
+    # #         vmin = np.min(vec)
+    # #     if np.max(vec) > vmax:
+    # #         vmax = np.max(vec)
+    # #     print(vmin, vmax)
+
+    # # # print(vmin, vmax)
+    # # vmin = 0
+    # # vmax = 500
+    # # # vmin = 1e13
+    # # # vmax = 1e14
+
+    # # nk0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(nk.isel(P=0), 'k', 'th', 5)
+    # # xg_interp = kg_interp * np.sin(thg_interp)
+    # # zg_interp = kg_interp * np.cos(thg_interp)
+
+    # # quad1 = ax1.pcolormesh(zg_interp, xg_interp, nk0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
+    # # quad1m = ax1.pcolormesh(zg_interp, -1 * xg_interp, nk0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
+    # # curve1 = ax1.plot(PphVals[0], 0, marker='x', markersize=10, color="magenta", label=r'$P_{ph}$')[0]
+    # # curve1m = ax1.plot(PimpVals[0], 0, marker='o', markersize=10, color="red", label=r'$P_{imp}$')[0]
+    # # curvec = ax1.plot(mI * nu, 0, marker='s', markersize=5, color="white", label=r'$m_{I}c$')[0]
+
+    # # P_text = ax1.text(0.83, 0.95, 'P: {:.2f}'.format(PVals[0]), transform=ax1.transAxes, color='g')
+    # # mIc_text = ax1.text(0.83, 0.85, r'$m_{I}c$' + ': {:.2f}'.format(mI * nu), transform=ax1.transAxes, color='w')
+    # # Pimp_text = ax1.text(0.83, 0.8, r'$P_{imp}$' + ': {:.2f}'.format(PimpVals[0]), transform=ax1.transAxes, color='r')
+    # # Pph_text = ax1.text(0.83, 0.75, r'$P_{ph}$' + ': {:.2f}'.format(PphVals[0]), transform=ax1.transAxes, color='m')
+    # # ax1.set_xlim([-1.5, 1.5])
+    # # ax1.set_ylim([-1.5, 1.5])
+    # # # ax1.set_xlim([-3, 3])
+    # # # ax1.set_ylim([-3, 3])
+    # # ax1.legend(loc=2)
+    # # ax1.grid(True, linewidth=0.5)
+    # # ax1.set_title('Ind Phonon Distribution (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+    # # ax1.set_xlabel(r'$k_{z}$')
+    # # ax1.set_ylabel(r'$k_{x}$')
+    # # fig1.colorbar(quad1, ax=ax1, extend='both')
+
+    # # def animate1(i):
+    # #     nk_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(nk.isel(P=i), 'k', 'th', 5)
+    # #     quad1.set_array(nk_interp_vals[:-1, :-1].ravel())
+    # #     quad1m.set_array(nk_interp_vals[:-1, :-1].ravel())
+    # #     curve1.set_xdata(PphVals[i])
+    # #     curve1m.set_xdata(PimpVals[i])
+    # #     P_text.set_text('P: {:.2f}'.format(PVals[i]))
+    # #     Pimp_text.set_text(r'$P_{imp}$' + ': {:.2f}'.format(PimpVals[i]))
+    # #     Pph_text.set_text(r'$P_{ph}$' + ': {:.2f}'.format(PphVals[i]))
+
+    # # anim1 = FuncAnimation(fig1, animate1, interval=500, frames=range(PVals.size), blit=False)
+    # # # anim1.save(animpath + '/aIBi_{:d}'.format(aIBi) + '_indPhononDist_2D_fulltransition.gif', writer='imagemagick')
+
+    # # plt.draw()
+    # # plt.show()
+
+    # # Supersonic only
+
+    # Pinit = 0.9
+    # nkP = nk.sel(P=Pinit, method='nearest')
+    # Pinit = 1 * nkP['P'].values
+    # nk = nk.sel(P=slice(Pinit, PVals[-1]))
+    # PVals = nk.coords['P'].values
 
     # fig1, ax1 = plt.subplots()
     # vmin = 1
@@ -360,11 +425,7 @@ if __name__ == "__main__":
     #         vmin = np.min(vec)
     #     if np.max(vec) > vmax:
     #         vmax = np.max(vec)
-    #     print(vmin, vmax)
 
-    # # print(vmin, vmax)
-    # vmin = 0
-    # vmax = 500
     # # vmin = 1e13
     # # vmax = 1e14
 
@@ -382,8 +443,8 @@ if __name__ == "__main__":
     # mIc_text = ax1.text(0.83, 0.85, r'$m_{I}c$' + ': {:.2f}'.format(mI * nu), transform=ax1.transAxes, color='w')
     # Pimp_text = ax1.text(0.83, 0.8, r'$P_{imp}$' + ': {:.2f}'.format(PimpVals[0]), transform=ax1.transAxes, color='r')
     # Pph_text = ax1.text(0.83, 0.75, r'$P_{ph}$' + ': {:.2f}'.format(PphVals[0]), transform=ax1.transAxes, color='m')
-    # ax1.set_xlim([-1.5, 1.5])
-    # ax1.set_ylim([-1.5, 1.5])
+    # ax1.set_xlim([-0.1, 0.1])
+    # ax1.set_ylim([-0.01, 0.01])
     # # ax1.set_xlim([-3, 3])
     # # ax1.set_ylim([-3, 3])
     # ax1.legend(loc=2)
@@ -403,73 +464,11 @@ if __name__ == "__main__":
     #     Pimp_text.set_text(r'$P_{imp}$' + ': {:.2f}'.format(PimpVals[i]))
     #     Pph_text.set_text(r'$P_{ph}$' + ': {:.2f}'.format(PphVals[i]))
 
-    # anim1 = FuncAnimation(fig1, animate1, interval=500, frames=range(PVals.size), blit=False)
-    # # anim1.save(animpath + '/aIBi_{:d}'.format(aIBi) + '_indPhononDist_2D_fulltransition.gif', writer='imagemagick')
+    # anim1 = FuncAnimation(fig1, animate1, interval=1500, frames=range(PVals.size), blit=False)
+    # anim1.save(animpath + '/aIBi_{:d}'.format(aIBi) + '_indPhononDist_2D_supersonic.gif', writer='imagemagick')
 
-    # plt.draw()
-    # plt.show()
-
-    # Supersonic only
-
-    Pinit = 0.9
-    nkP = nk.sel(P=Pinit, method='nearest')
-    Pinit = 1 * nkP['P'].values
-    nk = nk.sel(P=slice(Pinit, PVals[-1]))
-    PVals = nk.coords['P'].values
-
-    fig1, ax1 = plt.subplots()
-    vmin = 1
-    vmax = 0
-    for Pind, Pv in enumerate(PVals):
-        vec = nk.sel(P=Pv).values
-        if np.min(vec) < vmin:
-            vmin = np.min(vec)
-        if np.max(vec) > vmax:
-            vmax = np.max(vec)
-
-    # vmin = 1e13
-    # vmax = 1e14
-
-    nk0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(nk.isel(P=0), 'k', 'th', 5)
-    xg_interp = kg_interp * np.sin(thg_interp)
-    zg_interp = kg_interp * np.cos(thg_interp)
-
-    quad1 = ax1.pcolormesh(zg_interp, xg_interp, nk0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
-    quad1m = ax1.pcolormesh(zg_interp, -1 * xg_interp, nk0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
-    curve1 = ax1.plot(PphVals[0], 0, marker='x', markersize=10, color="magenta", label=r'$P_{ph}$')[0]
-    curve1m = ax1.plot(PimpVals[0], 0, marker='o', markersize=10, color="red", label=r'$P_{imp}$')[0]
-    curvec = ax1.plot(mI * nu, 0, marker='s', markersize=5, color="white", label=r'$m_{I}c$')[0]
-
-    P_text = ax1.text(0.83, 0.95, 'P: {:.2f}'.format(PVals[0]), transform=ax1.transAxes, color='g')
-    mIc_text = ax1.text(0.83, 0.85, r'$m_{I}c$' + ': {:.2f}'.format(mI * nu), transform=ax1.transAxes, color='w')
-    Pimp_text = ax1.text(0.83, 0.8, r'$P_{imp}$' + ': {:.2f}'.format(PimpVals[0]), transform=ax1.transAxes, color='r')
-    Pph_text = ax1.text(0.83, 0.75, r'$P_{ph}$' + ': {:.2f}'.format(PphVals[0]), transform=ax1.transAxes, color='m')
-    ax1.set_xlim([-0.1, 0.1])
-    ax1.set_ylim([-0.01, 0.01])
-    # ax1.set_xlim([-3, 3])
-    # ax1.set_ylim([-3, 3])
-    ax1.legend(loc=2)
-    ax1.grid(True, linewidth=0.5)
-    ax1.set_title('Ind Phonon Distribution (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    ax1.set_xlabel(r'$k_{z}$')
-    ax1.set_ylabel(r'$k_{x}$')
-    fig1.colorbar(quad1, ax=ax1, extend='both')
-
-    def animate1(i):
-        nk_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(nk.isel(P=i), 'k', 'th', 5)
-        quad1.set_array(nk_interp_vals[:-1, :-1].ravel())
-        quad1m.set_array(nk_interp_vals[:-1, :-1].ravel())
-        curve1.set_xdata(PphVals[i])
-        curve1m.set_xdata(PimpVals[i])
-        P_text.set_text('P: {:.2f}'.format(PVals[i]))
-        Pimp_text.set_text(r'$P_{imp}$' + ': {:.2f}'.format(PimpVals[i]))
-        Pph_text.set_text(r'$P_{ph}$' + ': {:.2f}'.format(PphVals[i]))
-
-    anim1 = FuncAnimation(fig1, animate1, interval=1500, frames=range(PVals.size), blit=False)
-    anim1.save(animpath + '/aIBi_{:d}'.format(aIBi) + '_indPhononDist_2D_supersonic.gif', writer='imagemagick')
-
-    # plt.draw()
-    # plt.show()
+    # # plt.draw()
+    # # plt.show()
 
     # # IMPURITY DISTRIBUTION CHARACTERIZATION (CARTESIAN)
 
@@ -539,7 +538,7 @@ if __name__ == "__main__":
 
     # anim2 = FuncAnimation(fig2, animate2, interval=1000, frames=range(PVals.size))
     # anim2.save(animpath + '/aIBi_{0}'.format(aIBi) + '_ImpDist.gif', writer='imagemagick')
-    # # plt.show()
+    # plt.show()
 
     # # DISTRIBUTION CHARACTERIZATION SATURATION
 

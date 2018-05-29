@@ -30,11 +30,11 @@ if __name__ == "__main__":
 
     kx = kgrid.getArray('kx')
 
-    # tMax = 1000
-    # dt = 10
+    tMax = 1000
+    dt = 10
 
-    tMax = 100
-    dt = 0.2
+    # tMax = 100
+    # dt = 0.2
 
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'cartesian'}
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'imaginary', 'Coupling': 'twophonon', 'Grid': 'cartesian'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -87,11 +87,11 @@ if __name__ == "__main__":
     elif toggleDict['Coupling'] == 'twophonon':
         innerdatapath = innerdatapath
 
-    if os.path.isdir(datapath) is False:
-        os.mkdir(datapath)
+    # if os.path.isdir(datapath) is False:
+    #     os.mkdir(datapath)
 
-    if os.path.isdir(innerdatapath) is False:
-        os.mkdir(innerdatapath)
+    # if os.path.isdir(innerdatapath) is False:
+    #     os.mkdir(innerdatapath)
 
     # # ---- SINGLE FUNCTION RUN ----
 
@@ -113,8 +113,8 @@ if __name__ == "__main__":
     # aIBi_Vals = np.array([-5.0, -2.0, -0.1])
     # P_Vals = np.array([5.0, 10.0])
     aIBi_Vals = np.array([-10.0, -5.0, -2.0])
-    # P_Vals = np.array([0.1, 0.4, 0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 2.0, 2.4, 2.7, 3.0, 4.0, 5.0])
-    P_Vals = np.array([0.1, 0.4, 0.6, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 2.0, 2.2, 2.4, 2.7, 3.0, 4.0, 5.0])
+    P_Vals = np.array([0.1, 0.4, 0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 2.0, 2.4, 2.7, 3.0, 4.0, 5.0])
+    # P_Vals = np.array([0.1, 0.4, 0.6, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 2.0, 2.2, 2.4, 2.7, 3.0, 4.0, 5.0])
 
     for ind, aIBi in enumerate(aIBi_Vals):
         for P in P_Vals:
