@@ -2,7 +2,7 @@
 #SBATCH -J quench
 #SBATCH -n 2
 #SBATCH -N 1
-#SBATCH -t 5-00:00
+#SBATCH -t 3-00:00
 #SBATCH -p shared
 #SBATCH --mem=12000
 #SBATCH --mail-type=ALL
