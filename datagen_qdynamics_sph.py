@@ -79,7 +79,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Coupling': 'frohlich', 'Grid': 'spherical', 'Longtime': 'false', 'CoarseGrainRate': CoarseGrainRate}
+    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Coupling': 'frohlich', 'Grid': 'spherical', 'Longtime': 'false', 'CoarseGrainRate': CoarseGrainRate}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -134,19 +134,58 @@ if __name__ == "__main__":
     # end = timer()
     # print('Time: {:.2f}'.format(end - runstart))
 
-    # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
+    # # ---- SINGLE FUNCTION RUN GAUSSIAN COMPARISON ----
 
-    cParams_List = []
+    runstart = timer()
 
-    aIBi_Vals = np.array([-10.0, -5.0, -2.0])
-    # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi_Vals = aIBi_Vals - aSi
+    thetaArray = np.linspace(0, np.pi, 1e3)
+    kArray = np.arange(0.1, 5.1, 0.1)
+    kgrid = Grid.Grid("SPHERICAL_2D")
+    kgrid.initArray_premade('k', kArray)
+    kgrid.initArray_premade('th', thetaArray)
+    # print('{:.2E}'.format(kgrid.size()))
+    tMax = 20
+    dt = 0.1
+    tgrid = np.arange(0, tMax + dt, dt)
+    gParams = [xgrid, kgrid, tgrid]
+    mI = 1e9
+    mB = 1
+    n0 = 1
+    gBB = (4 * np.pi / mB) * 0.065
+    sParams = [mI, mB, n0, gBB]
+    P = 0.05
+    aIBi = -1.2
+    cParams = [P, aIBi]
 
-    # P_Vals = np.array([0.4])
-    P_Vals = np.concatenate((np.array([0.1, 0.4, 0.6]), np.linspace(0.8, 2.8, 20), np.linspace(3.0, 5.0, 3)))
+    datapath = datapath[0:-22] + '{:.2E}/massRatio=inf'.format(kgrid.size())
+    if toggleDict['Dynamics'] == 'real':
+        innerdatapath = datapath + '/redyn_spherical'
+    elif toggleDict['Dynamics'] == 'imaginary':
+        innerdatapath = datapath + '/imdyn_spherical'
+    if os.path.isdir(datapath) is False:
+        os.mkdir(datapath)
+    if os.path.isdir(innerdatapath) is False:
+        os.mkdir(innerdatapath)
 
-    for ind, aIBi in enumerate(aIBi_Vals):
-        for P in P_Vals:
-            cParams_List.append([P, aIBi])
+    dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
+    dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+
+    end = timer()
+    print('Time: {:.2f}'.format(end - runstart))
+
+    # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
+
+    # cParams_List = []
+
+    # aIBi_Vals = np.array([-10.0, -5.0, -2.0])
+    # # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi_Vals = aIBi_Vals - aSi
+
+    # # P_Vals = np.array([0.4])
+    # P_Vals = np.concatenate((np.array([0.1, 0.4, 0.6]), np.linspace(0.8, 2.8, 20), np.linspace(3.0, 5.0, 3)))
+
+    # for ind, aIBi in enumerate(aIBi_Vals):
+    #     for P in P_Vals:
+    #         cParams_List.append([P, aIBi])
 
     # # ---- COMPUTE DATA ON COMPUTER ----
 
@@ -163,24 +202,24 @@ if __name__ == "__main__":
     # end = timer()
     # print('Total Time: {:.2f}'.format(end - runstart))
 
-    # ---- COMPUTE DATA ON CLUSTER ----
+    # # ---- COMPUTE DATA ON CLUSTER ----
 
-    runstart = timer()
+    # runstart = timer()
 
-    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    if(taskCount != len(cParams_List)):
-        print('ERROR: TASK COUNT MISMATCH')
-        P = float('nan')
-        aIBi = float('nan')
-        sys.exit()
-    else:
-        cParams = cParams_List[taskID]
-        [P, aIBi] = cParams
+    # if(taskCount != len(cParams_List)):
+    #     print('ERROR: TASK COUNT MISMATCH')
+    #     P = float('nan')
+    #     aIBi = float('nan')
+    #     sys.exit()
+    # else:
+    #     cParams = cParams_List[taskID]
+    #     [P, aIBi] = cParams
 
-    dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
-    dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
+    # dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
-    end = timer()
-    print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))
+    # end = timer()
+    # print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))
