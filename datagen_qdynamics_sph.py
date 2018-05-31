@@ -160,15 +160,28 @@ if __name__ == "__main__":
     datapath = datapath[0:-22] + '{:.2E}/massRatio=inf'.format(kgrid.size())
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn_spherical'
+        filepath = innerdatapath + '/cs_mfrt_aIBi_{:.2f}.npy'.format(aIBi)
     elif toggleDict['Dynamics'] == 'imaginary':
         innerdatapath = datapath + '/imdyn_spherical'
+        filepath = innerdatapath + '/cs_mfit_aIBi_{:.2f}.npy'.format(aIBi)
     if os.path.isdir(datapath) is False:
         os.mkdir(datapath)
     if os.path.isdir(innerdatapath) is False:
         os.mkdir(innerdatapath)
 
     dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
-    dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    # dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    energy_vec = np.zeros(tgrid.size)
+    CSAmp_ds = dynsph_ds['Real_CSAmp'] + 1j * dynsph_ds['Imag_CSAmp']
+    for ind, t in enumerate(tgrid):
+        CSAmp = CSAmp_ds.sel(t=t).values
+        energy_vec[ind] = pf_dynamic_sph.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+    NB_Vec = dynsph_ds['Nph'].values
+    Zfactor_Vec = np.abs((dynsph_ds['Real_DynOv'] + 1j * dynsph_ds['Imag_DynOv']).values)
+    tVec = tgrid
+    Params = [aIBi, mB, n0, gBB]
+    data = [Params, tVec, NB_Vec, Zfactor_Vec, energy_vec]
+    np.save(filepath, data)
 
     end = timer()
     print('Time: {:.2f}'.format(end - runstart))
