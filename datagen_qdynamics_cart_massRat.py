@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Coupling': 'twophonon', 'Grid': 'cartesian'}
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'imaginary', 'Coupling': 'twophonon', 'Grid': 'cartesian'}
 
     # ---- SET PARAMS ----
 
@@ -91,6 +91,23 @@ if __name__ == "__main__":
                 elif toggleDict['Coupling'] == 'twophonon':
                     innerdatapath = innerdatapath
                 Params_List.append([sParams, cParams, innerdatapath])
+
+    # # ---- COMPUTE DATA ON COMPUTER ----
+
+    # runstart = timer()
+
+    # for ind, Params in enumerate(Params_List):
+    #     loopstart = timer()
+    #     [sParams, cParams, innerdatapath] = Params_List[ind]
+    #     [mI, mB, n0, gBB] = sParams
+    #     [P, aIBi] = cParams
+    #     dyncart_ds = pf_dynamic_cart.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
+    #     dyncart_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    #     loopend = timer()
+    #     print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
+
+    # end = timer()
+    # print('Total Time: {:.2f}'.format(end - runstart))
 
     # ---- COMPUTE DATA ON CLUSTER ----
 
