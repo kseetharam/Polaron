@@ -4,7 +4,7 @@ import xarray as xr
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-import matplotlib.colors as colors
+from matplotlib.lines import Line2D
 import os
 import itertools
 import pf_dynamic_cart as pfc
@@ -30,46 +30,19 @@ if __name__ == "__main__":
     NGridPoints = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     # NGridPoints_cart = 1.37e5
 
-    # Basic parameters
-
-    mI = 5
-    mB = 1
-
-    # Toggle parameters
-
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Coupling': 'twophonon', 'Grid': 'cartesian', 'Longtime': 'false'}
-
-    # ---- SET OUTPUT DATA FOLDER ----
-
-    if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints, mI / mB)
-    elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints, mI / mB)
-    elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints, mI / mB)
-
-    if toggleDict['Dynamics'] == 'real':
-        innerdatapath = datapath + '/redyn'
-    elif toggleDict['Dynamics'] == 'imaginary':
-        innerdatapath = datapath + '/imdyn'
-
-    if toggleDict['Grid'] == 'cartesian':
-        innerdatapath = innerdatapath + '_cart'
-    elif toggleDict['Grid'] == 'spherical':
-        innerdatapath = innerdatapath + '_spherical'
-
-    if toggleDict['Coupling'] == 'frohlich':
-        innerdatapath = innerdatapath + '_froh'
-    elif toggleDict['Coupling'] == 'twophonon':
-        innerdatapath = innerdatapath
-
-    if toggleDict['Longtime'] == 'true':
-        innerdatapath = innerdatapath + '_longtime'
-    elif toggleDict['Longtime'] == 'false':
-        innerdatapath = innerdatapath
+    massRat_Vals = [1, 2, 5, 10]
+    toggleDict = {'Location': 'work'}
+    datapathDict = {}
+    for mR in massRat_Vals:
+        if toggleDict['Location'] == 'home':
+            datapathDict[mR] = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}/imdyn_cart'.format(NGridPoints, mR)
+        elif toggleDict['Location'] == 'work':
+            datapathDict[mR] = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}/imdyn_cart'.format(NGridPoints, mR)
 
     # # # Concatenate Individual Datasets
 
+    # mR = 10
+    # innerdatapath = datapathDict[mR]
     # ds_list = []; P_list = []; aIBi_list = []; mI_list = []
     # for ind, filename in enumerate(os.listdir(innerdatapath)):
     #     if filename == 'quench_Dataset.nc':
@@ -99,62 +72,79 @@ if __name__ == "__main__":
     # del(ds_tot.attrs['P']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
     # ds_tot.to_netcdf(innerdatapath + '/quench_Dataset.nc')
 
-    # # # Analysis of Total Dataset
-    # qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
-    # PVals = qds['P'].values
-    # tVals = qds['t'].values
-    # n0 = qds.attrs['n0']
-    # gBB = qds.attrs['gBB']
-    # nu = pfc.nu(gBB)
-    # mI = qds.attrs['mI']
-    # mB = qds.attrs['mB']
+    # # Analysis of Total Dataset
 
-    # aIBi = -10
-    # qds_aIBi = qds.sel(aIBi=aIBi)
+    aIBi = -10
+    qdsDict = {}
+    for mR in massRat_Vals:
+        qdsDict[mR] = xr.open_dataset(datapathDict[mR] + '/quench_Dataset.nc').sel(aIBi=aIBi)
 
-    # # IMPURITY DISTRIBUTION CHARACTERIZATION (CARTESIAN)
+    PVals = qdsDict[1]['P'].values
+    tVals = qdsDict[1]['t'].values
+    n0 = qdsDict[1].attrs['n0']
+    gBB = qdsDict[1].attrs['gBB']
+    nu = pfc.nu(gBB)
+    mI = qdsDict[1].attrs['mI']
+    mB = qdsDict[1].attrs['mB']
 
-    # nPIm_FWHM_Vals = np.zeros(PVals.size)
-    # nPIm_distPeak_Vals = np.zeros(PVals.size)
-    # nPIm_deltaPeak_Vals = np.zeros(PVals.size)
-    # nPIm_Tot_Vals = np.zeros(PVals.size)
-    # nPIm_Vec = np.empty(PVals.size, dtype=np.object)
-    # PIm_Vec = np.empty(PVals.size, dtype=np.object)
-    # fig, ax = plt.subplots()
-    # for ind, P in enumerate(PVals):
-    #     qds_nPIm_inf = qds_aIBi['nPI_mag'].sel(P=P).isel(t=-1).dropna('PI_mag')
-    #     PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
-    #     dPIm = PIm_Vals[1] - PIm_Vals[0]
+    # IMPURITY DISTRIBUTION CHARACTERIZATION (CARTESIAN)
+    nPIm_FWHM_Dict = {}
+    nPIm_distPeak_Dict = {}
+    nPIm_deltaPeak_Dict = {}
+    nPIm_Tot_Dict = {}
+    for mind, mR in enumerate(massRat_Vals):
+        nPIm_FWHM_Vals = np.zeros(PVals.size)
+        nPIm_distPeak_Vals = np.zeros(PVals.size)
+        nPIm_deltaPeak_Vals = np.zeros(PVals.size)
+        nPIm_Tot_Vals = np.zeros(PVals.size)
+        nPIm_Vec = np.empty(PVals.size, dtype=np.object)
+        PIm_Vec = np.empty(PVals.size, dtype=np.object)
+        for ind, P in enumerate(PVals):
+            qds_nPIm_inf = qdsDict[mR]['nPI_mag'].sel(P=P).isel(t=-1).dropna('PI_mag')
+            PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
+            dPIm = PIm_Vals[1] - PIm_Vals[0]
 
-    #     # # Plot nPIm(t=inf)
-    #     qds_nPIm_inf.plot(ax=ax, label='P: {:.1f}'.format(P))
-    #     nPIm_Vec[ind] = qds_nPIm_inf.values
-    #     PIm_Vec[ind] = PIm_Vals
+            # # Calculate nPIm(t=inf) normalization
+            nPIm_Tot_Vals[ind] = np.sum(qds_nPIm_inf.values * dPIm) + qdsDict[mR].sel(P=P).isel(t=-1)['mom_deltapeak'].values
 
-    #     # # Calculate nPIm(t=inf) normalization
-    #     nPIm_Tot_Vals[ind] = np.sum(qds_nPIm_inf.values * dPIm) + qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
+            # Calculate FWHM, distribution peak, and delta peak
+            nPIm_FWHM_Vals[ind] = pfc.FWHM(PIm_Vals, qds_nPIm_inf.values)
+            nPIm_distPeak_Vals[ind] = np.max(qds_nPIm_inf.values)
+            nPIm_deltaPeak_Vals[ind] = qdsDict[mR].sel(P=P).isel(t=-1)['mom_deltapeak'].values
 
-    #     # Calculate FWHM, distribution peak, and delta peak
-    #     nPIm_FWHM_Vals[ind] = pfc.FWHM(PIm_Vals, qds_nPIm_inf.values)
-    #     nPIm_distPeak_Vals[ind] = np.max(qds_nPIm_inf.values)
-    #     nPIm_deltaPeak_Vals[ind] = qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
+        # Plot characterization of nPIm(t=inf)
+        nPIm_FWHM_Dict[mR] = nPIm_FWHM_Vals
+        nPIm_distPeak_Dict[mR] = nPIm_distPeak_Vals
+        nPIm_deltaPeak_Dict[mR] = nPIm_deltaPeak_Vals
 
-    # # Plot nPIm(t=inf)
-    # ax.plot(mI * nu * np.ones(PIm_Vals.size), np.linspace(0, 1, PIm_Vals.size), 'k--', label=r'$m_{I}c$')
-    # ax.legend()
-    # ax.set_xlabel(r'$|P_{I}|$')
-    # ax.set_ylabel(r'$n_{|P_{I}|}$')
-    # ax.set_title('Ground state impurity distribution (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    # # plt.show()
+    colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
+    legend_elements = []
+    fig, ax = plt.subplots()
+    for mind, mR in enumerate(massRat_Vals):
+        ax.plot(PVals, nPIm_FWHM_Dict[mR], color=colors[mind], linestyle='-')
+        ax.plot(PVals, nPIm_distPeak_Dict[mR], color=colors[mind], linestyle='--')
+        ax.plot(PVals, nPIm_deltaPeak_Dict[mR], color=colors[mind], linestyle=':')
+        legend_elements.append(Line2D([0], [0], color=colors[mind], lw=2, label=r'$\frac{m_{I}}{m_{B}}=$' + '{:.1f}'.format(mR)))
 
-    # # # Plot characterization of nPIm(t=inf)
-    # # ax.plot(PVals, nPIm_FWHM_Vals, 'b-', label='Incoherent Dist FWHM')
-    # # ax.plot(PVals, nPIm_distPeak_Vals, 'g-', label='Incoherent Dist Peak')
-    # # ax.plot(PVals, nPIm_deltaPeak_Vals, 'r-', label='Delta Peak (Z-factor)')
-    # # ax.legend()
-    # # ax.set_xlabel('$P$')
-    # # ax.set_title(r'$n_{|P_{I}|}$' + ' Characterization (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    # # plt.show()
+    legend_elements.append(Line2D([0], [0], color='k', linestyle='-', lw=1, label='Incoherent Dist FWHM'))
+    legend_elements.append(Line2D([0], [0], color='k', linestyle='--', lw=1, label='Incoherent Dist Peak'))
+    legend_elements.append(Line2D([0], [0], color='k', linestyle=':', lw=1, label='Delta Peak (Z-factor)'))
+    ax.legend(handles=legend_elements)
+    ax.set_xlabel('$P$')
+    ax.set_title(r'$n_{|P_{I}|}$' + ' Characterization (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+    # plt.show()
+
+    fig2, ax2, = plt.subplots()
+    Pinit = 0.3
+    for mind, mR in enumerate(massRat_Vals):
+        qds_nPIm_inf = qdsDict[mR]['nPI_mag'].sel(P=Pinit, method='nearest').isel(t=-1).dropna('PI_mag')
+        Pinit = 1 * qds_nPIm_inf['P'].values
+        PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
+        ax2.plot(PIm_Vals, qds_nPIm_inf.values, color=colors[mind], linestyle='-', label=r'$\frac{m_{I}}{m_{B}}=$' + '{:.1f}'.format(mR))
+    ax2.set_xlabel(r'$|P_{I}|$')
+    ax2.set_title(r'$n_{|P_{I}|}$' + ' (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$P=$' + '{:.2f})'.format(Pinit))
+    ax2.legend()
+    plt.show()
 
     # fig2, ax2 = plt.subplots()
     # ax2.plot(mI * nu * np.ones(PIm_Vals.size), np.linspace(0, 1, PIm_Vals.size), 'k--', label=r'$m_{I}c$')
@@ -180,65 +170,4 @@ if __name__ == "__main__":
 
     # anim2 = FuncAnimation(fig2, animate2, interval=1000, frames=range(PVals.size))
     # anim2.save(animpath + '/aIBi_{0}'.format(aIBi) + '_ImpDist.gif', writer='imagemagick')
-    # plt.show()
-
-    # # DISTRIBUTION CHARACTERIZATION SATURATION
-
-    # nPIm_FWHM_Vals = np.zeros((PVals.size, tVals.size))
-    # nPIm_distPeak_Vals = np.zeros((PVals.size, tVals.size))
-    # nPIm_deltaPeak_Vals = np.zeros((PVals.size, tVals.size))
-
-    # for Pind, P in enumerate(PVals):
-    #     for tind, t in enumerate(tVals):
-    #         qds_nPIm_inf = qds_aIBi['nPI_mag'].sel(P=P, t=t).dropna('PI_mag')
-    #         PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
-    #         dPIm = PIm_Vals[1] - PIm_Vals[0]
-
-    #         # # Plot nPIm(t=inf)
-    #         # qds_nPIm_inf.plot(ax=ax, label='P: {:.1f}'.format(P))
-
-    #         # # Calculate nPIm(t=inf) normalization
-    #         nPIm_Tot = np.sum(qds_nPIm_inf.values * dPIm) + qds_aIBi.sel(P=P, t=t)['mom_deltapeak'].values
-
-    #         # Calculate FWHM, distribution peak, and delta peak
-    #         nPIm_FWHM_Vals[Pind, tind] = pfc.FWHM(PIm_Vals, qds_nPIm_inf.values)
-    #         nPIm_distPeak_Vals[Pind, tind] = np.max(qds_nPIm_inf.values)
-    #         nPIm_deltaPeak_Vals[Pind, tind] = qds_aIBi.sel(P=P, t=t)['mom_deltapeak'].values
-
-    #     # fig, ax = plt.subplots()
-    #     # # ax.plot(tVals, nPIm_FWHM_Vals, 'b-', label='Incoherent Dist FWHM')
-    #     # ax.plot(tVals, nPIm_distPeak_Vals, 'g-', label='Incoherent Dist Peak')
-    #     # ax.plot(tVals, nPIm_deltaPeak_Vals, 'r-', label='Delta Peak (Z-factor)')
-    #     # ax.legend()
-    #     # ax.set_xscale('log')
-    #     # ax.set_xlabel('Imaginary Time')
-    #     # ax.set_yscale('log')
-    #     # ax.set_title(r'$n_{|P_{I}|}$' + ' Characteristics Saturation (' + r'$aIB^{-1}=$' + '{0}'.format(aIBi) + ', P={:.2f})'.format(P))
-    #     # plt.show()
-
-    # fig, ax = plt.subplots()
-    # quadFWHM = ax.pcolormesh(tVals, PVals, nPIm_FWHM_Vals, norm=colors.LogNorm())
-    # ax.set_xscale('log')
-    # ax.set_xlabel('Imaginary Time')
-    # ax.set_ylabel('P')
-    # ax.set_title('Incoherent Dist FWHM (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    # fig.colorbar(quadFWHM, ax=ax, extend='max')
-    # plt.show()
-
-    # fig, ax = plt.subplots()
-    # quaddistP = ax.pcolormesh(tVals, PVals, nPIm_distPeak_Vals, norm=colors.LogNorm())
-    # ax.set_xscale('log')
-    # ax.set_xlabel('Imaginary Time')
-    # ax.set_ylabel('P')
-    # ax.set_title('Incoherent Dist Peak (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    # fig.colorbar(quaddistP, ax=ax, extend='max')
-    # plt.show()
-
-    # fig, ax = plt.subplots()
-    # quaddeltP = ax.pcolormesh(tVals, PVals, nPIm_deltaPeak_Vals, norm=colors.LogNorm())
-    # ax.set_xscale('log')
-    # ax.set_xlabel('Imaginary Time')
-    # ax.set_ylabel('P')
-    # ax.set_title('Delta Peak (Z-factor) (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    # fig.colorbar(quaddeltP, ax=ax, extend='max')
     # plt.show()

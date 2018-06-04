@@ -63,9 +63,10 @@ if __name__ == "__main__":
     gBB = (4 * np.pi / mB) * 0.05
 
     Params_List = []
-    mI_Vals = np.array([2, 5, 10])
+    mI_Vals = np.array([1, 2, 5, 10])
     aIBi_Vals = np.array([-10.0, -5.0, -2.0])
-    P_Vals = np.array([0.1, 0.4, 0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 2.0, 2.4, 2.7, 3.0, 4.0, 5.0])
+    # P_Vals = np.array([0.1, 0.4, 0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 2.0, 2.4, 2.7, 3.0, 4.0, 5.0])
+    P_Vals = np.array([3.2, 3.4, 3.6, 3.8, 3.9, 4.1, 4.2, 4.4, 4.6, 4.8, 5.2, 5.4, 5.6, 5.8, 6.0])
 
     for mI in mI_Vals:
         for aIBi in aIBi_Vals:
