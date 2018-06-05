@@ -46,6 +46,7 @@ if __name__ == "__main__":
     kx = kgrid.getArray('kx'); ky = kgrid.getArray('ky'); kz = kgrid.getArray('kz')
     k_max = np.sqrt(np.max(kx)**2 + np.max(ky)**2 + np.max(kz)**2)
 
+    print('datagen_qdynamics_cart_massRat')
     print('Total time steps: {0}'.format(tgrid.size))
     print('UV cutoff: {0}'.format(k_max))
     print('NGridPoints: {0}'.format(NGridPoints))
