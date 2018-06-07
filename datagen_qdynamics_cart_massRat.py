@@ -64,35 +64,67 @@ if __name__ == "__main__":
     gBB = (4 * np.pi / mB) * 0.05
 
     Params_List = []
-    mI_Vals = np.array([1, 2, 5, 10])
-    aIBi_Vals = np.array([-10.0, -5.0, -2.0])
-    # P_Vals = np.array([0.1, 0.4, 0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 2.0, 2.4, 2.7, 3.0, 4.0, 5.0])
-    P_Vals = np.array([3.2, 3.4, 3.6, 3.8, 3.9, 4.1, 4.2, 4.4, 4.6, 4.8, 5.2, 5.4, 5.6, 5.8, 6.0])
+    # mI_Vals = np.array([1, 2, 5, 10])
+    # aIBi_Vals = np.array([-10.0, -5.0, -2.0])
+    # # P_Vals = np.array([0.1, 0.4, 0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6, 2.0, 2.4, 2.7, 3.0, 4.0, 5.0])
+    # P_Vals = np.array([3.2, 3.4, 3.6, 3.8, 3.9, 4.1, 4.2, 4.4, 4.6, 4.8, 5.2, 5.4, 5.6, 5.8, 6.0])
 
-    for mI in mI_Vals:
-        for aIBi in aIBi_Vals:
-            for P in P_Vals:
-                sParams = [mI, mB, n0, gBB]
-                cParams = [P, aIBi]
-                if toggleDict['Location'] == 'home':
-                    datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints, mI / mB)
-                elif toggleDict['Location'] == 'work':
-                    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints, mI / mB)
-                elif toggleDict['Location'] == 'cluster':
-                    datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints, mI / mB)
-                if toggleDict['Dynamics'] == 'real':
-                    innerdatapath = datapath + '/redyn'
-                elif toggleDict['Dynamics'] == 'imaginary':
-                    innerdatapath = datapath + '/imdyn'
-                if toggleDict['Grid'] == 'cartesian':
-                    innerdatapath = innerdatapath + '_cart'
-                elif toggleDict['Grid'] == 'spherical':
-                    innerdatapath = innerdatapath + '_spherical'
-                if toggleDict['Coupling'] == 'frohlich':
-                    innerdatapath = innerdatapath + '_froh'
-                elif toggleDict['Coupling'] == 'twophonon':
-                    innerdatapath = innerdatapath
-                Params_List.append([sParams, cParams, innerdatapath])
+    # for mI in mI_Vals:
+    #     for aIBi in aIBi_Vals:
+    #         for P in P_Vals:
+    #             sParams = [mI, mB, n0, gBB]
+    #             cParams = [P, aIBi]
+    #             if toggleDict['Location'] == 'home':
+    #                 datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints, mI / mB)
+    #             elif toggleDict['Location'] == 'work':
+    #                 datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints, mI / mB)
+    #             elif toggleDict['Location'] == 'cluster':
+    #                 datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints, mI / mB)
+    #             if toggleDict['Dynamics'] == 'real':
+    #                 innerdatapath = datapath + '/redyn'
+    #             elif toggleDict['Dynamics'] == 'imaginary':
+    #                 innerdatapath = datapath + '/imdyn'
+    #             if toggleDict['Grid'] == 'cartesian':
+    #                 innerdatapath = innerdatapath + '_cart'
+    #             elif toggleDict['Grid'] == 'spherical':
+    #                 innerdatapath = innerdatapath + '_spherical'
+    #             if toggleDict['Coupling'] == 'frohlich':
+    #                 innerdatapath = innerdatapath + '_froh'
+    #             elif toggleDict['Coupling'] == 'twophonon':
+    #                 innerdatapath = innerdatapath
+    #             Params_List.append([sParams, cParams, innerdatapath])
+
+    # redo (mI, P, aIBi)
+    redo_Vals = [(2, 4.4, -5.0), (2, 4.6, -5.0), (2, 4.8, -5.0),
+                 (1, 3.2, -2.0), (1, 3.4, -2.0), (1, 3.6, -2.0),
+                 (1, 3.8, -2.0), (1, 3.9, -2.0), (1, 4.1, -5.0),
+                 (1, 4.1, -2.0), (1, 4.2, -5.0), (1, 4.2, -2.0),
+                 (1, 4.4, -5.0), (1, 4.6, -2.0), (1, 5.6, -10.0),
+                 (1, 5.8, -10.0), (1, 6.0, -10.0)]
+
+    for tup in redo_Vals:
+        (mI, P, aIBi) = tup
+        sParams = [mI, mB, n0, gBB]
+        cParams = [P, aIBi]
+        if toggleDict['Location'] == 'home':
+            datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints, mI / mB)
+        elif toggleDict['Location'] == 'work':
+            datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints, mI / mB)
+        elif toggleDict['Location'] == 'cluster':
+            datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints, mI / mB)
+        if toggleDict['Dynamics'] == 'real':
+            innerdatapath = datapath + '/redyn'
+        elif toggleDict['Dynamics'] == 'imaginary':
+            innerdatapath = datapath + '/imdyn'
+        if toggleDict['Grid'] == 'cartesian':
+            innerdatapath = innerdatapath + '_cart'
+        elif toggleDict['Grid'] == 'spherical':
+            innerdatapath = innerdatapath + '_spherical'
+        if toggleDict['Coupling'] == 'frohlich':
+            innerdatapath = innerdatapath + '_froh'
+        elif toggleDict['Coupling'] == 'twophonon':
+            innerdatapath = innerdatapath
+        Params_List.append([sParams, cParams, innerdatapath])
 
     # # ---- COMPUTE DATA ON COMPUTER ----
 
