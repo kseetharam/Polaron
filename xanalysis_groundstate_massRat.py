@@ -106,7 +106,7 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -2
+    aIBi = -10
     qdsDict = {}
     for mR in massRat_Vals:
         # qdsDict[mR] = xr.open_dataset(datapathDict[mR] + '/quench_Dataset.nc').sel(aIBi=aIBi)
@@ -154,30 +154,30 @@ if __name__ == "__main__":
     legend_elements = []
     fig, ax = plt.subplots()
     for mind, mR in enumerate(massRat_Vals):
-        ax.plot(PVals, nPIm_FWHM_Dict[mR], color=colors[mind], linestyle='-')
-        ax.plot(PVals, nPIm_distPeak_Dict[mR], color=colors[mind], linestyle='--')
-        ax.plot(PVals, nPIm_deltaPeak_Dict[mR], color=colors[mind], linestyle=':')
+        ax.plot(PVals / (mR * mB * nu), nPIm_FWHM_Dict[mR], color=colors[mind], linestyle='-')
+        ax.plot(PVals / (mR * mB * nu), nPIm_distPeak_Dict[mR], color=colors[mind], linestyle='--')
+        ax.plot(PVals / (mR * mB * nu), nPIm_deltaPeak_Dict[mR], color=colors[mind], linestyle=':')
         legend_elements.append(Line2D([0], [0], color=colors[mind], lw=2, label=r'$\frac{m_{I}}{m_{B}}=$' + '{:.1f}'.format(mR)))
 
     legend_elements.append(Line2D([0], [0], color='k', linestyle='-', lw=1, label='Incoherent Dist FWHM'))
     legend_elements.append(Line2D([0], [0], color='k', linestyle='--', lw=1, label='Incoherent Dist Peak'))
     legend_elements.append(Line2D([0], [0], color='k', linestyle=':', lw=1, label='Delta Peak (Z-factor)'))
     ax.legend(handles=legend_elements)
-    ax.set_xlabel('$P$')
+    ax.set_xlabel(r'$\frac{P}{m_{I}*c_{BEC}}$')
     ax.set_title(r'$n_{|P_{I}|}$' + ' Characterization (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    # plt.show()
-
-    fig2, ax2, = plt.subplots()
-    Pinit = 6
-    for mind, mR in enumerate(massRat_Vals):
-        qds_nPIm_inf = qdsDict[mR]['nPI_mag'].sel(P=Pinit, method='nearest').isel(t=-1).dropna('PI_mag')
-        Pinit = 1 * qds_nPIm_inf['P'].values
-        PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
-        ax2.plot(PIm_Vals, qds_nPIm_inf.values, color=colors[mind], linestyle='-', label=r'$\frac{m_{I}}{m_{B}}=$' + '{:.1f}'.format(mR))
-    ax2.set_xlabel(r'$|P_{I}|$')
-    ax2.set_title(r'$n_{|P_{I}|}$' + ' (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$P=$' + '{:.2f})'.format(Pinit))
-    ax2.legend()
     plt.show()
+
+    # fig2, ax2, = plt.subplots()
+    # Pinit = 6
+    # for mind, mR in enumerate(massRat_Vals):
+    #     qds_nPIm_inf = qdsDict[mR]['nPI_mag'].sel(P=Pinit, method='nearest').isel(t=-1).dropna('PI_mag')
+    #     Pinit = 1 * qds_nPIm_inf['P'].values
+    #     PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
+    #     ax2.plot(PIm_Vals, qds_nPIm_inf.values, color=colors[mind], linestyle='-', label=r'$\frac{m_{I}}{m_{B}}=$' + '{:.1f}'.format(mR))
+    # ax2.set_xlabel(r'$|P_{I}|$')
+    # ax2.set_title(r'$n_{|P_{I}|}$' + ' (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$P=$' + '{:.2f})'.format(Pinit))
+    # ax2.legend()
+    # plt.show()
 
     # fig2, ax2 = plt.subplots()
     # ax2.plot(mI * nu * np.ones(PIm_Vals.size), np.linspace(0, 1, PIm_Vals.size), 'k--', label=r'$m_{I}c$')
