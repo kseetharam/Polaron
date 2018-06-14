@@ -106,7 +106,7 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -10
+    aIBi = -2
     qdsDict = {}
     for mR in massRat_Vals:
         # qdsDict[mR] = xr.open_dataset(datapathDict[mR] + '/quench_Dataset.nc').sel(aIBi=aIBi)
@@ -154,16 +154,23 @@ if __name__ == "__main__":
     legend_elements = []
     fig, ax = plt.subplots()
     for mind, mR in enumerate(massRat_Vals):
-        ax.plot(PVals / (mR * mB * nu), nPIm_FWHM_Dict[mR], color=colors[mind], linestyle='-')
-        ax.plot(PVals / (mR * mB * nu), nPIm_distPeak_Dict[mR], color=colors[mind], linestyle='--')
-        ax.plot(PVals / (mR * mB * nu), nPIm_deltaPeak_Dict[mR], color=colors[mind], linestyle=':')
+        mIc = mR * mB * nu
+        mininds = np.argpartition(nPIm_FWHM_Dict[mR], 2)[:2]
+        Pcrit = np.average(PVals[mininds])  # estimate of critical momentum based on two minimum values of FWHM
+        if mR == 10:
+            Pcrit = mIc
+        # Pcrit = mIc
+        ax.plot(PVals / (Pcrit), nPIm_FWHM_Dict[mR], color=colors[mind], linestyle='-')
+        ax.plot(PVals / (Pcrit), nPIm_distPeak_Dict[mR], color=colors[mind], linestyle='--')
+        ax.plot(PVals / (Pcrit), nPIm_deltaPeak_Dict[mR], color=colors[mind], linestyle=':')
         legend_elements.append(Line2D([0], [0], color=colors[mind], lw=2, label=r'$\frac{m_{I}}{m_{B}}=$' + '{:.1f}'.format(mR)))
 
     legend_elements.append(Line2D([0], [0], color='k', linestyle='-', lw=1, label='Incoherent Dist FWHM'))
     legend_elements.append(Line2D([0], [0], color='k', linestyle='--', lw=1, label='Incoherent Dist Peak'))
     legend_elements.append(Line2D([0], [0], color='k', linestyle=':', lw=1, label='Delta Peak (Z-factor)'))
     ax.legend(handles=legend_elements)
-    ax.set_xlabel(r'$\frac{P}{m_{I}*c_{BEC}}$')
+    ax.set_xlabel(r'$\frac{P}{P_{crit}}$')
+    ax.set_xlabel(r'$\frac{P}{m_{I}c_{BEC}}$')
     ax.set_title(r'$n_{|P_{I}|}$' + ' Characterization (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
     plt.show()
 
