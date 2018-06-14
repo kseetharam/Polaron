@@ -21,11 +21,8 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    # (Lx, Ly, Lz) = (30, 30, 30)
     (Lx, Ly, Lz) = (21, 21, 21)
-    # (Lx, Ly, Lz) = (12, 12, 12)
     (dx, dy, dz) = (0.375, 0.375, 0.375)
-    # (dx, dy, dz) = (0.75, 0.75, 0.75)
 
     NGridPoints = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     # NGridPoints_cart = 1.37e5
@@ -39,12 +36,13 @@ if __name__ == "__main__":
         elif toggleDict['Location'] == 'work':
             datapathDict[mR] = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}/imdyn_cart'.format(NGridPoints, mR)
 
-    # # # Concatenate Individual Datasets
+    # # # Concatenate Individual Datasets (everything)
 
     # mR = 10
     # innerdatapath = datapathDict[mR]
     # ds_list = []; P_list = []; aIBi_list = []; mI_list = []
     # for ind, filename in enumerate(os.listdir(innerdatapath)):
+    #     print(ind)
     #     if filename == 'quench_Dataset.nc':
     #         continue
     #     print(filename)
@@ -72,12 +70,47 @@ if __name__ == "__main__":
     # del(ds_tot.attrs['P']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
     # ds_tot.to_netcdf(innerdatapath + '/quench_Dataset.nc')
 
+    # # # Concatenate Individual Datasets (aIBi specific - note that for some reason there is a chunk of memory from the initial for loop through filenames that is not being freed up)
+
+    # mR = 1
+    # innerdatapath = datapathDict[mR]
+    # aIBi_List = [-10, -5, -2]
+    # # aIBi_List = [-2]
+    # for aIBi in aIBi_List:
+    #     ds_list = []; P_list = []; mI_list = []
+    #     for ind, filename in enumerate(os.listdir(innerdatapath)):
+    #         if filename[0:14] == 'quench_Dataset':
+    #             continue
+    #         ds = xr.open_dataset(innerdatapath + '/' + filename)
+    #         aIBi_temp = ds.attrs['aIBi']
+    #         if aIBi_temp != aIBi:
+    #             continue
+    #         print(filename)
+    #         ds_list.append(ds)
+    #         P_list.append(ds.attrs['P'])
+    #         mI_list.append(ds.attrs['mI'])
+
+    #     s = sorted(zip(P_list, ds_list))
+    #     g = itertools.groupby(s, key=lambda x: x[0])
+
+    #     P_keys = []; P_ds_list = []; aIBi_ds_list = []
+    #     for key, group in g:
+    #         P_temp_list, ds_temp_list = zip(*list(group))
+    #         P_keys.append(key)  # note that key = P_temp_list[0]
+    #         P_ds_list.append(ds_temp_list[0])
+
+    #     with xr.concat(P_ds_list, pd.Index(P_keys, name='P')) as ds_tot:
+    #         # ds_tot = xr.concat(P_ds_list, pd.Index(P_keys, name='P'))
+    #         del(ds_tot.attrs['P']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
+    #         ds_tot.to_netcdf(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+
     # # Analysis of Total Dataset
 
-    aIBi = -10
+    aIBi = -2
     qdsDict = {}
     for mR in massRat_Vals:
-        qdsDict[mR] = xr.open_dataset(datapathDict[mR] + '/quench_Dataset.nc').sel(aIBi=aIBi)
+        # qdsDict[mR] = xr.open_dataset(datapathDict[mR] + '/quench_Dataset.nc').sel(aIBi=aIBi)
+        qdsDict[mR] = xr.open_dataset(datapathDict[mR] + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
 
     PVals = qdsDict[1]['P'].values
     tVals = qdsDict[1]['t'].values
@@ -135,7 +168,7 @@ if __name__ == "__main__":
     # plt.show()
 
     fig2, ax2, = plt.subplots()
-    Pinit = 0.3
+    Pinit = 6
     for mind, mR in enumerate(massRat_Vals):
         qds_nPIm_inf = qdsDict[mR]['nPI_mag'].sel(P=Pinit, method='nearest').isel(t=-1).dropna('PI_mag')
         Pinit = 1 * qds_nPIm_inf['P'].values
