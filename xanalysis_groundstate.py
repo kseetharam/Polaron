@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'cartesian', 'Coupling': 'twophonon', 'Longtime': 'false'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Longtime': 'false'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -99,7 +99,12 @@ if __name__ == "__main__":
     # ds_tot.to_netcdf(innerdatapath + '/quench_Dataset_cart.nc')
 
     # # Analysis of Total Dataset
+    aIBi = -10
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
+    qds_aIBi = qds.sel(aIBi=aIBi)
+    # qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    # qds_aIBi = qds
+
     PVals = qds['P'].values
     tVals = qds['t'].values
     n0 = qds.attrs['n0']
@@ -108,8 +113,24 @@ if __name__ == "__main__":
     mI = qds.attrs['mI']
     mB = qds.attrs['mB']
 
-    aIBi = -10
-    qds_aIBi = qds.sel(aIBi=aIBi)
+    # # # # PHONON POSITION DISTRIBUTION (CARTESIAN)
+
+    # Pinit = 3.0
+    # nx_ds = qds_aIBi['nxyz_xz_slice'].isel(t=-1).sel(P=Pinit, method='nearest')
+    # Nx = nx_ds.coords['x'].values.size
+    # nx_interp_vals, xg_interp, zg_interp = pfc.xinterp2D(nx_ds, 'x', 'z', 5)
+    # fig, ax = plt.subplots()
+    # quad1 = ax.pcolormesh(zg_interp, xg_interp, nx_interp_vals[:-1, :-1])
+    # ax.set_xlim([-1, 1])
+    # ax.set_ylim([-1, 1])
+    # # nx_ds.plot()
+    # plt.show()
+    # nPB_ds = qds_aIBi['nPB_xz_slice'].isel(t=-1).sel(P=Pinit, method='nearest')
+    # PBx = nPB_ds.coords['PB_x'].values
+    # PBz = nPB_ds.coords['PB_x'].values
+    # print(PBz[1] - PBz[0])
+    # kz = np.fft.fftshift(np.fft.fftfreq(Nx) * 2 * np.pi / dy)
+    # print(kz[1] - kz[0])
 
     # # # ENERGY AND IMPURITY VELOCITY DATA CONVERSION FOR MATHEMATICA
 
@@ -432,6 +453,7 @@ if __name__ == "__main__":
     # nk0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(nk.isel(P=0), 'k', 'th', 5)
     # xg_interp = kg_interp * np.sin(thg_interp)
     # zg_interp = kg_interp * np.cos(thg_interp)
+    # # print(zg_interp[0, 1] - zg_interp[0, 0])
 
     # quad1 = ax1.pcolormesh(zg_interp, xg_interp, nk0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
     # quad1m = ax1.pcolormesh(zg_interp, -1 * xg_interp, nk0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
@@ -465,10 +487,95 @@ if __name__ == "__main__":
     #     Pph_text.set_text(r'$P_{ph}$' + ': {:.2f}'.format(PphVals[i]))
 
     # anim1 = FuncAnimation(fig1, animate1, interval=1500, frames=range(PVals.size), blit=False)
-    # anim1.save(animpath + '/aIBi_{:d}'.format(aIBi) + '_indPhononDist_2D_supersonic.gif', writer='imagemagick')
+    # # anim1.save(animpath + '/aIBi_{:d}'.format(aIBi) + '_indPhononDist_2D_supersonic.gif', writer='imagemagick')
 
-    # # plt.draw()
-    # # plt.show()
+    # plt.draw()
+    # plt.show()
+
+    # # PHONON MODE POSITION CHARACTERIZATION - 2D PLOTS (SPHERICAL)
+
+    CSAmp_ds = (qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']).isel(t=-1)
+    kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    kVec = kgrid.getArray('k')
+    thVec = kgrid.getArray('th')
+    kDiff = kgrid.diffArray('k')
+    thDiff = kgrid.diffArray('th')
+
+    PphVals = qds_aIBi.isel(t=-1)['Pph'].values
+    PimpVals = PVals - PphVals
+    Bk = xr.DataArray(np.full((len(kVec), len(thVec)), np.nan, dtype=float), coords=[kVec, thVec], dims=['k', 'th'])
+    for Pind, P in enumerate(PVals):
+        CSAmp_Vals = CSAmp_ds.sel(P=P).values
+        CSAmp_flat = CSAmp_Vals.reshape(CSAmp_Vals.size)
+        Nph = qds_aIBi.isel(t=-1).sel(P=P)['Nph'].values
+        PhDen = (1 / Nph) * CSAmp_flat
+        Bk[:] = PhDen.reshape((len(kVec), len(thVec))).real.astype(float)
+        Bk_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Bk, 'k', 'th', 5)
+        kxg_interp = kg_interp * np.sin(thg_interp)
+        kzg_interp = kg_interp * np.cos(thg_interp)
+
+        # now zg, xg, and Bk_interp_vals form a nonlinear grid of Bk vals in 2D -> we need to reinterpolate onto a linear grid in kx,kz space (don't forget to include the -xg branch after reinterpolation) and then do a 2D FFT, then save this to an array to plot
+        C1 = xdataset.coords[coord1].values
+        C2 = xdataset.coords[coord2].values
+        C1g, C2g = np.meshgrid(C1, C2, indexing='ij')
+        C1_interp = np.linspace(np.min(C1), np.max(C1), mult * C1.size)
+        C2_interp = np.linspace(np.min(C2), np.max(C2), mult * C2.size)
+        C1g_interp, C2g_interp = np.meshgrid(C1_interp, C2_interp, indexing='ij')
+        interp_vals = interpolate.griddata((C1g.flatten(), C2g.flatten()), xdataset.values.flatten(), (C1g_interp, C2g_interp), method='cubic')
+
+        # print(kzg_interp)
+        print(kxg_interp)
+        break
+
+    # # Supersonic only
+
+    # Pinit = 0.9
+    # BkP = Bk.sel(P=Pinit, method='nearest')
+    # Pinit = 1 * BkP['P'].values
+    # Bk = Bk.sel(P=slice(Pinit, PVals[-1]))
+    # PVals = Bk.coords['P'].values
+
+    # fig1, ax1 = plt.subplots()
+    # vmin = 1
+    # vmax = 0
+    # for Pind, Pv in enumerate(PVals):
+    #     vec = Bk.sel(P=Pv).values
+    #     if np.min(vec) < vmin:
+    #         vmin = np.min(vec)
+    #     if np.max(vec) > vmax:
+    #         vmax = np.max(vec)
+
+    # # vmin = 1e13
+    # # vmax = 1e14
+
+    # Bk0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Bk.isel(P=0), 'k', 'th', 5)
+    # xg_interp = kg_interp * np.sin(thg_interp)
+    # zg_interp = kg_interp * np.cos(thg_interp)
+    # # print(zg_interp[0, 1] - zg_interp[0, 0])
+
+    # quad1 = ax1.pcolormesh(zg_interp, xg_interp, Bk0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
+    # quad1m = ax1.pcolormesh(zg_interp, -1 * xg_interp, Bk0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
+    # ax1.set_xlim([-0.1, 0.1])
+    # ax1.set_ylim([-0.01, 0.01])
+    # # ax1.set_xlim([-3, 3])
+    # # ax1.set_ylim([-3, 3])
+    # # ax1.legend(loc=2)
+    # ax1.grid(True, linewidth=0.5)
+    # ax1.set_title('Ind Phonon Distribution (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+    # ax1.set_xlabel(r'$z$')
+    # ax1.set_ylabel(r'$x$')
+    # fig1.colorbar(quad1, ax=ax1, extend='both')
+
+    # def animate1(i):
+    #     Bk_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Bk.isel(P=i), 'k', 'th', 5)
+    #     quad1.set_array(Bk_interp_vals[:-1, :-1].ravel())
+    #     quad1m.set_array(Bk_interp_vals[:-1, :-1].ravel())
+
+    # anim1 = FuncAnimation(fig1, animate1, interval=1500, frames=range(PVals.size), blit=False)
+    # # anim1.save(animpath + '/aIBi_{:d}'.format(aIBi) + '_indPhononDist_2D_supersonic.gif', writer='imagemagick')
+
+    # plt.draw()
+    # plt.show()
 
     # # IMPURITY DISTRIBUTION CHARACTERIZATION (CARTESIAN)
 
