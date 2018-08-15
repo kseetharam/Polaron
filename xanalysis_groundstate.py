@@ -4,6 +4,7 @@ import xarray as xr
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from matplotlib.lines import Line2D
 import matplotlib.colors as colors
 import os
 import itertools
@@ -277,6 +278,77 @@ if __name__ == "__main__":
     # ax.set_xlabel(r'$a_{IB}^{-1}$')
     # plt.show()
 
+    # # # POLARON SOUND VELOCITY SATURATION (SPHERICAL)
+
+    # # Check to see if linear part of polaron (total system) energy spectrum has slope equal to sound velocity
+
+    # # aIBi = -10
+    # fig, ax = plt.subplots()
+    # aIBi_Vals = qds.coords['aIBi'].values
+    # colorList = ['b', 'g', 'r']
+    # for aind, aIBi in enumerate(aIBi_Vals):
+    #     qds_aIBi = qds.sel(aIBi=aIBi)
+    #     tVals = qds_aIBi['t'].values
+    #     vsound_Vals = np.zeros(tVals.size)
+    #     vI_Vals = np.zeros(tVals.size)
+    #     CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+    #     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    #     # get sound mask for Einf
+    #     Energy_Vals_inf = np.zeros(PVals.size)
+    #     PI_Vals = np.zeros(PVals.size)
+    #     for Pind, P in enumerate(PVals):
+    #         CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
+    #         Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+    #         PI_Vals[Pind] = P - qds_aIBi.sel(P=P).isel(t=-1)['Pph'].values
+    #     Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+    #     Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
+    #     Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+    #     Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+    #     sound_mask = np.abs(Einf_2ndderiv_Vals) <= 5e-3
+
+    #     for tind, t in enumerate(tVals):
+    #         Energy_Vals_inf = np.zeros(PVals.size)
+    #         PI_Vals = np.zeros(PVals.size)
+    #         for Pind, P in enumerate(PVals):
+    #             CSAmp = CSAmp_ds.sel(P=P, t=t).values
+    #             Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+    #             PI_Vals[Pind] = P - qds_aIBi.sel(P=P, t=t)['Pph'].values
+
+    #         Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+    #         Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
+    #         Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+    #         Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+
+    #         # sound_mask = np.abs(Einf_2ndderiv_Vals) <= 5e-3
+    #         Einf_sound = Einf_Vals[sound_mask]
+    #         Pinf_sound = Pinf_Vals[sound_mask]
+    #         [vsound_Vals[tind], vs_const] = np.polyfit(Pinf_sound, Einf_sound, deg=1)
+
+    #         vI_inf_tck = interpolate.splrep(PVals, PI_Vals / mI, s=0)
+    #         vI_inf_Vals = 1 * interpolate.splev(Pinf_Vals, vI_inf_tck, der=0)
+    #         vI_Vals[tind] = np.polyfit(Pinf_sound, vI_inf_Vals[sound_mask], deg=0)
+
+    #     vsound_tr = vsound_Vals - nu
+    #     vI_tr = vI_Vals - nu
+    #     ax.plot(tVals, vsound_tr, color=colorList[aind], linestyle='none', marker='o', markerfacecolor='none', label='')
+    #     ax.plot(tVals, vI_tr, color=colorList[aind], linestyle='none', marker='x', label='')
+
+    # legend_elements = [Line2D([0], [0], marker='o', color='k', label='Translated Post-Transition Polaron Sound Velocity (' + r'$\frac{\partial E}{\partial P}-c_{BEC}$' + ')',
+    #                           markerfacecolor='none', markersize=10, linestyle='none'),
+    #                    Line2D([0], [0], marker='x', color='k', label='Translated Post-Transition Impurity Velocity (' + r'$\frac{P-P_{ph}}{m_{I}}-c_{BEC}$' + ')',
+    #                           markersize=10, linestyle='none')]
+    # for aind, aIBi in enumerate(aIBi_Vals):
+    #     legend_elements.append(Line2D([0], [0], color=colorList[aind], lw=4, label=r'$a_{IB}^{-1}=$' + '{:.1f}'.format(aIBi)))
+    # ax.legend(handles=legend_elements, loc=1)
+    # # ax.set_xscale('symlog', linthreshy=1)
+    # ax.set_xscale('log')
+    # ax.set_yscale('log')
+    # # ax.legend()
+    # ax.set_ylim([0.009, 3])
+    # ax.set_title('Velocity Saturation')
+    # ax.set_xlabel(r'$\tau=-it$')
+    # plt.show()
+
     # # # PHONON MODE CHARACTERIZATION - INTEGRATED PLOTS (SPHERICAL)
 
     # CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
@@ -508,159 +580,159 @@ if __name__ == "__main__":
     # plt.draw()
     # plt.show()
 
-    # # # PHONON MODE POSITION CHARACTERIZATION - 2D PLOTS (SPHERICAL)
+    # # PHONON MODE POSITION CHARACTERIZATION - 2D PLOTS (SPHERICAL)
 
-    # CSAmp_ds = (qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']).isel(t=-1)
-    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
-    # kVec = kgrid.getArray('k')
-    # thVec = kgrid.getArray('th')
-    # kDiff = kgrid.diffArray('k')
-    # thDiff = kgrid.diffArray('th')
-    # Bk = xr.DataArray(np.full((len(kVec), len(thVec)), np.nan, dtype=complex), coords=[kVec, thVec], dims=['k', 'th'])
-    # for Pind, P in enumerate(PVals):
-    #     if Pind != 10:
-    #         continue
-    #     CSAmp_Vals = CSAmp_ds.sel(P=P).values
-    #     Nph = qds_aIBi.isel(t=-1).sel(P=P)['Nph'].values
-    #     Bk[:] = CSAmp_Vals.reshape((len(kVec), len(thVec)))
-    #     Bk_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Bk, 'k', 'th', 5)
-    #     kxg_interp = kg_interp * np.sin(thg_interp)
-    #     kzg_interp = kg_interp * np.cos(thg_interp)
+    CSAmp_ds = (qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']).isel(t=-1)
+    kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    kVec = kgrid.getArray('k')
+    thVec = kgrid.getArray('th')
+    kDiff = kgrid.diffArray('k')
+    thDiff = kgrid.diffArray('th')
+    Bk = xr.DataArray(np.full((len(kVec), len(thVec)), np.nan, dtype=complex), coords=[kVec, thVec], dims=['k', 'th'])
+    for Pind, P in enumerate(PVals):
+        if Pind != 10:
+            continue
+        CSAmp_Vals = CSAmp_ds.sel(P=P).values
+        Nph = qds_aIBi.isel(t=-1).sel(P=P)['Nph'].values
+        Bk[:] = CSAmp_Vals.reshape((len(kVec), len(thVec)))
+        Bk_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Bk, 'k', 'th', 5)
+        kxg_interp = kg_interp * np.sin(thg_interp)
+        kzg_interp = kg_interp * np.cos(thg_interp)
 
-    #     kxg_interp2 = np.concatenate((-1 * np.fliplr(kxg_interp), kxg_interp), axis=1)
-    #     kzg_interp2 = np.concatenate((kzg_interp, kzg_interp), axis=1)
-    #     # Bk_interp2_vals = np.concatenate((np.fliplr(Bk_interp_vals), Bk_interp_vals), axis=1)
-    #     Bk_interp2_vals = np.concatenate((Bk_interp_vals, Bk_interp_vals), axis=1)  # THINK ABOUT WHY NO FLIPLR HERE
+        kxg_interp2 = np.concatenate((-1 * np.fliplr(kxg_interp), kxg_interp), axis=1)
+        kzg_interp2 = np.concatenate((kzg_interp, kzg_interp), axis=1)
+        # Bk_interp2_vals = np.concatenate((np.fliplr(Bk_interp_vals), Bk_interp_vals), axis=1)
+        Bk_interp2_vals = np.concatenate((Bk_interp_vals, Bk_interp_vals), axis=1)  # THINK ABOUT WHY NO FLIPLR HERE
 
-    #     # fig1, ax1 = plt.subplots()
-    #     # ax1.scatter(kzg_interp, kxg_interp)
-    #     # plt.show()
+        # fig1, ax1 = plt.subplots()
+        # ax1.scatter(kzg_interp, kxg_interp)
+        # plt.show()
 
-    #     (zdim, xdim) = kzg_interp.shape
-    #     # now zg, xg, and Bk_interp_vals form a nonlinear grid of Bk vals in 2D -> we need to reinterpolate onto a linear grid in kx,kz space (don't forget to include the -xg branch after reinterpolation) and then do a 2D FFT, then save this to an array to plot, include Nph
-    #     npoints = zdim
-    #     # kzL = np.linspace(np.min(kzg_interp), np.max(kzg_interp), npoints)
-    #     # kxL = np.linspace(np.min(kxg_interp), np.max(kxg_interp), npoints)
-    #     # print(kzL)
-    #     # print(kxL)
+        (zdim, xdim) = kzg_interp.shape
+        # now zg, xg, and Bk_interp_vals form a nonlinear grid of Bk vals in 2D -> we need to reinterpolate onto a linear grid in kx,kz space (don't forget to include the -xg branch after reinterpolation) and then do a 2D FFT, then save this to an array to plot, include Nph
+        npoints = zdim
+        # kzL = np.linspace(np.min(kzg_interp), np.max(kzg_interp), npoints)
+        # kxL = np.linspace(np.min(kxg_interp), np.max(kxg_interp), npoints)
+        # print(kzL)
+        # print(kxL)
 
-    #     fig, axes = plt.subplots(nrows=1, ncols=3)
-    #     # fig1, ax1 = plt.subplots()
+        fig, axes = plt.subplots(nrows=1, ncols=3)
+        # fig1, ax1 = plt.subplots()
 
-    #     if P < 0.9:
-    #         [vmin, vmax] = [0, 500]
-    #         axes[0].set_xlim([-1.5, 1.5])
-    #         axes[0].set_ylim([-1.5, 1.5])
-    #         axes[1].set_xlim([-1.5, 1.5])
-    #         axes[1].set_ylim([-1.5, 1.5])
-    #         axes[2].set_xlim([-1.5, 1.5])
-    #         axes[2].set_ylim([-1.5, 1.5])
+        if P < 0.9:
+            [vmin, vmax] = [0, 500]
+            axes[0].set_xlim([-1.5, 1.5])
+            axes[0].set_ylim([-1.5, 1.5])
+            axes[1].set_xlim([-1.5, 1.5])
+            axes[1].set_ylim([-1.5, 1.5])
+            axes[2].set_xlim([-1.5, 1.5])
+            axes[2].set_ylim([-1.5, 1.5])
 
-    #         # ax1.set_xlim([-1.5, 1.5])
-    #         # ax1.set_ylim([-1.5, 1.5])
-    #         kzL = np.linspace(-2, 2, 2 * npoints)
-    #         kxL = np.linspace(0, 2, npoints)
-    #         kzLg_interp, kxLg_interp = np.meshgrid(kzL, kxL, indexing='ij')
+            # ax1.set_xlim([-1.5, 1.5])
+            # ax1.set_ylim([-1.5, 1.5])
+            kzL = np.linspace(-2, 2, 2 * npoints)
+            kxL = np.linspace(0, 2, npoints)
+            kzLg_interp, kxLg_interp = np.meshgrid(kzL, kxL, indexing='ij')
 
-    #         kzL2 = np.linspace(-2, 2, 2 * npoints)
-    #         kxL2 = np.linspace(-2, 2, 2 * npoints)
-    #         kzLg_interp2, kxLg_interp2 = np.meshgrid(kzL2, kxL2, indexing='ij')
+            kzL2 = np.linspace(-2, 2, 2 * npoints)
+            kxL2 = np.linspace(-2, 2, 2 * npoints)
+            kzLg_interp2, kxLg_interp2 = np.meshgrid(kzL2, kxL2, indexing='ij')
 
-    #     else:
-    #         # [vmin, vmax] = [0, 9.2e13]
-    #         [vmin, vmax] = [0, 1e18]
-    #         axes[0].set_xlim([-0.1, 0.1])
-    #         axes[0].set_ylim([-0.01, 0.01])
-    #         axes[1].set_xlim([-0.1, 0.1])
-    #         axes[1].set_ylim([-0.01, 0.01])
-    #         axes[2].set_xlim([-0.1, 0.1])
-    #         axes[2].set_ylim([-0.01, 0.01])
+        else:
+            # [vmin, vmax] = [0, 9.2e13]
+            [vmin, vmax] = [0, 1e18]
+            axes[0].set_xlim([-0.1, 0.1])
+            axes[0].set_ylim([-0.01, 0.01])
+            axes[1].set_xlim([-0.1, 0.1])
+            axes[1].set_ylim([-0.01, 0.01])
+            axes[2].set_xlim([-0.1, 0.1])
+            axes[2].set_ylim([-0.01, 0.01])
 
-    #         # ax1.set_xlim([-0.1, 0.1])
-    #         # ax1.set_ylim([-0.01, 0.01])
-    #         kzL = np.linspace(-0.1, 0.1, int(0.1 * npoints))
-    #         kxL = np.linspace(0, 0.01, int(0.1 * npoints))
-    #         kzLg_interp, kxLg_interp = np.meshgrid(kzL, kxL, indexing='ij')
+            # ax1.set_xlim([-0.1, 0.1])
+            # ax1.set_ylim([-0.01, 0.01])
+            kzL = np.linspace(-0.1, 0.1, int(0.1 * npoints))
+            kxL = np.linspace(0, 0.01, int(0.1 * npoints))
+            kzLg_interp, kxLg_interp = np.meshgrid(kzL, kxL, indexing='ij')
 
-    #         kzL2 = np.linspace(-0.1, 0.1, int(0.1 * npoints))
-    #         kxL2 = np.linspace(-0.01, 0.01, int(0.2 * npoints))
-    #         kzLg_interp2, kxLg_interp2 = np.meshgrid(kzL2, kxL2, indexing='ij')
+            kzL2 = np.linspace(-0.1, 0.1, int(0.1 * npoints))
+            kxL2 = np.linspace(-0.01, 0.01, int(0.2 * npoints))
+            kzLg_interp2, kxLg_interp2 = np.meshgrid(kzL2, kxL2, indexing='ij')
 
-    #     Bk_Lg = interpolate.griddata((kzg_interp.flatten(), kxg_interp.flatten()), Bk_interp_vals.flatten(), (kzLg_interp, kxLg_interp), method='cubic')
+        Bk_Lg = interpolate.griddata((kzg_interp.flatten(), kxg_interp.flatten()), Bk_interp_vals.flatten(), (kzLg_interp, kxLg_interp), method='cubic')
 
-    #     PhDen = ((1 / Nph) * np.abs(Bk_interp_vals)**2).real.astype(float)
-    #     PhDen_Lg = ((1 / Nph) * np.abs(Bk_Lg)**2).real.astype(float)
+        PhDen = ((1 / Nph) * np.abs(Bk_interp_vals)**2).real.astype(float)
+        PhDen_Lg = ((1 / Nph) * np.abs(Bk_Lg)**2).real.astype(float)
 
-    #     Bk_Lg2 = interpolate.griddata((kzg_interp2.flatten(), kxg_interp2.flatten()), Bk_interp2_vals.flatten(), (kzLg_interp2, kxLg_interp2), method='cubic')
-    #     PhDen_Lg2 = ((1 / Nph) * np.abs(Bk_Lg2)**2).real.astype(float)
+        Bk_Lg2 = interpolate.griddata((kzg_interp2.flatten(), kxg_interp2.flatten()), Bk_interp2_vals.flatten(), (kzLg_interp2, kxLg_interp2), method='cubic')
+        PhDen_Lg2 = ((1 / Nph) * np.abs(Bk_Lg2)**2).real.astype(float)
 
-    #     quad = axes[0].pcolormesh(kzLg_interp, kxLg_interp, PhDen_Lg[:-1, :-1], vmin=vmin, vmax=vmax)
-    #     quadm = axes[0].pcolormesh(kzLg_interp, -1 * kxLg_interp, PhDen_Lg[:-1, :-1], vmin=vmin, vmax=vmax)
-    #     fig.colorbar(quad, ax=axes[0], extend='both')
-    #     quad1 = axes[1].pcolormesh(kzg_interp, kxg_interp, PhDen[:-1, :-1], vmin=vmin, vmax=vmax)
-    #     quad1m = axes[1].pcolormesh(kzg_interp, -1 * kxg_interp, PhDen[:-1, :-1], vmin=vmin, vmax=vmax)
-    #     fig.colorbar(quad1, ax=axes[1], extend='both')
+        quad = axes[0].pcolormesh(kzLg_interp, kxLg_interp, PhDen_Lg[:-1, :-1], vmin=vmin, vmax=vmax)
+        quadm = axes[0].pcolormesh(kzLg_interp, -1 * kxLg_interp, PhDen_Lg[:-1, :-1], vmin=vmin, vmax=vmax)
+        fig.colorbar(quad, ax=axes[0], extend='both')
+        quad1 = axes[1].pcolormesh(kzg_interp, kxg_interp, PhDen[:-1, :-1], vmin=vmin, vmax=vmax)
+        quad1m = axes[1].pcolormesh(kzg_interp, -1 * kxg_interp, PhDen[:-1, :-1], vmin=vmin, vmax=vmax)
+        fig.colorbar(quad1, ax=axes[1], extend='both')
 
-    #     quad3 = axes[2].pcolormesh(kzLg_interp2, kxLg_interp2, PhDen_Lg2[:-1, :-1], vmin=vmin, vmax=vmax)
-    #     fig.colorbar(quad3, ax=axes[2], extend='both')
+        quad3 = axes[2].pcolormesh(kzLg_interp2, kxLg_interp2, PhDen_Lg2[:-1, :-1], vmin=vmin, vmax=vmax)
+        fig.colorbar(quad3, ax=axes[2], extend='both')
 
-    #     # ax1.scatter(kzg_interp, kxg_interp, c='b')
-    #     # ax1.scatter(kzg_interp, -1 * kxg_interp, c='b')
-    #     # ax1.scatter(kzLg_interp, kxLg_interp, c='r')
-    #     # ax1.scatter(kzLg_interp, -1 * kxLg_interp, c='r')
+        # ax1.scatter(kzg_interp, kxg_interp, c='b')
+        # ax1.scatter(kzg_interp, -1 * kxg_interp, c='b')
+        # ax1.scatter(kzLg_interp, kxLg_interp, c='r')
+        # ax1.scatter(kzLg_interp, -1 * kxLg_interp, c='r')
 
-    #     fig2, ax2 = plt.subplots()
+        fig2, ax2 = plt.subplots()
 
-    #     dkz = kzL[1] - kzL[0]
-    #     dkx = kxL[1] - kxL[0]
-    #     zL = np.fft.fftshift(np.fft.fftfreq(kzL.size) * 2 * np.pi / dkz)
-    #     xL = np.fft.fftshift(np.fft.fftfreq(kxL.size) * 2 * np.pi / dkx)
-    #     zLg, xLg = np.meshgrid(zL, xL, indexing='ij')
-    #     dzL = zL[1] - zL[0]
-    #     dxL = xL[1] - xL[0]
+        dkz = kzL[1] - kzL[0]
+        dkx = kxL[1] - kxL[0]
+        zL = np.fft.fftshift(np.fft.fftfreq(kzL.size) * 2 * np.pi / dkz)
+        xL = np.fft.fftshift(np.fft.fftfreq(kxL.size) * 2 * np.pi / dkx)
+        zLg, xLg = np.meshgrid(zL, xL, indexing='ij')
+        dzL = zL[1] - zL[0]
+        dxL = xL[1] - xL[0]
 
-    #     # print(Bk_Lg[np.logical_not(np.isnan(Bk_Lg))])
-    #     Bk_Lg[np.isnan(Bk_Lg)] = 0
-    #     beta_kzkx = np.fft.ifftshift(Bk_Lg)
-    #     amp_beta_zx_preshift = np.fft.ifftn(beta_kzkx) / (dzL * dxL)
-    #     amp_beta_zx = np.fft.fftshift(amp_beta_zx_preshift)
-    #     nzx = ((1 / Nph) * np.abs(amp_beta_zx)**2).real.astype(float)
-    #     quad2 = ax2.pcolormesh(zLg, xLg, nzx, vmin=np.min(nzx), vmax=np.max(nzx))
-    #     # ax2.set_xlim([-10, 10])
-    #     # ax2.set_ylim([-10, 10])
-    #     fig2.colorbar(quad2, ax=ax2, extend='both')
+        # print(Bk_Lg[np.logical_not(np.isnan(Bk_Lg))])
+        Bk_Lg[np.isnan(Bk_Lg)] = 0
+        beta_kzkx = np.fft.ifftshift(Bk_Lg)
+        amp_beta_zx_preshift = np.fft.ifftn(beta_kzkx) / (dzL * dxL)
+        amp_beta_zx = np.fft.fftshift(amp_beta_zx_preshift)
+        nzx = ((1 / Nph) * np.abs(amp_beta_zx)**2).real.astype(float)
+        quad2 = ax2.pcolormesh(zLg, xLg, nzx, vmin=np.min(nzx), vmax=np.max(nzx))
+        # ax2.set_xlim([-10, 10])
+        # ax2.set_ylim([-10, 10])
+        fig2.colorbar(quad2, ax=ax2, extend='both')
 
-    #     fig3, ax3 = plt.subplots()
+        fig3, ax3 = plt.subplots()
 
-    #     dkz2 = kzL2[1] - kzL2[0]
-    #     dkx2 = kxL2[1] - kxL2[0]
-    #     zL2 = np.fft.fftshift(np.fft.fftfreq(kzL2.size) * 2 * np.pi / dkz2)
-    #     xL2 = np.fft.fftshift(np.fft.fftfreq(kxL2.size) * 2 * np.pi / dkx2)
-    #     zLg2, xLg2 = np.meshgrid(zL2, xL2, indexing='ij')
-    #     dzL2 = zL2[1] - zL2[0]
-    #     dxL2 = xL2[1] - xL2[0]
+        dkz2 = kzL2[1] - kzL2[0]
+        dkx2 = kxL2[1] - kxL2[0]
+        zL2 = np.fft.fftshift(np.fft.fftfreq(kzL2.size) * 2 * np.pi / dkz2)
+        xL2 = np.fft.fftshift(np.fft.fftfreq(kxL2.size) * 2 * np.pi / dkx2)
+        zLg2, xLg2 = np.meshgrid(zL2, xL2, indexing='ij')
+        dzL2 = zL2[1] - zL2[0]
+        dxL2 = xL2[1] - xL2[0]
 
-    #     # print(Bk_Lg[np.logical_not(np.isnan(Bk_Lg))])
-    #     Bk_Lg2[np.isnan(Bk_Lg2)] = 0
-    #     beta_kzkx2 = np.fft.ifftshift(Bk_Lg2)
-    #     amp_beta_zx_preshift2 = np.fft.ifftn(beta_kzkx2) / (dzL2 * dxL2)
-    #     amp_beta_zx2 = np.fft.fftshift(amp_beta_zx_preshift2)
-    #     nzx2 = ((1 / Nph) * np.abs(amp_beta_zx2)**2).real.astype(float)
-    #     quad3 = ax3.pcolormesh(zLg2, xLg2, nzx2, vmin=0, vmax=np.max(nzx2))
+        # print(Bk_Lg[np.logical_not(np.isnan(Bk_Lg))])
+        Bk_Lg2[np.isnan(Bk_Lg2)] = 0
+        beta_kzkx2 = np.fft.ifftshift(Bk_Lg2)
+        amp_beta_zx_preshift2 = np.fft.ifftn(beta_kzkx2) / (dzL2 * dxL2)
+        amp_beta_zx2 = np.fft.fftshift(amp_beta_zx_preshift2)
+        nzx2 = ((1 / Nph) * np.abs(amp_beta_zx2)**2).real.astype(float)
+        quad3 = ax3.pcolormesh(zLg2, xLg2, nzx2, vmin=0, vmax=np.max(nzx2))
 
-    #     # zZ = np.linspace(-4e3, 4e3, 5 * zL2.size)
-    #     # xZ = np.linspace(-60e3, 60e3, 5 * xL2.size)
-    #     # zZg, xZg = np.meshgrid(zZ, xZ, indexing='ij')
-    #     # nzxZ = interpolate.griddata((zLg2.flatten(), xLg2.flatten()), nzx2.flatten(), (zZg, xZg), method='cubic')
-    #     # quad3 = ax3.pcolormesh(zZg, xZg, nzxZ, vmin=0, vmax=np.max(nzxZ))
+        # zZ = np.linspace(-4e3, 4e3, 5 * zL2.size)
+        # xZ = np.linspace(-60e3, 60e3, 5 * xL2.size)
+        # zZg, xZg = np.meshgrid(zZ, xZ, indexing='ij')
+        # nzxZ = interpolate.griddata((zLg2.flatten(), xLg2.flatten()), nzx2.flatten(), (zZg, xZg), method='cubic')
+        # quad3 = ax3.pcolormesh(zZg, xZg, nzxZ, vmin=0, vmax=np.max(nzxZ))
 
-    #     # ax3.set_xlim([-20, 20])
-    #     # ax3.set_ylim([-20, 20])
-    #     fig3.colorbar(quad3, ax=ax3, extend='both')
+        # ax3.set_xlim([-20, 20])
+        # ax3.set_ylim([-20, 20])
+        fig3.colorbar(quad3, ax=ax3, extend='both')
 
-    #     print(P)
-    #     plt.show()
-    #     break
+        print(P)
+        plt.show()
+        break
 
     # # IMPURITY DISTRIBUTION CHARACTERIZATION (CARTESIAN)
 
