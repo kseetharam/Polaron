@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Longtime': 'false'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Longtime': 'false'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -748,7 +748,7 @@ if __name__ == "__main__":
     dk0 = kg[1, 0] - kg[0, 0]
     dth0 = thg[0, 1] - thg[0, 0]
     Bk_norm = (1 / Nph) * np.sum(dk0 * dth0 * (2 * np.pi)**(-2) * kg**2 * np.sin(thg) * np.abs(Bk_2D.values)**2)
-    print(Bk_norm)
+    print('Original (1/Nph)|Bk|^2 normalization (Spherical 2D): {0}'.format(Bk_norm))
     # Interpolation of original data array onto a finer spaced (spherical) grid
     k_interp = np.linspace(np.min(kVec), np.max(kVec), mult * kVec.size); th_interp = np.linspace(np.min(thVec), np.max(thVec), mult * thVec.size)
     kg_interp, thg_interp = np.meshgrid(k_interp, th_interp, indexing='ij')
@@ -757,7 +757,7 @@ if __name__ == "__main__":
     dk = kg_interp[1, 0] - kg_interp[0, 0]
     dth = thg_interp[0, 1] - thg_interp[0, 0]
     Bk_interp_norm = (1 / Nph) * np.sum(dk * dth * (2 * np.pi)**(-2) * kg_interp**2 * np.sin(thg_interp) * np.abs(Bk_interp_vals)**2)
-    print(Bk_interp_norm)
+    print('Interpolated (1/Nph)|Bk|^2 normalization (Spherical 2D): {0}'.format(Bk_interp_norm))
 
     # 3D reconstruction in spherical coordinates (copy interpolated 2D spherical Bk onto all phi coordinates due to phi symmetry)
     phi_interp = np.linspace(np.min(phiVec), np.max(phiVec), 1 * phiVec.size)
@@ -771,6 +771,10 @@ if __name__ == "__main__":
     kyg = kg_3Di * np.sin(thg_3Di) * np.sin(phig_3Di)
     kzg = kg_3Di * np.cos(thg_3Di)
     (Nk, Nth, Nphi) = kzg.shape
+
+    dphi = phi_interp[1] - phi_interp[0]
+    Bk_Sph3D_norm = (1 / Nph) * np.sum(dk * dth * dphi * (2 * np.pi)**(-3) * kg_3Di**2 * np.sin(thg_3Di) * np.abs(Bk_3D.values)**2)
+    print('Interpolated (1/Nph)|Bk|^2 normalization (Spherical 3D): {0}'.format(Bk_Sph3D_norm))
 
     # Create linear 3D cartesian grid and reinterpolate Bk_3D onto this grid
     if P < 0.9:
@@ -792,6 +796,10 @@ if __name__ == "__main__":
     BkLg_3D = interpolate.griddata((kzg.flatten(), kxg.flatten(), kyg.flatten()), Bk_3D.values.flatten(), (kzLg_3D, kxLg_3D, kyLg_3D), method='linear')
     interpend = timer()
     print('Interp Time: {0}'.format(interpend - interpstart))
+
+    dkzL = kzL[1] - kzL[0]; dkxL = kxL[1] - kxL[0]; dkyL = kyL[1] - kyL[0]
+    BkLg_3D_norm = (1 / Nph) * np.sum(dkzL * dkzL * dkyL * np.abs(BkLg_3D)**2)
+    print('Linear grid (1/Nph)|Bk|^2 normalization (Cartesian 3D): {0}'.format(BkLg_3D_norm))
 
     # Consistency check: use 2D ky=0 slice of Bk to calculate phonon density and compare it to phonon density from original spherical interpolated data
 
@@ -827,13 +835,12 @@ if __name__ == "__main__":
 
     # # Fourier Transform to get 3D position distribution
 
-    # dkz = kzL[1] - kzL[0]; dkx = kxL[1] - kxL[0]; dky = kyL[1] - kyL[0]
-    # zL = np.fft.fftshift(np.fft.fftfreq(kzL.size) * 2 * np.pi / dkz)
-    # xL = np.fft.fftshift(np.fft.fftfreq(kxL.size) * 2 * np.pi / dkx)
-    # yL = np.fft.fftshift(np.fft.fftfreq(kyL.size) * 2 * np.pi / dky)
+    # zL = np.fft.fftshift(np.fft.fftfreq(kzL.size) * 2 * np.pi / dkzL)
+    # xL = np.fft.fftshift(np.fft.fftfreq(kxL.size) * 2 * np.pi / dkxL)
+    # yL = np.fft.fftshift(np.fft.fftfreq(kyL.size) * 2 * np.pi / dkyL)
     # dzL = zL[1] - zL[0]; dxL = xL[1] - xL[0]; dyL = yL[1] - yL[0]
     # dVzxy = dxL * dyL * dzL
-    # # print(dzL, 2 * np.pi / (kzL.size * dkz))
+    # # print(dzL, 2 * np.pi / (kzL.size * dkzL))
 
     # zLg_3D, xLg_3D, yLg_3D = np.meshgrid(zL, xL, yL, indexing='ij')
     # # BkLg_3D[np.isnan(BkLg_3D)] = 0
@@ -842,7 +849,7 @@ if __name__ == "__main__":
     # amp_beta_zxy = np.fft.fftshift(amp_beta_zxy_preshift)
     # nzxy = ((1 / Nph) * np.abs(amp_beta_zxy)**2).real.astype(float)
     # nzxy_norm = np.sum(dVzxy * nzxy)
-    # print(nzxy_norm)
+    # print('Linear grid (1/Nph)*n(x,y,z) normalization (Cartesian 3D): {0}'.format(nzxy_norm))
 
     # # Take 2D slices of position distribution and plot
     # print(yL[yL.size // 2])
