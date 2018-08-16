@@ -777,7 +777,7 @@ if __name__ == "__main__":
     Bk_3D_vals[np.isnan(Bk_3D_vals)] = 0
 
     dphi = phi_interp[1] - phi_interp[0]
-    Bk_Sph3D_norm = (1 / Nph) * np.sum(dk * dth * dphi * (2 * np.pi)**(-3) * kg_3Di**2 * np.sin(thg_3Di) * np.abs(Bk_3D.vals)**2)
+    Bk_Sph3D_norm = (1 / Nph) * np.sum(dk * dth * dphi * (2 * np.pi)**(-3) * kg_3Di**2 * np.sin(thg_3Di) * np.abs(Bk_3D_vals)**2)
     print('Interpolated (1/Nph)|Bk|^2 normalization (Spherical 3D): {0}'.format(Bk_Sph3D_norm))
 
     # Create linear 3D cartesian grid and reinterpolate Bk_3D onto this grid
@@ -837,34 +837,34 @@ if __name__ == "__main__":
     quad2 = axes[1].pcolormesh(kzLg_ky0slice, kxLg_ky0slice, PhDen_Lg_ky0slice[:-1, :-1], vmin=vmin, vmax=vmax)
     fig.colorbar(quad2, ax=axes[1], extend='both')
 
-    # # Fourier Transform to get 3D position distribution
+    # Fourier Transform to get 3D position distribution
 
-    # zL = np.fft.fftshift(np.fft.fftfreq(kzL.size) * 2 * np.pi / dkzL)
-    # xL = np.fft.fftshift(np.fft.fftfreq(kxL.size) * 2 * np.pi / dkxL)
-    # yL = np.fft.fftshift(np.fft.fftfreq(kyL.size) * 2 * np.pi / dkyL)
-    # dzL = zL[1] - zL[0]; dxL = xL[1] - xL[0]; dyL = yL[1] - yL[0]
-    # dVzxy = dxL * dyL * dzL
-    # # print(dzL, 2 * np.pi / (kzL.size * dkzL))
+    zL = np.fft.fftshift(np.fft.fftfreq(kzL.size) * 2 * np.pi / dkzL)
+    xL = np.fft.fftshift(np.fft.fftfreq(kxL.size) * 2 * np.pi / dkxL)
+    yL = np.fft.fftshift(np.fft.fftfreq(kyL.size) * 2 * np.pi / dkyL)
+    dzL = zL[1] - zL[0]; dxL = xL[1] - xL[0]; dyL = yL[1] - yL[0]
+    dVzxy = dxL * dyL * dzL
+    # print(dzL, 2 * np.pi / (kzL.size * dkzL))
 
-    # zLg_3D, xLg_3D, yLg_3D = np.meshgrid(zL, xL, yL, indexing='ij')
-    # # BkLg_3D[np.isnan(BkLg_3D)] = 0
-    # beta_kzkxky = np.fft.ifftshift(BkLg_3D)
-    # amp_beta_zxy_preshift = np.fft.ifftn(beta_kzkxky) / dVzxy
-    # amp_beta_zxy = np.fft.fftshift(amp_beta_zxy_preshift)
-    # nzxy = ((1 / Nph) * np.abs(amp_beta_zxy)**2).real.astype(float)
-    # nzxy_norm = np.sum(dVzxy * nzxy)
-    # print('Linear grid (1/Nph)*n(x,y,z) normalization (Cartesian 3D): {0}'.format(nzxy_norm))
+    zLg_3D, xLg_3D, yLg_3D = np.meshgrid(zL, xL, yL, indexing='ij')
+    # BkLg_3D[np.isnan(BkLg_3D)] = 0
+    beta_kzkxky = np.fft.ifftshift(BkLg_3D)
+    amp_beta_zxy_preshift = np.fft.ifftn(beta_kzkxky) / dVzxy
+    amp_beta_zxy = np.fft.fftshift(amp_beta_zxy_preshift)
+    nzxy = ((1 / Nph) * np.abs(amp_beta_zxy)**2).real.astype(float)
+    nzxy_norm = np.sum(dVzxy * nzxy)
+    print('Linear grid (1/Nph)*n(x,y,z) normalization (Cartesian 3D): {0}'.format(nzxy_norm))
 
-    # # Take 2D slices of position distribution and plot
-    # print(yL[yL.size // 2])
-    # zLg_y0slice = zLg_3D[:, :, yL.size // 2]
-    # xLg_y0slice = xLg_3D[:, :, yL.size // 2]
-    # nzxy_y0slice = nzxy[:, :, yL.size // 2]
-    # fig2, ax2 = plt.subplots()
-    # quad3 = ax2.pcolormesh(zLg_y0slice, xLg_y0slice, nzxy_y0slice, vmin=0, vmax=np.max(nzxy_y0slice))
-    # ax2.set_xlim([-200, 200])
-    # ax2.set_ylim([-3e3, 3e3])
-    # fig2.colorbar(quad3, ax=ax2, extend='both')
+    # Take 2D slices of position distribution and plot
+    print(yL[yL.size // 2])
+    zLg_y0slice = zLg_3D[:, :, yL.size // 2]
+    xLg_y0slice = xLg_3D[:, :, yL.size // 2]
+    nzxy_y0slice = nzxy[:, :, yL.size // 2]
+    fig2, ax2 = plt.subplots()
+    quad3 = ax2.pcolormesh(zLg_y0slice, xLg_y0slice, nzxy_y0slice, vmin=0, vmax=np.max(nzxy_y0slice))
+    ax2.set_xlim([-200, 200])
+    ax2.set_ylim([-3e3, 3e3])
+    fig2.colorbar(quad3, ax=ax2, extend='both')
 
     plt.show()
 
