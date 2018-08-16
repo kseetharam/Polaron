@@ -730,7 +730,8 @@ if __name__ == "__main__":
     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
     kVec = kgrid.getArray('k')
     thVec = kgrid.getArray('th')
-    phiVec = np.linspace(0, 2 * np.pi, int(0.1 * thVec.size))
+    NphiPoints = 50
+    phiVec = np.concatenate((np.linspace(0, np.pi, NphiPoints // 2, endpoint=False), np.linspace(np.pi, 2 * np.pi, NphiPoints // 2)))
     Bk_2D = xr.DataArray(np.full((len(kVec), len(thVec)), np.nan, dtype=complex), coords=[kVec, thVec], dims=['k', 'th'])
 
     Pind = 3
@@ -772,13 +773,16 @@ if __name__ == "__main__":
     kzg = kg_3Di * np.cos(thg_3Di)
     (Nk, Nth, Nphi) = kzg.shape
 
+    Bk_3D_vals = Bk_3D.values
+    Bk_3D_vals[np.isnan(Bk_3D_vals)] = 0
+
     dphi = phi_interp[1] - phi_interp[0]
-    Bk_Sph3D_norm = (1 / Nph) * np.sum(dk * dth * dphi * (2 * np.pi)**(-3) * kg_3Di**2 * np.sin(thg_3Di) * np.abs(Bk_3D.values)**2)
+    Bk_Sph3D_norm = (1 / Nph) * np.sum(dk * dth * dphi * (2 * np.pi)**(-3) * kg_3Di**2 * np.sin(thg_3Di) * np.abs(Bk_3D.vals)**2)
     print('Interpolated (1/Nph)|Bk|^2 normalization (Spherical 3D): {0}'.format(Bk_Sph3D_norm))
 
     # Create linear 3D cartesian grid and reinterpolate Bk_3D onto this grid
     if P < 0.9:
-        nmul = 0.01  # actual number of points in each array will be 2*nmul*Np-1
+        nmul = 0.04  # actual number of points in each array will be 2*nmul*Nk-1
         kxL_pos = np.linspace(0, 2, int(nmul * Nk)); kxL = np.concatenate((-1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
         kyL_pos = np.linspace(0, 2, int(nmul * Nk)); kyL = np.concatenate((-1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
         kzL_pos = np.linspace(0, 2, int(nmul * Nk)); kzL = np.concatenate((-1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
@@ -793,7 +797,7 @@ if __name__ == "__main__":
     print('Spherical Interp Grid Shape: {0}'.format(kzg.shape))
     print('Cartesian Interp Grid Shape: {0}'.format(kzLg_3D.shape))
     interpstart = timer()
-    BkLg_3D = interpolate.griddata((kzg.flatten(), kxg.flatten(), kyg.flatten()), Bk_3D.values.flatten(), (kzLg_3D, kxLg_3D, kyLg_3D), method='linear')
+    BkLg_3D = interpolate.griddata((kzg.flatten(), kxg.flatten(), kyg.flatten()), Bk_3D_vals.flatten(), (kzLg_3D, kxLg_3D, kyLg_3D), method='linear')
     interpend = timer()
     print('Interp Time: {0}'.format(interpend - interpstart))
 
