@@ -736,7 +736,7 @@ if __name__ == "__main__":
 
     Pind = 3
     P = PVals[Pind]
-    print(P)
+    print('P: {0}'.format(P))
 
     CSAmp_Vals = CSAmp_ds.sel(P=P).values
     Nph = qds_aIBi.isel(t=-1).sel(P=P)['Nph'].values
