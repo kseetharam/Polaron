@@ -591,7 +591,7 @@ if __name__ == "__main__":
     # thDiff = kgrid.diffArray('th')
     # Bk = xr.DataArray(np.full((len(kVec), len(thVec)), np.nan, dtype=complex), coords=[kVec, thVec], dims=['k', 'th'])
     # for Pind, P in enumerate(PVals):
-    #     if Pind != 10:
+    #     if Pind != 3:
     #         continue
     #     CSAmp_Vals = CSAmp_ds.sel(P=P).values
     #     Nph = qds_aIBi.isel(t=-1).sel(P=P)['Nph'].values
@@ -730,8 +730,8 @@ if __name__ == "__main__":
     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
     kVec = kgrid.getArray('k')
     thVec = kgrid.getArray('th')
-    NphiPoints = 50
-    phiVec = np.concatenate((np.linspace(0, np.pi, NphiPoints // 2, endpoint=False), np.linspace(np.pi, 2 * np.pi, NphiPoints // 2)))
+    NphiPoints = 8  # This is the step that dramatically increases memory consumption and runtime of Cartesian griddata interpolation -> also affects quality of normalization of 3D distribution
+    phiVec = np.concatenate((np.linspace(0, np.pi, NphiPoints // 2, endpoint=False), np.linspace(np.pi, 2 * np.pi, NphiPoints // 2, endpoint=False)))
     Bk_2D = xr.DataArray(np.full((len(kVec), len(thVec)), np.nan, dtype=complex), coords=[kVec, thVec], dims=['k', 'th'])
 
     Pind = 3
@@ -782,16 +782,18 @@ if __name__ == "__main__":
 
     # Create linear 3D cartesian grid and reinterpolate Bk_3D onto this grid
     if P < 0.9:
-        nmul = 0.04  # actual number of points in each array will be 2*nmul*Nk-1
-        kxL_pos = np.linspace(0, 2, int(nmul * Nk)); kxL = np.concatenate((-1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
-        kyL_pos = np.linspace(0, 2, int(nmul * Nk)); kyL = np.concatenate((-1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
-        kzL_pos = np.linspace(0, 2, int(nmul * Nk)); kzL = np.concatenate((-1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
+        # nmul = 0.045  # actual number of points in each array will be int(nmul*Nk) -> 2*nmul*Nk-1
+        Npoints = 252  # actual number of points will be ~Npoints-1, want Npoints=2502 (gives 2500 points)
+        kxL_pos = np.linspace(0, 2, Npoints // 2); kxL = np.concatenate((-1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
+        kyL_pos = np.linspace(0, 2, Npoints // 2); kyL = np.concatenate((-1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
+        kzL_pos = np.linspace(0, 2, Npoints // 2); kzL = np.concatenate((-1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
         kzLg_3D, kxLg_3D, kyLg_3D = np.meshgrid(kzL, kxL, kyL, indexing='ij')
     else:
-        nmul = 0.1  # actual number of points in each array will be 2*nmul*Np-1
-        kxL_pos = np.linspace(0, 0.02, int(nmul * Nk)); kxL = np.concatenate((-1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
-        kyL_pos = np.linspace(0, 0.02, int(nmul * Nk)); kyL = np.concatenate((-1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
-        kzL_pos = np.linspace(0, 0.1, int(nmul * Nk)); kzL = np.concatenate((-1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
+        # nmul = 0.1  # actual number of points in each array will be 2*nmul*Np-1
+        Npoints = 252  # (gives 250 points)
+        kxL_pos = np.linspace(0, 0.02, Npoints // 2); kxL = np.concatenate((-1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
+        kyL_pos = np.linspace(0, 0.02, Npoints // 2); kyL = np.concatenate((-1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
+        kzL_pos = np.linspace(0, 0.1, Npoints // 2); kzL = np.concatenate((-1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
         kzLg_3D, kxLg_3D, kyLg_3D = np.meshgrid(kzL, kxL, kyL, indexing='ij')
 
     print('Spherical Interp Grid Shape: {0}'.format(kzg.shape))
@@ -847,7 +849,7 @@ if __name__ == "__main__":
     # print(dzL, 2 * np.pi / (kzL.size * dkzL))
 
     zLg_3D, xLg_3D, yLg_3D = np.meshgrid(zL, xL, yL, indexing='ij')
-    # BkLg_3D[np.isnan(BkLg_3D)] = 0
+    BkLg_3D[np.isnan(BkLg_3D)] = 0
     beta_kzkxky = np.fft.ifftshift(BkLg_3D)
     amp_beta_zxy_preshift = np.fft.ifftn(beta_kzkxky) / dVzxy
     amp_beta_zxy = np.fft.fftshift(amp_beta_zxy_preshift)
@@ -856,7 +858,6 @@ if __name__ == "__main__":
     print('Linear grid (1/Nph)*n(x,y,z) normalization (Cartesian 3D): {0}'.format(nzxy_norm))
 
     # Take 2D slices of position distribution and plot
-    print(yL[yL.size // 2])
     zLg_y0slice = zLg_3D[:, :, yL.size // 2]
     xLg_y0slice = xLg_3D[:, :, yL.size // 2]
     nzxy_y0slice = nzxy[:, :, yL.size // 2]
