@@ -794,7 +794,8 @@ if __name__ == "__main__":
     print('Interp Time: {0}'.format(interpend - interpstart))
 
     # Consistency check: use 2D ky=0 slice of Bk to calculate phonon density and compare it to phonon density from original spherical interpolated data
-    kxL_0ind = int(kxL.size / 2); kyL_0ind = int(kyL.size / 2); kzL_0ind = int(kzL.size / 2)  # find position of zero of each axis: kxL=0, kyL=0, kzL=0
+
+    kxL_0ind = kxL.size // 2; kyL_0ind = kyL.size // 2; kzL_0ind = kzL.size // 2  # find position of zero of each axis: kxL=0, kyL=0, kzL=0
     kxLg_ky0slice = kxLg_3D[:, :, kyL_0ind]
     kzLg_ky0slice = kzLg_3D[:, :, kyL_0ind]
     BkLg_ky0slice = BkLg_3D[:, :, kyL_0ind]
@@ -824,35 +825,37 @@ if __name__ == "__main__":
     quad2 = axes[1].pcolormesh(kzLg_ky0slice, kxLg_ky0slice, PhDen_Lg_ky0slice[:-1, :-1], vmin=vmin, vmax=vmax)
     fig.colorbar(quad2, ax=axes[1], extend='both')
 
-    # # Fourier Transform to get position distribution. This may not be kosher - see note above Bk_Lg2 above
+    # # Fourier Transform to get 3D position distribution
+
+    # dkz = kzL[1] - kzL[0]; dkx = kxL[1] - kxL[0]; dky = kyL[1] - kyL[0]
+    # zL = np.fft.fftshift(np.fft.fftfreq(kzL.size) * 2 * np.pi / dkz)
+    # xL = np.fft.fftshift(np.fft.fftfreq(kxL.size) * 2 * np.pi / dkx)
+    # yL = np.fft.fftshift(np.fft.fftfreq(kyL.size) * 2 * np.pi / dky)
+    # dzL = zL[1] - zL[0]; dxL = xL[1] - xL[0]; dyL = yL[1] - yL[0]
+    # dVzxy = dxL * dyL * dzL
+    # # print(dzL, 2 * np.pi / (kzL.size * dkz))
+
+    # zLg_3D, xLg_3D, yLg_3D = np.meshgrid(zL, xL, yL, indexing='ij')
+    # # BkLg_3D[np.isnan(BkLg_3D)] = 0
+    # beta_kzkxky = np.fft.ifftshift(BkLg_3D)
+    # amp_beta_zxy_preshift = np.fft.ifftn(beta_kzkxky) / dVzxy
+    # amp_beta_zxy = np.fft.fftshift(amp_beta_zxy_preshift)
+    # nzxy = ((1 / Nph) * np.abs(amp_beta_zxy)**2).real.astype(float)
+    # nzxy_norm = np.sum(dVzxy * nzxy)
+    # print(nzxy_norm)
+
+    # # Take 2D slices of position distribution and plot
+    # print(yL[yL.size // 2])
+    # zLg_y0slice = zLg_3D[:, :, yL.size // 2]
+    # xLg_y0slice = xLg_3D[:, :, yL.size // 2]
+    # nzxy_y0slice = nzxy[:, :, yL.size // 2]
     # fig2, ax2 = plt.subplots()
-    # dkz2 = kzL2[1] - kzL2[0]
-    # dkx2 = kxL2[1] - kxL2[0]
-    # zL2 = np.fft.fftshift(np.fft.fftfreq(kzL2.size) * 2 * np.pi / dkz2)
-    # xL2 = np.fft.fftshift(np.fft.fftfreq(kxL2.size) * 2 * np.pi / dkx2)
-    # zLg2, xLg2 = np.meshgrid(zL2, xL2, indexing='ij')
-    # dzL2 = zL2[1] - zL2[0]
-    # dxL2 = xL2[1] - xL2[0]
-    # # print(dzL2, 2 * np.pi / (kzL2.size * dkz2))
-    # dVzx = dzL2 * dxL2
-    # # Bk_Lg2[np.isnan(Bk_Lg2)] = 0
-    # beta_kzkx2 = np.fft.ifftshift(Bk_Lg2)
-    # beta_kzkx2 = Bk_Lg2
-    # amp_beta_zx_preshift2 = np.fft.ifftn(beta_kzkx2) / dVzx
-    # amp_beta_zx2 = np.fft.fftshift(amp_beta_zx_preshift2)
-    # nzx2 = ((1 / Nph) * np.abs(amp_beta_zx2)**2).real.astype(float)
-    # print(dkz2 * dkx2 * np.sum(PhDen_Lg2))
-    # print(dVzx * np.sum(nzx2))
-    # quad3 = ax2.pcolormesh(zLg2, xLg2, nzx2, vmin=0, vmax=np.max(nzx2))
-    # # zZ = np.linspace(-200, 200, 5 * zL2.size)
-    # # xZ = np.linspace(-3e3, 3e3, 5 * xL2.size)
-    # # zZg, xZg = np.meshgrid(zZ, xZ, indexing='ij')
-    # # nzxZ = interpolate.griddata((zLg2.flatten(), xLg2.flatten()), nzx2.flatten(), (zZg, xZg), method='linear')
-    # # quad3 = ax2.pcolormesh(zZg, xZg, nzxZ, vmin=0, vmax=np.max(nzxZ))
+    # quad3 = ax2.pcolormesh(zLg_y0slice, xLg_y0slice, nzxy_y0slice, vmin=0, vmax=np.max(nzxy_y0slice))
     # ax2.set_xlim([-200, 200])
     # ax2.set_ylim([-3e3, 3e3])
     # fig2.colorbar(quad3, ax=ax2, extend='both')
-    # plt.show()
+
+    plt.show()
 
     # # IMPURITY DISTRIBUTION CHARACTERIZATION (CARTESIAN)
 
