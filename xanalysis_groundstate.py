@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Longtime': 'false'}
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Longtime': 'false'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -60,6 +60,8 @@ if __name__ == "__main__":
     elif toggleDict['Location'] == 'work':
         datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, 1)
         animpath = '/media/kis/Storage/Dropbox/VariationalResearch/DataAnalysis/figs'
+    elif toggleDict['Location'] == 'cluster':
+        datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, 1)
 
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
@@ -117,6 +119,7 @@ if __name__ == "__main__":
     # ds_tot.to_netcdf(innerdatapath + '/quench_Dataset_cart.nc')
 
     # # Analysis of Total Dataset
+    interpdatapath = innerdatapath + '/interp'
     aIBi = -10
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
     qds_aIBi = qds.sel(aIBi=aIBi)
@@ -807,7 +810,7 @@ if __name__ == "__main__":
     BkLg_3D_norm = (1 / Nph) * np.sum(dkzL * dkzL * dkyL * np.abs(BkLg_3D)**2)
     print('Linear grid (1/Nph)|Bk|^2 normalization (Cartesian 3D): {0}'.format(BkLg_3D_norm))
 
-    # Consistency check: use 2D ky=0 slice of Bk to calculate phonon density and compare it to phonon density from original spherical interpolated data
+    # Consistency check: use 2D ky=0 slice of |Bk|^2 to calculate phonon density and compare it to phonon density from original spherical interpolated data
 
     kxL_0ind = kxL.size // 2; kyL_0ind = kyL.size // 2; kzL_0ind = kzL.size // 2  # find position of zero of each axis: kxL=0, kyL=0, kzL=0
     kxLg_ky0slice = kxLg_3D[:, :, kyL_0ind]
@@ -817,27 +820,6 @@ if __name__ == "__main__":
     PhDen_Sph = ((1 / Nph) * np.abs(Bk_interp_vals)**2).real.astype(float)
     kxg_Sph = kg_interp * np.sin(thg_interp)
     kzg_Sph = kg_interp * np.cos(thg_interp)
-
-    fig, axes = plt.subplots(nrows=1, ncols=2)
-    if P < 0.9:
-        [vmin, vmax] = [0, 500]
-        axes[0].set_xlim([-1.5, 1.5])
-        axes[0].set_ylim([-1.5, 1.5])
-        axes[1].set_xlim([-1.5, 1.5])
-        axes[1].set_ylim([-1.5, 1.5])
-    else:
-        [vmin, vmax] = [0, 9.2e13]
-        # [vmin, vmax] = [0, 1e18]
-        axes[0].set_xlim([-0.1, 0.1])
-        axes[0].set_ylim([-0.01, 0.01])
-        axes[1].set_xlim([-0.1, 0.1])
-        axes[1].set_ylim([-0.01, 0.01])
-
-    quad1 = axes[0].pcolormesh(kzg_Sph, kxg_Sph, PhDen_Sph[:-1, :-1], vmin=vmin, vmax=vmax)
-    quad1m = axes[0].pcolormesh(kzg_Sph, -1 * kxg_Sph, PhDen_Sph[:-1, :-1], vmin=vmin, vmax=vmax)
-    fig.colorbar(quad1, ax=axes[0], extend='both')
-    quad2 = axes[1].pcolormesh(kzLg_ky0slice, kxLg_ky0slice, PhDen_Lg_ky0slice[:-1, :-1], vmin=vmin, vmax=vmax)
-    fig.colorbar(quad2, ax=axes[1], extend='both')
 
     # Fourier Transform to get 3D position distribution
 
@@ -857,17 +839,53 @@ if __name__ == "__main__":
     nzxy_norm = np.sum(dVzxy * nzxy)
     print('Linear grid (1/Nph)*n(x,y,z) normalization (Cartesian 3D): {0}'.format(nzxy_norm))
 
-    # Take 2D slices of position distribution and plot
+    # Take 2D slices of position distribution
     zLg_y0slice = zLg_3D[:, :, yL.size // 2]
     xLg_y0slice = xLg_3D[:, :, yL.size // 2]
     nzxy_y0slice = nzxy[:, :, yL.size // 2]
-    fig2, ax2 = plt.subplots()
-    quad3 = ax2.pcolormesh(zLg_y0slice, xLg_y0slice, nzxy_y0slice, vmin=0, vmax=np.max(nzxy_y0slice))
-    ax2.set_xlim([-200, 200])
-    ax2.set_ylim([-3e3, 3e3])
-    fig2.colorbar(quad3, ax=ax2, extend='both')
 
-    plt.show()
+    # Create DataSet for 3D Betak and position distribution slices
+
+    ReCSA_da = xr.DataArray(np.real(BkLg_3D), coords=[kzL, kxL, kyL], dims=['kz', 'kx', 'ky'])
+    ImCSA_da = xr.DataArray(np.imag(BkLg_3D), coords=[kzL, kxL, kyL], dims=['kz', 'kx', 'ky'])
+    nzxy_da = xr.DataArray(nzxy, coords=[zL, xL, yL], dims=['z', 'x', 'y'])
+
+    data_dict = {'ReCSA': ReCSA_da, 'ImCSA': ImCSA_da, 'nzxy': nzxy_da}
+    coords_dict = {'kx': kxL, 'ky': kyL, 'kz': kzL, 'x': xL, 'y': yL, 'z': zL}
+    attrs_dict = {'P': P, 'aIBi': aIBi}
+    interp_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
+    interp_ds.to_netcdf(interpdatapath + '/InterpDat_P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+
+    # # All Plotting: (a) 2D ky=0 slice of |Bk|^2, (b) 2D slice of position distribution
+
+    # fig, axes = plt.subplots(nrows=1, ncols=2)
+    # if P < 0.9:
+    #     [vmin, vmax] = [0, 500]
+    #     axes[0].set_xlim([-1.5, 1.5])
+    #     axes[0].set_ylim([-1.5, 1.5])
+    #     axes[1].set_xlim([-1.5, 1.5])
+    #     axes[1].set_ylim([-1.5, 1.5])
+    # else:
+    #     [vmin, vmax] = [0, 9.2e13]
+    #     # [vmin, vmax] = [0, 1e18]
+    #     axes[0].set_xlim([-0.1, 0.1])
+    #     axes[0].set_ylim([-0.01, 0.01])
+    #     axes[1].set_xlim([-0.1, 0.1])
+    #     axes[1].set_ylim([-0.01, 0.01])
+
+    # quad1 = axes[0].pcolormesh(kzg_Sph, kxg_Sph, PhDen_Sph[:-1, :-1], vmin=vmin, vmax=vmax)
+    # quad1m = axes[0].pcolormesh(kzg_Sph, -1 * kxg_Sph, PhDen_Sph[:-1, :-1], vmin=vmin, vmax=vmax)
+    # fig.colorbar(quad1, ax=axes[0], extend='both')
+    # quad2 = axes[1].pcolormesh(kzLg_ky0slice, kxLg_ky0slice, PhDen_Lg_ky0slice[:-1, :-1], vmin=vmin, vmax=vmax)
+    # fig.colorbar(quad2, ax=axes[1], extend='both')
+
+    # fig2, ax2 = plt.subplots()
+    # quad3 = ax2.pcolormesh(zLg_y0slice, xLg_y0slice, nzxy_y0slice, vmin=0, vmax=np.max(nzxy_y0slice))
+    # ax2.set_xlim([-200, 200])
+    # ax2.set_ylim([-3e3, 3e3])
+    # fig2.colorbar(quad3, ax=ax2, extend='both')
+
+    # plt.show()
 
     # # IMPURITY DISTRIBUTION CHARACTERIZATION (CARTESIAN)
 

@@ -2,9 +2,9 @@
 #SBATCH -J quench
 #SBATCH -n 2
 #SBATCH -N 1
-#SBATCH -t 0-20:00
+#SBATCH -t 2-00:00
 #SBATCH -p shared
-#SBATCH --mem=6000
+#SBATCH --mem=30000
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kis@mit.edu 
 #SBATCH --open-mode=append
@@ -13,4 +13,4 @@
 
 module load Anaconda3/5.0.1-fasrc01
 source activate anaclone
-python datagen_qdynamics_imdyn_sph.py
+python xanalysis_groundstate.py
