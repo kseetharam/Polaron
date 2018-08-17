@@ -62,6 +62,7 @@ if __name__ == "__main__":
         animpath = '/media/kis/Storage/Dropbox/VariationalResearch/DataAnalysis/figs'
     elif toggleDict['Location'] == 'cluster':
         datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, 1)
+        animpath = ''
 
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
