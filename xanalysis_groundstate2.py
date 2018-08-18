@@ -283,76 +283,76 @@ if __name__ == "__main__":
     # ax.set_xlabel(r'$a_{IB}^{-1}$')
     # plt.show()
 
-    # # POLARON SOUND VELOCITY SATURATION (SPHERICAL)
+    # # # POLARON SOUND VELOCITY SATURATION (SPHERICAL)
 
-    # Check to see if linear part of polaron (total system) energy spectrum has slope equal to sound velocity
+    # # Check to see if linear part of polaron (total system) energy spectrum has slope equal to sound velocity
 
-    # aIBi = -10
-    fig, ax = plt.subplots()
-    aIBi_Vals = qds.coords['aIBi'].values
-    colorList = ['b', 'g', 'r']
-    for aind, aIBi in enumerate(aIBi_Vals):
-        qds_aIBi = qds.sel(aIBi=aIBi)
-        tVals = qds_aIBi['t'].values
-        vsound_Vals = np.zeros(tVals.size)
-        vI_Vals = np.zeros(tVals.size)
-        CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
-        kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
-        # get sound mask for Einf
-        Energy_Vals_inf = np.zeros(PVals.size)
-        PI_Vals = np.zeros(PVals.size)
-        for Pind, P in enumerate(PVals):
-            CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
-            Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
-            PI_Vals[Pind] = P - qds_aIBi.sel(P=P).isel(t=-1)['Pph'].values
-        Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
-        Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
-        Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
-        Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
-        sound_mask = np.abs(Einf_2ndderiv_Vals) <= 5e-3
+    # # aIBi = -10
+    # fig, ax = plt.subplots()
+    # aIBi_Vals = qds.coords['aIBi'].values
+    # colorList = ['b', 'g', 'r']
+    # for aind, aIBi in enumerate(aIBi_Vals):
+    #     qds_aIBi = qds.sel(aIBi=aIBi)
+    #     tVals = qds_aIBi['t'].values
+    #     vsound_Vals = np.zeros(tVals.size)
+    #     vI_Vals = np.zeros(tVals.size)
+    #     CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+    #     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    #     # get sound mask for Einf
+    #     Energy_Vals_inf = np.zeros(PVals.size)
+    #     PI_Vals = np.zeros(PVals.size)
+    #     for Pind, P in enumerate(PVals):
+    #         CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
+    #         Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+    #         PI_Vals[Pind] = P - qds_aIBi.sel(P=P).isel(t=-1)['Pph'].values
+    #     Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+    #     Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
+    #     Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+    #     Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+    #     sound_mask = np.abs(Einf_2ndderiv_Vals) <= 5e-3
 
-        for tind, t in enumerate(tVals):
-            Energy_Vals_inf = np.zeros(PVals.size)
-            PI_Vals = np.zeros(PVals.size)
-            for Pind, P in enumerate(PVals):
-                CSAmp = CSAmp_ds.sel(P=P, t=t).values
-                Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
-                PI_Vals[Pind] = P - qds_aIBi.sel(P=P, t=t)['Pph'].values
+    #     for tind, t in enumerate(tVals):
+    #         Energy_Vals_inf = np.zeros(PVals.size)
+    #         PI_Vals = np.zeros(PVals.size)
+    #         for Pind, P in enumerate(PVals):
+    #             CSAmp = CSAmp_ds.sel(P=P, t=t).values
+    #             Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+    #             PI_Vals[Pind] = P - qds_aIBi.sel(P=P, t=t)['Pph'].values
 
-            Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
-            Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
-            Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
-            Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+    #         Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+    #         Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
+    #         Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+    #         Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
 
-            # sound_mask = np.abs(Einf_2ndderiv_Vals) <= 5e-3
-            Einf_sound = Einf_Vals[sound_mask]
-            Pinf_sound = Pinf_Vals[sound_mask]
-            [vsound_Vals[tind], vs_const] = np.polyfit(Pinf_sound, Einf_sound, deg=1)
+    #         # sound_mask = np.abs(Einf_2ndderiv_Vals) <= 5e-3
+    #         Einf_sound = Einf_Vals[sound_mask]
+    #         Pinf_sound = Pinf_Vals[sound_mask]
+    #         [vsound_Vals[tind], vs_const] = np.polyfit(Pinf_sound, Einf_sound, deg=1)
 
-            vI_inf_tck = interpolate.splrep(PVals, PI_Vals / mI, s=0)
-            vI_inf_Vals = 1 * interpolate.splev(Pinf_Vals, vI_inf_tck, der=0)
-            vI_Vals[tind] = np.polyfit(Pinf_sound, vI_inf_Vals[sound_mask], deg=0)
+    #         vI_inf_tck = interpolate.splrep(PVals, PI_Vals / mI, s=0)
+    #         vI_inf_Vals = 1 * interpolate.splev(Pinf_Vals, vI_inf_tck, der=0)
+    #         vI_Vals[tind] = np.polyfit(Pinf_sound, vI_inf_Vals[sound_mask], deg=0)
 
-        vsound_tr = vsound_Vals - nu
-        vI_tr = vI_Vals - nu
-        ax.plot(tVals, vsound_tr, color=colorList[aind], linestyle='none', marker='o', markerfacecolor='none', label='')
-        ax.plot(tVals, vI_tr, color=colorList[aind], linestyle='none', marker='x', label='')
+    #     vsound_tr = vsound_Vals - nu
+    #     vI_tr = vI_Vals - nu
+    #     ax.plot(tVals, vsound_tr, color=colorList[aind], linestyle='none', marker='o', markerfacecolor='none', label='')
+    #     ax.plot(tVals, vI_tr, color=colorList[aind], linestyle='none', marker='x', label='')
 
-    legend_elements = [Line2D([0], [0], marker='o', color='k', label='Translated Post-Transition Polaron Sound Velocity (' + r'$\frac{\partial E}{\partial P}-c_{BEC}$' + ')',
-                              markerfacecolor='none', markersize=10, linestyle='none'),
-                       Line2D([0], [0], marker='x', color='k', label='Translated Post-Transition Impurity Velocity (' + r'$\frac{P-P_{ph}}{m_{I}}-c_{BEC}$' + ')',
-                              markersize=10, linestyle='none')]
-    for aind, aIBi in enumerate(aIBi_Vals):
-        legend_elements.append(Line2D([0], [0], color=colorList[aind], lw=4, label=r'$a_{IB}^{-1}=$' + '{:.1f}'.format(aIBi)))
-    ax.legend(handles=legend_elements, loc=1)
-    # ax.set_xscale('symlog', linthreshy=1)
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-    # ax.legend()
-    ax.set_ylim([0.009, 3])
-    ax.set_title('Velocity Saturation')
-    ax.set_xlabel(r'$\tau=-it$')
-    plt.show()
+    # legend_elements = [Line2D([0], [0], marker='o', color='k', label='Translated Post-Transition Polaron Sound Velocity (' + r'$\frac{\partial E}{\partial P}-c_{BEC}$' + ')',
+    #                           markerfacecolor='none', markersize=10, linestyle='none'),
+    #                    Line2D([0], [0], marker='x', color='k', label='Translated Post-Transition Impurity Velocity (' + r'$\frac{P-P_{ph}}{m_{I}}-c_{BEC}$' + ')',
+    #                           markersize=10, linestyle='none')]
+    # for aind, aIBi in enumerate(aIBi_Vals):
+    #     legend_elements.append(Line2D([0], [0], color=colorList[aind], lw=4, label=r'$a_{IB}^{-1}=$' + '{:.1f}'.format(aIBi)))
+    # ax.legend(handles=legend_elements, loc=1)
+    # # ax.set_xscale('symlog', linthreshy=1)
+    # ax.set_xscale('log')
+    # ax.set_yscale('log')
+    # # ax.legend()
+    # ax.set_ylim([0.009, 3])
+    # ax.set_title('Velocity Saturation')
+    # ax.set_xlabel(r'$\tau=-it$')
+    # plt.show()
 
     # # # PHONON MODE CHARACTERIZATION - INTEGRATED PLOTS (SPHERICAL)
 
@@ -728,293 +728,311 @@ if __name__ == "__main__":
     #     plt.show()
     #     break
 
-    # # # FULL RECONSTRUCTION OF 3D CARTESIAN BETA_K FROM 2D SPHERICAL BETA_K
+    # # FULL RECONSTRUCTION OF 3D CARTESIAN BETA_K FROM 2D SPHERICAL BETA_K
 
-    # CSAmp_ds = (qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']).isel(t=-1)
-    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
-    # kVec = kgrid.getArray('k')
-    # thVec = kgrid.getArray('th')
-    # NphiPoints = 8  # This is the step that dramatically increases memory consumption and runtime of Cartesian griddata interpolation -> also affects quality of normalization of 3D distribution
-    # phiVec = np.concatenate((np.linspace(0, np.pi, NphiPoints // 2, endpoint=False), np.linspace(np.pi, 2 * np.pi, NphiPoints // 2, endpoint=False)))
-    # Bk_2D = xr.DataArray(np.full((len(kVec), len(thVec)), np.nan, dtype=complex), coords=[kVec, thVec], dims=['k', 'th'])
+    CSAmp_ds = (qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']).isel(t=-1)
+    kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    kVec = kgrid.getArray('k')
+    thVec = kgrid.getArray('th')
+    NphiPoints = 6  # This is the step that dramatically increases memory consumption and runtime of Cartesian griddata interpolation -> also affects quality of normalization of 3D distribution
+    phiVec = np.concatenate((np.linspace(0, np.pi, NphiPoints // 2, endpoint=False), np.linspace(np.pi, 2 * np.pi, NphiPoints // 2, endpoint=False)))
+    Bk_2D = xr.DataArray(np.full((len(kVec), len(thVec)), np.nan, dtype=complex), coords=[kVec, thVec], dims=['k', 'th'])
 
-    # Pind = 3
-    # P = PVals[Pind]
-    # print('P: {0}'.format(P))
+    Pind = 3
+    P = PVals[Pind]
+    print('P: {0}'.format(P))
 
-    # CSAmp_Vals = CSAmp_ds.sel(P=P).values
-    # Nph = qds_aIBi.isel(t=-1).sel(P=P)['Nph'].values
+    CSAmp_Vals = CSAmp_ds.sel(P=P).values
+    Nph = qds_aIBi.isel(t=-1).sel(P=P)['Nph'].values
 
-    # Bk_2D[:] = CSAmp_Vals.reshape((len(kVec), len(thVec)))
+    Bk_2D[:] = CSAmp_Vals.reshape((len(kVec), len(thVec)))
 
-    # mult = 5
-    # kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
-    # # Normalization of the original data array - this checks out
-    # dk0 = kg[1, 0] - kg[0, 0]
-    # dth0 = thg[0, 1] - thg[0, 0]
-    # Bk_norm = (1 / Nph) * np.sum(dk0 * dth0 * (2 * np.pi)**(-2) * kg**2 * np.sin(thg) * np.abs(Bk_2D.values)**2)
-    # print('Original (1/Nph)|Bk|^2 normalization (Spherical 2D): {0}'.format(Bk_norm))
-    # # Interpolation of original data array onto a finer spaced (spherical) grid
-    # k_interp = np.linspace(np.min(kVec), np.max(kVec), mult * kVec.size); th_interp = np.linspace(np.min(thVec), np.max(thVec), mult * thVec.size)
-    # kg_interp, thg_interp = np.meshgrid(k_interp, th_interp, indexing='ij')
-    # Bk_interp_vals = interpolate.griddata((kg.flatten(), thg.flatten()), Bk_2D.values.flatten(), (kg_interp, thg_interp), method='cubic')
-    # # Normalization of interpolated data array (spherical coordinates) - this doesn't check out for supersonic case but does for subsonic case (why??)
-    # dk = kg_interp[1, 0] - kg_interp[0, 0]
-    # dth = thg_interp[0, 1] - thg_interp[0, 0]
-    # Bk_interp_norm = (1 / Nph) * np.sum(dk * dth * (2 * np.pi)**(-2) * kg_interp**2 * np.sin(thg_interp) * np.abs(Bk_interp_vals)**2)
-    # print('Interpolated (1/Nph)|Bk|^2 normalization (Spherical 2D): {0}'.format(Bk_interp_norm))
+    mult = 5
+    kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
+    # Normalization of the original data array - this checks out
+    dk0 = kg[1, 0] - kg[0, 0]
+    dth0 = thg[0, 1] - thg[0, 0]
+    Bk_norm = (1 / Nph) * np.sum(dk0 * dth0 * (2 * np.pi)**(-2) * kg**2 * np.sin(thg) * np.abs(Bk_2D.values)**2)
+    print('Original (1/Nph)|Bk|^2 normalization (Spherical 2D): {0}'.format(Bk_norm))
+    # Interpolation of original data array onto a finer spaced (spherical) grid
+    k_interp = np.linspace(np.min(kVec), np.max(kVec), mult * kVec.size); th_interp = np.linspace(np.min(thVec), np.max(thVec), mult * thVec.size)
+    kg_interp, thg_interp = np.meshgrid(k_interp, th_interp, indexing='ij')
+    Bk_interp_vals = interpolate.griddata((kg.flatten(), thg.flatten()), Bk_2D.values.flatten(), (kg_interp, thg_interp), method='cubic')
+    # Normalization of interpolated data array (spherical coordinates) - this doesn't check out for supersonic case but does for subsonic case (why??)
+    dk = kg_interp[1, 0] - kg_interp[0, 0]
+    dth = thg_interp[0, 1] - thg_interp[0, 0]
+    Bk_interp_norm = (1 / Nph) * np.sum(dk * dth * (2 * np.pi)**(-2) * kg_interp**2 * np.sin(thg_interp) * np.abs(Bk_interp_vals)**2)
+    print('Interpolated (1/Nph)|Bk|^2 normalization (Spherical 2D): {0}'.format(Bk_interp_norm))
 
-    # # 3D reconstruction in spherical coordinates (copy interpolated 2D spherical Bk onto all phi coordinates due to phi symmetry)
-    # phi_interp = np.linspace(np.min(phiVec), np.max(phiVec), 1 * phiVec.size)
-    # Bk_3D = xr.DataArray(np.full((len(k_interp), len(th_interp), len(phi_interp)), np.nan, dtype=complex), coords=[k_interp, th_interp, phi_interp], dims=['k', 'th', 'phi'])
-    # for phiInd, phi in enumerate(phi_interp):
-    #     Bk_3D.sel(phi=phi)[:] = Bk_interp_vals
+    # Set reduced bounds of k-space and other things dependent on subsonic or supersonic
+    if P < 0.9:
+        [vmin, vmax] = [0, 500]
+        linDimMajor = 1.5
+        linDimMinor = 1.5
+        Npoints = 20  # actual number of points will be ~Npoints-1, want Npoints=2502 (gives 2500 points)
+    else:
+        [vmin, vmax] = [0, 9.2e13]
+        linDimMajor = 0.1
+        linDimMinor = 0.01
+        Npoints = 252  # (gives 250 points)
 
-    # # Re-interpret grid points of 3D spherical reconstruction as nonlinear 3D cartesian grid
-    # kg_3Di, thg_3Di, phig_3Di = np.meshgrid(k_interp, th_interp, phi_interp, indexing='ij')
-    # kxg = kg_3Di * np.sin(thg_3Di) * np.cos(phig_3Di)
-    # kyg = kg_3Di * np.sin(thg_3Di) * np.sin(phig_3Di)
-    # kzg = kg_3Di * np.cos(thg_3Di)
-    # (Nk, Nth, Nphi) = kzg.shape
+    # Remove k values outside reduced k-space bounds (as |Bk|~0 there) and save the average of these values to add back in later before FFT
+    kred_ind = np.argwhere(kg_interp[:, 0] > (1.5 * linDimMinor))[0][0]
+    kg_red = np.delete(kg_interp, np.arange(kred_ind, k_interp.size), 0)
+    thg_red = np.delete(thg_interp, np.arange(kred_ind, k_interp.size), 0)
+    Bk_red = np.delete(Bk_interp_vals, np.arange(kred_ind, k_interp.size), 0)
+    Bk_remainder = np.delete(Bk_interp_vals, np.arange(0, kred_ind), 0)
+    Bk_rem_ave = np.average(Bk_remainder)
+    k_interp_red = k_interp[0:kred_ind]
 
-    # Bk_3D_vals = Bk_3D.values
-    # Bk_3D_vals[np.isnan(Bk_3D_vals)] = 0
+    k_interp = k_interp_red
+    Bk_interp_vals = Bk_red
 
-    # dphi = phi_interp[1] - phi_interp[0]
-    # Bk_Sph3D_norm = (1 / Nph) * np.sum(dk * dth * dphi * (2 * np.pi)**(-3) * kg_3Di**2 * np.sin(thg_3Di) * np.abs(Bk_3D_vals)**2)
-    # print('Interpolated (1/Nph)|Bk|^2 normalization (Spherical 3D): {0}'.format(Bk_Sph3D_norm))
+    # CHECK WHY ALL BK AMPLITUDES HAVE ZERO IMAGINARY PART, EVEN FOR SUPERSONIC CASE? IS THIS BECAUSE ITS THE GROUNDSTATE?
+    # print(np.imag(Bk_2D.values))
+    # print(np.imag(Bk_interp_vals))
 
-    # # Create linear 3D cartesian grid and reinterpolate Bk_3D onto this grid
-    # if P < 0.9:
-    #     # nmul = 0.045  # actual number of points in each array will be int(nmul*Nk) -> 2*nmul*Nk-1
-    #     Npoints = 252  # actual number of points will be ~Npoints-1, want Npoints=2502 (gives 2500 points)
-    #     kxL_pos = np.linspace(0, 2, Npoints // 2); kxL = np.concatenate((-1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
-    #     kyL_pos = np.linspace(0, 2, Npoints // 2); kyL = np.concatenate((-1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
-    #     kzL_pos = np.linspace(0, 2, Npoints // 2); kzL = np.concatenate((-1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
-    #     kzLg_3D, kxLg_3D, kyLg_3D = np.meshgrid(kzL, kxL, kyL, indexing='ij')
-    # else:
-    #     # nmul = 0.1  # actual number of points in each array will be 2*nmul*Np-1
-    #     Npoints = 252  # (gives 250 points)
-    #     kxL_pos = np.linspace(0, 0.02, Npoints // 2); kxL = np.concatenate((-1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
-    #     kyL_pos = np.linspace(0, 0.02, Npoints // 2); kyL = np.concatenate((-1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
-    #     kzL_pos = np.linspace(0, 0.1, Npoints // 2); kzL = np.concatenate((-1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
-    #     kzLg_3D, kxLg_3D, kyLg_3D = np.meshgrid(kzL, kxL, kyL, indexing='ij')
 
-    # print('Spherical Interp Grid Shape: {0}'.format(kzg.shape))
-    # print('Cartesian Interp Grid Shape: {0}'.format(kzLg_3D.shape))
-    # interpstart = timer()
-    # BkLg_3D = interpolate.griddata((kzg.flatten(), kxg.flatten(), kyg.flatten()), Bk_3D_vals.flatten(), (kzLg_3D, kxLg_3D, kyLg_3D), method='linear')
-    # interpend = timer()
-    # print('Interp Time: {0}'.format(interpend - interpstart))
+# 3D reconstruction in spherical coordinates (copy interpolated 2D spherical Bk onto all phi coordinates due to phi symmetry)
+phi_interp = np.linspace(np.min(phiVec), np.max(phiVec), 1 * phiVec.size)
+Bk_3D = xr.DataArray(np.full((len(k_interp), len(th_interp), len(phi_interp)), np.nan, dtype=complex), coords=[k_interp, th_interp, phi_interp], dims=['k', 'th', 'phi'])
+for phiInd, phi in enumerate(phi_interp):
+    Bk_3D.sel(phi=phi)[:] = Bk_interp_vals
 
-    # dkzL = kzL[1] - kzL[0]; dkxL = kxL[1] - kxL[0]; dkyL = kyL[1] - kyL[0]
-    # BkLg_3D_norm = (1 / Nph) * np.sum(dkzL * dkzL * dkyL * np.abs(BkLg_3D)**2)
-    # print('Linear grid (1/Nph)|Bk|^2 normalization (Cartesian 3D): {0}'.format(BkLg_3D_norm))
+# 3D reconstruction in spherical coordinates (copy interpolated 2D spherical Bk onto all phi coordinates due to phi symmetry)
+phi_interp = np.linspace(np.min(phiVec), np.max(phiVec), 1 * phiVec.size)
+Bk_3D = xr.DataArray(np.full((len(k_interp), len(th_interp), len(phi_interp)), np.nan, dtype=complex), coords=[k_interp, th_interp, phi_interp], dims=['k', 'th', 'phi'])
+for phiInd, phi in enumerate(phi_interp):
+    Bk_3D.sel(phi=phi)[:] = Bk_interp_vals
 
-    # # Consistency check: use 2D ky=0 slice of |Bk|^2 to calculate phonon density and compare it to phonon density from original spherical interpolated data
+# Re-interpret grid points of 3D spherical reconstruction as nonlinear 3D cartesian grid
+kg_3Di, thg_3Di, phig_3Di = np.meshgrid(k_interp, th_interp, phi_interp, indexing='ij')
+kxg = kg_3Di * np.sin(thg_3Di) * np.cos(phig_3Di)
+kyg = kg_3Di * np.sin(thg_3Di) * np.sin(phig_3Di)
+kzg = kg_3Di * np.cos(thg_3Di)
+(Nk, Nth, Nphi) = kzg.shape
 
-    # kxL_0ind = kxL.size // 2; kyL_0ind = kyL.size // 2; kzL_0ind = kzL.size // 2  # find position of zero of each axis: kxL=0, kyL=0, kzL=0
-    # kxLg_ky0slice = kxLg_3D[:, :, kyL_0ind]
-    # kzLg_ky0slice = kzLg_3D[:, :, kyL_0ind]
-    # BkLg_ky0slice = BkLg_3D[:, :, kyL_0ind]
-    # PhDen_Lg_ky0slice = ((1 / Nph) * np.abs(BkLg_ky0slice)**2).real.astype(float)
-    # PhDen_Sph = ((1 / Nph) * np.abs(Bk_interp_vals)**2).real.astype(float)
-    # kxg_Sph = kg_interp * np.sin(thg_interp)
-    # kzg_Sph = kg_interp * np.cos(thg_interp)
+Bk_3D_vals = Bk_3D.values
+Bk_3D_vals[np.isnan(Bk_3D_vals)] = 0
 
-    # # Fourier Transform to get 3D position distribution
+dphi = phi_interp[1] - phi_interp[0]
+Bk_Sph3D_norm = (1 / Nph) * np.sum(dk * dth * dphi * (2 * np.pi)**(-3) * kg_3Di**2 * np.sin(thg_3Di) * np.abs(Bk_3D_vals)**2)
+print('Interpolated (1/Nph)|Bk|^2 normalization (Spherical 3D): {0}'.format(Bk_Sph3D_norm))
 
-    # zL = np.fft.fftshift(np.fft.fftfreq(kzL.size) * 2 * np.pi / dkzL)
-    # xL = np.fft.fftshift(np.fft.fftfreq(kxL.size) * 2 * np.pi / dkxL)
-    # yL = np.fft.fftshift(np.fft.fftfreq(kyL.size) * 2 * np.pi / dkyL)
-    # dzL = zL[1] - zL[0]; dxL = xL[1] - xL[0]; dyL = yL[1] - yL[0]
-    # dVzxy = dxL * dyL * dzL
-    # # print(dzL, 2 * np.pi / (kzL.size * dkzL))
+# Create linear 3D cartesian grid and reinterpolate Bk_3D onto this grid
+kxL_pos = np.linspace(0, linDimMajor, Npoints // 2); kxL = np.concatenate((-1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
+kyL_pos = np.linspace(0, linDimMajor, Npoints // 2); kyL = np.concatenate((-1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
+kzL_pos = np.linspace(0, linDimMajor, Npoints // 2); kzL = np.concatenate((-1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
+kzLg_3D, kxLg_3D, kyLg_3D = np.meshgrid(kzL, kxL, kyL, indexing='ij')
 
-    # zLg_3D, xLg_3D, yLg_3D = np.meshgrid(zL, xL, yL, indexing='ij')
-    # BkLg_3D[np.isnan(BkLg_3D)] = 0
-    # beta_kzkxky = np.fft.ifftshift(BkLg_3D)
-    # amp_beta_zxy_preshift = np.fft.ifftn(beta_kzkxky) / dVzxy
-    # amp_beta_zxy = np.fft.fftshift(amp_beta_zxy_preshift)
-    # nzxy = ((1 / Nph) * np.abs(amp_beta_zxy)**2).real.astype(float)
-    # nzxy_norm = np.sum(dVzxy * nzxy)
-    # print('Linear grid (1/Nph)*n(x,y,z) normalization (Cartesian 3D): {0}'.format(nzxy_norm))
+print('Spherical Interp Grid Shape: {0}'.format(kzg.shape))
+print('Cartesian Interp Grid Shape: {0}'.format(kzLg_3D.shape))
+interpstart = timer()
+BkLg_3D = interpolate.griddata((kzg.flatten(), kxg.flatten(), kyg.flatten()), Bk_3D_vals.flatten(), (kzLg_3D, kxLg_3D, kyLg_3D), method='linear')
+interpend = timer()
+print('Interp Time: {0}'.format(interpend - interpstart))
 
-    # # Take 2D slices of position distribution
-    # zLg_y0slice = zLg_3D[:, :, yL.size // 2]
-    # xLg_y0slice = xLg_3D[:, :, yL.size // 2]
-    # nzxy_y0slice = nzxy[:, :, yL.size // 2]
+dkzL = kzL[1] - kzL[0]; dkxL = kxL[1] - kxL[0]; dkyL = kyL[1] - kyL[0]
+BkLg_3D_norm = (1 / Nph) * np.sum(dkzL * dkzL * dkyL * np.abs(BkLg_3D)**2)
+print('Linear grid (1/Nph)|Bk|^2 normalization (Cartesian 3D): {0}'.format(BkLg_3D_norm))
 
-    # # Create DataSet for 3D Betak and position distribution slices
+# Consistency check: use 2D ky=0 slice of |Bk|^2 to calculate phonon density and compare it to phonon density from original spherical interpolated data
 
-    # ReCSA_da = xr.DataArray(np.real(BkLg_3D), coords=[kzL, kxL, kyL], dims=['kz', 'kx', 'ky'])
-    # ImCSA_da = xr.DataArray(np.imag(BkLg_3D), coords=[kzL, kxL, kyL], dims=['kz', 'kx', 'ky'])
-    # nzxy_da = xr.DataArray(nzxy, coords=[zL, xL, yL], dims=['z', 'x', 'y'])
+kxL_0ind = kxL.size // 2; kyL_0ind = kyL.size // 2; kzL_0ind = kzL.size // 2  # find position of zero of each axis: kxL=0, kyL=0, kzL=0
+kxLg_ky0slice = kxLg_3D[:, :, kyL_0ind]
+kzLg_ky0slice = kzLg_3D[:, :, kyL_0ind]
+BkLg_ky0slice = BkLg_3D[:, :, kyL_0ind]
+PhDen_Lg_ky0slice = ((1 / Nph) * np.abs(BkLg_ky0slice)**2).real.astype(float)
+PhDen_Sph = ((1 / Nph) * np.abs(Bk_interp_vals)**2).real.astype(float)
+kxg_Sph = kg_interp * np.sin(thg_interp)
+kzg_Sph = kg_interp * np.cos(thg_interp)
 
-    # data_dict = {'ReCSA': ReCSA_da, 'ImCSA': ImCSA_da, 'nzxy': nzxy_da}
-    # coords_dict = {'kx': kxL, 'ky': kyL, 'kz': kzL, 'x': xL, 'y': yL, 'z': zL}
-    # attrs_dict = {'P': P, 'aIBi': aIBi}
-    # interp_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
-    # interp_ds.to_netcdf(interpdatapath + '/InterpDat_P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+# Fourier Transform to get 3D position distribution
 
-    # # All Plotting: (a) 2D ky=0 slice of |Bk|^2, (b) 2D slice of position distribution
+zL = np.fft.fftshift(np.fft.fftfreq(kzL.size) * 2 * np.pi / dkzL)
+xL = np.fft.fftshift(np.fft.fftfreq(kxL.size) * 2 * np.pi / dkxL)
+yL = np.fft.fftshift(np.fft.fftfreq(kyL.size) * 2 * np.pi / dkyL)
+dzL = zL[1] - zL[0]; dxL = xL[1] - xL[0]; dyL = yL[1] - yL[0]
+dVzxy = dxL * dyL * dzL
+# print(dzL, 2 * np.pi / (kzL.size * dkzL))
 
-    # fig, axes = plt.subplots(nrows=1, ncols=2)
-    # if P < 0.9:
-    #     [vmin, vmax] = [0, 500]
-    #     axes[0].set_xlim([-1.5, 1.5])
-    #     axes[0].set_ylim([-1.5, 1.5])
-    #     axes[1].set_xlim([-1.5, 1.5])
-    #     axes[1].set_ylim([-1.5, 1.5])
-    # else:
-    #     [vmin, vmax] = [0, 9.2e13]
-    #     # [vmin, vmax] = [0, 1e18]
-    #     axes[0].set_xlim([-0.1, 0.1])
-    #     axes[0].set_ylim([-0.01, 0.01])
-    #     axes[1].set_xlim([-0.1, 0.1])
-    #     axes[1].set_ylim([-0.01, 0.01])
+zLg_3D, xLg_3D, yLg_3D = np.meshgrid(zL, xL, yL, indexing='ij')
+BkLg_3D[np.isnan(BkLg_3D)] = 0
+beta_kzkxky = np.fft.ifftshift(BkLg_3D)
+amp_beta_zxy_preshift = np.fft.ifftn(beta_kzkxky) / dVzxy
+amp_beta_zxy = np.fft.fftshift(amp_beta_zxy_preshift)
+nzxy = ((1 / Nph) * np.abs(amp_beta_zxy)**2).real.astype(float)
+nzxy_norm = np.sum(dVzxy * nzxy)
+print('Linear grid (1/Nph)*n(x,y,z) normalization (Cartesian 3D): {0}'.format(nzxy_norm))
 
-    # quad1 = axes[0].pcolormesh(kzg_Sph, kxg_Sph, PhDen_Sph[:-1, :-1], vmin=vmin, vmax=vmax)
-    # quad1m = axes[0].pcolormesh(kzg_Sph, -1 * kxg_Sph, PhDen_Sph[:-1, :-1], vmin=vmin, vmax=vmax)
-    # fig.colorbar(quad1, ax=axes[0], extend='both')
-    # quad2 = axes[1].pcolormesh(kzLg_ky0slice, kxLg_ky0slice, PhDen_Lg_ky0slice[:-1, :-1], vmin=vmin, vmax=vmax)
-    # fig.colorbar(quad2, ax=axes[1], extend='both')
+# Take 2D slices of position distribution
+zLg_y0slice = zLg_3D[:, :, yL.size // 2]
+xLg_y0slice = xLg_3D[:, :, yL.size // 2]
+nzxy_y0slice = nzxy[:, :, yL.size // 2]
 
-    # fig2, ax2 = plt.subplots()
-    # quad3 = ax2.pcolormesh(zLg_y0slice, xLg_y0slice, nzxy_y0slice, vmin=0, vmax=np.max(nzxy_y0slice))
-    # ax2.set_xlim([-200, 200])
-    # ax2.set_ylim([-3e3, 3e3])
-    # fig2.colorbar(quad3, ax=ax2, extend='both')
+# Create DataSet for 3D Betak and position distribution slices
 
-    # plt.show()
+ReCSA_da = xr.DataArray(np.real(BkLg_3D), coords=[kzL, kxL, kyL], dims=['kz', 'kx', 'ky'])
+ImCSA_da = xr.DataArray(np.imag(BkLg_3D), coords=[kzL, kxL, kyL], dims=['kz', 'kx', 'ky'])
+nzxy_da = xr.DataArray(nzxy, coords=[zL, xL, yL], dims=['z', 'x', 'y'])
 
-    # # IMPURITY DISTRIBUTION CHARACTERIZATION (CARTESIAN)
+data_dict = {'ReCSA': ReCSA_da, 'ImCSA': ImCSA_da, 'nzxy': nzxy_da}
+coords_dict = {'kx': kxL, 'ky': kyL, 'kz': kzL, 'x': xL, 'y': yL, 'z': zL}
+attrs_dict = {'P': P, 'aIBi': aIBi}
+interp_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
+interp_ds.to_netcdf(interpdatapath + '/InterpDat_P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
-    # nPIm_FWHM_Vals = np.zeros(PVals.size)
-    # nPIm_distPeak_Vals = np.zeros(PVals.size)
-    # nPIm_deltaPeak_Vals = np.zeros(PVals.size)
-    # nPIm_Tot_Vals = np.zeros(PVals.size)
-    # nPIm_Vec = np.empty(PVals.size, dtype=np.object)
-    # PIm_Vec = np.empty(PVals.size, dtype=np.object)
-    # fig, ax = plt.subplots()
-    # for ind, P in enumerate(PVals):
-    #     qds_nPIm_inf = qds_aIBi['nPI_mag'].sel(P=P).isel(t=-1).dropna('PI_mag')
-    #     PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
-    #     dPIm = PIm_Vals[1] - PIm_Vals[0]
+# All Plotting: (a) 2D ky=0 slice of |Bk|^2, (b) 2D slice of position distribution
 
-    #     # # Plot nPIm(t=inf)
-    #     qds_nPIm_inf.plot(ax=ax, label='P: {:.1f}'.format(P))
-    #     nPIm_Vec[ind] = qds_nPIm_inf.values
-    #     PIm_Vec[ind] = PIm_Vals
+fig, axes = plt.subplots(nrows=1, ncols=2)
+axes[0].set_xlim([-1 * linDimMajor, linDimMajor])
+axes[0].set_ylim([-1 * linDimMinor, linDimMinor])
+axes[1].set_xlim([-1 * linDimMajor, linDimMajor])
+axes[1].set_ylim([-1 * linDimMinor, linDimMinor])
 
-    #     # # Calculate nPIm(t=inf) normalization
-    #     nPIm_Tot_Vals[ind] = np.sum(qds_nPIm_inf.values * dPIm) + qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
+quad1 = axes[0].pcolormesh(kzg_Sph, kxg_Sph, PhDen_Sph[:-1, :-1], vmin=vmin, vmax=vmax)
+quad1m = axes[0].pcolormesh(kzg_Sph, -1 * kxg_Sph, PhDen_Sph[:-1, :-1], vmin=vmin, vmax=vmax)
+fig.colorbar(quad1, ax=axes[0], extend='both')
+quad2 = axes[1].pcolormesh(kzLg_ky0slice, kxLg_ky0slice, PhDen_Lg_ky0slice[:-1, :-1], vmin=vmin, vmax=vmax)
+fig.colorbar(quad2, ax=axes[1], extend='both')
 
-    #     # Calculate FWHM, distribution peak, and delta peak
-    #     nPIm_FWHM_Vals[ind] = pfc.FWHM(PIm_Vals, qds_nPIm_inf.values)
-    #     nPIm_distPeak_Vals[ind] = np.max(qds_nPIm_inf.values)
-    #     nPIm_deltaPeak_Vals[ind] = qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
+fig2, ax2 = plt.subplots()
+quad3 = ax2.pcolormesh(zLg_y0slice, xLg_y0slice, nzxy_y0slice, vmin=0, vmax=np.max(nzxy_y0slice))
+ax2.set_xlim([-200, 200])
+ax2.set_ylim([-3e3, 3e3])
+fig2.colorbar(quad3, ax=ax2, extend='both')
 
-    # # Plot nPIm(t=inf)
-    # ax.plot(mI * nu * np.ones(PIm_Vals.size), np.linspace(0, 1, PIm_Vals.size), 'k--', label=r'$m_{I}c$')
-    # ax.legend()
-    # ax.set_xlabel(r'$|P_{I}|$')
-    # ax.set_ylabel(r'$n_{|P_{I}|}$')
-    # ax.set_title('Ground state impurity distribution (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    # # plt.show()
+plt.show()
 
-    # # # Plot characterization of nPIm(t=inf)
-    # # ax.plot(PVals, nPIm_FWHM_Vals, 'b-', label='Incoherent Dist FWHM')
-    # # ax.plot(PVals, nPIm_distPeak_Vals, 'g-', label='Incoherent Dist Peak')
-    # # ax.plot(PVals, nPIm_deltaPeak_Vals, 'r-', label='Delta Peak (Z-factor)')
-    # # ax.legend()
-    # # ax.set_xlabel('$P$')
-    # # ax.set_title(r'$n_{|P_{I}|}$' + ' Characterization (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    # # plt.show()
+# # IMPURITY DISTRIBUTION CHARACTERIZATION (CARTESIAN)
 
-    # fig2, ax2 = plt.subplots()
-    # ax2.plot(mI * nu * np.ones(PIm_Vals.size), np.linspace(0, 1, PIm_Vals.size), 'k--', label=r'$m_{I}c$')
-    # curve = ax2.plot(PIm_Vec[0], nPIm_Vec[0], color='k', lw=2, label='')[0]
-    # line = ax2.plot(PVals[0] * np.ones(PIm_Vals.size), np.linspace(0, nPIm_deltaPeak_Vals[0], PIm_Vals.size), 'go', label='')[0]
-    # P_text = ax2.text(0.85, 0.85, 'P: {:.2f}'.format(PVals[0]), transform=ax2.transAxes, color='r')
-    # norm_text = ax2.text(0.7, 0.8, r'$\int n_{|\vec{P_{I}}|} d|\vec{P_{I}}| = $' + '{:.3f}'.format(nPIm_Tot_Vals[0]), transform=ax.transAxes, color='b')
+# nPIm_FWHM_Vals = np.zeros(PVals.size)
+# nPIm_distPeak_Vals = np.zeros(PVals.size)
+# nPIm_deltaPeak_Vals = np.zeros(PVals.size)
+# nPIm_Tot_Vals = np.zeros(PVals.size)
+# nPIm_Vec = np.empty(PVals.size, dtype=np.object)
+# PIm_Vec = np.empty(PVals.size, dtype=np.object)
+# fig, ax = plt.subplots()
+# for ind, P in enumerate(PVals):
+#     qds_nPIm_inf = qds_aIBi['nPI_mag'].sel(P=P).isel(t=-1).dropna('PI_mag')
+#     PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
+#     dPIm = PIm_Vals[1] - PIm_Vals[0]
 
-    # ax2.legend()
-    # ax2.set_xlim([-0.01, np.max(PIm_Vec[0])])
-    # ax2.set_ylim([0, 1.2])
-    # ax2.set_title('Impurity Momentum Magnitude Distribution (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    # ax2.set_ylabel(r'$n_{|\vec{P_{I}}|}$')
-    # ax2.set_xlabel(r'$|\vec{P_{I}}|$')
+#     # # Plot nPIm(t=inf)
+#     qds_nPIm_inf.plot(ax=ax, label='P: {:.1f}'.format(P))
+#     nPIm_Vec[ind] = qds_nPIm_inf.values
+#     PIm_Vec[ind] = PIm_Vals
 
-    # def animate2(i):
-    #     curve.set_xdata(PIm_Vec[i])
-    #     curve.set_ydata(nPIm_Vec[i])
-    #     line.set_xdata(PVals[i])
-    #     line.set_ydata(np.linspace(0, nPIm_deltaPeak_Vals[i], PIm_Vals.size))
-    #     P_text.set_text('P: {:.2f}'.format(PVals[i]))
-    #     norm_text.set_text(r'$\int n_{|\vec{P_{I}}|} d|\vec{P_{I}}| = $' + '{:.3f}'.format(nPIm_Tot_Vals[i]))
+#     # # Calculate nPIm(t=inf) normalization
+#     nPIm_Tot_Vals[ind] = np.sum(qds_nPIm_inf.values * dPIm) + qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
 
-    # anim2 = FuncAnimation(fig2, animate2, interval=1000, frames=range(PVals.size))
-    # anim2.save(animpath + '/aIBi_{0}'.format(aIBi) + '_ImpDist.gif', writer='imagemagick')
-    # plt.show()
+#     # Calculate FWHM, distribution peak, and delta peak
+#     nPIm_FWHM_Vals[ind] = pfc.FWHM(PIm_Vals, qds_nPIm_inf.values)
+#     nPIm_distPeak_Vals[ind] = np.max(qds_nPIm_inf.values)
+#     nPIm_deltaPeak_Vals[ind] = qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
 
-    # # DISTRIBUTION CHARACTERIZATION SATURATION
+# # Plot nPIm(t=inf)
+# ax.plot(mI * nu * np.ones(PIm_Vals.size), np.linspace(0, 1, PIm_Vals.size), 'k--', label=r'$m_{I}c$')
+# ax.legend()
+# ax.set_xlabel(r'$|P_{I}|$')
+# ax.set_ylabel(r'$n_{|P_{I}|}$')
+# ax.set_title('Ground state impurity distribution (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+# # plt.show()
 
-    # nPIm_FWHM_Vals = np.zeros((PVals.size, tVals.size))
-    # nPIm_distPeak_Vals = np.zeros((PVals.size, tVals.size))
-    # nPIm_deltaPeak_Vals = np.zeros((PVals.size, tVals.size))
+# # # Plot characterization of nPIm(t=inf)
+# # ax.plot(PVals, nPIm_FWHM_Vals, 'b-', label='Incoherent Dist FWHM')
+# # ax.plot(PVals, nPIm_distPeak_Vals, 'g-', label='Incoherent Dist Peak')
+# # ax.plot(PVals, nPIm_deltaPeak_Vals, 'r-', label='Delta Peak (Z-factor)')
+# # ax.legend()
+# # ax.set_xlabel('$P$')
+# # ax.set_title(r'$n_{|P_{I}|}$' + ' Characterization (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+# # plt.show()
 
-    # for Pind, P in enumerate(PVals):
-    #     for tind, t in enumerate(tVals):
-    #         qds_nPIm_inf = qds_aIBi['nPI_mag'].sel(P=P, t=t).dropna('PI_mag')
-    #         PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
-    #         dPIm = PIm_Vals[1] - PIm_Vals[0]
+# fig2, ax2 = plt.subplots()
+# ax2.plot(mI * nu * np.ones(PIm_Vals.size), np.linspace(0, 1, PIm_Vals.size), 'k--', label=r'$m_{I}c$')
+# curve = ax2.plot(PIm_Vec[0], nPIm_Vec[0], color='k', lw=2, label='')[0]
+# line = ax2.plot(PVals[0] * np.ones(PIm_Vals.size), np.linspace(0, nPIm_deltaPeak_Vals[0], PIm_Vals.size), 'go', label='')[0]
+# P_text = ax2.text(0.85, 0.85, 'P: {:.2f}'.format(PVals[0]), transform=ax2.transAxes, color='r')
+# norm_text = ax2.text(0.7, 0.8, r'$\int n_{|\vec{P_{I}}|} d|\vec{P_{I}}| = $' + '{:.3f}'.format(nPIm_Tot_Vals[0]), transform=ax.transAxes, color='b')
 
-    #         # # Plot nPIm(t=inf)
-    #         # qds_nPIm_inf.plot(ax=ax, label='P: {:.1f}'.format(P))
+# ax2.legend()
+# ax2.set_xlim([-0.01, np.max(PIm_Vec[0])])
+# ax2.set_ylim([0, 1.2])
+# ax2.set_title('Impurity Momentum Magnitude Distribution (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+# ax2.set_ylabel(r'$n_{|\vec{P_{I}}|}$')
+# ax2.set_xlabel(r'$|\vec{P_{I}}|$')
 
-    #         # # Calculate nPIm(t=inf) normalization
-    #         nPIm_Tot = np.sum(qds_nPIm_inf.values * dPIm) + qds_aIBi.sel(P=P, t=t)['mom_deltapeak'].values
 
-    #         # Calculate FWHM, distribution peak, and delta peak
-    #         nPIm_FWHM_Vals[Pind, tind] = pfc.FWHM(PIm_Vals, qds_nPIm_inf.values)
-    #         nPIm_distPeak_Vals[Pind, tind] = np.max(qds_nPIm_inf.values)
-    #         nPIm_deltaPeak_Vals[Pind, tind] = qds_aIBi.sel(P=P, t=t)['mom_deltapeak'].values
+# def animate2(i):
+#     curve.set_xdata(PIm_Vec[i])
+#     curve.set_ydata(nPIm_Vec[i])
+#     line.set_xdata(PVals[i])
+#     line.set_ydata(np.linspace(0, nPIm_deltaPeak_Vals[i], PIm_Vals.size))
+#     P_text.set_text('P: {:.2f}'.format(PVals[i]))
+#     norm_text.set_text(r'$\int n_{|\vec{P_{I}}|} d|\vec{P_{I}}| = $' + '{:.3f}'.format(nPIm_Tot_Vals[i]))
 
-    #     # fig, ax = plt.subplots()
-    #     # # ax.plot(tVals, nPIm_FWHM_Vals, 'b-', label='Incoherent Dist FWHM')
-    #     # ax.plot(tVals, nPIm_distPeak_Vals, 'g-', label='Incoherent Dist Peak')
-    #     # ax.plot(tVals, nPIm_deltaPeak_Vals, 'r-', label='Delta Peak (Z-factor)')
-    #     # ax.legend()
-    #     # ax.set_xscale('log')
-    #     # ax.set_xlabel('Imaginary Time')
-    #     # ax.set_yscale('log')
-    #     # ax.set_title(r'$n_{|P_{I}|}$' + ' Characteristics Saturation (' + r'$aIB^{-1}=$' + '{0}'.format(aIBi) + ', P={:.2f})'.format(P))
-    #     # plt.show()
 
-    # fig, ax = plt.subplots()
-    # quadFWHM = ax.pcolormesh(tVals, PVals, nPIm_FWHM_Vals, norm=colors.LogNorm())
-    # ax.set_xscale('log')
-    # ax.set_xlabel('Imaginary Time')
-    # ax.set_ylabel('P')
-    # ax.set_title('Incoherent Dist FWHM (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    # fig.colorbar(quadFWHM, ax=ax, extend='max')
-    # plt.show()
+# anim2 = FuncAnimation(fig2, animate2, interval=1000, frames=range(PVals.size))
+# anim2.save(animpath + '/aIBi_{0}'.format(aIBi) + '_ImpDist.gif', writer='imagemagick')
+# plt.show()
 
-    # fig, ax = plt.subplots()
-    # quaddistP = ax.pcolormesh(tVals, PVals, nPIm_distPeak_Vals, norm=colors.LogNorm())
-    # ax.set_xscale('log')
-    # ax.set_xlabel('Imaginary Time')
-    # ax.set_ylabel('P')
-    # ax.set_title('Incoherent Dist Peak (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    # fig.colorbar(quaddistP, ax=ax, extend='max')
-    # plt.show()
+# # DISTRIBUTION CHARACTERIZATION SATURATION
 
-    # fig, ax = plt.subplots()
-    # quaddeltP = ax.pcolormesh(tVals, PVals, nPIm_deltaPeak_Vals, norm=colors.LogNorm())
-    # ax.set_xscale('log')
-    # ax.set_xlabel('Imaginary Time')
-    # ax.set_ylabel('P')
-    # ax.set_title('Delta Peak (Z-factor) (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    # fig.colorbar(quaddeltP, ax=ax, extend='max')
-    # plt.show()
+# nPIm_FWHM_Vals = np.zeros((PVals.size, tVals.size))
+# nPIm_distPeak_Vals = np.zeros((PVals.size, tVals.size))
+# nPIm_deltaPeak_Vals = np.zeros((PVals.size, tVals.size))
+
+# for Pind, P in enumerate(PVals):
+#     for tind, t in enumerate(tVals):
+#         qds_nPIm_inf = qds_aIBi['nPI_mag'].sel(P=P, t=t).dropna('PI_mag')
+#         PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
+#         dPIm = PIm_Vals[1] - PIm_Vals[0]
+
+#         # # Plot nPIm(t=inf)
+#         # qds_nPIm_inf.plot(ax=ax, label='P: {:.1f}'.format(P))
+
+#         # # Calculate nPIm(t=inf) normalization
+#         nPIm_Tot = np.sum(qds_nPIm_inf.values * dPIm) + qds_aIBi.sel(P=P, t=t)['mom_deltapeak'].values
+
+#         # Calculate FWHM, distribution peak, and delta peak
+#         nPIm_FWHM_Vals[Pind, tind] = pfc.FWHM(PIm_Vals, qds_nPIm_inf.values)
+#         nPIm_distPeak_Vals[Pind, tind] = np.max(qds_nPIm_inf.values)
+#         nPIm_deltaPeak_Vals[Pind, tind] = qds_aIBi.sel(P=P, t=t)['mom_deltapeak'].values
+
+#     # fig, ax = plt.subplots()
+#     # # ax.plot(tVals, nPIm_FWHM_Vals, 'b-', label='Incoherent Dist FWHM')
+#     # ax.plot(tVals, nPIm_distPeak_Vals, 'g-', label='Incoherent Dist Peak')
+#     # ax.plot(tVals, nPIm_deltaPeak_Vals, 'r-', label='Delta Peak (Z-factor)')
+#     # ax.legend()
+#     # ax.set_xscale('log')
+#     # ax.set_xlabel('Imaginary Time')
+#     # ax.set_yscale('log')
+#     # ax.set_title(r'$n_{|P_{I}|}$' + ' Characteristics Saturation (' + r'$aIB^{-1}=$' + '{0}'.format(aIBi) + ', P={:.2f})'.format(P))
+#     # plt.show()
+
+# fig, ax = plt.subplots()
+# quadFWHM = ax.pcolormesh(tVals, PVals, nPIm_FWHM_Vals, norm=colors.LogNorm())
+# ax.set_xscale('log')
+# ax.set_xlabel('Imaginary Time')
+# ax.set_ylabel('P')
+# ax.set_title('Incoherent Dist FWHM (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+# fig.colorbar(quadFWHM, ax=ax, extend='max')
+# plt.show()
+
+# fig, ax = plt.subplots()
+# quaddistP = ax.pcolormesh(tVals, PVals, nPIm_distPeak_Vals, norm=colors.LogNorm())
+# ax.set_xscale('log')
+# ax.set_xlabel('Imaginary Time')
+# ax.set_ylabel('P')
+# ax.set_title('Incoherent Dist Peak (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+# fig.colorbar(quaddistP, ax=ax, extend='max')
+# plt.show()
+
+# fig, ax = plt.subplots()
+# quaddeltP = ax.pcolormesh(tVals, PVals, nPIm_deltaPeak_Vals, norm=colors.LogNorm())
+# ax.set_xscale('log')
+# ax.set_xlabel('Imaginary Time')
+# ax.set_ylabel('P')
+# ax.set_title('Delta Peak (Z-factor) (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+# fig.colorbar(quaddeltP, ax=ax, extend='max')
+# plt.show()
