@@ -786,6 +786,8 @@ if __name__ == "__main__":
     k_interp_red = k_interp[0:kred_ind]
 
     k_interp = k_interp_red
+    kg_interp = kg_red
+    thg_interp = thg_red
     Bk_interp_vals = Bk_red
 
     # CHECK WHY ALL BK AMPLITUDES HAVE ZERO IMAGINARY PART, EVEN FOR SUPERSONIC CASE? IS THIS BECAUSE ITS THE GROUNDSTATE?
@@ -833,6 +835,7 @@ interpend = timer()
 print('Interp Time: {0}'.format(interpend - interpstart))
 
 dkzL = kzL[1] - kzL[0]; dkxL = kxL[1] - kxL[0]; dkyL = kyL[1] - kyL[0]
+BkLg_3D[np.isnan(BkLg_3D)] = 0
 BkLg_3D_norm = (1 / Nph) * np.sum(dkzL * dkzL * dkyL * np.abs(BkLg_3D)**2)
 print('Linear grid (1/Nph)|Bk|^2 normalization (Cartesian 3D): {0}'.format(BkLg_3D_norm))
 
@@ -857,7 +860,6 @@ dVzxy = dxL * dyL * dzL
 # print(dzL, 2 * np.pi / (kzL.size * dkzL))
 
 zLg_3D, xLg_3D, yLg_3D = np.meshgrid(zL, xL, yL, indexing='ij')
-BkLg_3D[np.isnan(BkLg_3D)] = 0
 beta_kzkxky = np.fft.ifftshift(BkLg_3D)
 amp_beta_zxy_preshift = np.fft.ifftn(beta_kzkxky) / dVzxy
 amp_beta_zxy = np.fft.fftshift(amp_beta_zxy_preshift)
