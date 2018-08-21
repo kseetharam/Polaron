@@ -207,6 +207,10 @@ if __name__ == "__main__":
         for P in P_Vals:
             cParams_List.append([P, aIBi])
 
+    missedVals = [6, 7, 13, 14, 19, 24, 25, 26, 27, 30, 31, 32, 33, 34, 44, 45, 46, 47, 56, 57, 58, 59, 65, 66, 67, 68, 70, 71, 74, 75, 76]
+    cParams_List = [cParams_List[i] for i in missedVals]
+    print(len(cParams_List))
+
     # # ---- COMPUTE DATA ON COMPUTER ----
 
     # runstart = timer()

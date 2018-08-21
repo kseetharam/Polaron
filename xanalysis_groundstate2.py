@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'ReducedInterp': 'true', 'kGrid_ext': 'true'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'ReducedInterp': 'true', 'kGrid_ext': 'true'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -729,7 +729,7 @@ if __name__ == "__main__":
     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
     kVec = kgrid.getArray('k')
     thVec = kgrid.getArray('th')
-    NphiPoints = 6  # This is the step that dramatically increases memory consumption and runtime of Cartesian griddata interpolation -> also affects quality of normalization of 3D distribution
+    NphiPoints = 8  # This is the step that dramatically increases memory consumption and runtime of Cartesian griddata interpolation -> also affects quality of normalization of 3D distribution
     phiVec = np.concatenate((np.linspace(0, np.pi, NphiPoints // 2, endpoint=False), np.linspace(np.pi, 2 * np.pi, NphiPoints // 2, endpoint=False)))
     Bk_2D = xr.DataArray(np.full((len(kVec), len(thVec)), np.nan, dtype=complex), coords=[kVec, thVec], dims=['k', 'th'])
 
@@ -764,7 +764,7 @@ if __name__ == "__main__":
         [vmin, vmax] = [0, 500]
         linDimMajor = 1.5
         linDimMinor = 1.5
-        Npoints = 22  # actual number of points will be ~Npoints-1, want Npoints=2502 (gives 2500 points)
+        Npoints = 202  # actual number of points will be ~Npoints-1, want Npoints=2502 (gives 2500 points)
     else:
         [vmin, vmax] = [0, 9.2e13]
         linDimMajor = 0.1
