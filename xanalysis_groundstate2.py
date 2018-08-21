@@ -826,7 +826,7 @@ if __name__ == "__main__":
     print('Spherical Interp Grid Shape: {0}'.format(kzg.shape))
     print('Cartesian Interp Grid Shape: {0}'.format(kzLg_3D.shape))
     interpstart = timer()
-    BkLg_3D = interpolate.griddata((kzg.flatten(), kxg.flatten(), kyg.flatten()), Bk_3D_vals.flatten(), (kzLg_3D, kxLg_3D, kyLg_3D), method='linear')
+    BkLg_3D = interpolate.griddata((kzg.flatten(), kxg.flatten(), kyg.flatten()), Bk_3D_vals.flatten(), (kzLg_3D, kxLg_3D, kyLg_3D), method='nearest')
     interpend = timer()
     print('Interp Time: {0}'.format(interpend - interpstart))
 
