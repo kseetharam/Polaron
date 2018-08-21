@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'ReducedInterp': 'true', 'kGrid_ext': 'true'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'ReducedInterp': 'true', 'kGrid_ext': 'false'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -847,19 +847,19 @@ if __name__ == "__main__":
     kzg_Sph = kg_interp * np.cos(thg_interp)
 
     # Add the remainder of Bk back in (values close to zero for large k)
-    kL_max = kmax_rem / np.sqrt(2)
-    kx_addon = np.arange(linDimMajor, kL_max, dkxL); ky_addon = np.arange(linDimMajor, kL_max, dkyL); kz_addon = np.arange(linDimMajor, kL_max, dkzL)
-    kxL_ext = np.concatenate((-1 * np.flip(kx_addon, axis=0), np.concatenate((kxL, kx_addon))))
-    kyL_ext = np.concatenate((-1 * np.flip(ky_addon, axis=0), np.concatenate((kyL, kx_addon))))
-    kzL_ext = np.concatenate((-1 * np.flip(kz_addon, axis=0), np.concatenate((kzL, kx_addon))))
-
-    ax = kxL.size; ay = kyL.size; az = kzL.size
-    mx = kx_addon.size; my = ky_addon.size; mz = kz_addon.size
-    BkLg_3D_ext = np.concatenate((Bk_rem_ave * np.ones((mz, ax, ay)), np.concatenate((BkLg_3D, Bk_rem_ave * np.ones((mz, ax, ay))), axis=0)), axis=0)
-    BkLg_3D_ext = np.concatenate((Bk_rem_ave * np.ones(((az + 2 * mz), mx, ay)), np.concatenate((BkLg_3D_ext, Bk_rem_ave * np.ones(((az + 2 * mz), mx, ay))), axis=1)), axis=1)
-    BkLg_3D_ext = np.concatenate((Bk_rem_ave * np.ones(((az + 2 * mz), (ax + 2 * mx), my)), np.concatenate((BkLg_3D_ext, Bk_rem_ave * np.ones(((az + 2 * mz), (ax + 2 * mx), my))), axis=2)), axis=2)
-
     if toggleDict['ReducedInterp'] == 'true' and toggleDict['kGrid_ext'] == 'true':
+        kL_max = kmax_rem / np.sqrt(2)
+        kx_addon = np.arange(linDimMajor, kL_max, dkxL); ky_addon = np.arange(linDimMajor, kL_max, dkyL); kz_addon = np.arange(linDimMajor, kL_max, dkzL)
+        kxL_ext = np.concatenate((-1 * np.flip(kx_addon, axis=0), np.concatenate((kxL, kx_addon))))
+        kyL_ext = np.concatenate((-1 * np.flip(ky_addon, axis=0), np.concatenate((kyL, kx_addon))))
+        kzL_ext = np.concatenate((-1 * np.flip(kz_addon, axis=0), np.concatenate((kzL, kx_addon))))
+
+        ax = kxL.size; ay = kyL.size; az = kzL.size
+        mx = kx_addon.size; my = ky_addon.size; mz = kz_addon.size
+        BkLg_3D_ext = np.concatenate((Bk_rem_ave * np.ones((mz, ax, ay)), np.concatenate((BkLg_3D, Bk_rem_ave * np.ones((mz, ax, ay))), axis=0)), axis=0)
+        BkLg_3D_ext = np.concatenate((Bk_rem_ave * np.ones(((az + 2 * mz), mx, ay)), np.concatenate((BkLg_3D_ext, Bk_rem_ave * np.ones(((az + 2 * mz), mx, ay))), axis=1)), axis=1)
+        BkLg_3D_ext = np.concatenate((Bk_rem_ave * np.ones(((az + 2 * mz), (ax + 2 * mx), my)), np.concatenate((BkLg_3D_ext, Bk_rem_ave * np.ones(((az + 2 * mz), (ax + 2 * mx), my))), axis=2)), axis=2)
+
         kxL = kxL_ext; kyL = kyL_ext; kzL = kzL_ext
         BkLg_3D = BkLg_3D_ext
         print('Cartesian Interp Extended Grid Shape: {0}'.format(BkLg_3D.shape))
