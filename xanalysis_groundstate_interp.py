@@ -437,7 +437,8 @@ if __name__ == "__main__":
 
     k_3Di_unique, k_3Di_inverse = np.unique(kg_3Di, return_inverse=True)
     th_3Di_unique, th_3Di_inverse = np.unique(thg_3Di, return_inverse=True)
-    print('Nk unique: {:1.2E}, Nth unique: {:1.2E}'.format(k_3Di_unique.size, th_3Di_unique.size))
+    print('Nk unique: {:1.2E}, Nth unique: {:1.2E}, Ntot unique: {:1.2E}'.format(k_3Di_unique.size, th_3Di_unique.size, k_3Di_unique.size * th_3Di_unique.size))
+    print('3D Cartesian grid Ntot: {:1.2E}'.format(kzLg_3D.size))
     # print(kg_3Di_unique.size / kg_3Di.size)
     # print(thg_3Di_unique.size / thg_3Di.size)
 
