@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'ReducedInterp': 'true', 'kGrid_ext': 'false'}
+    toggleDict = {'Location': 'home', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'ReducedInterp': 'true', 'kGrid_ext': 'true'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -729,7 +729,7 @@ if __name__ == "__main__":
     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
     kVec = kgrid.getArray('k')
     thVec = kgrid.getArray('th')
-    NphiPoints = 8  # This is the step that dramatically increases memory consumption and runtime of Cartesian griddata interpolation -> also affects quality of normalization of 3D distribution
+    NphiPoints = 100  # This is the step that dramatically increases memory consumption and runtime of Cartesian griddata interpolation -> also affects quality of normalization of 3D distribution
     phiVec = np.concatenate((np.linspace(0, np.pi, NphiPoints // 2, endpoint=False), np.linspace(np.pi, 2 * np.pi, NphiPoints // 2, endpoint=False)))
     Bk_2D = xr.DataArray(np.full((len(kVec), len(thVec)), np.nan, dtype=complex), coords=[kVec, thVec], dims=['k', 'th'])
 
@@ -764,15 +764,19 @@ if __name__ == "__main__":
         [vmin, vmax] = [0, 500]
         linDimMajor = 1.5
         linDimMinor = 1.5
-        Npoints = 202  # actual number of points will be ~Npoints-1, want Npoints=2502 (gives 2500 points)
+        ext_major_rat = 0.35
+        ext_minor_rat = 0.35
+        Npoints = 252  # actual number of points will be ~Npoints-1, want Npoints=2502 (gives 2500 points)
     else:
         [vmin, vmax] = [0, 9.2e13]
         linDimMajor = 0.1
         linDimMinor = 0.01
+        ext_major_rat = 0.025
+        ext_minor_rat = 0.0025
         Npoints = 252  # (gives 250 points)
 
     # Remove k values outside reduced k-space bounds (as |Bk|~0 there) and save the average of these values to add back in later before FFT
-    kred_ind = np.argwhere(kg_interp[:, 0] > (1.5 * linDimMinor))[0][0]
+    kred_ind = np.argwhere(kg_interp[:, 0] > (1.5 * linDimMajor))[0][0]
     kg_red = np.delete(kg_interp, np.arange(kred_ind, k_interp.size), 0)
     thg_red = np.delete(thg_interp, np.arange(kred_ind, k_interp.size), 0)
     Bk_red = np.delete(Bk_interp_vals, np.arange(kred_ind, k_interp.size), 0)
@@ -798,7 +802,7 @@ if __name__ == "__main__":
         Bk_3D.sel(phi=phi)[:] = Bk_interp_vals
 
     # 3D reconstruction in spherical coordinates (copy interpolated 2D spherical Bk onto all phi coordinates due to phi symmetry)
-    phi_interp = np.linspace(np.min(phiVec), np.max(phiVec), 1 * phiVec.size)
+    phi_interp, dphi = np.linspace(np.min(phiVec), np.max(phiVec), 1 * phiVec.size, retstep=True)
     Bk_3D = xr.DataArray(np.full((len(k_interp), len(th_interp), len(phi_interp)), np.nan, dtype=complex), coords=[k_interp, th_interp, phi_interp], dims=['k', 'th', 'phi'])
     for phiInd, phi in enumerate(phi_interp):
         Bk_3D.sel(phi=phi)[:] = Bk_interp_vals
@@ -813,13 +817,13 @@ if __name__ == "__main__":
     Bk_3D_vals = Bk_3D.values
     Bk_3D_vals[np.isnan(Bk_3D_vals)] = 0
 
-    dphi = phi_interp[1] - phi_interp[0]
+    # dphi = phi_interp[1] - phi_interp[0]
     Bk_Sph3D_norm = (1 / Nph) * np.sum(dk * dth * dphi * (2 * np.pi)**(-3) * kg_3Di**2 * np.sin(thg_3Di) * np.abs(Bk_3D_vals)**2)
     print('Interpolated (1/Nph)|Bk|^2 normalization (Spherical 3D): {0}'.format(Bk_Sph3D_norm))
 
     # Create linear 3D cartesian grid and reinterpolate Bk_3D onto this grid
-    kxL_pos, dkxL = np.linspace(0, linDimMajor, Npoints // 2, retstep=True, endpoint=False); kxL = np.concatenate((-1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
-    kyL_pos, dkyL = np.linspace(0, linDimMajor, Npoints // 2, retstep=True, endpoint=False); kyL = np.concatenate((-1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
+    kxL_pos, dkxL = np.linspace(0, linDimMinor, Npoints // 2, retstep=True, endpoint=False); kxL = np.concatenate((-1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
+    kyL_pos, dkyL = np.linspace(0, linDimMinor, Npoints // 2, retstep=True, endpoint=False); kyL = np.concatenate((-1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
     kzL_pos, dkzL = np.linspace(0, linDimMajor, Npoints // 2, retstep=True, endpoint=False); kzL = np.concatenate((-1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
     kzLg_3D, kxLg_3D, kyLg_3D = np.meshgrid(kzL, kxL, kyL, indexing='ij')
 
@@ -848,8 +852,12 @@ if __name__ == "__main__":
 
     # Add the remainder of Bk back in (values close to zero for large k)
     if toggleDict['ReducedInterp'] == 'true' and toggleDict['kGrid_ext'] == 'true':
-        kL_max = kmax_rem / np.sqrt(2)
-        kx_addon = np.arange(linDimMajor, kL_max, dkxL); ky_addon = np.arange(linDimMajor, kL_max, dkyL); kz_addon = np.arange(linDimMajor, kL_max, dkzL)
+        kL_max_major = ext_major_rat * kmax_rem / np.sqrt(2)
+        kL_max_minor = ext_minor_rat * kmax_rem / np.sqrt(2)
+        print('kL_red_max_major: {0}, kL_ext_max_major: {1}, dkL_major: {2}'.format(np.max(kzL), kL_max_major, dkzL))
+        print('kL_red_max_minor: {0}, kL_ext_max_minor: {1}, dkL_minor: {2}'.format(np.max(kxL), kL_max_minor, dkxL))
+        kx_addon = np.arange(linDimMinor, kL_max_minor, dkxL); ky_addon = np.arange(linDimMinor, kL_max_minor, dkyL); kz_addon = np.arange(linDimMajor, kL_max_major, dkzL)
+        print('kL_ext_addon size -  major: {0}, minor: {1}'.format(2 * kz_addon.size, 2 * kx_addon.size))
         kxL_ext = np.concatenate((-1 * np.flip(kx_addon, axis=0), np.concatenate((kxL, kx_addon))))
         kyL_ext = np.concatenate((-1 * np.flip(ky_addon, axis=0), np.concatenate((kyL, kx_addon))))
         kzL_ext = np.concatenate((-1 * np.flip(kz_addon, axis=0), np.concatenate((kzL, kx_addon))))
@@ -914,8 +922,8 @@ if __name__ == "__main__":
 
     fig2, ax2 = plt.subplots()
     quad3 = ax2.pcolormesh(zLg_y0slice, xLg_y0slice, nzxy_y0slice, vmin=0, vmax=np.max(nzxy_y0slice))
-    ax2.set_xlim([-200, 200])
-    ax2.set_ylim([-3e3, 3e3])
+    # ax2.set_xlim([-200, 200])
+    # ax2.set_ylim([-3e3, 3e3])
     fig2.colorbar(quad3, ax=ax2, extend='both')
 
     plt.show()
