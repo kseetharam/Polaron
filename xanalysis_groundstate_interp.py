@@ -27,27 +27,10 @@ if __name__ == "__main__":
     (dx, dy, dz) = (0.375, 0.375, 0.375)
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
-    # NGridPoints_cart = 1.37e5
-
-    # xgrid = Grid.Grid('CARTESIAN_3D')
-    # xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
-
-    # (Nx, Ny, Nz) = (len(xgrid.getArray('x')), len(xgrid.getArray('y')), len(xgrid.getArray('z')))
-
-    # kxfft = np.fft.fftfreq(Nx) * 2 * np.pi / dx; kyfft = np.fft.fftfreq(Nx) * 2 * np.pi / dy; kzfft = np.fft.fftfreq(Nx) * 2 * np.pi / dz
-
-    # kgrid = Grid.Grid('CARTESIAN_3D')
-    # kgrid.initArray_premade('kx', np.fft.fftshift(kxfft)); kgrid.initArray_premade('ky', np.fft.fftshift(kyfft)); kgrid.initArray_premade('kz', np.fft.fftshift(kzfft))
-
-    # kx = kgrid.getArray('kx')
-    # dVx_const = ((2 * np.pi)**(3)) * xgrid.dV()[0]
-
-    # dkx = kx[1] - kx[0]
-    # xg = np.fft.fftshift(np.fft.fftfreq(kx.size) * 2 * np.pi / dkx)
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'ReducedInterp': 'true', 'kGrid_ext': 'true'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'ReducedInterp': 'true', 'kGrid_ext': 'false'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -507,12 +490,12 @@ if __name__ == "__main__":
     xLg_y0slice = xLg_3D[:, :, yL.size // 2]
     nzxy_y0slice = nzxy[:, :, yL.size // 2]
 
+    # Interpolate 2D slice of position distribution
+
     posmult = 5
     zL_y0slice_interp = np.linspace(-1 * poslinDim, poslinDim, posmult * zL.size); xL_y0slice_interp = np.linspace(-1 * poslinDim, poslinDim, posmult * xL.size)
     zLg_y0slice_interp, xLg_y0slice_interp = np.meshgrid(zL_y0slice_interp, xL_y0slice_interp, indexing='ij')
     nzxy_y0slice_interp = interpolate.griddata((zLg_y0slice.flatten(), xLg_y0slice.flatten()), nzxy_y0slice.flatten(), (zLg_y0slice_interp, xLg_y0slice_interp), method='cubic')
-
-    # Interpolate 2D slice of position distribution
 
     # # Create DataSet for 3D Betak and position distribution slices
 

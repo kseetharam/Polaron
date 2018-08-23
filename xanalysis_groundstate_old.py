@@ -1,11 +1,11 @@
 import numpy as np
 import pandas as pd
 import xarray as xr
-import matplotlib
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
-from matplotlib.lines import Line2D
-import matplotlib.colors as colors
+# import matplotlib
+# import matplotlib.pyplot as plt
+# from matplotlib.animation import FuncAnimation
+# from matplotlib.lines import Line2D
+# import matplotlib.colors as colors
 import os
 import itertools
 import pf_dynamic_cart as pfc
@@ -23,16 +23,34 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    # (Lx, Ly, Lz) = (21, 21, 21)
-    # (dx, dy, dz) = (0.375, 0.375, 0.375)
-    (Lx, Ly, Lz) = (105, 105, 105)
+    # (Lx, Ly, Lz) = (30, 30, 30)
+    (Lx, Ly, Lz) = (21, 21, 21)
+    # (Lx, Ly, Lz) = (12, 12, 12)
     (dx, dy, dz) = (0.375, 0.375, 0.375)
+    # (dx, dy, dz) = (0.75, 0.75, 0.75)
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
+    # NGridPoints_cart = 1.37e5
+
+    # xgrid = Grid.Grid('CARTESIAN_3D')
+    # xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
+
+    # (Nx, Ny, Nz) = (len(xgrid.getArray('x')), len(xgrid.getArray('y')), len(xgrid.getArray('z')))
+
+    # kxfft = np.fft.fftfreq(Nx) * 2 * np.pi / dx; kyfft = np.fft.fftfreq(Nx) * 2 * np.pi / dy; kzfft = np.fft.fftfreq(Nx) * 2 * np.pi / dz
+
+    # kgrid = Grid.Grid('CARTESIAN_3D')
+    # kgrid.initArray_premade('kx', np.fft.fftshift(kxfft)); kgrid.initArray_premade('ky', np.fft.fftshift(kyfft)); kgrid.initArray_premade('kz', np.fft.fftshift(kzfft))
+
+    # kx = kgrid.getArray('kx')
+    # dVx_const = ((2 * np.pi)**(3)) * xgrid.dV()[0]
+
+    # dkx = kx[1] - kx[0]
+    # xg = np.fft.fftshift(np.fft.fftfreq(kx.size) * 2 * np.pi / dkx)
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Longtime': 'false', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Longtime': 'false', 'ReducedInterp': 'true', 'kGrid_ext': 'false'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -101,47 +119,13 @@ if __name__ == "__main__":
     # del(ds_tot.attrs['P']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
     # ds_tot.to_netcdf(innerdatapath + '/quench_Dataset_cart.nc')
 
-    # # # Concatenate Individual Datasets (aIBi specific)
-
-    # aIBi_List = [-10, -5, -2]
-    # for aIBi in aIBi_List:
-    #     ds_list = []; P_list = []; mI_list = []
-    #     for ind, filename in enumerate(os.listdir(innerdatapath)):
-    #         if filename[0:14] == 'quench_Dataset':
-    #             continue
-    #         if filename[0:6] == 'interp':
-    #             continue
-    #         if filename[0:2] == 'mm':
-    #             continue
-    #         if float(filename[13:-3]) != aIBi:
-    #             continue
-    #         print(filename)
-    #         ds = xr.open_dataset(innerdatapath + '/' + filename)
-    #         ds_list.append(ds)
-    #         P_list.append(ds.attrs['P'])
-    #         mI_list.append(ds.attrs['mI'])
-
-    #     s = sorted(zip(P_list, ds_list))
-    #     g = itertools.groupby(s, key=lambda x: x[0])
-
-    #     P_keys = []; P_ds_list = []; aIBi_ds_list = []
-    #     for key, group in g:
-    #         P_temp_list, ds_temp_list = zip(*list(group))
-    #         P_keys.append(key)  # note that key = P_temp_list[0]
-    #         P_ds_list.append(ds_temp_list[0])
-
-    #     with xr.concat(P_ds_list, pd.Index(P_keys, name='P')) as ds_tot:
-    #         # ds_tot = xr.concat(P_ds_list, pd.Index(P_keys, name='P'))
-    #         del(ds_tot.attrs['P']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
-    #         ds_tot.to_netcdf(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-
     # # Analysis of Total Dataset
     interpdatapath = innerdatapath + '/interp'
     aIBi = -10
-    # qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
-    # qds_aIBi = qds.sel(aIBi=aIBi)
-    qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    qds_aIBi = qds
+    qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
+    qds_aIBi = qds.sel(aIBi=aIBi)
+    # qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    # qds_aIBi = qds
 
     PVals = qds['P'].values
     tVals = qds['t'].values
@@ -601,106 +585,271 @@ if __name__ == "__main__":
     # plt.draw()
     # plt.show()
 
-    # # FULL RECONSTRUCTION OF 3D CARTESIAN BETA_K FROM 2D SPHERICAL BETA_K (doing actual interpolation in 2D spherical instead of 3D nonlinear cartesian)
+    # # # PHONON MODE POSITION CHARACTERIZATION - 2D PLOTS (SPHERICAL)
+
+    # CSAmp_ds = (qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']).isel(t=-1)
+    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    # kVec = kgrid.getArray('k')
+    # thVec = kgrid.getArray('th')
+    # kDiff = kgrid.diffArray('k')
+    # thDiff = kgrid.diffArray('th')
+    # Bk = xr.DataArray(np.full((len(kVec), len(thVec)), np.nan, dtype=complex), coords=[kVec, thVec], dims=['k', 'th'])
+    # for Pind, P in enumerate(PVals):
+    #     if Pind != 3:
+    #         continue
+    #     CSAmp_Vals = CSAmp_ds.sel(P=P).values
+    #     Nph = qds_aIBi.isel(t=-1).sel(P=P)['Nph'].values
+    #     Bk[:] = CSAmp_Vals.reshape((len(kVec), len(thVec)))
+
+    #     # Bk_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Bk, 'k', 'th', 5)
+    #     mult = 5
+    #     k = Bk.coords['k'].values; th = Bk.coords['th'].values
+    #     kg, thg = np.meshgrid(k, th, indexing='ij')
+
+    #     # Normalization of the original data array - this checks out
+    #     dk0 = kg[1, 0] - kg[0, 0]
+    #     dth0 = thg[0, 1] - thg[0, 0]
+    #     Bk_norm = (1 / Nph) * np.sum(dk0 * dth0 * (2 * np.pi)**(-2) * kg**2 * np.sin(thg) * np.abs(Bk.values)**2)
+    #     print(Bk_norm)
+
+    #     # Interpolation of original data array onto a finer spaced (spherical) grid
+    #     k_interp = np.linspace(np.min(k), np.max(k), mult * k.size); th_interp = np.linspace(np.min(th), np.max(th), mult * th.size)
+    #     kg_interp, thg_interp = np.meshgrid(k_interp, th_interp, indexing='ij')
+    #     Bk_interp_vals = interpolate.griddata((kg.flatten(), thg.flatten()), Bk.values.flatten(), (kg_interp, thg_interp), method='cubic')
+
+    #     # Normalization of interpolated data array (spherical coordinates) - this doesn't check out for supersonic P but does for subsonic (why??)
+    #     dk = kg_interp[1, 0] - kg_interp[0, 0]
+    #     dth = thg_interp[0, 1] - thg_interp[0, 0]
+    #     Bk_interp_norm = (1 / Nph) * np.sum(dk * dth * (2 * np.pi)**(-2) * kg_interp**2 * np.sin(thg_interp) * np.abs(Bk_interp_vals)**2)
+    #     print(Bk_interp_norm)
+
+    #     # add the negative theta values (equivalent to -x side) while deleting the column corresponding to theta=0 so we don't double count that point
+    #     thg_interp2 = np.concatenate((-1 * np.fliplr(np.delete(thg_interp, 0, 1)), thg_interp), axis=1)
+    #     kg_interp2 = np.concatenate((np.delete(kg_interp, 0, 1), kg_interp), axis=1)
+    #     Bk_interp2_vals = np.concatenate((np.fliplr(np.delete(Bk_interp_vals, 0, 1)), Bk_interp_vals), axis=1)
+    #     kxg_interp2 = kg_interp2 * np.sin(thg_interp2)
+    #     kzg_interp2 = kg_interp2 * np.cos(thg_interp2)
+
+    #     # fig1, ax1 = plt.subplots()
+    #     # ax1.scatter(kzg_interp, kxg_interp)
+    #     # plt.show()
+
+    #     (zdim, xdim) = kzg_interp2.shape
+    #     # now zg, xg, and Bk_interp_vals form a nonlinear grid of Bk vals in 2D -> we need to reinterpolate onto a linear grid in kx,kz space (don't forget to include the -xg branch after reinterpolation) and then do a 2D FFT, then save this to an array to plot, include Nph
+    #     npoints = zdim
+
+    #     fig, axes = plt.subplots(nrows=1, ncols=2)
+    #     # fig1, ax1 = plt.subplots()
+
+    #     if P < 0.9:
+    #         [vmin, vmax] = [0, 500]
+    #         axes[0].set_xlim([-1.5, 1.5])
+    #         axes[0].set_ylim([-1.5, 1.5])
+    #         axes[1].set_xlim([-1.5, 1.5])
+    #         axes[1].set_ylim([-1.5, 1.5])
+
+    #         # ax1.set_xlim([-1.5, 1.5])
+    #         # ax1.set_ylim([-1.5, 1.5])
+
+    #         kzL2 = np.linspace(-2, 2, 2 * npoints)
+    #         kxL2 = np.linspace(-2, 2, 2 * npoints)
+    #         kzLg_interp2, kxLg_interp2 = np.meshgrid(kzL2, kxL2, indexing='ij')
+
+    #     else:
+    #         [vmin, vmax] = [0, 9.2e13]
+    #         # [vmin, vmax] = [0, 1e18]
+    #         axes[0].set_xlim([-0.1, 0.1])
+    #         axes[0].set_ylim([-0.01, 0.01])
+    #         axes[1].set_xlim([-0.1, 0.1])
+    #         axes[1].set_ylim([-0.01, 0.01])
+
+    #         # ax1.set_xlim([-0.1, 0.1])
+    #         # ax1.set_ylim([-0.01, 0.01])
+
+    #         kzL2 = np.linspace(-0.1, 0.1, int(0.1 * npoints))
+    #         kxL2 = np.linspace(-0.01, 0.01, int(0.2 * npoints))
+    #         kzLg_interp2, kxLg_interp2 = np.meshgrid(kzL2, kxL2, indexing='ij')
+
+    #     # Now interpolate the spherical (interpolated) data onto a 2D cartesian grid
+    #     # Note: This is actually an 2D xz (since we chose theta=0 to be forward & |k|*cos(theta) to be z-direction in spherical coordinates) slice of the original Bk function
+    #     # We know that there is phi symmetry of the function Bk (as we rotate this xz slice around the z-axis, it stays the same)
+    #     # We need to reconstruct the full 3D function Bk (in Cartesian coords) using this 2D Cartesian coords xz slice and the phi symmetry we know the function satisfies
+    #     # Then, we can do a full 3D Fourier Transform on the 3D Bk from which we can trivially derive the position density distribution. We can then examine a 2D slice of the position distribution.
+    #     # Is there a shortcut where we can just take the Fourier Transform of the 2D xz slice directly to derive the 2D slice of the position distribution?
+    #     Bk_Lg2 = interpolate.griddata((kzg_interp2.flatten(), kxg_interp2.flatten()), Bk_interp2_vals.flatten(), (kzLg_interp2, kxLg_interp2), method='linear')
+    #     PhDen_Lg2 = ((1 / Nph) * np.abs(Bk_Lg2)**2).real.astype(float)
+
+    #     # For comparison, the phonon density in k-space using the original spherical (interpolated) data
+    #     PhDen = ((1 / Nph) * np.abs(Bk_interp2_vals)**2).real.astype(float)
+
+    #     quad1 = axes[0].pcolormesh(kzg_interp2, kxg_interp2, PhDen[:-1, :-1], vmin=vmin, vmax=vmax)
+    #     fig.colorbar(quad1, ax=axes[0], extend='both')
+    #     quad2 = axes[1].pcolormesh(kzLg_interp2, kxLg_interp2, PhDen_Lg2[:-1, :-1], vmin=vmin, vmax=vmax)
+    #     fig.colorbar(quad2, ax=axes[1], extend='both')
+
+    #     # ax1.scatter(kzg_interp, kxg_interp, c='b')
+    #     # ax1.scatter(kzg_interp, -1 * kxg_interp, c='b')
+    #     # ax1.scatter(kzLg_interp, kxLg_interp, c='r')
+    #     # ax1.scatter(kzLg_interp, -1 * kxLg_interp, c='r')
+
+    #     # Fourier Transform to get position distribution. This may not be kosher - see note above Bk_Lg2 above
+    #     fig2, ax2 = plt.subplots()
+
+    #     dkz2 = kzL2[1] - kzL2[0]
+    #     dkx2 = kxL2[1] - kxL2[0]
+    #     zL2 = np.fft.fftshift(np.fft.fftfreq(kzL2.size) * 2 * np.pi / dkz2)
+    #     xL2 = np.fft.fftshift(np.fft.fftfreq(kxL2.size) * 2 * np.pi / dkx2)
+    #     zLg2, xLg2 = np.meshgrid(zL2, xL2, indexing='ij')
+    #     dzL2 = zL2[1] - zL2[0]
+    #     dxL2 = xL2[1] - xL2[0]
+    #     # print(dzL2, 2 * np.pi / (kzL2.size * dkz2))
+    #     dVzx = dzL2 * dxL2
+
+    #     # Bk_Lg2[np.isnan(Bk_Lg2)] = 0
+    #     beta_kzkx2 = np.fft.ifftshift(Bk_Lg2)
+    #     beta_kzkx2 = Bk_Lg2
+    #     amp_beta_zx_preshift2 = np.fft.ifftn(beta_kzkx2) / dVzx
+    #     amp_beta_zx2 = np.fft.fftshift(amp_beta_zx_preshift2)
+    #     nzx2 = ((1 / Nph) * np.abs(amp_beta_zx2)**2).real.astype(float)
+    #     print(dkz2 * dkx2 * np.sum(PhDen_Lg2))
+    #     print(dVzx * np.sum(nzx2))
+    #     quad3 = ax2.pcolormesh(zLg2, xLg2, nzx2, vmin=0, vmax=np.max(nzx2))
+
+    #     # zZ = np.linspace(-200, 200, 5 * zL2.size)
+    #     # xZ = np.linspace(-3e3, 3e3, 5 * xL2.size)
+    #     # zZg, xZg = np.meshgrid(zZ, xZ, indexing='ij')
+    #     # nzxZ = interpolate.griddata((zLg2.flatten(), xLg2.flatten()), nzx2.flatten(), (zZg, xZg), method='linear')
+    #     # quad3 = ax2.pcolormesh(zZg, xZg, nzxZ, vmin=0, vmax=np.max(nzxZ))
+    #     ax2.set_xlim([-200, 200])
+    #     ax2.set_ylim([-3e3, 3e3])
+    #     fig2.colorbar(quad3, ax=ax2, extend='both')
+
+    #     print(P)
+    #     plt.show()
+    #     break
+
+    # # FULL RECONSTRUCTION OF 3D CARTESIAN BETA_K FROM 2D SPHERICAL BETA_K
 
     CSAmp_ds = (qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']).isel(t=-1)
     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
     kVec = kgrid.getArray('k')
     thVec = kgrid.getArray('th')
+    NphiPoints = 100  # This is the step that dramatically increases memory consumption and runtime of Cartesian griddata interpolation -> also affects quality of normalization of 3D distribution
+    phiVec = np.concatenate((np.linspace(0, np.pi, NphiPoints // 2, endpoint=False), np.linspace(np.pi, 2 * np.pi, NphiPoints // 2, endpoint=False)))
+    Bk_2D = xr.DataArray(np.full((len(kVec), len(thVec)), np.nan, dtype=complex), coords=[kVec, thVec], dims=['k', 'th'])
 
-    Pind = 7
+    Pind = 3
     P = PVals[Pind]
     print('P: {0}'.format(P))
 
     CSAmp_Vals = CSAmp_ds.sel(P=P).values
     Nph = qds_aIBi.isel(t=-1).sel(P=P)['Nph'].values
-    Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
 
+    Bk_2D[:] = CSAmp_Vals.reshape((len(kVec), len(thVec)))
+
+    mult = 5
     kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
-    kxg_Sph = kg * np.sin(thg)
-    kzg_Sph = kg * np.cos(thg)
     # Normalization of the original data array - this checks out
-    dk = kg[1, 0] - kg[0, 0]
-    dth = thg[0, 1] - thg[0, 0]
-    PhDen_Sph = ((1 / Nph) * np.abs(Bk_2D_vals)**2).real.astype(float)
-    Bk_norm = np.sum(dk * dth * (2 * np.pi)**(-2) * kg**2 * np.sin(thg) * PhDen_Sph)
+    dk0 = kg[1, 0] - kg[0, 0]
+    dth0 = thg[0, 1] - thg[0, 0]
+    Bk_norm = (1 / Nph) * np.sum(dk0 * dth0 * (2 * np.pi)**(-2) * kg**2 * np.sin(thg) * np.abs(Bk_2D.values)**2)
     print('Original (1/Nph)|Bk|^2 normalization (Spherical 2D): {0}'.format(Bk_norm))
+    # Interpolation of original data array onto a finer spaced (spherical) grid
+    k_interp = np.linspace(np.min(kVec), np.max(kVec), mult * kVec.size); th_interp = np.linspace(np.min(thVec), np.max(thVec), mult * thVec.size)
+    kg_interp, thg_interp = np.meshgrid(k_interp, th_interp, indexing='ij')
+    Bk_interp_vals = interpolate.griddata((kg.flatten(), thg.flatten()), Bk_2D.values.flatten(), (kg_interp, thg_interp), method='cubic')
+    # Normalization of interpolated data array (spherical coordinates) - this doesn't check out for supersonic case but does for subsonic case (why??)
+    dk = kg_interp[1, 0] - kg_interp[0, 0]
+    dth = thg_interp[0, 1] - thg_interp[0, 0]
+    Bk_interp_norm = (1 / Nph) * np.sum(dk * dth * (2 * np.pi)**(-2) * kg_interp**2 * np.sin(thg_interp) * np.abs(Bk_interp_vals)**2)
+    print('Interpolated (1/Nph)|Bk|^2 normalization (Spherical 2D): {0}'.format(Bk_interp_norm))
 
     # Set reduced bounds of k-space and other things dependent on subsonic or supersonic
     if P < 0.9:
         [vmin, vmax] = [0, 500]
-        # linDimMajor = 1.5
-        # linDimMinor = 1.5
-        linDimMajor = 3
-        linDimMinor = 3
+        linDimMajor = 1.5
+        linDimMinor = 1.5
         ext_major_rat = 0.35
         ext_minor_rat = 0.35
-        poslinDim = 10
-        Npoints = 400  # actual number of points will be ~Npoints-1
+        Npoints = 252  # actual number of points will be ~Npoints-1, want Npoints=2502 (gives 2500 points)
     else:
-        # [vmin, vmax] = [0, 9.2e13]
-        # linDimMajor = 0.1  # For the worse grid value data, there is some dependancy on the final FFT on what range of k we pick...(specifically the z-axis = lindimMajor changing in range 0.1 - 0.4), For better data grid, FFT still vanishes after lindimMajor >=0.4
-        # linDimMinor = 0.01
-        linDimMajor = 0.2
-        linDimMinor = 0.02
+        [vmin, vmax] = [0, 9.2e13]
+        linDimMajor = 0.1
+        linDimMinor = 0.01
         ext_major_rat = 0.025
         ext_minor_rat = 0.0025
-        poslinDim = 2000
-        Npoints = 400
+        Npoints = 252  # (gives 250 points)
 
     # Remove k values outside reduced k-space bounds (as |Bk|~0 there) and save the average of these values to add back in later before FFT
-    kred_ind = np.argwhere(kg[:, 0] > (1.5 * linDimMajor))[0][0]
-    kg_red = np.delete(kg, np.arange(kred_ind, kVec.size), 0)
-    thg_red = np.delete(thg, np.arange(kred_ind, kVec.size), 0)
-    Bk_red = np.delete(Bk_2D_vals, np.arange(kred_ind, kVec.size), 0)
-    Bk_remainder = np.delete(Bk_2D_vals, np.arange(0, kred_ind), 0)
+    kred_ind = np.argwhere(kg_interp[:, 0] > (1.5 * linDimMajor))[0][0]
+    kg_red = np.delete(kg_interp, np.arange(kred_ind, k_interp.size), 0)
+    thg_red = np.delete(thg_interp, np.arange(kred_ind, k_interp.size), 0)
+    Bk_red = np.delete(Bk_interp_vals, np.arange(kred_ind, k_interp.size), 0)
+    Bk_remainder = np.delete(Bk_interp_vals, np.arange(0, kred_ind), 0)
     Bk_rem_ave = np.average(Bk_remainder)
-    kVec_red = kVec[0:kred_ind]
-    kmax_rem = np.max(kVec)
+    k_interp_red = k_interp[0:kred_ind]
+    kmax_rem = np.max(k_interp)
 
     if toggleDict['ReducedInterp'] == 'true':
-        kVec = kVec_red
-        kg = kg_red
-        thg = thg_red
-        Bk_2D_vals = Bk_red
+        k_interp = k_interp_red
+        kg_interp = kg_red
+        thg_interp = thg_red
+        Bk_interp_vals = Bk_red
 
     # CHECK WHY ALL BK AMPLITUDES HAVE ZERO IMAGINARY PART, EVEN FOR SUPERSONIC CASE? IS THIS BECAUSE ITS THE GROUNDSTATE?
-    # print(np.imag(Bk_2D_vals))
+    # print(np.imag(Bk_2D.values))
+    # print(np.imag(Bk_interp_vals))
+
+    # 3D reconstruction in spherical coordinates (copy interpolated 2D spherical Bk onto all phi coordinates due to phi symmetry)
+    phi_interp, dphi = np.linspace(np.min(phiVec), np.max(phiVec), 1 * phiVec.size, retstep=True)
+    Bk_3D = xr.DataArray(np.full((len(k_interp), len(th_interp), len(phi_interp)), np.nan, dtype=complex), coords=[k_interp, th_interp, phi_interp], dims=['k', 'th', 'phi'])
+    for phiInd, phi in enumerate(phi_interp):
+        Bk_3D.sel(phi=phi)[:] = Bk_interp_vals
+
+    # Re-interpret grid points of 3D spherical reconstruction as nonlinear 3D cartesian grid
+    kg_3Di, thg_3Di, phig_3Di = np.meshgrid(k_interp, th_interp, phi_interp, indexing='ij')
+    kxg = kg_3Di * np.sin(thg_3Di) * np.cos(phig_3Di)
+    kyg = kg_3Di * np.sin(thg_3Di) * np.sin(phig_3Di)
+    kzg = kg_3Di * np.cos(thg_3Di)
+    (Nk, Nth, Nphi) = kzg.shape
+
+    Bk_3D_vals = Bk_3D.values
+    Bk_3D_vals[np.isnan(Bk_3D_vals)] = 0
+
+    # dphi = phi_interp[1] - phi_interp[0]
+    Bk_Sph3D_norm = (1 / Nph) * np.sum(dk * dth * dphi * (2 * np.pi)**(-3) * kg_3Di**2 * np.sin(thg_3Di) * np.abs(Bk_3D_vals)**2)
+    print('Interpolated (1/Nph)|Bk|^2 normalization (Spherical 3D): {0}'.format(Bk_Sph3D_norm))
 
     # Create linear 3D cartesian grid and reinterpolate Bk_3D onto this grid
-    kxL_pos, dkxL = np.linspace(1e-10, linDimMinor, Npoints // 2, retstep=True, endpoint=False); kxL = np.concatenate((1e-10 - 1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
-    kyL_pos, dkyL = np.linspace(1e-10, linDimMinor, Npoints // 2, retstep=True, endpoint=False); kyL = np.concatenate((1e-10 - 1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
-    kzL_pos, dkzL = np.linspace(1e-10, linDimMajor, Npoints // 2, retstep=True, endpoint=False); kzL = np.concatenate((1e-10 - 1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
-    kxLg_3D, kyLg_3D, kzLg_3D = np.meshgrid(kxL, kyL, kzL, indexing='ij')
+    kxL_pos, dkxL = np.linspace(0, linDimMinor, Npoints // 2, retstep=True, endpoint=False); kxL = np.concatenate((-1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
+    kyL_pos, dkyL = np.linspace(0, linDimMinor, Npoints // 2, retstep=True, endpoint=False); kyL = np.concatenate((-1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
+    kzL_pos, dkzL = np.linspace(0, linDimMajor, Npoints // 2, retstep=True, endpoint=False); kzL = np.concatenate((-1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
+    kzLg_3D, kxLg_3D, kyLg_3D = np.meshgrid(kzL, kxL, kyL, indexing='ij')
 
-    # Re-interpret grid points of linear 3D Cartesian as nonlinear 3D spherical grid, find unique (k,th) points
-    kg_3Di = np.sqrt(kxLg_3D**2 + kyLg_3D**2 + kzLg_3D**2)
-    thg_3Di = np.arccos(kzLg_3D / kg_3Di)
-    phig_3Di = np.arctan2(kyLg_3D, kxLg_3D)
-
-    kg_3Di_flat = kg_3Di.reshape(kg_3Di.size)
-    thg_3Di_flat = thg_3Di.reshape(thg_3Di.size)
-    tups_3Di = np.column_stack((kg_3Di_flat, thg_3Di_flat))
-    tups_3Di_unique, tups_inverse = np.unique(tups_3Di, return_inverse=True, axis=0)
-
-    # Perform interpolation on 2D projection and reconstruct full matrix on 3D linear cartesian grid
-    print('3D Cartesian grid Ntot: {:1.2E}'.format(kzLg_3D.size))
-    print('Unique interp points: {:1.2E}'.format(tups_3Di_unique[:, 0].size))
+    print('Spherical Interp Grid Shape: {0}'.format(kzg.shape))
+    print('Cartesian Interp Grid Shape: {0}'.format(kzLg_3D.shape))
     interpstart = timer()
-    Bk_2D_CartInt = interpolate.griddata((kg.flatten(), thg.flatten()), Bk_2D_vals.flatten(), tups_3Di_unique, method='cubic')
-    # Bk_2D_Rbf = interpolate.Rbf(kg, thg, Bk_2D.values)
-    # Bk_2D_CartInt = Bk_2D_Rbf(tups_3Di_unique)
+    BkLg_3D = interpolate.griddata((kzg.flatten(), kxg.flatten(), kyg.flatten()), Bk_3D_vals.flatten(), (kzLg_3D, kxLg_3D, kyLg_3D), method='nearest')
     interpend = timer()
     print('Interp Time: {0}'.format(interpend - interpstart))
-    BkLg_3D_flat = Bk_2D_CartInt[tups_inverse]
-    BkLg_3D = BkLg_3D_flat.reshape(kg_3Di.shape)
 
+    # dkzL = kzL[1] - kzL[0]; dkxL = kxL[1] - kxL[0]; dkyL = kyL[1] - kyL[0]
     BkLg_3D[np.isnan(BkLg_3D)] = 0
-    PhDenLg_3D = ((1 / Nph) * np.abs(BkLg_3D)**2).real.astype(float)
-    BkLg_3D_norm = np.sum(dkxL * dkyL * dkzL * (2 * np.pi)**(-3) * PhDenLg_3D)
-    print('Interpolated (1/Nph)|Bk|^2 normalization (Linear Cartesian 3D): {0}'.format(BkLg_3D_norm))
+    BkLg_3D_norm = (1 / Nph) * np.sum(dkzL * dkzL * dkyL * np.abs(BkLg_3D)**2)
+    print('Linear grid (1/Nph)|Bk|^2 normalization (Cartesian 3D): {0}'.format(BkLg_3D_norm))
 
-    # Add the remainder of Bk back in (values close to zero for large k) (Note: can also do this more easily by setting a fillvalue in griddata and interpolating)
+    # Consistency check: use 2D ky=0 slice of |Bk|^2 to calculate phonon density and compare it to phonon density from original spherical interpolated data
+
+    kxL_0ind = kxL.size // 2; kyL_0ind = kyL.size // 2; kzL_0ind = kzL.size // 2  # find position of zero of each axis: kxL=0, kyL=0, kzL=0
+    kxLg_ky0slice = kxLg_3D[:, :, kyL_0ind]
+    kzLg_ky0slice = kzLg_3D[:, :, kyL_0ind]
+    BkLg_ky0slice = BkLg_3D[:, :, kyL_0ind]
+    PhDen_Lg_ky0slice = ((1 / Nph) * np.abs(BkLg_ky0slice)**2).real.astype(float)
+    PhDen_Sph = ((1 / Nph) * np.abs(Bk_interp_vals)**2).real.astype(float)
+    kxg_Sph = kg_interp * np.sin(thg_interp)
+    kzg_Sph = kg_interp * np.cos(thg_interp)
+
+    # Add the remainder of Bk back in (values close to zero for large k)
     if toggleDict['ReducedInterp'] == 'true' and toggleDict['kGrid_ext'] == 'true':
         kL_max_major = ext_major_rat * kmax_rem / np.sqrt(2)
         kL_max_minor = ext_minor_rat * kmax_rem / np.sqrt(2)
@@ -708,81 +857,70 @@ if __name__ == "__main__":
         print('kL_red_max_minor: {0}, kL_ext_max_minor: {1}, dkL_minor: {2}'.format(np.max(kxL), kL_max_minor, dkxL))
         kx_addon = np.arange(linDimMinor, kL_max_minor, dkxL); ky_addon = np.arange(linDimMinor, kL_max_minor, dkyL); kz_addon = np.arange(linDimMajor, kL_max_major, dkzL)
         print('kL_ext_addon size -  major: {0}, minor: {1}'.format(2 * kz_addon.size, 2 * kx_addon.size))
-        kxL_ext = np.concatenate((1e-10 - 1 * np.flip(kx_addon, axis=0), np.concatenate((kxL, kx_addon))))
-        kyL_ext = np.concatenate((1e-10 - 1 * np.flip(ky_addon, axis=0), np.concatenate((kyL, kx_addon))))
-        kzL_ext = np.concatenate((1e-10 - 1 * np.flip(kz_addon, axis=0), np.concatenate((kzL, kx_addon))))
+        kxL_ext = np.concatenate((-1 * np.flip(kx_addon, axis=0), np.concatenate((kxL, kx_addon))))
+        kyL_ext = np.concatenate((-1 * np.flip(ky_addon, axis=0), np.concatenate((kyL, kx_addon))))
+        kzL_ext = np.concatenate((-1 * np.flip(kz_addon, axis=0), np.concatenate((kzL, kx_addon))))
 
         ax = kxL.size; ay = kyL.size; az = kzL.size
         mx = kx_addon.size; my = ky_addon.size; mz = kz_addon.size
-
-        BkLg_3D_ext = np.concatenate((Bk_rem_ave * np.ones((mz, ax, ay)), np.concatenate((BkLg_3D, Bk_rem_ave * np.ones((mx, ay, az))), axis=0)), axis=0)
-        BkLg_3D_ext = np.concatenate((Bk_rem_ave * np.ones(((az + 2 * mz), mx, ay)), np.concatenate((BkLg_3D_ext, Bk_rem_ave * np.ones(((ax + 2 * mx), my, az))), axis=1)), axis=1)
-        BkLg_3D_ext = np.concatenate((Bk_rem_ave * np.ones(((az + 2 * mz), (ax + 2 * mx), my)), np.concatenate((BkLg_3D_ext, Bk_rem_ave * np.ones(((ax + 2 * mx), (ay + 2 * my), mz))), axis=2)), axis=2)
+        BkLg_3D_ext = np.concatenate((Bk_rem_ave * np.ones((mz, ax, ay)), np.concatenate((BkLg_3D, Bk_rem_ave * np.ones((mz, ax, ay))), axis=0)), axis=0)
+        BkLg_3D_ext = np.concatenate((Bk_rem_ave * np.ones(((az + 2 * mz), mx, ay)), np.concatenate((BkLg_3D_ext, Bk_rem_ave * np.ones(((az + 2 * mz), mx, ay))), axis=1)), axis=1)
+        BkLg_3D_ext = np.concatenate((Bk_rem_ave * np.ones(((az + 2 * mz), (ax + 2 * mx), my)), np.concatenate((BkLg_3D_ext, Bk_rem_ave * np.ones(((az + 2 * mz), (ax + 2 * mx), my))), axis=2)), axis=2)
 
         kxL = kxL_ext; kyL = kyL_ext; kzL = kzL_ext
         BkLg_3D = BkLg_3D_ext
         print('Cartesian Interp Extended Grid Shape: {0}'.format(BkLg_3D.shape))
 
     # Fourier Transform to get 3D position distribution
+
+    zL = np.fft.fftshift(np.fft.fftfreq(kzL.size) * 2 * np.pi / dkzL)
     xL = np.fft.fftshift(np.fft.fftfreq(kxL.size) * 2 * np.pi / dkxL)
     yL = np.fft.fftshift(np.fft.fftfreq(kyL.size) * 2 * np.pi / dkyL)
-    zL = np.fft.fftshift(np.fft.fftfreq(kzL.size) * 2 * np.pi / dkzL)
-    dxL = xL[1] - xL[0]; dyL = yL[1] - yL[0]; dzL = zL[1] - zL[0]
-    dVxyz = dxL * dyL * dzL
+    dzL = zL[1] - zL[0]; dxL = xL[1] - xL[0]; dyL = yL[1] - yL[0]
+    dVzxy = dxL * dyL * dzL
     # print(dzL, 2 * np.pi / (kzL.size * dkzL))
 
-    xLg_3D, yLg_3D, zLg_3D = np.meshgrid(xL, yL, zL, indexing='ij')
-    beta_kxkykz = np.fft.ifftshift(BkLg_3D)
-    amp_beta_xyz_preshift = np.fft.ifftn(beta_kxkykz) / dVxyz
-    amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_preshift)
-    nxyz = ((1 / Nph) * np.abs(amp_beta_xyz)**2).real.astype(float)
-    nxyz_norm = np.sum(dVxyz * nxyz)
-    print('Linear grid (1/Nph)*n(x,y,z) normalization (Cartesian 3D): {0}'.format(nxyz_norm))
-
-    # # Create DataSet for 3D Betak and position distribution slices
-    # PhDen_da = xr.DataArray(PhDenLg_3D, coords=[kxL, kyL, kzL], dims=['kx', 'ky', 'kz'])
-    # nxyz_da = xr.DataArray(nxyz, coords=[xL, yL, zL], dims=['x', 'y', 'z'])
-
-    # data_dict = {'PhDen': PhDen_da, 'nxyz': nxyz_da}
-    # coords_dict = {'kx': kxL, 'ky': kyL, 'kz': kzL, 'x': xL, 'y': yL, 'z': zL}
-    # attrs_dict = {'P': P, 'aIBi': aIBi}
-    # interp_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
-    # interp_ds.to_netcdf(interpdatapath + '/InterpDat_P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
-
-    # Consistency check: use 2D ky=0 slice of |Bk|^2 to calculate phonon density and compare it to phonon density from original spherical interpolated data
-    kxL_0ind = kxL.size // 2; kyL_0ind = kyL.size // 2; kzL_0ind = kzL.size // 2  # find position of zero of each axis: kxL=0, kyL=0, kzL=0
-    kxLg_ky0slice = kxLg_3D[:, kyL_0ind, :]
-    kzLg_ky0slice = kzLg_3D[:, kyL_0ind, :]
-    PhDenLg_ky0slice = PhDenLg_3D[:, kyL_0ind, :]
+    zLg_3D, xLg_3D, yLg_3D = np.meshgrid(zL, xL, yL, indexing='ij')
+    beta_kzkxky = np.fft.ifftshift(BkLg_3D)
+    amp_beta_zxy_preshift = np.fft.ifftn(beta_kzkxky) / dVzxy
+    amp_beta_zxy = np.fft.fftshift(amp_beta_zxy_preshift)
+    nzxy = ((1 / Nph) * np.abs(amp_beta_zxy)**2).real.astype(float)
+    nzxy_norm = np.sum(dVzxy * nzxy)
+    print('Linear grid (1/Nph)*n(x,y,z) normalization (Cartesian 3D): {0}'.format(nzxy_norm))
 
     # Take 2D slices of position distribution
-    zLg_y0slice = zLg_3D[:, yL.size // 2, :]
-    xLg_y0slice = xLg_3D[:, yL.size // 2, :]
-    nxyz_y0slice = nxyz[:, yL.size // 2, :]
+    zLg_y0slice = zLg_3D[:, :, yL.size // 2]
+    xLg_y0slice = xLg_3D[:, :, yL.size // 2]
+    nzxy_y0slice = nzxy[:, :, yL.size // 2]
 
-    # Interpolate 2D slice of position distribution
-    posmult = 5
-    zL_y0slice_interp = np.linspace(-1 * poslinDim, poslinDim, posmult * zL.size); xL_y0slice_interp = np.linspace(-1 * poslinDim, poslinDim, posmult * xL.size)
-    xLg_y0slice_interp, zLg_y0slice_interp = np.meshgrid(xL_y0slice_interp, zL_y0slice_interp, indexing='ij')
-    nxyz_y0slice_interp = interpolate.griddata((xLg_y0slice.flatten(), zLg_y0slice.flatten()), nxyz_y0slice.flatten(), (xLg_y0slice_interp, zLg_y0slice_interp), method='cubic')
+    # Create DataSet for 3D Betak and position distribution slices
+
+    ReCSA_da = xr.DataArray(np.real(BkLg_3D), coords=[kzL, kxL, kyL], dims=['kz', 'kx', 'ky'])
+    ImCSA_da = xr.DataArray(np.imag(BkLg_3D), coords=[kzL, kxL, kyL], dims=['kz', 'kx', 'ky'])
+    nzxy_da = xr.DataArray(nzxy, coords=[zL, xL, yL], dims=['z', 'x', 'y'])
+
+    data_dict = {'ReCSA': ReCSA_da, 'ImCSA': ImCSA_da, 'nzxy': nzxy_da}
+    coords_dict = {'kx': kxL, 'ky': kyL, 'kz': kzL, 'x': xL, 'y': yL, 'z': zL}
+    attrs_dict = {'P': P, 'aIBi': aIBi}
+    interp_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
+    interp_ds.to_netcdf(interpdatapath + '/InterpDat_P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     # All Plotting: (a) 2D ky=0 slice of |Bk|^2, (b) 2D slice of position distribution
+
     fig, axes = plt.subplots(nrows=1, ncols=2)
     axes[0].set_xlim([-1 * linDimMajor, linDimMajor])
     axes[0].set_ylim([-1 * linDimMinor, linDimMinor])
     axes[1].set_xlim([-1 * linDimMajor, linDimMajor])
     axes[1].set_ylim([-1 * linDimMinor, linDimMinor])
 
-    if P > 0.9:
-        vmax = np.max(PhDen_Sph)
-    quad1 = axes[0].pcolormesh(kzg_Sph, kxg_Sph, PhDen_Sph[:-1, :-1], vmin=0, vmax=vmax)
-    quad1m = axes[0].pcolormesh(kzg_Sph, -1 * kxg_Sph, PhDen_Sph[:-1, :-1], vmin=0, vmax=vmax)
+    quad1 = axes[0].pcolormesh(kzg_Sph, kxg_Sph, PhDen_Sph[:-1, :-1], vmin=vmin, vmax=vmax)
+    quad1m = axes[0].pcolormesh(kzg_Sph, -1 * kxg_Sph, PhDen_Sph[:-1, :-1], vmin=vmin, vmax=vmax)
     fig.colorbar(quad1, ax=axes[0], extend='both')
-    quad2 = axes[1].pcolormesh(kzLg_ky0slice, kxLg_ky0slice, PhDenLg_ky0slice[:-1, :-1], vmin=0, vmax=vmax)
+    quad2 = axes[1].pcolormesh(kzLg_ky0slice, kxLg_ky0slice, PhDen_Lg_ky0slice[:-1, :-1], vmin=vmin, vmax=vmax)
     fig.colorbar(quad2, ax=axes[1], extend='both')
 
     fig2, ax2 = plt.subplots()
-    quad3 = ax2.pcolormesh(zLg_y0slice_interp, xLg_y0slice_interp, nxyz_y0slice_interp[:-1, :-1], vmin=0, vmax=np.max(nxyz_y0slice_interp))
+    quad3 = ax2.pcolormesh(zLg_y0slice, xLg_y0slice, nzxy_y0slice, vmin=0, vmax=np.max(nzxy_y0slice))
     # ax2.set_xlim([-200, 200])
     # ax2.set_ylim([-3e3, 3e3])
     fig2.colorbar(quad3, ax=ax2, extend='both')
