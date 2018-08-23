@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'ReducedInterp': 'true', 'kGrid_ext': 'false'}
+    toggleDict = {'Location': 'home', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'ReducedInterp': 'true', 'kGrid_ext': 'true'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -355,7 +355,7 @@ if __name__ == "__main__":
     phiVec = np.concatenate((np.linspace(0, np.pi, NphiPoints // 2, endpoint=False), np.linspace(np.pi, 2 * np.pi, NphiPoints // 2, endpoint=False)))
     Bk_2D = xr.DataArray(np.full((len(kVec), len(thVec)), np.nan, dtype=complex), coords=[kVec, thVec], dims=['k', 'th'])
 
-    Pind = 3
+    Pind = 10
     P = PVals[Pind]
     print('P: {0}'.format(P))
 
@@ -388,14 +388,16 @@ if __name__ == "__main__":
         linDimMinor = 1.5
         ext_major_rat = 0.35
         ext_minor_rat = 0.35
-        Npoints = 45  # actual number of points will be ~Npoints-1, want Npoints=2502 (gives 2500 points)
+        poslinDim = 10
+        Npoints = 252  # actual number of points will be ~Npoints-1
     else:
         [vmin, vmax] = [0, 9.2e13]
         linDimMajor = 0.1
         linDimMinor = 0.01
         ext_major_rat = 0.025
         ext_minor_rat = 0.0025
-        Npoints = 30  # (gives 250 points)
+        poslinDim = 2000
+        Npoints = 252
 
     # Remove k values outside reduced k-space bounds (as |Bk|~0 there) and save the average of these values to add back in later before FFT
     kred_ind = np.argwhere(kg_interp[:, 0] > (1.5 * linDimMajor))[0][0]
@@ -423,46 +425,27 @@ if __name__ == "__main__":
     kzL_pos, dkzL = np.linspace(1e-10, linDimMajor, Npoints // 2, retstep=True, endpoint=False); kzL = np.concatenate((1e-10 - 1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
     kzLg_3D, kxLg_3D, kyLg_3D = np.meshgrid(kzL, kxL, kyL, indexing='ij')
 
-    # Re-interpret grid points of linear 3D Cartesian as nonlinear 3D spherical grid
+    # Re-interpret grid points of linear 3D Cartesian as nonlinear 3D spherical grid, find unique (k,th) points
     kg_3Di = np.sqrt(kxLg_3D**2 + kyLg_3D**2 + kzLg_3D**2)
     thg_3Di = np.arccos(kzLg_3D / kg_3Di)
     phig_3Di = np.arctan2(kyLg_3D, kxLg_3D)
 
-    # print('k')
-    # print(np.min(kg_3Di), np.max(kg_3Di))
-    # print('\n' + 'th')
-    # print(np.min(thg_3Di), np.max(thg_3Di))
-    # print('\n' + 'phi')
-    # print(np.min(phig_3Di), np.max(phig_3Di))
+    kg_3Di_flat = kg_3Di.reshape(kg_3Di.size)
+    thg_3Di_flat = thg_3Di.reshape(thg_3Di.size)
+    tups_3Di = np.column_stack((kg_3Di_flat, thg_3Di_flat))
+    tups_3Di_unique, tups_inverse = np.unique(tups_3Di, return_inverse=True, axis=0)
 
-    k_3Di_unique, k_3Di_inverse = np.unique(kg_3Di, return_inverse=True)
-    th_3Di_unique, th_3Di_inverse = np.unique(thg_3Di, return_inverse=True)
-    print('Nk unique: {:1.2E}, Nth unique: {:1.2E}, Ntot unique: {:1.2E}'.format(k_3Di_unique.size, th_3Di_unique.size, k_3Di_unique.size * th_3Di_unique.size))
+    # Perform interpolation on 2D projection and reconstruct full matrix on 3D linear cartesian grid
     print('3D Cartesian grid Ntot: {:1.2E}'.format(kzLg_3D.size))
-    # print(kg_3Di_unique.size / kg_3Di.size)
-    # print(thg_3Di_unique.size / thg_3Di.size)
-
-    kg_3Di_unique, thg_3Di_unique = np.meshgrid(k_3Di_unique, th_3Di_unique, indexing='ij')
+    print('Unique interp points: {:1.2E}'.format(tups_3Di_unique[:, 0].size))
     interpstart = timer()
-    Bk_2D_CartInt = interpolate.griddata((kg_interp.flatten(), thg_interp.flatten()), Bk_interp_vals.flatten(), (kg_3Di_unique, thg_3Di_unique), method='cubic')
+    Bk_2D_CartInt = interpolate.griddata((kg_interp.flatten(), thg_interp.flatten()), Bk_interp_vals.flatten(), tups_3Di_unique, method='linear')
     # Bk_2D_Rbf = interpolate.Rbf(kg, thg, Bk_2D.values)
     # Bk_2D_CartInt = Bk_2D_Rbf(kg_3Di_unique, thg_3Di_unique)
     interpend = timer()
     print('Interp Time: {0}'.format(interpend - interpstart))
-    reconstart = timer()
-    BkLg_3D = np.zeros(kzLg_3D.shape, dtype='complex')
-    # think about playing with zip (zip kg_3Di_unique & thg_2Di_unique and compare to zipped kg_3Di & thg_3Di)
-    (Nkz, Nkx, Nky) = kg_3Di.shape
-    for iz in np.arange(Nkz):
-        for ix in np.arange(Nkx):
-            for iy in np.arange(Nky):
-                kv = kg_3Di[iz, ix, iy]
-                thv = thg_3Di[iz, ix, iy]
-                ik_un = np.argwhere(k_3Di_unique == kv)[0][0]
-                ith_un = np.argwhere(th_3Di_unique == thv)[0][0]
-                BkLg_3D[iz, ix, iy] = Bk_2D_CartInt[ik_un, ith_un]
-    reconend = timer()
-    print('Recon Time: {0}'.format(reconend - reconstart))
+    BkLg_3D_flat = Bk_2D_CartInt[tups_inverse]
+    BkLg_3D = BkLg_3D_flat.reshape(kg_3Di.shape)
 
     BkLg_3D[np.isnan(BkLg_3D)] = 0
     BkLg_3D_norm = (1 / Nph) * np.sum(dkzL * dkzL * dkyL * np.abs(BkLg_3D)**2)
@@ -479,7 +462,8 @@ if __name__ == "__main__":
     kxg_Sph = kg_interp * np.sin(thg_interp)
     kzg_Sph = kg_interp * np.cos(thg_interp)
 
-    # Add the remainder of Bk back in (values close to zero for large k)
+    # Add the remainder of Bk back in (values close to zero for large k) (Note: can also do this more easily by setting a fillvalue in griddata and interpolating)
+
     if toggleDict['ReducedInterp'] == 'true' and toggleDict['kGrid_ext'] == 'true':
         kL_max_major = ext_major_rat * kmax_rem / np.sqrt(2)
         kL_max_minor = ext_minor_rat * kmax_rem / np.sqrt(2)
@@ -487,9 +471,9 @@ if __name__ == "__main__":
         print('kL_red_max_minor: {0}, kL_ext_max_minor: {1}, dkL_minor: {2}'.format(np.max(kxL), kL_max_minor, dkxL))
         kx_addon = np.arange(linDimMinor, kL_max_minor, dkxL); ky_addon = np.arange(linDimMinor, kL_max_minor, dkyL); kz_addon = np.arange(linDimMajor, kL_max_major, dkzL)
         print('kL_ext_addon size -  major: {0}, minor: {1}'.format(2 * kz_addon.size, 2 * kx_addon.size))
-        kxL_ext = np.concatenate((-1 * np.flip(kx_addon, axis=0), np.concatenate((kxL, kx_addon))))
-        kyL_ext = np.concatenate((-1 * np.flip(ky_addon, axis=0), np.concatenate((kyL, kx_addon))))
-        kzL_ext = np.concatenate((-1 * np.flip(kz_addon, axis=0), np.concatenate((kzL, kx_addon))))
+        kxL_ext = np.concatenate((1e-10 - 1 * np.flip(kx_addon, axis=0), np.concatenate((kxL, kx_addon))))
+        kyL_ext = np.concatenate((1e-10 - 1 * np.flip(ky_addon, axis=0), np.concatenate((kyL, kx_addon))))
+        kzL_ext = np.concatenate((1e-10 - 1 * np.flip(kz_addon, axis=0), np.concatenate((kzL, kx_addon))))
 
         ax = kxL.size; ay = kyL.size; az = kzL.size
         mx = kx_addon.size; my = ky_addon.size; mz = kz_addon.size
@@ -523,17 +507,24 @@ if __name__ == "__main__":
     xLg_y0slice = xLg_3D[:, :, yL.size // 2]
     nzxy_y0slice = nzxy[:, :, yL.size // 2]
 
-    # Create DataSet for 3D Betak and position distribution slices
+    posmult = 5
+    zL_y0slice_interp = np.linspace(-1 * poslinDim, poslinDim, posmult * zL.size); xL_y0slice_interp = np.linspace(-1 * poslinDim, poslinDim, posmult * xL.size)
+    zLg_y0slice_interp, xLg_y0slice_interp = np.meshgrid(zL_y0slice_interp, xL_y0slice_interp, indexing='ij')
+    nzxy_y0slice_interp = interpolate.griddata((zLg_y0slice.flatten(), xLg_y0slice.flatten()), nzxy_y0slice.flatten(), (zLg_y0slice_interp, xLg_y0slice_interp), method='cubic')
 
-    ReCSA_da = xr.DataArray(np.real(BkLg_3D), coords=[kzL, kxL, kyL], dims=['kz', 'kx', 'ky'])
-    ImCSA_da = xr.DataArray(np.imag(BkLg_3D), coords=[kzL, kxL, kyL], dims=['kz', 'kx', 'ky'])
-    nzxy_da = xr.DataArray(nzxy, coords=[zL, xL, yL], dims=['z', 'x', 'y'])
+    # Interpolate 2D slice of position distribution
 
-    data_dict = {'ReCSA': ReCSA_da, 'ImCSA': ImCSA_da, 'nzxy': nzxy_da}
-    coords_dict = {'kx': kxL, 'ky': kyL, 'kz': kzL, 'x': xL, 'y': yL, 'z': zL}
-    attrs_dict = {'P': P, 'aIBi': aIBi}
-    interp_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
-    interp_ds.to_netcdf(interpdatapath + '/InterpDat_P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    # # Create DataSet for 3D Betak and position distribution slices
+
+    # ReCSA_da = xr.DataArray(np.real(BkLg_3D), coords=[kzL, kxL, kyL], dims=['kz', 'kx', 'ky'])
+    # ImCSA_da = xr.DataArray(np.imag(BkLg_3D), coords=[kzL, kxL, kyL], dims=['kz', 'kx', 'ky'])
+    # nzxy_da = xr.DataArray(nzxy, coords=[zL, xL, yL], dims=['z', 'x', 'y'])
+
+    # data_dict = {'ReCSA': ReCSA_da, 'ImCSA': ImCSA_da, 'nzxy': nzxy_da}
+    # coords_dict = {'kx': kxL, 'ky': kyL, 'kz': kzL, 'x': xL, 'y': yL, 'z': zL}
+    # attrs_dict = {'P': P, 'aIBi': aIBi}
+    # interp_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
+    # interp_ds.to_netcdf(interpdatapath + '/InterpDat_P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     # All Plotting: (a) 2D ky=0 slice of |Bk|^2, (b) 2D slice of position distribution
 
@@ -550,7 +541,7 @@ if __name__ == "__main__":
     fig.colorbar(quad2, ax=axes[1], extend='both')
 
     fig2, ax2 = plt.subplots()
-    quad3 = ax2.pcolormesh(zLg_y0slice, xLg_y0slice, nzxy_y0slice, vmin=0, vmax=np.max(nzxy_y0slice))
+    quad3 = ax2.pcolormesh(zLg_y0slice_interp, xLg_y0slice_interp, nzxy_y0slice_interp[:-1, :-1], vmin=0, vmax=np.max(nzxy_y0slice_interp))
     # ax2.set_xlim([-200, 200])
     # ax2.set_ylim([-3e3, 3e3])
     fig2.colorbar(quad3, ax=ax2, extend='both')
