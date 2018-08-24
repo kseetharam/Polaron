@@ -608,9 +608,10 @@ if __name__ == "__main__":
     kVec = kgrid.getArray('k')
     thVec = kgrid.getArray('th')
 
-    Pind = 7
+    Pind = 1
     P = PVals[Pind]
     print('P: {0}'.format(P))
+    print('dk: {0}'.format(kVec[1] - kVec[0]))
 
     CSAmp_Vals = CSAmp_ds.sel(P=P).values
     Nph = qds_aIBi.isel(t=-1).sel(P=P)['Nph'].values
@@ -739,6 +740,20 @@ if __name__ == "__main__":
     nxyz_norm = np.sum(dVxyz * nxyz)
     print('Linear grid (1/Nph)*n(x,y,z) normalization (Cartesian 3D): {0}'.format(nxyz_norm))
 
+    # Calculate real space distribution of atoms in the BEC
+    uk2 = 0.5 * (1 + (pfc.epsilon(kxLg_3D, kyLg_3D, kzLg_3D, mB) + gBB * n0) / pfc.omegak(kxLg_3D, kyLg_3D, kzLg_3D, mB, n0, gBB))
+    vk2 = uk2 - 1
+    uk = np.sqrt(uk2); vk = np.sqrt(vk2)
+
+    uB_kxkykz = np.fft.ifftshift(uk * BkLg_3D)
+    uB_xyz = np.fft.fftshift(np.fft.ifftn(uB_kxkykz) / dVxyz)
+    vB_kxkykz = np.fft.ifftshift(vk * BkLg_3D)
+    vB_xyz = np.fft.fftshift(np.fft.ifftn(vB_kxkykz) / dVxyz)
+    # na_xyz = np.sum(vk2 * dkxL * dkyL * dkzL) + np.abs(uB_xyz - np.conjugate(vB_xyz))**2
+    na_xyz = np.abs(uB_xyz - np.conjugate(vB_xyz))**2
+    na_xyz_norm = na_xyz / np.sum(na_xyz * dVxyz)
+    print(np.sum(vk2 * dkxL * dkyL * dkzL), np.max(np.abs(uB_xyz - np.conjugate(vB_xyz))**2))
+
     # # Create DataSet for 3D Betak and position distribution slices
     # PhDen_da = xr.DataArray(PhDenLg_3D, coords=[kxL, kyL, kzL], dims=['kx', 'ky', 'kz'])
     # nxyz_da = xr.DataArray(nxyz, coords=[xL, yL, zL], dims=['x', 'y', 'z'])
@@ -766,6 +781,10 @@ if __name__ == "__main__":
     xLg_y0slice_interp, zLg_y0slice_interp = np.meshgrid(xL_y0slice_interp, zL_y0slice_interp, indexing='ij')
     nxyz_y0slice_interp = interpolate.griddata((xLg_y0slice.flatten(), zLg_y0slice.flatten()), nxyz_y0slice.flatten(), (xLg_y0slice_interp, zLg_y0slice_interp), method='cubic')
 
+    # Take 2D slices of atom position distribution and interpolate
+    na_xyz_y0slice = na_xyz_norm[:, yL.size // 2, :]
+    na_xyz_y0slice_interp = interpolate.griddata((xLg_y0slice.flatten(), zLg_y0slice.flatten()), na_xyz_y0slice.flatten(), (xLg_y0slice_interp, zLg_y0slice_interp), method='cubic')
+
     # All Plotting: (a) 2D ky=0 slice of |Bk|^2, (b) 2D slice of position distribution
     fig, axes = plt.subplots(nrows=1, ncols=2)
     axes[0].set_xlim([-1 * linDimMajor, linDimMajor])
@@ -780,12 +799,26 @@ if __name__ == "__main__":
     fig.colorbar(quad1, ax=axes[0], extend='both')
     quad2 = axes[1].pcolormesh(kzLg_ky0slice, kxLg_ky0slice, PhDenLg_ky0slice[:-1, :-1], vmin=0, vmax=vmax)
     fig.colorbar(quad2, ax=axes[1], extend='both')
+    axes[0].set_xlabel('kz (Impurity Propagation Direction)')
+    axes[0].set_xlabel('kx')
+    axes[1].set_xlabel('kz (Impurity Propagation Direction)')
+    axes[1].set_xlabel('kx')
+    axes[0].set_title('Individual Phonon Momentum Distribution (Data)')
+    axes[1].set_title('Individual Phonon Momentum Distribution (Interp)')
 
     fig2, ax2 = plt.subplots()
     quad3 = ax2.pcolormesh(zLg_y0slice_interp, xLg_y0slice_interp, nxyz_y0slice_interp[:-1, :-1], vmin=0, vmax=np.max(nxyz_y0slice_interp))
-    # ax2.set_xlim([-200, 200])
-    # ax2.set_ylim([-3e3, 3e3])
+    ax2.set_xlabel('z (Impurity Propagation Direction)')
+    ax2.set_ylabel('x')
+    ax2.set_title('Indivudal Phonon Position Distribution (Interp)')
     fig2.colorbar(quad3, ax=ax2, extend='both')
+
+    fig3, ax3 = plt.subplots()
+    quad4 = ax3.pcolormesh(zLg_y0slice_interp, xLg_y0slice_interp, na_xyz_y0slice_interp[:-1, :-1])
+    ax3.set_xlabel('z (Impurity Propagation Direction)')
+    ax3.set_ylabel('x')
+    ax3.set_title('Indivudal Atom Position Distribution (Interp)')
+    fig3.colorbar(quad4, ax=ax3, extend='both')
 
     plt.show()
 
