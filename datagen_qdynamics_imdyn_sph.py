@@ -198,7 +198,7 @@ if __name__ == "__main__":
 
     cParams_List = []
 
-    aIBi_Vals = np.array([-10.0, -5.0, -2.0])
+    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -0.5])
     # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi_Vals = aIBi_Vals - aSi
 
     # P_Vals = np.array([0.4])
@@ -208,7 +208,6 @@ if __name__ == "__main__":
         for P in P_Vals:
             cParams_List.append([P, aIBi])
 
-    print(innerdatapath)
     # missedVals = [6, 7, 13, 14, 19, 24, 25, 26, 27, 30, 31, 32, 33, 34, 44, 45, 46, 47, 56, 57, 58, 59, 65, 66, 67, 68, 70, 71, 74, 75, 76]
     # cParams_List = [cParams_List[i] for i in missedVals]
 
