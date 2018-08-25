@@ -2,8 +2,8 @@
 #SBATCH -J quench
 #SBATCH -n 2
 #SBATCH -N 1
-#SBATCH -t 6-23:59
-#SBATCH -p shared
+#SBATCH -t 16-00:00
+#SBATCH -p unrestricted
 #SBATCH --mem=8000
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kis@mit.edu 

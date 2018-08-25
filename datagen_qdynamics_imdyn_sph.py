@@ -52,7 +52,8 @@ if __name__ == "__main__":
     kgrid.initArray_premade('th', thetaArray)
 
     # for imdyn evolution
-    tMax = 1e5
+    # tMax = 1e5
+    tMax = 6e4
     dt = 10
     CoarseGrainRate = 100
 
@@ -88,11 +89,11 @@ if __name__ == "__main__":
     # ---- SET OUTPUT DATA FOLDER ----
 
     if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints, mI / mB)
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, mI / mB)
     elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints, mI / mB)
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, mI / mB)
     elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints, mI / mB)
+        datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, mI / mB)
 
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
@@ -201,11 +202,18 @@ if __name__ == "__main__":
     # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi_Vals = aIBi_Vals - aSi
 
     # P_Vals = np.array([0.4])
-    P_Vals = np.concatenate((np.array([0.1, 0.4, 0.6]), np.linspace(0.8, 2.8, 20), np.linspace(3.0, 5.0, 3)))
+    P_Vals = np.concatenate((np.linspace(0.1, 0.8, 9, endpoint=False), np.linspace(0.8, 2.8, 20), np.linspace(3.0, 5.0, 3)))
 
     for ind, aIBi in enumerate(aIBi_Vals):
         for P in P_Vals:
             cParams_List.append([P, aIBi])
+
+    print(innerdatapath)
+    # missedVals = [6, 7, 13, 14, 19, 24, 25, 26, 27, 30, 31, 32, 33, 34, 44, 45, 46, 47, 56, 57, 58, 59, 65, 66, 67, 68, 70, 71, 74, 75, 76]
+    # cParams_List = [cParams_List[i] for i in missedVals]
+
+    # print(len(cParams_List))
+    # print(P_Vals)
 
     # # ---- COMPUTE DATA ON COMPUTER ----
 
