@@ -190,6 +190,21 @@ if __name__ == "__main__":
     #     data = np.concatenate((P * np.ones(tVals.size)[:, np.newaxis], tVals[:, np.newaxis], Energy_Vals[Pind, :][:, np.newaxis], vI_Vals[Pind, :][:, np.newaxis]), axis=1)
     #     np.savetxt(mmdatapath + '/aIBi_{:d}_P_{:.2f}.dat'.format(aIBi, P), data)
 
+    # # # Nph (SPHERICAL)
+
+    # Nph_ds = qds_aIBi['Nph']
+    # Nph_Vals = np.zeros((PVals.size, tVals.size))
+    # for Pind, P in enumerate(PVals):
+    #     for tind, t in enumerate(tVals):
+    #         Nph_Vals[Pind, tind] = Nph_ds.sel(P=P, t=t).values
+
+    # fig, ax = plt.subplots()
+    # ax.plot(PVals, Nph_Vals[:, -1], 'k-')
+    # ax.set_title('Phonon Number (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+    # ax.set_xlabel('P')
+    # ax.set_ylabel(r'$N_{ph}$')
+    # plt.show()
+
     # # # Z-FACTOR (SPHERICAL)
 
     # Zfac_ds = np.exp(-1 * qds_aIBi['Nph'])
@@ -253,6 +268,31 @@ if __name__ == "__main__":
     # ax3.set_xscale('log')
     # ax3.set_title('Ground State Energy (' + r'$a_{IB}^{-1}=$' + '{0}, '.format(aIBi) + r'$P=$' + '{:.2f})'.format(PVals[Pind]))
     # ax3.set_xlabel('Imaginary time')
+    # plt.show()
+
+    # # # ENERGY CHARACTERIZATION MULTIPLE INTERACTION STRENGTHS (SPHERICAL)
+
+    # aIBi_Vals = np.array([-10, -5, -2])
+    # colorList = ['b', 'g', 'r']
+    # fig, ax = plt.subplots()
+    # for aind, aIBi in enumerate(aIBi_Vals):
+    #     qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    #     CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+    #     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+
+    #     Energy_Vals_inf = np.zeros(PVals.size)
+    #     for Pind, P in enumerate(PVals):
+    #         CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
+    #         Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+
+    #     Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+    #     Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
+    #     Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+    #     Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+    #     ax.plot(Pinf_Vals, Einf_2ndderiv_Vals, color=colorList[aind], linestyle='', marker='o', label=r'$a_{IB}^{-1}=$' + '{:.1f}'.format(aIBi))
+    # ax.legend()
+    # ax.set_title('2nd Derivative of Ground State Energy')
+    # ax.set_xlabel('P')
     # plt.show()
 
     # # # POLARON SOUND VELOCITY (SPHERICAL)
@@ -618,7 +658,7 @@ if __name__ == "__main__":
     # kVec = kgrid.getArray('k')
     # thVec = kgrid.getArray('th')
 
-    # Pind = 10
+    # Pind = 2
     # P = PVals[Pind]
     # print('P: {0}'.format(P))
     # print('dk: {0}'.format(kVec[1] - kVec[0]))
@@ -807,7 +847,7 @@ if __name__ == "__main__":
     # ax1.set_xlim([-1 * linDimMajor, linDimMajor])
     # ax1.set_ylim([-1 * linDimMinor, linDimMinor])
     # ax1.set_xlabel('kz (Impurity Propagation Direction)')
-    # ax1.set_xlabel('kx')
+    # ax1.set_ylabel('kx')
     # ax1.set_title('Individual Phonon Momentum Distribution (Data)')
     # fig1.colorbar(quad1, ax=ax1, extend='both')
 
@@ -815,38 +855,41 @@ if __name__ == "__main__":
     # quad2 = ax2.pcolormesh(kzLg_ky0slice, kxLg_ky0slice, PhDenLg_ky0slice[:-1, :-1], norm=colors.LogNorm(vmin=np.abs(np.min(PhDen_Sph)), vmax=np.max(PhDen_Sph)), cmap='inferno')
     # ax2.set_xlim([-1 * linDimMajor, linDimMajor])
     # ax2.set_ylim([-1 * linDimMinor, linDimMinor])
+    # # quad2 = ax2.pcolormesh(kzLg_ky0slice, kxLg_ky0slice, PhDenLg_ky0slice[:-1, :-1], norm=colors.LogNorm(vmin=1, vmax=np.max(PhDen_Sph)), cmap='inferno')
+    # # ax2.set_xlim([-1 * 0.75, 0.75])
+    # # ax2.set_ylim([-1 * 0.75, 0.75])
     # ax2.set_xlabel('kz (Impurity Propagation Direction)')
-    # ax2.set_xlabel('kx')
+    # ax2.set_ylabel('kx')
     # ax2.set_title('Individual Phonon Momentum Distribution (Interp)')
     # fig2.colorbar(quad2, ax=ax2, extend='both')
 
-    # # fig3, ax3 = plt.subplots()
-    # # quad3 = ax3.pcolormesh(zLg_y0slice_interp, xLg_y0slice_interp, nxyz_y0slice_interp[:-1, :-1], norm=colors.LogNorm(vmin=np.abs(np.min(nxyz_y0slice_interp)), vmax=np.max(nxyz_y0slice_interp)), cmap='inferno')
-    # # ax3.set_xlabel('z (Impurity Propagation Direction)')
-    # # ax3.set_ylabel('x')
-    # # ax3.set_title('Individual Phonon Position Distribution (Interp)')
-    # # fig3.colorbar(quad3, ax=ax3, extend='both')
-
-    # # fig4, ax4 = plt.subplots()
-    # # quad4 = ax4.pcolormesh(zLg_y0slice_interp, xLg_y0slice_interp, na_xyz_y0slice_interp[:-1, :-1], norm=colors.LogNorm(vmin=np.abs(np.min(na_xyz_y0slice_interp)), vmax=np.max(na_xyz_y0slice_interp)), cmap='inferno')
-    # # ax4.set_xlabel('z (Impurity Propagation Direction)')
-    # # ax4.set_ylabel('x')
-    # # ax4.set_title('Individual Atom Position Distribution (Interp)')
-    # # fig4.colorbar(quad4, ax=ax4, extend='both')
-
     # fig3, ax3 = plt.subplots()
-    # quad3 = ax3.pcolormesh(zLg_y0slice_interp, xLg_y0slice_interp, nxyz_y0slice_interp[:-1, :-1], norm=colors.SymLogNorm(linthresh=0.01, vmin=np.min(nxyz_y0slice_interp), vmax=np.max(nxyz_y0slice_interp)), cmap='inferno')
+    # quad3 = ax3.pcolormesh(zLg_y0slice_interp, xLg_y0slice_interp, nxyz_y0slice_interp[:-1, :-1], norm=colors.LogNorm(vmin=np.abs(np.min(nxyz_y0slice_interp)), vmax=np.max(nxyz_y0slice_interp)), cmap='inferno')
     # ax3.set_xlabel('z (Impurity Propagation Direction)')
     # ax3.set_ylabel('x')
     # ax3.set_title('Individual Phonon Position Distribution (Interp)')
     # fig3.colorbar(quad3, ax=ax3, extend='both')
 
     # fig4, ax4 = plt.subplots()
-    # quad4 = ax4.pcolormesh(zLg_y0slice_interp, xLg_y0slice_interp, na_xyz_y0slice_interp[:-1, :-1], norm=colors.SymLogNorm(linthresh=0.01, vmin=np.min(na_xyz_y0slice_interp), vmax=np.max(na_xyz_y0slice_interp)), cmap='inferno')
+    # quad4 = ax4.pcolormesh(zLg_y0slice_interp, xLg_y0slice_interp, na_xyz_y0slice_interp[:-1, :-1], norm=colors.LogNorm(vmin=np.abs(np.min(na_xyz_y0slice_interp)), vmax=np.max(na_xyz_y0slice_interp)), cmap='inferno')
     # ax4.set_xlabel('z (Impurity Propagation Direction)')
     # ax4.set_ylabel('x')
     # ax4.set_title('Individual Atom Position Distribution (Interp)')
     # fig4.colorbar(quad4, ax=ax4, extend='both')
+
+    # # fig3, ax3 = plt.subplots()
+    # # quad3 = ax3.pcolormesh(zLg_y0slice_interp, xLg_y0slice_interp, nxyz_y0slice_interp[:-1, :-1], norm=colors.SymLogNorm(linthresh=0.01, vmin=np.min(nxyz_y0slice_interp), vmax=np.max(nxyz_y0slice_interp)), cmap='inferno')
+    # # ax3.set_xlabel('z (Impurity Propagation Direction)')
+    # # ax3.set_ylabel('x')
+    # # ax3.set_title('Individual Phonon Position Distribution (Interp)')
+    # # fig3.colorbar(quad3, ax=ax3, extend='both')
+
+    # # fig4, ax4 = plt.subplots()
+    # # quad4 = ax4.pcolormesh(zLg_y0slice_interp, xLg_y0slice_interp, na_xyz_y0slice_interp[:-1, :-1], norm=colors.SymLogNorm(linthresh=0.01, vmin=np.min(na_xyz_y0slice_interp), vmax=np.max(na_xyz_y0slice_interp)), cmap='inferno')
+    # # ax4.set_xlabel('z (Impurity Propagation Direction)')
+    # # ax4.set_ylabel('x')
+    # # ax4.set_title('Individual Atom Position Distribution (Interp)')
+    # # fig4.colorbar(quad4, ax=ax4, extend='both')
 
     # plt.show()
 
