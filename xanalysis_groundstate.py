@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Longtime': 'false', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
+    toggleDict = {'Location': 'home', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Longtime': 'false', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -658,7 +658,7 @@ if __name__ == "__main__":
     kVec = kgrid.getArray('k')
     thVec = kgrid.getArray('th')
 
-    Pind = 2
+    Pind = 10
     P = PVals[Pind]
     print('P: {0}'.format(P))
     print('dk: {0}'.format(kVec[1] - kVec[0]))
@@ -690,14 +690,15 @@ if __name__ == "__main__":
         Npoints = 400  # actual number of points will be ~Npoints-1
     else:
         # [vmin, vmax] = [0, 9.2e13]
-        # linDimMajor = 0.1  # For the worse grid value data, there is some dependancy on the final FFT on what range of k we pick...(specifically the z-axis = lindimMajor changing in range 0.1 - 0.4), For better data grid, FFT still vanishes after lindimMajor >=0.4 -> probably due to resolution in k-space not capturing the features
-        # linDimMinor = 0.01
         linDimMajor = 0.2
         linDimMinor = 0.02
         ext_major_rat = 0.025
         ext_minor_rat = 0.0025
         poslinDim = 2500
         Npoints = 400
+        # linDimMajor = 0.1  # For the worse grid value data, there is some dependancy on the final FFT on what range of k we pick...(specifically the z-axis = lindimMajor changing in range 0.1 - 0.4), For better data grid, FFT still vanishes after lindimMajor >=0.4 -> probably due to resolution in k-space not capturing the features
+        # linDimMinor = 0.01
+        # Npoints = 200
 
     # Remove k values outside reduced k-space bounds (as |Bk|~0 there) and save the average of these values to add back in later before FFT
     if toggleDict['ReducedInterp'] == 'true':
