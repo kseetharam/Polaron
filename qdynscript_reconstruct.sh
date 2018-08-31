@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -J gsrecon
-#SBATCH -n 1
+#SBATCH -n 2
 #SBATCH -N 1
 #SBATCH -t 3-00:00
 #SBATCH -p bigmem
