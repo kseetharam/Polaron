@@ -5,6 +5,8 @@ import Grid
 from scipy import interpolate
 from timeit import default_timer as timer
 import time
+# import matplotlib
+# import matplotlib.pyplot as plt
 
 
 if __name__ == "__main__":
@@ -18,7 +20,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon'}
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -184,6 +186,16 @@ if __name__ == "__main__":
         interp_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
         interp_ds.to_netcdf(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
 
+        # # compare grids
+        # fig, ax = plt.subplots()
+        # kxLg, kzLg = np.meshgrid(kxL, kzL, indexing='ij')
+        # kxg_Sph = kg * np.sin(thg)
+        # kzg_Sph = kg * np.cos(thg)
+        # ax.scatter(kzg_Sph, kxg_Sph, c='b')
+        # ax.scatter(kzg_Sph, -1 * kxg_Sph, c='b')
+        # ax.scatter(kzLg, kxLg, c='r')
+        # plt.show()
+
         # # remove references to objects to free up memory
         # kxLg_3D, kyLg_3D, kzLg_3D, kg_3Di, thg_3Di, phig_3Di, kg_3Di_flat, thg_3Di_flat
         # tups_3Di, tups_3Di_unique, tups_inverse
@@ -200,10 +212,12 @@ if __name__ == "__main__":
 
     # Generate data
 
-    # !!!!!!!check if what is the largest dkx, dky, dkz to get correct features
     # dkxL = 1e-4; dkyL = 1e-4; dkzL = 1e-3
-    dkxL = 5e-4; dkyL = 5e-4; dkzL = 5e-3
-    linDimList = [(0.1, 0.01)]
+    # linDimList = [(0.1, 0.01)]
+
+    dkxL = 1e-3; dkyL = 1e-3; dkzL = 1e-3
+    linDimList = [(0.1, 0.1), (0.2, 0.2), (0.5, 0.5), (1, 1), (1.5, 1.5), (2, 2), (2.5, 2.5), (3, 3), (3.5, 3.5), (4, 4), (4.5, 4.5), (5, 5), (5.5, 5.5), (6, 6), (6.5, 6.5)]
+
     for ldtup in linDimList:
         tupstart = timer()
         linDimMajor, linDimMinor = ldtup

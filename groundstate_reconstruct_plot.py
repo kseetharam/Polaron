@@ -58,7 +58,9 @@ if __name__ == "__main__":
     aIBi = -10
     P = 1.54
 
-    linDimList = [(0.1, 0.01)]
+    # linDimList = [(6.5, 0.02)]
+    # linDimList = [(0.2, 0.2)]
+    linDimList = [(0.1, 0.1)]
     linDimMajor, linDimMinor = linDimList[0]
 
     # Plot
@@ -86,19 +88,20 @@ if __name__ == "__main__":
     np_xz_slice = np_xz_slice_interp
     na_xz_slice = na_xz_slice_interp
 
+    print(np.max(zL), np.max(xL))
     # All Plotting:
 
     fig2, ax2 = plt.subplots()
     quad2 = ax2.pcolormesh(kzLg_xz_slice, kxLg_xz_slice, PhDenLg_xz_slice[:-1, :-1], norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDenLg_xz_slice)), cmap='inferno')
-    ax2.set_xlim([-1 * linDimMajor, linDimMajor])
-    ax2.set_ylim([-1 * linDimMinor, linDimMinor])
+    ax2.set_xlim([-1 * 0.1, 0.1])
+    ax2.set_ylim([-1 * 0.02, 0.02])
     ax2.set_xlabel('kz (Impurity Propagation Direction)')
     ax2.set_ylabel('kx')
     ax2.set_title('Individual Phonon Momentum Distribution (Interp)')
     fig2.colorbar(quad2, ax=ax2, extend='both')
 
     fig3, ax3 = plt.subplots()
-    quad3 = ax3.pcolormesh(zLg_xz_slice, xLg_xz_slice, np_xz_slice[:-1, :-1], norm=colors.LogNorm(vmin=5e-14, vmax=np.max(np_xz_slice)), cmap='inferno')
+    quad3 = ax3.pcolormesh(zLg_xz_slice, xLg_xz_slice, np_xz_slice[:-1, :-1], norm=colors.LogNorm(vmin=np.abs(np.min(np_xz_slice)), vmax=np.max(np_xz_slice)), cmap='inferno')
     poslinDim3 = 3000
     ax3.set_xlim([-1 * poslinDim3, poslinDim3])
     ax3.set_ylim([-1 * poslinDim3, poslinDim3])
@@ -108,7 +111,7 @@ if __name__ == "__main__":
     fig3.colorbar(quad3, ax=ax3, extend='both')
 
     fig4, ax4 = plt.subplots()
-    quad4 = ax4.pcolormesh(zLg_xz_slice, xLg_xz_slice, na_xz_slice[:-1, :-1], norm=colors.LogNorm(vmin=1e-10, vmax=np.max(na_xz_slice)), cmap='inferno')
+    quad4 = ax4.pcolormesh(zLg_xz_slice, xLg_xz_slice, na_xz_slice[:-1, :-1], norm=colors.LogNorm(vmin=np.abs(np.min(na_xz_slice)), vmax=np.max(na_xz_slice)), cmap='inferno')
     poslinDim4 = 1500
     ax4.set_xlim([-1 * poslinDim4, poslinDim4])
     ax4.set_ylim([-1 * poslinDim4, poslinDim4])
@@ -116,7 +119,5 @@ if __name__ == "__main__":
     ax4.set_ylabel('x')
     ax4.set_title('Individual Atom Position Distribution (Interp)')
     fig4.colorbar(quad4, ax=ax4, extend='both')
-
-    print(np.abs(np.min(np_xz_slice)), np.abs(np.min(na_xz_slice)))
 
     plt.show()
