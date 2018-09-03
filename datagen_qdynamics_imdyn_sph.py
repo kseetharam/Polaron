@@ -208,6 +208,8 @@ if __name__ == "__main__":
         for P in P_Vals:
             cParams_List.append([P, aIBi])
 
+    # CANCELLED cParams_List[63-127]
+
     # missedVals = [6, 7, 13, 14, 19, 24, 25, 26, 27, 30, 31, 32, 33, 34, 44, 45, 46, 47, 56, 57, 58, 59, 65, 66, 67, 68, 70, 71, 74, 75, 76]
     # cParams_List = [cParams_List[i] for i in missedVals]
 
