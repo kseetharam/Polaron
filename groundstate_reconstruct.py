@@ -20,7 +20,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -57,6 +57,7 @@ if __name__ == "__main__":
 
     interpdatapath = innerdatapath + '/interp'
     aIBi = -10
+    # Pind = 2
     Pind = 10
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
@@ -216,8 +217,8 @@ if __name__ == "__main__":
     # linDimList = [(0.1, 0.01)]
 
     dkxL = 1e-3; dkyL = 1e-3; dkzL = 1e-3
-    linDimList = [(0.1, 0.1), (0.2, 0.2), (0.5, 0.5), (1, 1), (1.5, 1.5), (2, 2), (2.5, 2.5), (3, 3), (3.5, 3.5), (4, 4), (4.5, 4.5), (5, 5), (5.5, 5.5), (6, 6), (6.5, 6.5)]
-
+    # linDimList = [(0.1, 0.1), (0.2, 0.2), (0.5, 0.5), (1, 1), (1.5, 1.5), (2, 2), (2.5, 2.5), (3, 3), (3.5, 3.5), (4, 4), (4.5, 4.5), (5, 5), (5.5, 5.5), (6, 6), (6.5, 6.5)]
+    linDimList = [(0.2, 0.2)]
     for ldtup in linDimList:
         tupstart = timer()
         linDimMajor, linDimMinor = ldtup
