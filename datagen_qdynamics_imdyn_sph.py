@@ -59,9 +59,9 @@ if __name__ == "__main__":
     # tMax = 1e5
     # tMax = 6e4
     # CoarseGrainRate = 100
-    tMax = 1e3
+    tMax = 1e4
     dt = 10
-    CoarseGrainRate = 10
+    CoarseGrainRate = 100
 
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -207,7 +207,7 @@ if __name__ == "__main__":
     # P_Vals = np.array([0.4])
     # P_Vals = np.concatenate((np.linspace(0.1, 0.8, 9, endpoint=False), np.linspace(0.8, 2.8, 20), np.linspace(3.0, 5.0, 3)))
 
-    P_Vals = np.concatenate((np.linspace(0.1, 7.0, 15, endpoint=False), np.linspace(7.0, 10.0, 15), np.linspace(11.0, 15.0, 3)))
+    P_Vals = np.concatenate((np.linspace(0.1, 7.0, 16, endpoint=False), np.linspace(7.0, 10.0, 15), np.linspace(11.0, 15.0, 3)))
 
     for ind, aIBi in enumerate(aIBi_Vals):
         for P in P_Vals:
