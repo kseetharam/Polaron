@@ -20,8 +20,12 @@ if __name__ == "__main__":
     # (dx, dy, dz) = (0.375, 0.375, 0.375)
     # # (dx, dy, dz) = (0.25, 0.25, 0.25)
 
-    (Lx, Ly, Lz) = (105, 105, 105)
-    (dx, dy, dz) = (0.375, 0.375, 0.375)
+    # (Lx, Ly, Lz) = (105, 105, 105)
+    # (dx, dy, dz) = (0.375, 0.375, 0.375)
+
+    (Lx, Ly, Lz) = (81, 81, 81)
+    # (dx, dy, dz) = (0.25, 0.25, 0.25)
+    (dx, dy, dz) = (0.225, 0.225, 0.225)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -53,14 +57,11 @@ if __name__ == "__main__":
 
     # for imdyn evolution
     # tMax = 1e5
-    tMax = 6e4
+    # tMax = 6e4
+    # CoarseGrainRate = 100
+    tMax = 1e3
     dt = 10
-    CoarseGrainRate = 100
-
-    # # for realdyn evolution
-    # tMax = 200
-    # dt = 0.2
-    # CoarseGrainRate = 1
+    CoarseGrainRate = 10
 
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -75,7 +76,8 @@ if __name__ == "__main__":
 
     # Basic parameters
 
-    mI = 1
+    # mI = 1
+    mI = 10
     mB = 1
     n0 = 1
     gBB = (4 * np.pi / mB) * 0.05
@@ -198,11 +200,14 @@ if __name__ == "__main__":
 
     cParams_List = []
 
-    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -0.5])
+    # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -0.5])
+    aIBi_Vals = np.array([-10.0])
     # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi_Vals = aIBi_Vals - aSi
 
     # P_Vals = np.array([0.4])
-    P_Vals = np.concatenate((np.linspace(0.1, 0.8, 9, endpoint=False), np.linspace(0.8, 2.8, 20), np.linspace(3.0, 5.0, 3)))
+    # P_Vals = np.concatenate((np.linspace(0.1, 0.8, 9, endpoint=False), np.linspace(0.8, 2.8, 20), np.linspace(3.0, 5.0, 3)))
+
+    P_Vals = np.concatenate((np.linspace(0.1, 7.0, 15, endpoint=False), np.linspace(7.0, 10.0, 15), np.linspace(11.0, 15.0, 3)))
 
     for ind, aIBi in enumerate(aIBi_Vals):
         for P in P_Vals:
@@ -217,6 +222,7 @@ if __name__ == "__main__":
     # print(P_Vals)
 
     # # ---- COMPUTE DATA ON COMPUTER ----
+    # print(innerdatapath)
 
     # runstart = timer()
 
