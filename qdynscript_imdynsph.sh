@@ -3,7 +3,7 @@
 #SBATCH -n 2
 #SBATCH -N 1
 #SBATCH -t 2-12:00
-#SBATCH -p unrestricted
+#SBATCH -p shared
 #SBATCH --mem=10000
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kis@mit.edu 
