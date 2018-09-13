@@ -270,30 +270,40 @@ if __name__ == "__main__":
     # ax3.set_xlabel('Imaginary time')
     # plt.show()
 
-    # # # ENERGY CHARACTERIZATION MULTIPLE INTERACTION STRENGTHS (SPHERICAL)
+    # # ENERGY CHARACTERIZATION MULTIPLE INTERACTION STRENGTHS (SPHERICAL)
 
-    # aIBi_Vals = np.array([-10, -5, -2])
-    # colorList = ['b', 'g', 'r']
-    # fig, ax = plt.subplots()
-    # for aind, aIBi in enumerate(aIBi_Vals):
-    #     qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    #     CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
-    #     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    aIBi_Vals = np.array([-10, -5, -2])
+    Pcrit = np.zeros(aIBi_Vals.size)
+    colorList = ['b', 'g', 'r']
+    fig, ax = plt.subplots()
+    for aind, aIBi in enumerate(aIBi_Vals):
+        qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+        CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+        kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
 
-    #     Energy_Vals_inf = np.zeros(PVals.size)
-    #     for Pind, P in enumerate(PVals):
-    #         CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
-    #         Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+        Energy_Vals_inf = np.zeros(PVals.size)
+        for Pind, P in enumerate(PVals):
+            CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
+            Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
 
-    #     Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
-    #     Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
-    #     Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
-    #     Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
-    #     ax.plot(Pinf_Vals, Einf_2ndderiv_Vals, color=colorList[aind], linestyle='', marker='o', label=r'$a_{IB}^{-1}=$' + '{:.1f}'.format(aIBi))
-    # ax.legend()
-    # ax.set_title('2nd Derivative of Ground State Energy')
-    # ax.set_xlabel('P')
-    # plt.show()
+        Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+        Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
+        Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+        Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+        Pcrit[aind] = Pinf_Vals[np.argwhere(Einf_2ndderiv_Vals < 0)[-1][0] + 3]
+        ax.plot(Pinf_Vals, Einf_2ndderiv_Vals, color=colorList[aind], linestyle='', marker='o', label=r'$a_{IB}^{-1}=$' + '{:.1f}'.format(aIBi))
+    ax.legend()
+    ax.set_title('2nd Derivative of Ground State Energy')
+    ax.set_xlabel('P')
+
+    Pcrit_norm = Pcrit / mI * nu
+    fig2, ax2 = plt.subplots()
+    ax2.plot(aIBi_Vals, Pcrit_norm, 'bo')
+    ax2.set_title('Critical Momentum (Normalized)')
+    ax2.set_xlabel(r'$a_{IB}^{-1}$')
+    ax2.set_ylabel(r'$\frac{P_{crit}}{m_{I}c_{BEC}}$')
+
+    plt.show()
 
     # # # POLARON SOUND VELOCITY (SPHERICAL)
 
