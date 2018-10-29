@@ -4,6 +4,7 @@ import xarray as xr
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from matplotlib.animation import writers
 from matplotlib.lines import Line2D
 import matplotlib.colors as colors
 import os
@@ -20,6 +21,7 @@ if __name__ == "__main__":
     # # Initialization
 
     # matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
+    mpegWriter = writers['ffmpeg'](fps=20, bitrate=1800)
 
     # ---- INITIALIZE GRIDS ----
 
@@ -32,7 +34,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
+    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -93,22 +95,32 @@ if __name__ == "__main__":
     # del(ds_tot.attrs['P']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
     # ds_tot.to_netcdf(innerdatapath + '/quench_Dataset.nc')
 
-    # # # # Analysis of Total Dataset
+    # # # # # Analysis of Total Dataset
 
-    aIBi = -10
-    qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
-    qds_aIBi = qds.sel(aIBi=aIBi)
+    # aIBi = -10
+    # qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
+    # qds_aIBi = qds.sel(aIBi=aIBi)
 
-    PVals = qds['P'].values
-    tVals = qds['t'].values
-    n0 = qds.attrs['n0']
-    gBB = qds.attrs['gBB']
-    nu = pfc.nu(gBB)
-    mI = qds.attrs['mI']
-    mB = qds.attrs['mB']
-    aBB = (mB / (4 * np.pi)) * gBB
-    xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
-    tscale = xi / nu
+    # PVals = qds['P'].values
+    # tVals = qds['t'].values
+    # n0 = qds.attrs['n0']
+    # gBB = qds.attrs['gBB']
+    # nu = pfc.nu(gBB)
+    # mI = qds.attrs['mI']
+    # mB = qds.attrs['mB']
+    # aBB = (mB / (4 * np.pi)) * gBB
+    # xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
+    # tscale = xi / nu
+
+    # tau = 3.5
+    # tVals_short = tVals[tVals <= tau]
+    # Pss_ind = 13
+    # P = PVals[Pss_ind]
+    # qds_short = qds_aIBi.sel(P=P, t=tVals_short)
+    # # nk_ds = xr.open_dataset(innerdatapath + '/nk_ind_Dataset.nc')
+    # # nkds_short = nk_ds.sel(aIBi=aIBi, P=P, t=tVals_short)
+    # # qds_short.to_netcdf(innerdatapath + '/qds_short.nc')
+    # # nkds_short.to_netcdf(innerdatapath + '/nkds_short.nc')
 
     # # # # P_Imp PLOT
 
@@ -121,32 +133,174 @@ if __name__ == "__main__":
     # ax.legend()
     # plt.show()
 
-    # # PLOT IND PHONON MOMENTUM DIST
+    # # # ANALYSIS OF SHORT TIME PHONON EXCITATIONS/MOMENTUM DISTS
 
-    tau = 3.5
-    tVals_short = tVals[tVals <= tau]
-    Pss_ind = 13
-    P = PVals[Pss_ind]
-    qds_short = qds_aIBi.sel(P=P, t=tVals_short)
-    # nk_ds = xr.open_dataset(innerdatapath + '/nk_ind_Dataset.nc')
-    # nkds_short = nk_ds.sel(aIBi=aIBi, P=P, t=tVals_short)
-    # qds_short.to_netcdf(innerdatapath + '/qds_short.nc')
-    # nkds_short.to_netcdf(innerdatapath + '/nkds_short.nc')
+    # qds_short = xr.open_dataset(innerdatapath + '_TPY/qds_short.nc')
+    # nkds_short = xr.open_dataset(innerdatapath + '_TPY/nkds_short.nc')
+    # animpath = animpath + '/short_time_scattering'
 
-    kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_short.coords['k'].values); kgrid.initArray_premade('th', qds_short.coords['th'].values)
-    kVec = kgrid.getArray('k')
-    thVec = kgrid.getArray('th')
-    kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
+    # aIBi = 1 * qds_short['aIBi'].values
+    # P = 1 * qds_short['P'].values
+    # tVals = qds_short['t'].values
+    # n0 = qds_short.attrs['n0']
+    # gBB = qds_short.attrs['gBB']
+    # nu = pfc.nu(gBB)
+    # mI = qds_short.attrs['mI']
+    # mB = qds_short.attrs['mB']
+    # aBB = (mB / (4 * np.pi)) * gBB
+    # xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
+    # tscale = xi / nu
+    # dt = tVals[1] - tVals[0]
 
-    for tind, t in enumerate(tVals_short):
-        CSAmp_ds = (qds_short['Real_CSAmp'] + 1j * qds_short['Imag_CSAmp']).sel(t=t)
-        CSAmp_Vals = CSAmp_ds.values
-        Nph = qds_short.sel(t=t)['Nph'].values
-        Pph = qds_short.sel(t=t)['Pph'].values
-        Pimp = P - Pph
-        Omegak = pfs.Omega(kgrid, Pimp, mI, mB, n0, gBB)
-        Omegak_2D = Omegak.reshape((len(kVec), len(thVec)))
-        Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
+    # # # Plot ind phonon mom dist
+
+    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_short.coords['k'].values); kgrid.initArray_premade('th', qds_short.coords['th'].values)
+    # kVec = kgrid.getArray('k')
+    # thVec = kgrid.getArray('th')
+    # kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
+
+    # Omegak_da = xr.DataArray(np.full((tVals.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tVals, kVec, thVec], dims=['t', 'k', 'th'])
+    # PhDen_da = xr.DataArray(np.full((tVals.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tVals, kVec, thVec], dims=['t', 'k', 'th'])
+    # for tind, t in enumerate(tVals):
+    #     CSAmp_ds = (qds_short['Real_CSAmp'] + 1j * qds_short['Imag_CSAmp']).sel(t=t)
+    #     CSAmp_Vals = CSAmp_ds.values
+    #     Nph = qds_short.sel(t=t)['Nph'].values
+    #     Pph = qds_short.sel(t=t)['Pph'].values
+    #     Pimp = P - Pph
+    #     Omegak = pfs.Omega(kgrid, Pimp, mI, mB, n0, gBB)
+    #     Omegak_da.sel(t=t)[:] = Omegak.reshape((len(kVec), len(thVec))).real.astype(float)
+    #     Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
+    #     PhDen_da.sel(t=t)[:] = ((1 / Nph) * np.abs(Bk_2D_vals)**2).real.astype(float)
+
+    # # Animations
+
+    # nk = nkds_short['nk_ind']
+    # Pph = qds_short['Pph'].values
+    # Pimp = P - Pph
+    # zoom = True
+
+    # # Omega_k
+
+    # fig0, ax0 = plt.subplots()
+    # vmin = 0
+    # vmax = 1e-6
+
+    # Omegak0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Omegak_da.isel(t=0), 'k', 'th', 5)
+    # xg_interp = kg_interp * np.sin(thg_interp)
+    # zg_interp = kg_interp * np.cos(thg_interp)
+
+    # quad1 = ax0.pcolormesh(zg_interp, xg_interp, Omegak0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
+    # quad1m = ax0.pcolormesh(zg_interp, -1 * xg_interp, Omegak0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
+    # t_text = ax0.text(0.81, 0.9, r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tVals[0] / tscale), transform=ax0.transAxes, color='r')
+    # ax0.set_xlim([-2, 2])
+    # ax0.set_ylim([-2, 2])
+    # ax0.grid(True, linewidth=0.5)
+    # ax0.set_title(r'$\Omega_{\vec{k}}$' + ' (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$P=$' + '{:.2f})'.format(P))
+    # ax0.set_xlabel(r'$k_{z}$')
+    # ax0.set_ylabel(r'$k_{x}$')
+    # fig0.colorbar(quad1, ax=ax0, extend='both')
+
+    # def animate0(i):
+    #     Omegak_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Omegak_da.isel(t=i), 'k', 'th', 5)
+    #     quad1.set_array(Omegak_interp_vals[:-1, :-1].ravel())
+    #     quad1m.set_array(Omegak_interp_vals[:-1, :-1].ravel())
+    #     t_text.set_text(r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tVals[i] / tscale))
+    # anim0 = FuncAnimation(fig0, animate0, interval=1e-5, frames=range(tVals.size), blit=False)
+    # anim0_filename = '/aIBi_{:d}_P_{:.2f}'.format(int(aIBi), P) + '_Omegak_2D'
+    # # anim0.save(animpath + anim0_filename + '.mp4', writer='mpegWriter')
+    # anim0.save(animpath + anim0_filename + '.gif', writer='imagemagick')
+
+    # # Ind phonon momentum dist
+
+    # fig1, ax1 = plt.subplots()
+
+    # vmin = 0
+    # vmax = 700
+    # if zoom is True:
+    #     vmax = 3e3
+
+    # nk0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(nk.isel(t=0), 'k', 'th', 5)
+    # xg_interp = kg_interp * np.sin(thg_interp)
+    # zg_interp = kg_interp * np.cos(thg_interp)
+
+    # quad1 = ax1.pcolormesh(zg_interp, xg_interp, nk0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
+    # quad1m = ax1.pcolormesh(zg_interp, -1 * xg_interp, nk0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
+    # curve1 = ax1.plot(Pph[0], 0, marker='x', markersize=10, color="magenta", label=r'$P_{ph}$')[0]
+    # curve1m = ax1.plot(Pimp[0], 0, marker='o', markersize=10, color="red", label=r'$P_{imp}$')[0]
+
+    # t_text = ax1.text(0.81, 0.9, r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tVals[0] / tscale), transform=ax1.transAxes, color='r')
+    # ax1.set_xlim([-2, 2])
+    # ax1.set_ylim([-2, 2])
+    # if zoom is True:
+    #     ax1.set_xlim([-0.2, 0.2])
+    #     ax1.set_ylim([-0.2, 0.2])
+    # ax1.legend(loc=2)
+    # ax1.grid(True, linewidth=0.5)
+    # ax1.set_title('Ind Phonon Distribution (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$P=$' + '{:.2f})'.format(P))
+    # ax1.set_xlabel(r'$k_{z}$')
+    # ax1.set_ylabel(r'$k_{x}$')
+    # fig1.colorbar(quad1, ax=ax1, extend='both')
+
+    # def animate1(i):
+    #     nk_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(nk.isel(t=i), 'k', 'th', 5)
+    #     quad1.set_array(nk_interp_vals[:-1, :-1].ravel())
+    #     quad1m.set_array(nk_interp_vals[:-1, :-1].ravel())
+    #     curve1.set_xdata(Pph[i])
+    #     curve1m.set_xdata(Pimp[i])
+    #     t_text.set_text(r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tVals[i] / tscale))
+    # anim1 = FuncAnimation(fig1, animate1, interval=1e-5, frames=range(tVals.size), blit=False)
+    # anim1_filename = '/aIBi_{:d}_P_{:.2f}'.format(int(aIBi), P) + '_indPhononDist_2D'
+    # if zoom is True:
+    #     anim1_filename = anim1_filename + '_zoom'
+    # # anim1.save(animpath + anim1_filename + '.mp4', writer='mpegWriter')
+    # anim1.save(animpath + anim1_filename + '.gif', writer='imagemagick')
+
+    # # Ind phonon momentum dist time deriv
+
+    # fig2, ax2 = plt.subplots()
+    # vmin = -25
+    # vmax = 110
+    # if zoom is True:
+    #     vmax = 5e3
+
+    # dnk0 = (nk.isel(t=1) - nk.isel(t=0)) / dt
+    # dnk0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(dnk0, 'k', 'th', 5)
+    # xg_interp = kg_interp * np.sin(thg_interp)
+    # zg_interp = kg_interp * np.cos(thg_interp)
+
+    # quad2 = ax2.pcolormesh(zg_interp, xg_interp, dnk0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
+    # quad2m = ax2.pcolormesh(zg_interp, -1 * xg_interp, dnk0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
+    # curve2 = ax2.plot(Pph[0], 0, marker='x', markersize=10, color="magenta", label=r'$P_{ph}$')[0]
+    # curve2m = ax2.plot(Pimp[0], 0, marker='o', markersize=10, color="red", label=r'$P_{imp}$')[0]
+    # t_text = ax2.text(0.81, 0.9, r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tVals[0] / tscale), transform=ax2.transAxes, color='r')
+    # ax2.set_xlim([-3, 3])
+    # ax2.set_ylim([-3, 3])
+    # if zoom is True:
+    #     ax2.set_xlim([-0.2, 0.2])
+    #     ax2.set_ylim([-0.2, 0.2])
+    # ax2.legend(loc=2)
+    # ax2.grid(True, linewidth=0.5)
+    # ax2.set_title('Ind Phonon Distribution Time Derivative (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$P=$' + '{:.2f})'.format(P))
+    # ax2.set_xlabel(r'$k_{z}$')
+    # ax2.set_ylabel(r'$k_{x}$')
+    # fig2.colorbar(quad2, ax=ax2, extend='both')
+
+    # def animate2(i):
+    #     dnk = (nk.isel(t=i + 1) - nk.isel(t=i)) / dt
+    #     dnk_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(dnk, 'k', 'th', 5)
+    #     quad2.set_array(dnk_interp_vals[:-1, :-1].ravel())
+    #     quad2m.set_array(dnk_interp_vals[:-1, :-1].ravel())
+    #     curve2.set_xdata(Pph[i])
+    #     curve2m.set_xdata(Pimp[i])
+    #     t_text.set_text(r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tVals[i] / tscale))
+    # anim2 = FuncAnimation(fig2, animate2, interval=1e-5, frames=range(tVals.size), blit=False)
+    # anim2_filename = '/aIBi_{:d}_P_{:.2f}'.format(int(aIBi), P) + '_indPhononDistDeriv_2D_num'
+    # if zoom is True:
+    #     anim2_filename = anim2_filename + '_zoom'
+    # # anim2.save(animpath + anim2_filename + '.mp4', writer='mpegWriter')
+    # anim2.save(animpath + anim2_filename + '.gif', writer='imagemagick')
+
+    # # plt.show()
 
     # # # FULL RECONSTRUCTION OF 3D CARTESIAN BETA_K FROM 2D SPHERICAL BETA_K (doing actual interpolation in 2D spherical instead of 3D nonlinear cartesian)
 
