@@ -4,15 +4,18 @@ import xarray as xr
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from matplotlib.animation import writers
 import os
 import itertools
 from scipy.interpolate import griddata
+import pf_dynamic_cart as pfc
 
 if __name__ == "__main__":
 
     # # Initialization
 
     # matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
+    mpegWriter = writers['ffmpeg'](fps=20, bitrate=1800)
 
     # gParams
 
@@ -25,12 +28,13 @@ if __name__ == "__main__":
     NGridPoints = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
     # datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
-    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints)
+    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints, 1)
 
     innerdatapath = datapath + '/redyn_cart'
     # innerdatapath = datapath + '/imdyn_cart'
 
     figdatapath = datapath + '/figures'
+    animpath = '/media/kis/Storage/Dropbox/VariationalResearch/DataAnalysis/figs/rdyn_twophonon/short_time_scattering'
 
     def xinterp2D(xdataset, coord1, coord2, mult):
         # xdataset is the desired xarray dataset with the desired plotting quantity already selected
@@ -82,16 +86,115 @@ if __name__ == "__main__":
     # del(ds_tot.attrs['P']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
     # ds_tot.to_netcdf(innerdatapath + '/quench_Dataset_cart.nc')
 
-    # # Analysis of Total Dataset
+    # Analysis of Total Dataset
 
-    # qds = xr.open_dataset(innerdatapath + '/quench_Dataset_cart.nc')
-    # qds['nPI_mag'].sel(aIBi=-2, P=3, t=99).dropna('PI_mag').plot()
-    # qds['nPI_xz_slice'].sel(aIBi=-2, P=3, t=99).dropna('PI_z').plot()
+    qds = xr.open_dataset(innerdatapath + '/quench_Dataset_cart.nc')
+    # qds['nPI_mag'].sel(aIBi=-10, P=1.5, t=99).dropna('PI_mag').plot()
+    # qds['nPI_xz_slice'].sel(aIBi=-10, P=1.5, t=99).dropna('PI_z').plot()
     # plt.show()
 
-    # # nPI xz slice
+    gBB = qds.attrs['gBB']
+    nu = pfc.nu(gBB)
+    n0 = qds.attrs['n0']
+    mI = qds.attrs['mI']
+    mB = qds.attrs['mB']
+    aBB = (mB / (4 * np.pi)) * gBB
+    xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
+    tscale = xi / nu
 
-    # aIBi = -2
+    # # nPI xz slice - TIME animation
+
+    # aIBi = -10
+    # P = 1.5
+    # qds_am2 = qds['nPI_xz_slice'].sel(aIBi=aIBi, P=P)
+    # Pimp_da = P - qds['PB'].sel(aIBi=aIBi, P=P)
+
+    # fig1, ax1 = plt.subplots()
+
+    # tVec = qds_am2.coords['t'].values
+    # # tau = 3.0
+    # tau = 99.0
+    # tVec = tVec[tVec / tscale <= tau]
+
+    # vmin = 1
+    # vmax = 0
+    # for ind, tv in enumerate(tVec):
+    #     vec = qds_am2.sel(t=tv).dropna('PI_z').values
+    #     if np.min(vec) < vmin:
+    #         vmin = np.min(vec)
+    #     if np.max(vec) > vmax:
+    #         vmax = np.max(vec)
+
+    # quad = qds_am2.isel(t=0).dropna('PI_z')[:-1, :-1].plot.pcolormesh(ax=ax1, vmin=vmin, vmax=vmax, add_colorbar=False, add_labels=False)
+    # t_text = ax1.text(0.82, 0.9, r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tVec[0] / tscale), transform=ax1.transAxes, color='r')
+    # curve1 = ax1.plot(mI * nu, 0, marker='x', markersize=10, color="white", label=r'$m_{I}c$')[0]
+    # curve1m = ax1.plot(1 * Pimp_da.isel(t=0).values, 0, marker='o', markersize=10, color="magenta", label=r'$P_{imp}$')[0]
+
+    # ax1.set_title('Impurity Longitudinal Momentum Distribution ' + r'($a_{IB}^{-1}=$' + '{:.2f})'.format(aIBi))
+    # ax1.set_ylabel(r'$P_{I,x}$')
+    # ax1.set_xlabel(r'$P_{I,z}$')
+    # ax1.legend(loc=2)
+    # ax1.set_xlim([-2, 2])
+    # ax1.set_ylim([-2, 2])
+    # fig1.colorbar(quad, ax=ax1, extend='both')
+
+    # def animate1(i):
+    #     qds_am2.isel(t=i).dropna('PI_z')[:-1, :-1].plot.pcolormesh(ax=ax1, vmin=vmin, vmax=vmax, add_colorbar=False, add_labels=False)
+    #     ax1.set_xlim([-2, 2])
+    #     ax1.set_ylim([-2, 2])
+    #     curve1m.set_xdata(1 * Pimp_da.isel(t=i).values)
+    #     t_text.set_text(r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tVec[i] / tscale))
+
+    # anim1 = FuncAnimation(fig1, animate1, interval=5, frames=tVec.size, blit=False)
+    # anim1.save(animpath + '/aIBi_{:.2f}_nPI_xz.mp4'.format(aIBi), writer=mpegWriter)
+    # plt.show()
+
+    # nPI xy slice - TIME animation
+
+    aIBi = -10
+    P = 1.5
+    qds_am2 = qds['nPI_xy_slice'].sel(aIBi=aIBi, P=P)
+    Pimp_da = P - qds['PB'].sel(aIBi=aIBi, P=P)
+
+    fig1, ax1 = plt.subplots()
+
+    tVec = qds_am2.coords['t'].values
+    # tau = 3.0
+    tau = 99.0
+    tVec = tVec[tVec / tscale <= tau]
+
+    vmin = 1
+    vmax = 0
+    for ind, tv in enumerate(tVec):
+        vec = qds_am2.sel(t=tv).values
+        if np.min(vec) < vmin:
+            vmin = np.min(vec)
+        if np.max(vec) > vmax:
+            vmax = np.max(vec)
+
+    quad = qds_am2.isel(t=0)[:-1, :-1].plot.pcolormesh(ax=ax1, vmin=vmin, vmax=vmax, add_colorbar=False, add_labels=False)
+    t_text = ax1.text(0.85, 0.9, r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tVec[0] / tscale), transform=ax1.transAxes, color='r')
+
+    ax1.set_title('Impurity Transverse Momentum Distribution ' + r'($a_{IB}^{-1}=$' + '{:.2f})'.format(aIBi))
+    ax1.set_ylabel(r'$P_{I,x}$')
+    ax1.set_xlabel(r'$P_{I,y}$')
+    ax1.set_xlim([-2, 2])
+    ax1.set_ylim([-2, 2])
+    fig1.colorbar(quad, ax=ax1, extend='both')
+
+    def animate1(i):
+        qds_am2.isel(t=i)[:-1, :-1].plot.pcolormesh(ax=ax1, vmin=vmin, vmax=vmax, add_colorbar=False, add_labels=False)
+        ax1.set_xlim([-2, 2])
+        ax1.set_ylim([-2, 2])
+        t_text.set_text(r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tVec[i] / tscale))
+
+    anim1 = FuncAnimation(fig1, animate1, interval=5, frames=tVec.size, blit=False)
+    anim1.save(animpath + '/aIBi_{:.2f}_nPI_xy.mp4'.format(aIBi), writer=mpegWriter)
+    plt.show()
+
+    # # nPI xz slice - P animation
+
+    # aIBi = -10
     # qds_am2 = qds['nPI_xz_slice'].sel(aIBi=aIBi, t=99)
 
     # fig1, ax1 = plt.subplots()
