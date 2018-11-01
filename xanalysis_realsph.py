@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'home', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -133,44 +133,45 @@ if __name__ == "__main__":
     # ax.legend()
     # plt.show()
 
-    # # # ANALYSIS OF SHORT TIME PHONON EXCITATIONS/MOMENTUM DISTS
+    # # ANALYSIS OF SHORT TIME PHONON EXCITATIONS/MOMENTUM DISTS
 
-    # qds_short = xr.open_dataset(innerdatapath + '_TPY/qds_short.nc')
-    # nkds_short = xr.open_dataset(innerdatapath + '_TPY/nkds_short.nc')
-    # animpath = animpath + '/short_time_scattering'
+    qds_short = xr.open_dataset(innerdatapath + '_TPY/qds_short.nc')
+    nkds_short = xr.open_dataset(innerdatapath + '_TPY/nkds_short.nc')
+    animpath = animpath + '/short_time_scattering'
 
-    # aIBi = 1 * qds_short['aIBi'].values
-    # P = 1 * qds_short['P'].values
-    # tVals = qds_short['t'].values
-    # n0 = qds_short.attrs['n0']
-    # gBB = qds_short.attrs['gBB']
-    # nu = pfc.nu(gBB)
-    # mI = qds_short.attrs['mI']
-    # mB = qds_short.attrs['mB']
-    # aBB = (mB / (4 * np.pi)) * gBB
-    # xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
-    # tscale = xi / nu
-    # dt = tVals[1] - tVals[0]
+    aIBi = 1 * qds_short['aIBi'].values
+    P = 1 * qds_short['P'].values
+    tVals = qds_short['t'].values
+    n0 = qds_short.attrs['n0']
+    gBB = qds_short.attrs['gBB']
+    nu = pfc.nu(gBB)
+    mI = qds_short.attrs['mI']
+    mB = qds_short.attrs['mB']
+    aBB = (mB / (4 * np.pi)) * gBB
+    xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
+    tscale = xi / nu
+    dt = tVals[1] - tVals[0]
 
-    # # # Plot ind phonon mom dist
+    # # Plot ind phonon mom dist
 
-    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_short.coords['k'].values); kgrid.initArray_premade('th', qds_short.coords['th'].values)
-    # kVec = kgrid.getArray('k')
-    # thVec = kgrid.getArray('th')
-    # kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
+    kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_short.coords['k'].values); kgrid.initArray_premade('th', qds_short.coords['th'].values)
+    kVec = kgrid.getArray('k')
+    thVec = kgrid.getArray('th')
+    kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
+    print(kVec[1] - kVec[0])
 
-    # Omegak_da = xr.DataArray(np.full((tVals.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tVals, kVec, thVec], dims=['t', 'k', 'th'])
-    # PhDen_da = xr.DataArray(np.full((tVals.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tVals, kVec, thVec], dims=['t', 'k', 'th'])
-    # for tind, t in enumerate(tVals):
-    #     CSAmp_ds = (qds_short['Real_CSAmp'] + 1j * qds_short['Imag_CSAmp']).sel(t=t)
-    #     CSAmp_Vals = CSAmp_ds.values
-    #     Nph = qds_short.sel(t=t)['Nph'].values
-    #     Pph = qds_short.sel(t=t)['Pph'].values
-    #     Pimp = P - Pph
-    #     Omegak = pfs.Omega(kgrid, Pimp, mI, mB, n0, gBB)
-    #     Omegak_da.sel(t=t)[:] = Omegak.reshape((len(kVec), len(thVec))).real.astype(float)
-    #     Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
-    #     PhDen_da.sel(t=t)[:] = ((1 / Nph) * np.abs(Bk_2D_vals)**2).real.astype(float)
+    Omegak_da = xr.DataArray(np.full((tVals.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tVals, kVec, thVec], dims=['t', 'k', 'th'])
+    PhDen_da = xr.DataArray(np.full((tVals.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tVals, kVec, thVec], dims=['t', 'k', 'th'])
+    for tind, t in enumerate(tVals):
+        CSAmp_ds = (qds_short['Real_CSAmp'] + 1j * qds_short['Imag_CSAmp']).sel(t=t)
+        CSAmp_Vals = CSAmp_ds.values
+        Nph = qds_short.sel(t=t)['Nph'].values
+        Pph = qds_short.sel(t=t)['Pph'].values
+        Pimp = P - Pph
+        Omegak = pfs.Omega(kgrid, Pimp, mI, mB, n0, gBB)
+        Omegak_da.sel(t=t)[:] = Omegak.reshape((len(kVec), len(thVec))).real.astype(float)
+        Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
+        PhDen_da.sel(t=t)[:] = ((1 / Nph) * np.abs(Bk_2D_vals)**2).real.astype(float)
 
     # # Animations
 
