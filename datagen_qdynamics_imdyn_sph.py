@@ -13,26 +13,27 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    # # (Lx, Ly, Lz) = (30, 30, 30)
-    # (Lx, Ly, Lz) = (21, 21, 21)
-    # # (Lx, Ly, Lz) = (12, 12, 12)
-    # # (dx, dy, dz) = (0.75, 0.75, 0.75)
-    # (dx, dy, dz) = (0.375, 0.375, 0.375)
-    # # (dx, dy, dz) = (0.25, 0.25, 0.25)
+    # (Lx, Ly, Lz) = (30, 30, 30)
+    (Lx, Ly, Lz) = (21, 21, 21)
+    # (Lx, Ly, Lz) = (12, 12, 12)
+    # (dx, dy, dz) = (0.75, 0.75, 0.75)
+    (dx, dy, dz) = (0.375, 0.375, 0.375)
+    # (dx, dy, dz) = (0.25, 0.25, 0.25)
 
     # (Lx, Ly, Lz) = (105, 105, 105)
     # (dx, dy, dz) = (0.375, 0.375, 0.375)
 
-    (Lx, Ly, Lz) = (81, 81, 81)
-    # (dx, dy, dz) = (0.25, 0.25, 0.25)
-    (dx, dy, dz) = (0.225, 0.225, 0.225)
+    # (Lx, Ly, Lz) = (81, 81, 81)
+    # # (dx, dy, dz) = (0.25, 0.25, 0.25)
+    # (dx, dy, dz) = (0.225, 0.225, 0.225)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
-    Ntheta = 250
+    # Ntheta = 250
+    Ntheta = 50
     Nk = np.ceil(NGridPoints_desired / Ntheta)
 
     # # adjust num theta points
@@ -56,13 +57,14 @@ if __name__ == "__main__":
     kgrid.initArray_premade('th', thetaArray)
 
     # for imdyn evolution
-    # tMax = 1e5
+    tMax = 1e5
     # tMax = 6e4
     # CoarseGrainRate = 100
-    tMax = 1e4
+    # tMax = 1e4
     dt = 10
     CoarseGrainRate = 100
 
+    tMax = 100
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
@@ -76,8 +78,8 @@ if __name__ == "__main__":
 
     # Basic parameters
 
-    # mI = 1
-    mI = 10
+    mI = 1
+    # mI = 10
     mB = 1
     n0 = 1
     gBB = (4 * np.pi / mB) * 0.05
@@ -95,7 +97,7 @@ if __name__ == "__main__":
     elif toggleDict['Location'] == 'work':
         datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, mI / mB)
     elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, mI / mB)
+        datapath = '/n/scratchlfs/demler_lab/kis/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, mI / mB)
 
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
@@ -131,8 +133,9 @@ if __name__ == "__main__":
     # runstart = timer()
 
     # P = 1.4
-    # aIBi = -2
+    # aIBi = -0.1
 
+    # print(innerdatapath)
     # # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi = aIBi - aSi
     # # print(aIBi)
 
@@ -201,18 +204,21 @@ if __name__ == "__main__":
     cParams_List = []
 
     # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -0.5])
-    aIBi_Vals = np.array([-10.0])
+    # aIBi_Vals = np.array([-10.0])
+    aIBi_Vals = np.array([-10.0, -5.0, -2.0 - 1.0, -0.75, -0.5, -0.1])
     # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi_Vals = aIBi_Vals - aSi
 
     # P_Vals = np.array([0.4])
-    # P_Vals = np.concatenate((np.linspace(0.1, 0.8, 9, endpoint=False), np.linspace(0.8, 2.8, 20), np.linspace(3.0, 5.0, 3)))
+    P_Vals = np.concatenate((np.linspace(0.1, 0.8, 10, endpoint=False), np.linspace(0.8, 4.0, 40, endpoint=False), np.linspace(4.0, 5.0, 2)))
+    # P_Vals = np.concatenate((np.array([0.1, 0.4, 0.6]), np.linspace(0.8, 2.8, 20), np.linspace(3.0, 5.0, 3)))
 
-    P_Vals = np.concatenate((np.linspace(0.1, 7.0, 16, endpoint=False), np.linspace(7.0, 10.0, 15), np.linspace(11.0, 15.0, 3)))
+    # P_Vals = np.concatenate((np.linspace(0.1, 7.0, 16, endpoint=False), np.linspace(7.0, 10.0, 15), np.linspace(11.0, 15.0, 3)))
 
     for ind, aIBi in enumerate(aIBi_Vals):
         for P in P_Vals:
             cParams_List.append([P, aIBi])
 
+    print(len(cParams_List))
     # CANCELLED cParams_List[63-127]
 
     # missedVals = [6, 7, 13, 14, 19, 24, 25, 26, 27, 30, 31, 32, 33, 34, 44, 45, 46, 47, 56, 57, 58, 59, 65, 66, 67, 68, 70, 71, 74, 75, 76]
