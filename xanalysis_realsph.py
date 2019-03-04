@@ -95,22 +95,22 @@ if __name__ == "__main__":
     # del(ds_tot.attrs['P']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
     # ds_tot.to_netcdf(innerdatapath + '/quench_Dataset.nc')
 
-    # # # # # Analysis of Total Dataset
+    # # # # Analysis of Total Dataset
 
-    # aIBi = -10
-    # qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
-    # qds_aIBi = qds.sel(aIBi=aIBi)
+    aIBi = -10
+    qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
+    qds_aIBi = qds.sel(aIBi=aIBi)
 
-    # PVals = qds['P'].values
-    # tVals = qds['t'].values
-    # n0 = qds.attrs['n0']
-    # gBB = qds.attrs['gBB']
-    # nu = pfc.nu(gBB)
-    # mI = qds.attrs['mI']
-    # mB = qds.attrs['mB']
-    # aBB = (mB / (4 * np.pi)) * gBB
-    # xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
-    # tscale = xi / nu
+    PVals = qds['P'].values
+    tVals = qds['t'].values
+    n0 = qds.attrs['n0']
+    gBB = qds.attrs['gBB']
+    nu = pfc.nu(gBB)
+    mI = qds.attrs['mI']
+    mB = qds.attrs['mB']
+    aBB = (mB / (4 * np.pi)) * gBB
+    xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
+    tscale = xi / nu
 
     # tau = 3.5
     # tVals_short = tVals[tVals <= tau]
@@ -133,45 +133,68 @@ if __name__ == "__main__":
     # ax.legend()
     # plt.show()
 
-    # # ANALYSIS OF SHORT TIME PHONON EXCITATIONS/MOMENTUM DISTS
+    # # # # Nph PLOT
 
-    qds_short = xr.open_dataset(innerdatapath + '_TPY/qds_short.nc')
-    nkds_short = xr.open_dataset(innerdatapath + '_TPY/nkds_short.nc')
-    animpath = animpath + '/short_time_scattering'
+    # fig, ax = plt.subplots()
+    # for Pind, P in enumerate(PVals):
+    #     Nph = qds_aIBi.isel(P=Pind)['Nph'].values
+    #     ax.plot(tVals / tscale, Nph, label='P={0}'.format(P))
+    # ax.legend()
+    # ax.set_xscale('log')
+    # plt.show()
 
-    aIBi = 1 * qds_short['aIBi'].values
-    P = 1 * qds_short['P'].values
-    tVals = qds_short['t'].values
-    n0 = qds_short.attrs['n0']
-    gBB = qds_short.attrs['gBB']
-    nu = pfc.nu(gBB)
-    mI = qds_short.attrs['mI']
-    mB = qds_short.attrs['mB']
-    aBB = (mB / (4 * np.pi)) * gBB
-    xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
-    tscale = xi / nu
-    dt = tVals[1] - tVals[0]
+    # # # S(t) PLOT
 
-    # # Plot ind phonon mom dist
+    print(tVals)
+    print(PVals)
 
-    kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_short.coords['k'].values); kgrid.initArray_premade('th', qds_short.coords['th'].values)
-    kVec = kgrid.getArray('k')
-    thVec = kgrid.getArray('th')
-    kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
-    print(kVec[1] - kVec[0])
+    fig, ax = plt.subplots()
+    for Pind, P in enumerate(PVals):
+        DynOv = np.abs(qds_aIBi.isel(P=Pind)['Real_DynOv'].values + 1j * qds_aIBi.isel(P=Pind)['Imag_DynOv'].values).real.astype(float)
+        ax.plot(tVals / tscale, DynOv, label='P={0}'.format(P))
+    ax.legend()
+    ax.set_xscale('log')
+    plt.show()
 
-    Omegak_da = xr.DataArray(np.full((tVals.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tVals, kVec, thVec], dims=['t', 'k', 'th'])
-    PhDen_da = xr.DataArray(np.full((tVals.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tVals, kVec, thVec], dims=['t', 'k', 'th'])
-    for tind, t in enumerate(tVals):
-        CSAmp_ds = (qds_short['Real_CSAmp'] + 1j * qds_short['Imag_CSAmp']).sel(t=t)
-        CSAmp_Vals = CSAmp_ds.values
-        Nph = qds_short.sel(t=t)['Nph'].values
-        Pph = qds_short.sel(t=t)['Pph'].values
-        Pimp = P - Pph
-        Omegak = pfs.Omega(kgrid, Pimp, mI, mB, n0, gBB)
-        Omegak_da.sel(t=t)[:] = Omegak.reshape((len(kVec), len(thVec))).real.astype(float)
-        Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
-        PhDen_da.sel(t=t)[:] = ((1 / Nph) * np.abs(Bk_2D_vals)**2).real.astype(float)
+    # # # ANALYSIS OF SHORT TIME PHONON EXCITATIONS/MOMENTUM DISTS
+
+    # qds_short = xr.open_dataset(innerdatapath + '_TPY/qds_short.nc')
+    # nkds_short = xr.open_dataset(innerdatapath + '_TPY/nkds_short.nc')
+    # animpath = animpath + '/short_time_scattering'
+
+    # aIBi = 1 * qds_short['aIBi'].values
+    # P = 1 * qds_short['P'].values
+    # tVals = qds_short['t'].values
+    # n0 = qds_short.attrs['n0']
+    # gBB = qds_short.attrs['gBB']
+    # nu = pfc.nu(gBB)
+    # mI = qds_short.attrs['mI']
+    # mB = qds_short.attrs['mB']
+    # aBB = (mB / (4 * np.pi)) * gBB
+    # xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
+    # tscale = xi / nu
+    # dt = tVals[1] - tVals[0]
+
+    # # # Plot ind phonon mom dist
+
+    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_short.coords['k'].values); kgrid.initArray_premade('th', qds_short.coords['th'].values)
+    # kVec = kgrid.getArray('k')
+    # thVec = kgrid.getArray('th')
+    # kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
+    # print(kVec[1] - kVec[0])
+
+    # Omegak_da = xr.DataArray(np.full((tVals.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tVals, kVec, thVec], dims=['t', 'k', 'th'])
+    # PhDen_da = xr.DataArray(np.full((tVals.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tVals, kVec, thVec], dims=['t', 'k', 'th'])
+    # for tind, t in enumerate(tVals):
+    #     CSAmp_ds = (qds_short['Real_CSAmp'] + 1j * qds_short['Imag_CSAmp']).sel(t=t)
+    #     CSAmp_Vals = CSAmp_ds.values
+    #     Nph = qds_short.sel(t=t)['Nph'].values
+    #     Pph = qds_short.sel(t=t)['Pph'].values
+    #     Pimp = P - Pph
+    #     Omegak = pfs.Omega(kgrid, Pimp, mI, mB, n0, gBB)
+    #     Omegak_da.sel(t=t)[:] = Omegak.reshape((len(kVec), len(thVec))).real.astype(float)
+    #     Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
+    #     PhDen_da.sel(t=t)[:] = ((1 / Nph) * np.abs(Bk_2D_vals)**2).real.astype(float)
 
     # # Animations
 

@@ -54,7 +54,7 @@ if __name__ == "__main__":
     # CoarseGrainRate = 100
 
     # for realdyn evolution
-    tMax = 200
+    tMax = 150
     dt = 0.2
     CoarseGrainRate = 1
 
@@ -79,16 +79,16 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical', 'Longtime': 'false', 'CoarseGrainRate': CoarseGrainRate}
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical', 'Longtime': 'false', 'CoarseGrainRate': CoarseGrainRate}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
     if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints, mI / mB)
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, mI / mB)
     elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints, mI / mB)
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, mI / mB)
     elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/scratchlfs/demler_lab/kis/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints, mI / mB)
+        datapath = '/n/scratchlfs/demler_lab/kis/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, mI / mB)
 
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
@@ -121,84 +121,88 @@ if __name__ == "__main__":
     # runstart = timer()
 
     # P = 1.4
-    # aIBi = -2
+    # aIBi = -0.5
 
     # # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi = aIBi - aSi
     # # print(aIBi)
 
     # cParams = [P, aIBi]
 
+    # print(innerdatapath)
     # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
     # dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     # end = timer()
     # print('Time: {:.2f}'.format(end - runstart))
 
-    # # ---- SINGLE FUNCTION RUN GAUSSIAN COMPARISON ----
+    # # # ---- SINGLE FUNCTION RUN GAUSSIAN COMPARISON ----
 
-    runstart = timer()
+    # runstart = timer()
 
-    thetaArray = np.linspace(0, np.pi, 1e3)
-    kArray = np.arange(0.1, 5.1, 0.1)
-    kgrid = Grid.Grid("SPHERICAL_2D")
-    kgrid.initArray_premade('k', kArray)
-    kgrid.initArray_premade('th', thetaArray)
-    # print('{:.2E}'.format(kgrid.size()))
-    tMax = 20
-    dt = 0.1
-    tgrid = np.arange(0, tMax + dt, dt)
-    gParams = [xgrid, kgrid, tgrid]
-    mI = 1e9
-    mB = 1
-    n0 = 1
-    gBB = (4 * np.pi / mB) * 0.065
-    sParams = [mI, mB, n0, gBB]
-    P = 0.05
-    aIBi = -1.2
-    cParams = [P, aIBi]
+    # thetaArray = np.linspace(0, np.pi, 1e3)
+    # kArray = np.arange(0.1, 5.1, 0.1)
+    # kgrid = Grid.Grid("SPHERICAL_2D")
+    # kgrid.initArray_premade('k', kArray)
+    # kgrid.initArray_premade('th', thetaArray)
+    # # print('{:.2E}'.format(kgrid.size()))
+    # tMax = 20
+    # dt = 0.1
+    # tgrid = np.arange(0, tMax + dt, dt)
+    # gParams = [xgrid, kgrid, tgrid]
+    # mI = 1e9
+    # mB = 1
+    # n0 = 1
+    # gBB = (4 * np.pi / mB) * 0.065
+    # sParams = [mI, mB, n0, gBB]
+    # P = 0.05
+    # aIBi = -1.2
+    # cParams = [P, aIBi]
 
-    datapath = datapath[0:-22] + '{:.2E}/massRatio=inf'.format(kgrid.size())
-    if toggleDict['Dynamics'] == 'real':
-        innerdatapath = datapath + '/redyn_spherical'
-        filepath = innerdatapath + '/cs_mfrt_aIBi_{:.2f}.npy'.format(aIBi)
-    elif toggleDict['Dynamics'] == 'imaginary':
-        innerdatapath = datapath + '/imdyn_spherical'
-        filepath = innerdatapath + '/cs_mfit_aIBi_{:.2f}.npy'.format(aIBi)
-    if os.path.isdir(datapath) is False:
-        os.mkdir(datapath)
-    if os.path.isdir(innerdatapath) is False:
-        os.mkdir(innerdatapath)
+    # datapath = datapath[0:-22] + '{:.2E}/massRatio=inf'.format(kgrid.size())
+    # if toggleDict['Dynamics'] == 'real':
+    #     innerdatapath = datapath + '/redyn_spherical'
+    #     filepath = innerdatapath + '/cs_mfrt_aIBi_{:.2f}.npy'.format(aIBi)
+    # elif toggleDict['Dynamics'] == 'imaginary':
+    #     innerdatapath = datapath + '/imdyn_spherical'
+    #     filepath = innerdatapath + '/cs_mfit_aIBi_{:.2f}.npy'.format(aIBi)
+    # if os.path.isdir(datapath) is False:
+    #     os.mkdir(datapath)
+    # if os.path.isdir(innerdatapath) is False:
+    #     os.mkdir(innerdatapath)
 
-    dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
-    # dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
-    energy_vec = np.zeros(tgrid.size)
-    CSAmp_ds = dynsph_ds['Real_CSAmp'] + 1j * dynsph_ds['Imag_CSAmp']
-    for ind, t in enumerate(tgrid):
-        CSAmp = CSAmp_ds.sel(t=t).values
-        energy_vec[ind] = pf_dynamic_sph.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
-    NB_Vec = dynsph_ds['Nph'].values
-    Zfactor_Vec = np.abs((dynsph_ds['Real_DynOv'] + 1j * dynsph_ds['Imag_DynOv']).values)
-    tVec = tgrid
-    Params = [aIBi, mB, n0, gBB]
-    data = [Params, tVec, NB_Vec, Zfactor_Vec, energy_vec]
-    np.save(filepath, data)
+    # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
+    # # dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    # energy_vec = np.zeros(tgrid.size)
+    # CSAmp_ds = dynsph_ds['Real_CSAmp'] + 1j * dynsph_ds['Imag_CSAmp']
+    # for ind, t in enumerate(tgrid):
+    #     CSAmp = CSAmp_ds.sel(t=t).values
+    #     energy_vec[ind] = pf_dynamic_sph.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+    # NB_Vec = dynsph_ds['Nph'].values
+    # Zfactor_Vec = np.abs((dynsph_ds['Real_DynOv'] + 1j * dynsph_ds['Imag_DynOv']).values)
+    # tVec = tgrid
+    # Params = [aIBi, mB, n0, gBB]
+    # data = [Params, tVec, NB_Vec, Zfactor_Vec, energy_vec]
+    # np.save(filepath, data)
 
-    end = timer()
-    print('Time: {:.2f}'.format(end - runstart))
+    # end = timer()
+    # print('Time: {:.2f}'.format(end - runstart))
 
-    # # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
+    # ---- SET CPARAMS (RANGE OVER MULTIPLE aIBi, P VALUES) ----
 
-    # cParams_List = []
+    cParams_List = []
 
     # aIBi_Vals = np.array([-10.0, -5.0, -2.0])
-    # # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi_Vals = aIBi_Vals - aSi
+    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0, -0.75, -0.5])
+    # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi_Vals = aIBi_Vals - aSi
 
-    # # P_Vals = np.array([0.4])
-    # P_Vals = np.concatenate((np.array([0.1, 0.4, 0.6]), np.linspace(0.8, 2.8, 20), np.linspace(3.0, 5.0, 3)))
+    # P_Vals = np.array([0.4])
+    P_Vals = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 3.0, 22, endpoint=False), np.linspace(3.0, 5.0, 3)))
 
-    # for ind, aIBi in enumerate(aIBi_Vals):
-    #     for P in P_Vals:
-    #         cParams_List.append([P, aIBi])
+    for ind, aIBi in enumerate(aIBi_Vals):
+        for P in P_Vals:
+            cParams_List.append([P, aIBi])
+
+    print(len(cParams_List))
 
     # # ---- COMPUTE DATA ON COMPUTER ----
 
@@ -215,24 +219,25 @@ if __name__ == "__main__":
     # end = timer()
     # print('Total Time: {:.2f}'.format(end - runstart))
 
-    # # ---- COMPUTE DATA ON CLUSTER ----
+    # ---- COMPUTE DATA ON CLUSTER ----
 
-    # runstart = timer()
+    runstart = timer()
 
-    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    # if(taskCount != len(cParams_List)):
-    #     print('ERROR: TASK COUNT MISMATCH')
-    #     P = float('nan')
-    #     aIBi = float('nan')
-    #     sys.exit()
-    # else:
-    #     cParams = cParams_List[taskID]
-    #     [P, aIBi] = cParams
+    if(taskCount != len(cParams_List)):
+        print('ERROR: TASK COUNT MISMATCH')
+        print(taskCount, len(cParams_List))
+        P = float('nan')
+        aIBi = float('nan')
+        sys.exit()
+    else:
+        cParams = cParams_List[taskID]
+        [P, aIBi] = cParams
 
-    # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
-    # dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
+    dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
-    # end = timer()
-    # print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))
+    end = timer()
+    print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))
