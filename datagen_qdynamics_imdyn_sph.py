@@ -204,7 +204,7 @@ if __name__ == "__main__":
 
     # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -0.5])
     # aIBi_Vals = np.array([-10.0])
-    aIBi_Vals = np.array([-10.0, -5.0, -2.0 - 1.0, -0.75, -0.5, -0.1])
+    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0, -0.75, -0.5, -0.1])
     # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi_Vals = aIBi_Vals - aSi
 
     # P_Vals = np.array([0.4])
@@ -251,6 +251,7 @@ if __name__ == "__main__":
 
     if(taskCount != len(cParams_List)):
         print('ERROR: TASK COUNT MISMATCH')
+        print(taskCount, len(cParams_List))
         P = float('nan')
         aIBi = float('nan')
         sys.exit()
