@@ -64,7 +64,6 @@ if __name__ == "__main__":
     dt = 10
     CoarseGrainRate = 100
 
-    tMax = 100
     tgrid = np.arange(0, tMax + dt, dt)
 
     gParams = [xgrid, kgrid, tgrid]
