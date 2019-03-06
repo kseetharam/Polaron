@@ -46,8 +46,11 @@ if __name__ == "__main__":
 
     # k_max = np.sqrt((np.pi / dx)**2 + (np.pi / dy)**2 + (np.pi / dz)**2)
     k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
-
     k_min = 1e-5
+
+    k_max_ratio = 0.5
+    k_max = k_max * k_max_ratio
+
     kArray, dk = np.linspace(k_min, k_max, Nk, retstep=True)
     if dk < k_min:
         print('k ARRAY GENERATION ERROR')
@@ -87,7 +90,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'imaginary', 'Coupling': 'twophonon', 'Grid': 'spherical', 'Longtime': 'false', 'CoarseGrainRate': CoarseGrainRate}
+    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Coupling': 'twophonon', 'Grid': 'spherical', 'Longtime': 'false', 'CoarseGrainRate': CoarseGrainRate, 'ChangedCutoff': 'true'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -118,6 +121,11 @@ if __name__ == "__main__":
     elif toggleDict['Longtime'] == 'false':
         innerdatapath = innerdatapath
 
+    if toggleDict['ChangedCutoff'] == 'true':
+        innerdatapath = innerdatapath + '_cutoffRatio_{:.2f}'.format(k_max_ratio)
+    elif toggleDict['ChangedCutoff'] == 'false':
+        innerdatapath = innerdatapath
+
     # if os.path.isdir(datapath[0:-14]) is False:
     #     os.mkdir(datapath[0:-14])
 
@@ -127,24 +135,24 @@ if __name__ == "__main__":
     # if os.path.isdir(innerdatapath) is False:
     #     os.mkdir(innerdatapath)
 
-    # # # ---- SINGLE FUNCTION RUN ----
+    # # ---- SINGLE FUNCTION RUN ----
 
-    # runstart = timer()
+    runstart = timer()
 
-    # P = 1.4
-    # aIBi = -0.1
+    P = 1.4
+    aIBi = -0.1
 
-    # print(innerdatapath)
-    # # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi = aIBi - aSi
-    # # print(aIBi)
+    print(innerdatapath)
+    # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi = aIBi - aSi
+    # print(aIBi)
 
-    # cParams = [P, aIBi]
+    cParams = [P, aIBi]
 
-    # dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
-    # dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    dynsph_ds = pf_dynamic_sph.quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict)
+    dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
-    # end = timer()
-    # print('Time: {:.2f}'.format(end - runstart))
+    end = timer()
+    print('Time: {:.2f}'.format(end - runstart))
 
     # # # ---- SINGLE FUNCTION RUN GAUSSIAN COMPARISON ----
 
@@ -204,10 +212,7 @@ if __name__ == "__main__":
 
     # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -0.5])
     # aIBi_Vals = np.array([-10.0])
-
-    # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0, -0.75, -0.5])
-    aIBi_Vals = np.array([-15.0, -12.5, -9.0, -8.0, -7.0, -6.0, -3.5])
-
+    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0, -0.75, -0.5, -0.1])
     # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi_Vals = aIBi_Vals - aSi
 
     # P_Vals = np.array([0.4])

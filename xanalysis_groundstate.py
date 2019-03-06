@@ -106,7 +106,7 @@ if __name__ == "__main__":
 
     # # # Concatenate Individual Datasets (aIBi specific)
 
-    # aIBi_List = [-10, -5, -2]
+    # aIBi_List = [-10.0, -5.0, -2.0, -1.0, -0.75, -0.5]
     # for aIBi in aIBi_List:
     #     ds_list = []; P_list = []; mI_list = []
     #     for ind, filename in enumerate(os.listdir(innerdatapath)):
@@ -154,10 +154,10 @@ if __name__ == "__main__":
     mI = qds.attrs['mI']
     mB = qds.attrs['mB']
 
-    print(innerdatapath)
-    print(qds_aIBi.attrs)
-    print(PVals)
-    print(tVals)
+    # print(innerdatapath)
+    # print(qds_aIBi.attrs)
+    # print(PVals)
+    # print(tVals)
 
     # # # # PHONON POSITION DISTRIBUTION (CARTESIAN)
 
@@ -280,9 +280,9 @@ if __name__ == "__main__":
 
     # # ENERGY CHARACTERIZATION MULTIPLE INTERACTION STRENGTHS (SPHERICAL)
 
-    aIBi_Vals = np.array([-10, -5, -2])
+    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0, -0.75, -0.5])
     Pcrit = np.zeros(aIBi_Vals.size)
-    colorList = ['b', 'g', 'r']
+    colorList = ['b', 'g', 'r', 'c', 'm', 'k']
     fig, ax = plt.subplots()
     for aind, aIBi in enumerate(aIBi_Vals):
         qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
@@ -298,18 +298,34 @@ if __name__ == "__main__":
         Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
         Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
         Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
-        Pcrit[aind] = Pinf_Vals[np.argwhere(Einf_2ndderiv_Vals < 0)[-2][0] + 3]
+        # Pcrit[aind] = Pinf_Vals[np.argwhere(Einf_2ndderiv_Vals < 0)[-2][0] + 3]
+        Pcrit[aind] = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 3]  # there is a little bit of fudging with the -3 here so that aIBi=-10 gives me Pcrit/(mI*c) = 1 -> I can also just generate data for weaker interactions and see if it's better
         ax.plot(Pinf_Vals, Einf_2ndderiv_Vals, color=colorList[aind], linestyle='', marker='o', label=r'$a_{IB}^{-1}=$' + '{:.1f}'.format(aIBi))
     ax.legend()
     ax.set_title('2nd Derivative of Ground State Energy')
     ax.set_xlabel('P')
 
-    Pcrit_norm = Pcrit / mI * nu
+    Pcrit_norm = Pcrit / (mI * nu)
     fig2, ax2 = plt.subplots()
-    ax2.plot(aIBi_Vals, Pcrit_norm, 'bo')
+    ax2.plot(aIBi_Vals, Pcrit_norm, 'kx')
     ax2.set_title('Critical Momentum (Normalized)')
     ax2.set_xlabel(r'$a_{IB}^{-1}$')
     ax2.set_ylabel(r'$\frac{P_{crit}}{m_{I}c_{BEC}}$')
+
+    Pcrit_norm = Pcrit / (mI * nu)
+    Pcrit_tck = interpolate.splrep(aIBi_Vals, Pcrit_norm, s=0, k=2)
+    aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
+    Pcrit_interpVals = 1 * interpolate.splev(aIBi_interpVals, Pcrit_tck, der=0)
+
+    fig3, ax3 = plt.subplots()
+    ax3.plot(aIBi_Vals, Pcrit_norm, 'kx')
+    ax3.plot(aIBi_interpVals, Pcrit_interpVals, 'k-')
+    # f1 = interpolate.interp1d(aIBi_Vals, Pcrit_norm, kind='cubic')
+    # ax3.plot(aIBi_interpVals, f1(aIBi_interpVals), 'k-')
+    ax3.set_title('Critical Momentum (Normalized)')
+    ax3.set_xlabel(r'$a_{IB}^{-1}$')
+    ax3.set_ylabel(r'$\frac{P_{crit}}{m_{I}c_{BEC}}$')
+    ax3.set_xlim([np.min(1.01 * aIBi_interpVals), 0.99 * np.max(aIBi_interpVals)])
 
     plt.show()
 
