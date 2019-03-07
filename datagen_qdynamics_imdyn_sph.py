@@ -202,7 +202,7 @@ if __name__ == "__main__":
 
     cParams_List = []
 
-    # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -0.5])
+    # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -0.5, -0.1])
     # aIBi_Vals = np.array([-10.0])
 
     # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0, -0.75, -0.5])
