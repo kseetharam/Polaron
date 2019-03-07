@@ -30,7 +30,7 @@ def ur(mI, mB):
 
 
 def nu(gBB):
-    return np.sqrt(gBB)
+    return np.sqrt(gBB)  # NOTE: this assumes n0=1 and mB = 1 (real formula is np.sqrt(n0*gBB/mB))
 
 
 def epsilon(k, mB):

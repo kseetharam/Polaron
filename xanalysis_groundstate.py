@@ -20,6 +20,10 @@ if __name__ == "__main__":
 
     # # Initialization
 
+    # fm = matplotlib.font_manager.json_load(os.path.expanduser("~/.cache/matplotlib/fontlist-v310.json"))
+    # fm.findfont("serif", rebuild_if_missing=False)
+    matplotlib.rcParams['font.family'] = 'serif'
+    matplotlib.rcParams['font.serif'] = ['Adobe Garamond Pro']
     # matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
     mpegWriter = writers['ffmpeg'](fps=0.75, bitrate=1800)
 
@@ -278,12 +282,44 @@ if __name__ == "__main__":
     # ax3.set_xlabel('Imaginary time')
     # plt.show()
 
-    # # ENERGY CHARACTERIZATION MULTIPLE INTERACTION STRENGTHS (SPHERICAL)
+    # # # ENERGY CHARACTERIZATION MULTIPLE INTERACTION STRENGTHS (SPHERICAL)
+
+    # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0, -0.75, -0.5])
+    # Pcrit = np.zeros(aIBi_Vals.size)
+    # colorList = ['b', 'g', 'r', 'c', 'm', 'k']
+    # fig, ax = plt.subplots()
+    # for aind, aIBi in enumerate(aIBi_Vals):
+    #     qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    #     CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+    #     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+
+    #     Energy_Vals_inf = np.zeros(PVals.size)
+    #     for Pind, P in enumerate(PVals):
+    #         CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
+    #         Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+
+    #     Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+    #     Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
+    #     Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+    #     Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+    #     # Pcrit[aind] = Pinf_Vals[np.argwhere(Einf_2ndderiv_Vals < 0)[-2][0] + 3]
+    #     Pcrit[aind] = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 0]  # there is a little bit of fudging with the -3 here so that aIBi=-10 gives me Pcrit/(mI*c) = 1 -> I can also just generate data for weaker interactions and see if it's better
+    #     ax.plot(Pinf_Vals, Einf_2ndderiv_Vals, color=colorList[aind], linestyle='', marker='o', label=r'$a_{IB}^{-1}=$' + '{:.1f}'.format(aIBi))
+    # ax.legend()
+    # ax.set_title('2nd Derivative of Ground State Energy')
+    # ax.set_xlabel('P')
+
+    # Pcrit_norm = Pcrit / (mI * nu)
+    # fig2, ax2 = plt.subplots()
+    # ax2.plot(aIBi_Vals, Pcrit_norm, 'kx')
+    # ax2.set_title('Critical Momentum (Normalized)')
+    # ax2.set_xlabel(r'$a_{IB}^{-1}$')
+    # ax2.set_ylabel(r'$\frac{P_{crit}}{m_{I}c_{BEC}}$')
+
+    # # PHASE DIAGRAM (SPHERICAL)
 
     aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0, -0.75, -0.5])
     Pcrit = np.zeros(aIBi_Vals.size)
-    colorList = ['b', 'g', 'r', 'c', 'm', 'k']
-    fig, ax = plt.subplots()
     for aind, aIBi in enumerate(aIBi_Vals):
         qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
         CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
@@ -299,34 +335,37 @@ if __name__ == "__main__":
         Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
         Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
         # Pcrit[aind] = Pinf_Vals[np.argwhere(Einf_2ndderiv_Vals < 0)[-2][0] + 3]
-        Pcrit[aind] = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 3]  # there is a little bit of fudging with the -3 here so that aIBi=-10 gives me Pcrit/(mI*c) = 1 -> I can also just generate data for weaker interactions and see if it's better
-        ax.plot(Pinf_Vals, Einf_2ndderiv_Vals, color=colorList[aind], linestyle='', marker='o', label=r'$a_{IB}^{-1}=$' + '{:.1f}'.format(aIBi))
-    ax.legend()
-    ax.set_title('2nd Derivative of Ground State Energy')
-    ax.set_xlabel('P')
-
-    Pcrit_norm = Pcrit / (mI * nu)
-    fig2, ax2 = plt.subplots()
-    ax2.plot(aIBi_Vals, Pcrit_norm, 'kx')
-    ax2.set_title('Critical Momentum (Normalized)')
-    ax2.set_xlabel(r'$a_{IB}^{-1}$')
-    ax2.set_ylabel(r'$\frac{P_{crit}}{m_{I}c_{BEC}}$')
+        Pcrit[aind] = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 0]  # there is a little bit of fudging with the -3 here so that aIBi=-10 gives me Pcrit/(mI*c) = 1 -> I can also just generate data for weaker interactions and see if it's better
 
     Pcrit_norm = Pcrit / (mI * nu)
     Pcrit_tck = interpolate.splrep(aIBi_Vals, Pcrit_norm, s=0, k=2)
     aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
     Pcrit_interpVals = 1 * interpolate.splev(aIBi_interpVals, Pcrit_tck, der=0)
 
-    fig3, ax3 = plt.subplots()
-    ax3.plot(aIBi_Vals, Pcrit_norm, 'kx')
-    ax3.plot(aIBi_interpVals, Pcrit_interpVals, 'k-')
-    # f1 = interpolate.interp1d(aIBi_Vals, Pcrit_norm, kind='cubic')
-    # ax3.plot(aIBi_interpVals, f1(aIBi_interpVals), 'k-')
-    ax3.set_title('Critical Momentum (Normalized)')
-    ax3.set_xlabel(r'$a_{IB}^{-1}$')
-    ax3.set_ylabel(r'$\frac{P_{crit}}{m_{I}c_{BEC}}$')
-    ax3.set_xlim([np.min(1.01 * aIBi_interpVals), 0.99 * np.max(aIBi_interpVals)])
+    xmin = np.min(aIBi_interpVals)
+    xmax = 1.01 * np.max(aIBi_interpVals)
+    ymin = 0.5
+    ymax = 1.01 * np.max(Pcrit_interpVals)
 
+    font = {'family': 'serif', 'color': 'black', 'size': 14}
+    sfont = {'family': 'serif', 'color': 'black', 'size': 13}
+
+    fig, ax = plt.subplots()
+    ax.plot(aIBi_Vals, Pcrit_norm, 'kx')
+    ax.plot(aIBi_interpVals, Pcrit_interpVals, 'k-')
+    # f1 = interpolate.interp1d(aIBi_Vals, Pcrit_norm, kind='cubic')
+    # ax.plot(aIBi_interpVals, f1(aIBi_interpVals), 'k-')
+    ax.set_title('Ground State Phase Diagram')
+    ax.set_xlabel(r'$a_{IB}^{-1}$')
+    ax.set_ylabel(r'$\frac{P}{m_{I}c_{BEC}}$')
+    ax.set_xlim([xmin, xmax])
+    ax.set_ylim([ymin, ymax])
+    ax.fill_between(aIBi_interpVals, Pcrit_interpVals, ymax, facecolor='b', alpha=0.25)
+    ax.fill_between(aIBi_interpVals, ymin, Pcrit_interpVals, facecolor='g', alpha=0.25)
+    ax.text(-4, ymin + 0.175 * (ymax - ymin), 'Polaron', fontdict=font)
+    ax.text(-8, ymin + 0.7 * (ymax - ymin), 'Cherenkov', fontdict=font)
+    ax.text(-3.85, ymin + 0.075 * (ymax - ymin), '(' + r'$Z>0$' + ')', fontdict=sfont)
+    ax.text(-7.7, ymin + 0.6 * (ymax - ymin), '(' + r'$Z=0$' + ')', fontdict=sfont)
     plt.show()
 
     # # # POLARON SOUND VELOCITY (SPHERICAL)
