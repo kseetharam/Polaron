@@ -144,7 +144,6 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    interpdatapath = innerdatapath + '/interp'
     aIBi = -2.0
     # qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
     # qds_aIBi = qds.sel(aIBi=aIBi)
