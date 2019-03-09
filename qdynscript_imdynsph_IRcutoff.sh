@@ -13,4 +13,4 @@
 
 module load Anaconda3/5.0.1-fasrc01
 source activate anaclone
-python datagen_qdynamics_imdyn_sph.py
+python datagen_qdynamics_imdyn_sph_IRcutoff.py
