@@ -112,42 +112,42 @@ if __name__ == "__main__":
     #         del(ds_tot.attrs['P']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
     #         ds_tot.to_netcdf(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
 
-    # # Concatenate Individual Datasets (aIBi specific, IRcuts)
+    # # # Concatenate Individual Datasets (aIBi specific, IRcuts)
 
-    IRrat_Vals = [1, 2, 5, 10, 50, 1e2, 5e2, 1e3, 5e3, 1e4]
-    aIBi_List = [-10.0, -5.0, -2.0, -0.5]
-    for IRrat in IRrat_Vals:
-        IRdatapath = innerdatapath + '/IRratio_{:.1E}'.format(IRrat)
-        for aIBi in aIBi_List:
-            ds_list = []; P_list = []; mI_list = []
-            for ind, filename in enumerate(os.listdir(IRdatapath)):
-                if filename[0:14] == 'quench_Dataset':
-                    continue
-                if filename[0:6] == 'interp':
-                    continue
-                if filename[0:2] == 'mm':
-                    continue
-                if float(filename[13:-3]) != aIBi:
-                    continue
-                print(filename)
-                ds = xr.open_dataset(IRdatapath + '/' + filename)
-                ds_list.append(ds)
-                P_list.append(ds.attrs['P'])
-                mI_list.append(ds.attrs['mI'])
+    # IRrat_Vals = [1, 2, 5, 10, 50, 1e2, 5e2, 1e3, 5e3, 1e4]
+    # aIBi_List = [-10.0, -5.0, -2.0, -0.5]
+    # for IRrat in IRrat_Vals:
+    #     IRdatapath = innerdatapath + '/IRratio_{:.1E}'.format(IRrat)
+    #     for aIBi in aIBi_List:
+    #         ds_list = []; P_list = []; mI_list = []
+    #         for ind, filename in enumerate(os.listdir(IRdatapath)):
+    #             if filename[0:14] == 'quench_Dataset':
+    #                 continue
+    #             if filename[0:6] == 'interp':
+    #                 continue
+    #             if filename[0:2] == 'mm':
+    #                 continue
+    #             if float(filename[13:-3]) != aIBi:
+    #                 continue
+    #             print(filename)
+    #             ds = xr.open_dataset(IRdatapath + '/' + filename)
+    #             ds_list.append(ds)
+    #             P_list.append(ds.attrs['P'])
+    #             mI_list.append(ds.attrs['mI'])
 
-            s = sorted(zip(P_list, ds_list))
-            g = itertools.groupby(s, key=lambda x: x[0])
+    #         s = sorted(zip(P_list, ds_list))
+    #         g = itertools.groupby(s, key=lambda x: x[0])
 
-            P_keys = []; P_ds_list = []; aIBi_ds_list = []
-            for key, group in g:
-                P_temp_list, ds_temp_list = zip(*list(group))
-                P_keys.append(key)  # note that key = P_temp_list[0]
-                P_ds_list.append(ds_temp_list[0])
+    #         P_keys = []; P_ds_list = []; aIBi_ds_list = []
+    #         for key, group in g:
+    #             P_temp_list, ds_temp_list = zip(*list(group))
+    #             P_keys.append(key)  # note that key = P_temp_list[0]
+    #             P_ds_list.append(ds_temp_list[0])
 
-            with xr.concat(P_ds_list, pd.Index(P_keys, name='P')) as ds_tot:
-                # ds_tot = xr.concat(P_ds_list, pd.Index(P_keys, name='P'))
-                del(ds_tot.attrs['P']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
-                ds_tot.to_netcdf(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    #         with xr.concat(P_ds_list, pd.Index(P_keys, name='P')) as ds_tot:
+    #             # ds_tot = xr.concat(P_ds_list, pd.Index(P_keys, name='P'))
+    #             del(ds_tot.attrs['P']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
+    #             ds_tot.to_netcdf(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
 
     # # # Analysis of Total Dataset
 
@@ -431,20 +431,48 @@ if __name__ == "__main__":
     # ax.set_xlabel(r'$a_{IB}^{-1}$')
     # plt.show()
 
-    # # # Nph (SPHERICAL)
+    # # Nph (SPHERICAL)
 
-    # Nph_ds = qds_aIBi['Nph']
-    # Nph_Vals = np.zeros((PVals.size, tVals.size))
-    # for Pind, P in enumerate(PVals):
-    #     for tind, t in enumerate(tVals):
-    #         Nph_Vals[Pind, tind] = Nph_ds.sel(P=P, t=t).values
+    IRrat_Vals = np.array([1, 2, 5, 10, 50, 1e2, 5e2, 1e3, 5e3, 1e4])
+    aIBi_List = [-10.0, -5.0, -2.0, -0.5]
 
-    # fig, ax = plt.subplots()
-    # ax.plot(PVals, Nph_Vals[:, -1], 'k-')
-    # ax.set_title('Phonon Number (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    # ax.set_xlabel('P')
-    # ax.set_ylabel(r'$N_{ph}$')
-    # plt.show()
+    aIBi = aIBi_List[1]
+    IRrat = IRrat_Vals[0]
+    IRdatapath = innerdatapath + '/IRratio_{:.1E}'.format(IRrat)
+    qds_aIBi = (xr.open_dataset(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))).isel(t=-1)
+
+    PVals = qds_aIBi['P'].values
+    n0 = qds_aIBi.attrs['n0']
+    gBB = qds_aIBi.attrs['gBB']
+    mI = qds_aIBi.attrs['mI']
+    mB = qds_aIBi.attrs['mB']
+    nu = np.sqrt(n0 * gBB / mB)
+
+    Nph_ds = qds_aIBi['Nph']
+    Nph_Vals = Nph_ds.values
+
+    Pind = np.argmin(np.abs(PVals - 3.0 * mI * nu))
+    Nph_IRcuts = np.zeros(IRrat_Vals.size)
+    for ind, IRrat in enumerate(IRrat_Vals):
+        qds_IRrat = (xr.open_dataset(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))).isel(t=-1)
+        kmin = np.min(qds_IRrat.coords['k'].values); print(kmin)
+        Nph_ds_IRrat = qds_IRrat['Nph']
+        Nph_IRcuts[ind] = Nph_ds_IRrat.values[Pind]
+
+    print(Nph_IRcuts)
+
+    fig, axes = plt.subplots(nrows=1, ncols=2)
+    axes[0].plot(PVals, Nph_Vals, 'k-')
+    axes[0].set_title('Phonon Number (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+    axes[0].set_xlabel('P')
+    axes[0].set_ylabel(r'$N_{ph}$')
+
+    axes[1].plot(IRrat_Vals, Nph_IRcuts, 'g-')
+    axes[1].set_xlabel('IR Cutoff Increase Ratio')
+    axes[1].set_ylabel(r'$N_{ph}$')
+    axes[1].set_title('Phonon Number (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.1f})'.format(PVals[Pind] / (mI * nu)))
+
+    plt.show()
 
     # # IMPURITY DISTRIBUTION ANIMATION WITH CHARACTERIZATION (CARTESIAN)
 
