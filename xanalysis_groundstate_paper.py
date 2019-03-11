@@ -454,6 +454,7 @@ if __name__ == "__main__":
     Pind = np.argmin(np.abs(PVals - 3.0 * mI * nu))
     Nph_IRcuts = np.zeros(IRrat_Vals.size)
     for ind, IRrat in enumerate(IRrat_Vals):
+        IRdatapath = innerdatapath + '/IRratio_{:.1E}'.format(IRrat)
         qds_IRrat = (xr.open_dataset(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))).isel(t=-1)
         kmin = np.min(qds_IRrat.coords['k'].values); print(kmin)
         Nph_ds_IRrat = qds_IRrat['Nph']
