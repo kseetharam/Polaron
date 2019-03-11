@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'cartesian', 'Coupling': 'twophonon', 'Longtime': 'false', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'IRcuts': 'true', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -72,45 +72,15 @@ if __name__ == "__main__":
         innerdatapath = innerdatapath
         animpath = animpath + '_twophonon'
 
-    if toggleDict['Longtime'] == 'true':
-        innerdatapath = innerdatapath + '_longtime'
-    elif toggleDict['Longtime'] == 'false':
+    if toggleDict['IRcuts'] == 'true':
+        innerdatapath = innerdatapath + '_IRcuts'
+    elif toggleDict['IRcuts'] == 'false':
         innerdatapath = innerdatapath
-
-    # # # Concatenate Individual Datasets
-
-    # ds_list = []; P_list = []; aIBi_list = []; mI_list = []
-    # for ind, filename in enumerate(os.listdir(innerdatapath)):
-    #     if filename == 'quench_Dataset_cart.nc':
-    #         continue
-    #     print(filename)
-    #     ds = xr.open_dataset(innerdatapath + '/' + filename)
-    #     ds_list.append(ds)
-    #     P_list.append(ds.attrs['P'])
-    #     aIBi_list.append(ds.attrs['aIBi'])
-    #     mI_list.append(ds.attrs['mI'])
-
-    # s = sorted(zip(aIBi_list, P_list, ds_list))
-    # g = itertools.groupby(s, key=lambda x: x[0])
-
-    # aIBi_keys = []; aIBi_groups = []; aIBi_ds_list = []
-    # for key, group in g:
-    #     aIBi_keys.append(key)
-    #     aIBi_groups.append(list(group))
-
-    # for ind, group in enumerate(aIBi_groups):
-    #     aIBi = aIBi_keys[ind]
-    #     _, P_list_temp, ds_list_temp = zip(*group)
-    #     ds_temp = xr.concat(ds_list_temp, pd.Index(P_list_temp, name='P'))
-    #     aIBi_ds_list.append(ds_temp)
-
-    # ds_tot = xr.concat(aIBi_ds_list, pd.Index(aIBi_keys, name='aIBi'))
-    # del(ds_tot.attrs['P']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
-    # ds_tot.to_netcdf(innerdatapath + '/quench_Dataset_cart.nc')
 
     # # # Concatenate Individual Datasets (aIBi specific)
 
     # aIBi_List = [-15.0, -12.5, -10.0, -9.0, -8.0, -7.0, -6.0, -5.0, -3.5, -2.0, -1.0, -0.75, -0.5, -0.1]
+
     # for aIBi in aIBi_List:
     #     ds_list = []; P_list = []; mI_list = []
     #     for ind, filename in enumerate(os.listdir(innerdatapath)):
@@ -142,23 +112,60 @@ if __name__ == "__main__":
     #         del(ds_tot.attrs['P']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
     #         ds_tot.to_netcdf(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
 
-    # # Analysis of Total Dataset
+    # # Concatenate Individual Datasets (aIBi specific, IRcuts)
 
-    aIBi = -2.0
-    # qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
-    # qds_aIBi = qds.sel(aIBi=aIBi)
-    qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    qds_aIBi = qds
+    IRrat_Vals = [1, 2, 5, 10, 50, 1e2, 5e2, 1e3, 5e3, 1e4]
+    aIBi_List = [-10.0, -5.0, -2.0, -0.5]
+    for IRrat in IRrat_Vals:
+        IRdatapath = innerdatapath + '/IRratio_{:.1E}'.format(IRrat)
+        for aIBi in aIBi_List:
+            ds_list = []; P_list = []; mI_list = []
+            for ind, filename in enumerate(os.listdir(IRdatapath)):
+                if filename[0:14] == 'quench_Dataset':
+                    continue
+                if filename[0:6] == 'interp':
+                    continue
+                if filename[0:2] == 'mm':
+                    continue
+                if float(filename[13:-3]) != aIBi:
+                    continue
+                print(filename)
+                ds = xr.open_dataset(IRdatapath + '/' + filename)
+                ds_list.append(ds)
+                P_list.append(ds.attrs['P'])
+                mI_list.append(ds.attrs['mI'])
 
-    PVals = qds['P'].values
-    tVals = qds['t'].values
-    n0 = qds.attrs['n0']
-    gBB = qds.attrs['gBB']
-    mI = qds.attrs['mI']
-    mB = qds.attrs['mB']
-    nu = np.sqrt(n0 * gBB / mB)
+            s = sorted(zip(P_list, ds_list))
+            g = itertools.groupby(s, key=lambda x: x[0])
 
-    aIBi_Vals = np.array([-12.5, -10.0, -9.0, -8.0, -7.0, -5.0, -3.5, -2.0, -1.0, -0.75, -0.5, -0.1])  # used by many plots (spherical)
+            P_keys = []; P_ds_list = []; aIBi_ds_list = []
+            for key, group in g:
+                P_temp_list, ds_temp_list = zip(*list(group))
+                P_keys.append(key)  # note that key = P_temp_list[0]
+                P_ds_list.append(ds_temp_list[0])
+
+            with xr.concat(P_ds_list, pd.Index(P_keys, name='P')) as ds_tot:
+                # ds_tot = xr.concat(P_ds_list, pd.Index(P_keys, name='P'))
+                del(ds_tot.attrs['P']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
+                ds_tot.to_netcdf(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+
+    # # # Analysis of Total Dataset
+
+    # aIBi = -2.0
+    # # qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
+    # # qds_aIBi = qds.sel(aIBi=aIBi)
+    # qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    # qds_aIBi = qds
+
+    # PVals = qds['P'].values
+    # tVals = qds['t'].values
+    # n0 = qds.attrs['n0']
+    # gBB = qds.attrs['gBB']
+    # mI = qds.attrs['mI']
+    # mB = qds.attrs['mB']
+    # nu = np.sqrt(n0 * gBB / mB)
+
+    # aIBi_Vals = np.array([-12.5, -10.0, -9.0, -8.0, -7.0, -5.0, -3.5, -2.0, -1.0, -0.75, -0.5, -0.1])  # used by many plots (spherical)
 
     # # # # BOGOLIUBOV DISPERSION (SPHERICAL)
 
