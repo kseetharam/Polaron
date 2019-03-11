@@ -433,7 +433,9 @@ if __name__ == "__main__":
 
     # # Nph (SPHERICAL)
 
-    IRrat_Vals = np.array([1, 2, 5, 10, 50, 1e2, 5e2, 1e3, 5e3, 1e4])
+    # IRrat_Vals = np.array([1, 2, 5, 10, 50, 1e2, 5e2, 1e3, 5e3, 1e4])
+    IRrat_Vals = np.array([1, 2, 5, 10, 50, 1e2])
+
     aIBi_List = [-10.0, -5.0, -2.0, -0.5]
 
     aIBi = aIBi_List[1]
@@ -456,16 +458,14 @@ if __name__ == "__main__":
     for ind, IRrat in enumerate(IRrat_Vals):
         IRdatapath = innerdatapath + '/IRratio_{:.1E}'.format(IRrat)
         qds_IRrat = (xr.open_dataset(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))).isel(t=-1)
-        kmin = np.min(qds_IRrat.coords['k'].values); print(kmin)
+        kmin = np.min(qds_IRrat.coords['k'].values)
         Nph_ds_IRrat = qds_IRrat['Nph']
         Nph_IRcuts[ind] = Nph_ds_IRrat.values[Pind]
 
-    print(Nph_IRcuts)
-
     fig, axes = plt.subplots(nrows=1, ncols=2)
-    axes[0].plot(PVals, Nph_Vals, 'k-')
+    axes[0].plot(PVals / (mI * nu), Nph_Vals, 'k-')
     axes[0].set_title('Phonon Number (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    axes[0].set_xlabel('P')
+    axes[0].set_xlabel(r'$\frac{P}{m_{I}c_{BEC}}$')
     axes[0].set_ylabel(r'$N_{ph}$')
 
     axes[1].plot(IRrat_Vals, Nph_IRcuts, 'g-')
@@ -473,6 +473,7 @@ if __name__ == "__main__":
     axes[1].set_ylabel(r'$N_{ph}$')
     axes[1].set_title('Phonon Number (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.1f})'.format(PVals[Pind] / (mI * nu)))
 
+    fig.tight_layout()
     plt.show()
 
     # # IMPURITY DISTRIBUTION ANIMATION WITH CHARACTERIZATION (CARTESIAN)
