@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'frohlich', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -124,7 +124,16 @@ if __name__ == "__main__":
     xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
     tscale = xi / nu
 
+    kArray = qds.coords['k'].values
+    k0 = kArray[0]
+    kf = kArray[-1]
+
     print(mI / mB)
+    IR_lengthscale = 1 / (k0 / (2 * np.pi)) / xi
+    UV_lengthscale = 1 / (kf / (2 * np.pi)) / xi
+
+    print(k0, 1 / IR_lengthscale, IR_lengthscale)
+    print(kf, 1 / UV_lengthscale, UV_lengthscale)
 
     # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0, -0.75, -0.5])
     aIBi_Vals = np.array([-10.0, -5.0, -2.0])
@@ -137,7 +146,7 @@ if __name__ == "__main__":
 
     Pnorm = PVals / mc
     print(Pnorm)
-    Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.35, 1.8, 3.0])
+    Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.35, 1.8, 3.0, 5.0])
     # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
     # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.0, 1.1, 1.3, 1.8, 3.0])
 
@@ -157,9 +166,9 @@ if __name__ == "__main__":
         tfLin = tsVals[tsVals > 10]
         fLin = np.exp(z[1]) * tfLin**(z[0])
 
-        axes[0].plot(tsVals, DynOv, label='{:.2f}'.format(P / mc))
-        axes[0].plot(tfLin, fLin, 'k--', label='')
-        axes[1].plot(tsVals, PImp, label='{:.2f}'.format(P / mc))
+        axes[0].plot(tsVals / tscale, DynOv, label='{:.2f}'.format(P / mc))
+        axes[0].plot(tfLin / tscale, fLin, 'k--', label='')
+        axes[1].plot(tsVals / tscale, PImp, label='{:.2f}'.format(P / mc))
 
     axes[0].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
     axes[0].set_xscale('log')
@@ -167,14 +176,14 @@ if __name__ == "__main__":
     axes[0].set_xlim([1e-1, 1e2])
     axes[0].set_title('Loschmidt Echo (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
     axes[0].set_ylabel(r'$|S(t)|$')
-    axes[0].set_xlabel(r'$t$')
+    axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
 
-    axes[1].plot(tsVals, mc * np.ones(tsVals.size), 'k--', label='$m_{I}c_{BEC}$')
+    axes[1].plot(tsVals / tscale, mc * np.ones(tsVals.size), 'k--', label='$m_{I}c_{BEC}$')
     axes[1].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=1, ncol=2)
     axes[1].set_xlim([-1, 100])
     axes[1].set_title('Average Impurity Momentum (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
     axes[1].set_ylabel(r'$<P_{I}>$')
-    axes[1].set_xlabel(r'$t$')
+    axes[1].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
 
     fig.tight_layout()
     plt.show()
