@@ -34,6 +34,8 @@ if __name__ == "__main__":
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     # NGridPoints_cart = 1.37e5
 
+    massRat = 1.0
+
     # Toggle parameters
 
     toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'frohlich', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
@@ -41,10 +43,10 @@ if __name__ == "__main__":
     # ---- SET OUTPUT DATA FOLDER ----
 
     if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, 1)
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, massRat)
         animpath = '/home/kis/Dropbox/VariationalResearch/DataAnalysis/figs'
     elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, 1)
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, massRat)
         animpath = '/media/kis/Storage/Dropbox/VariationalResearch/DataAnalysis/figs'
 
     if toggleDict['Dynamics'] == 'real':
@@ -122,9 +124,10 @@ if __name__ == "__main__":
     xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
     tscale = xi / nu
 
-    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0, -0.75, -0.5])
-    if toggleDict['Coupling'] == 'frohlich':
-        aIBi_Vals = np.array([-10.0, -5.0, -2.0])
+    print(mI / mB)
+
+    # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0, -0.75, -0.5])
+    aIBi_Vals = np.array([-10.0, -5.0, -2.0])
 
     # # # # S(t) AND P_Imp CURVES
 
@@ -133,7 +136,10 @@ if __name__ == "__main__":
     # qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
 
     # Pnorm = PVals / mc
+    # # print(Pnorm)
     # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.35, 1.8, 3.0])
+    # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
+
     # Pinds = np.zeros(Pnorm_des.size, dtype=int)
     # for Pn_ind, Pn in enumerate(Pnorm_des):
     #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
