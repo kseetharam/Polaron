@@ -54,7 +54,7 @@ if __name__ == "__main__":
     # CoarseGrainRate = 100
 
     # for realdyn evolution
-    tMax = 150
+    tMax = 100
     dt = 0.2
     CoarseGrainRate = 1
 
@@ -79,7 +79,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical', 'Longtime': 'false', 'CoarseGrainRate': CoarseGrainRate}
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Coupling': 'frohlich', 'Grid': 'spherical', 'Longtime': 'false', 'CoarseGrainRate': CoarseGrainRate}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -191,8 +191,8 @@ if __name__ == "__main__":
 
     cParams_List = []
 
-    # aIBi_Vals = np.array([-10.0, -5.0, -2.0])
-    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0, -0.75, -0.5])
+    aIBi_Vals = np.array([-10.0, -5.0, -2.0])
+    # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0, -0.75, -0.5])
     # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi_Vals = aIBi_Vals - aSi
 
     # P_Vals = np.array([0.4])
@@ -225,6 +225,9 @@ if __name__ == "__main__":
 
     taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
     taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    # taskCount = len(cParams_List)
+    # taskID = 72
 
     if(taskCount != len(cParams_List)):
         print('ERROR: TASK COUNT MISMATCH')
