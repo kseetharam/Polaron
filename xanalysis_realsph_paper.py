@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'frohlich', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -106,7 +106,7 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -2.0
+    aIBi = -10.0
     # qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
     # qds_aIBi = qds.sel(aIBi=aIBi)
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
@@ -138,55 +138,55 @@ if __name__ == "__main__":
     # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0, -0.75, -0.5])
     aIBi_Vals = np.array([-10.0, -5.0, -2.0])
 
-    # # # S(t) AND P_Imp CURVES
+    # # # # S(t) AND P_Imp CURVES
 
-    tau = 100
-    tsVals = tVals[tVals < tau]
-    qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
+    # tau = 100
+    # tsVals = tVals[tVals < tau]
+    # qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
 
-    Pnorm = PVals / mc
-    print(Pnorm)
-    Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.35, 1.8, 3.0, 5.0])
-    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
-    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.0, 1.1, 1.3, 1.8, 3.0])
+    # Pnorm = PVals / mc
+    # print(Pnorm)
+    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.35, 1.8, 3.0, 5.0])
+    # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
+    # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.0, 1.1, 1.3, 1.8, 3.0])
 
-    Pinds = np.zeros(Pnorm_des.size, dtype=int)
-    for Pn_ind, Pn in enumerate(Pnorm_des):
-        Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
+    # Pinds = np.zeros(Pnorm_des.size, dtype=int)
+    # for Pn_ind, Pn in enumerate(Pnorm_des):
+    #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
 
-    fig, axes = plt.subplots(nrows=2, ncols=1)
-    for indP in Pinds:
-        P = PVals[indP]
-        DynOv = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
-        PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
+    # fig, axes = plt.subplots(nrows=2, ncols=1)
+    # for indP in Pinds:
+    #     P = PVals[indP]
+    #     DynOv = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+    #     PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
 
-        tfmask = tsVals > 60
-        tfVals = tsVals[tfmask]
-        z = np.polyfit(np.log(tfVals), np.log(DynOv[tfmask]), deg=1)
-        tfLin = tsVals[tsVals > 10]
-        fLin = np.exp(z[1]) * tfLin**(z[0])
+    #     tfmask = tsVals > 60
+    #     tfVals = tsVals[tfmask]
+    #     z = np.polyfit(np.log(tfVals), np.log(DynOv[tfmask]), deg=1)
+    #     tfLin = tsVals[tsVals > 10]
+    #     fLin = np.exp(z[1]) * tfLin**(z[0])
 
-        axes[0].plot(tsVals / tscale, DynOv, label='{:.2f}'.format(P / mc))
-        axes[0].plot(tfLin / tscale, fLin, 'k--', label='')
-        axes[1].plot(tsVals / tscale, PImp, label='{:.2f}'.format(P / mc))
+    #     axes[0].plot(tsVals / tscale, DynOv, label='{:.2f}'.format(P / mc))
+    #     axes[0].plot(tfLin / tscale, fLin, 'k--', label='')
+    #     axes[1].plot(tsVals / tscale, PImp, label='{:.2f}'.format(P / mc))
 
-    axes[0].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
-    axes[0].set_xscale('log')
-    axes[0].set_yscale('log')
-    axes[0].set_xlim([1e-1, 1e2])
-    axes[0].set_title('Loschmidt Echo (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    axes[0].set_ylabel(r'$|S(t)|$')
-    axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    # axes[0].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
+    # axes[0].set_xscale('log')
+    # axes[0].set_yscale('log')
+    # axes[0].set_xlim([1e-1, 1e2])
+    # axes[0].set_title('Loschmidt Echo (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    # axes[0].set_ylabel(r'$|S(t)|$')
+    # axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
 
-    axes[1].plot(tsVals / tscale, mc * np.ones(tsVals.size), 'k--', label='$m_{I}c_{BEC}$')
-    axes[1].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=1, ncol=2)
-    axes[1].set_xlim([-1, 100])
-    axes[1].set_title('Average Impurity Momentum (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    axes[1].set_ylabel(r'$<P_{I}>$')
-    axes[1].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    # axes[1].plot(tsVals / tscale, mc * np.ones(tsVals.size), 'k--', label='$m_{I}c_{BEC}$')
+    # axes[1].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=1, ncol=2)
+    # axes[1].set_xlim([-1, 100])
+    # axes[1].set_title('Average Impurity Momentum (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    # axes[1].set_ylabel(r'$<P_{I}>$')
+    # axes[1].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
 
-    fig.tight_layout()
-    plt.show()
+    # fig.tight_layout()
+    # plt.show()
 
     # # # # S(t) AND P_Imp EXPONENTS
 
@@ -262,3 +262,8 @@ if __name__ == "__main__":
     # # ax.set_title('Long Time Power-Law Behavior of Observables')
 
     # plt.show()
+
+    # # # RF SPECTRA
+
+    prefac = -1
+    prefac2 = 1

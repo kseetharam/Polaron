@@ -64,6 +64,110 @@ def gIB(kgrid, aIBi, mI, mB, n0, gBB):
     return 1 / ((mR / (2 * np.pi)) * aIBi - (mR / np.pi**2) * k_max)
 
 
+# ---- SPECTRUM RELATED FUNCTIONS ----
+
+
+# def PCrit_inf(kcutoff, aIBi, mI, mB, n0, gBB):
+#     #
+#     DP = mI * nu(mB, n0, gBB)  # condition for critical momentum is P-PB = mI*nu where nu is the speed of sound
+#     # non-grid helper function
+
+#     def Wk(k, gBB, mB, n0):
+#         return np.sqrt(eB(k, mB) / w(k, gBB, mB, n0))
+
+#     # calculate aSi
+#     def integrand(k): return (4 * ur(mI, mB) / (k**2) - ((Wk(k, gBB, mB, n0)**2) / (DP * k / mI)) * np.log((w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) / (w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)))) * (k**2)
+#     val, abserr = quad(integrand, 0, kcutoff, epsabs=0, epsrel=1.49e-12)
+#     aSi = (1 / (2 * np.pi * ur(mI, mB))) * val
+#     # calculate PB (phonon momentum)
+
+#     def integrand(k): return ((2 * (w(k, gBB, mB, n0) + (k**2) / (2 * mI)) * (DP * k / mI) + (w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) * (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) * np.log((w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) / (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)))) / ((w(k, gBB, mB, n0) + (k**2) / (2 * mI) - (DP * k / mI)) * (w(k, gBB, mB, n0) + (k**2) / (2 * mI) + (DP * k / mI)) * (DP * k / mI)**2)) * (Wk(k, gBB, mB, n0)**2) * (k**3)
+#     val, abserr = quad(integrand, 0, kcutoff, epsabs=0, epsrel=1.49e-12)
+#     PB = n0 / (ur(mI, mB)**2 * (aIBi - aSi)**2) * val
+
+#     return DP + PB
+
+def dirRF(dataset, kgrid, cParams, sParams):
+    CSAmp = dataset['Real_CSAmp'] + 1j * dataset['Imag_CSAmp']
+    Phase = dataset['Phase']
+    dVk = kgrid.dV()
+    tgrid = CSAmp.coords['t'].values
+    CSA0 = CSAmp.isel(t=0).values; CSA0 = CSA0.reshape(CSA0.size)
+    Phase0 = Phase.isel(t=0).values
+    DynOv_Vec = np.zeros(tgrid.size, dtype=complex)
+
+    for tind, t in enumerate(tgrid):
+        CSAt = CSAmp.sel(t=t).values; CSAt = CSAt.reshape(CSAt.size)
+        Phaset = Phase.sel(t=t).values
+        exparg = np.dot(np.abs(CSAt)**2 + np.abs(CSA0)**2 - 2 * CSA0.conjugate() * CSAt, dVk)
+        DynOv_Vec[tind] = np.exp(-1j * (Phaset - Phase0)) * np.exp((-1 / 2) * exparg)
+
+    # calculate polaron energy (energy of initial state CSA0)
+    [P, aIBi] = cParams
+    [mI, mB, n0, gBB] = sParams
+    dVk = kgrid.dV()
+    kzg_flat = kcos_func(kgrid)
+    g_IB = gIB(kgrid, aIBi, mI, mB, n0, gBB)
+    PB0 = np.dot(kzg_flat * np.abs(CSA0)**2, dVk).real.astype(float)
+    DP0 = P - PB0
+    Energy0 = (P**2 - PB0**2) / (2 * mI) + np.dot(Omega(kgrid, DP0, mI, mB, n0, gBB) * np.abs(CSA0)**2, dVk) + g_IB * (np.dot(Wk(kgrid, mB, n0, gBB) * CSA0, dVk) + np.sqrt(n0))**2
+
+    # calculate full dynamical overlap
+    DynOv_Vec = np.exp(1j * Energy0) * DynOv_Vec
+    ReDynOv_da = xr.DataArray(np.real(DynOv_Vec), coords=[tgrid], dims=['t'])
+    ImDynOv_da = xr.DataArray(np.imag(DynOv_Vec), coords=[tgrid], dims=['t'])
+    # DynOv_ds = xr.Dataset({'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da}, coords={'t': tgrid}, attrs=dataset.attrs)
+    DynOv_ds = dataset[['Real_CSAmp', 'Imag_CSAmp', 'Phase']]; DynOv_ds['Real_DynOv'] = ReDynOv_da; DynOv_ds['Imag_DynOv'] = ImDynOv_da; DynOv_ds.attrs = dataset.attrs
+    return DynOv_ds
+
+
+# def spectFunc(t_Vec, S_Vec, tdecay):
+#     # spectral function (Fourier Transform of dynamical overlap) using convention A(omega) = 2*Re[\int {S(t)*e^(-i*omega*t)}]
+#     dt = t_Vec[1] - t_Vec[0]
+#     Nt = t_Vec.size
+#     decayFactor = np.exp(-1 * t_Vec / tdecay)
+#     Sarg = S_Vec * decayFactor
+#     sf_preshift = 2 * np.real(dt * np.fft.fft(Sarg))
+#     sf = np.fft.fftshift(sf_preshift)
+#     omega = np.fft.fftshift((2 * np.pi / dt) * np.fft.fftfreq(Nt))
+#     return omega, sf
+
+
+def spectFunc(t_Vec, S_Vec, tdecay):
+    # spectral function (Fourier Transform of dynamical overlap) using convention A(omega) = 2*Re[\int {S(t)*e^(i*omega*t)}]
+    dt = t_Vec[1] - t_Vec[0]
+    Nt = t_Vec.size
+    domega = 2 * np.pi / (Nt * dt)
+    decayFactor = np.exp(-1 * t_Vec / tdecay)
+    Sarg = S_Vec * decayFactor
+    sf_preshift = np.real((2 * np.pi / domega) * np.fft.ifft(Sarg))
+    # sf_preshift = 2 * np.real((2 * np.pi / domega) * np.fft.ifft(Sarg))
+    sf = np.fft.fftshift(sf_preshift)
+    omega = np.fft.fftshift((2 * np.pi / dt) * np.fft.fftfreq(Nt))
+    return omega, sf
+
+
+def Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB):
+    dVk = kgrid.dV()
+    kzg_flat = kcos_func(kgrid)
+    Wk_grid = Wk(kgrid, mB, n0, gBB)
+    Wki_grid = 1 / Wk_grid
+
+    amplitude = CSAmp.reshape(CSAmp.size)
+    PB = np.dot(kzg_flat * np.abs(amplitude)**2, dVk).real.astype(float)
+    DP = P - PB
+    Omega_grid = Omega(kgrid, DP, mI, mB, n0, gBB)
+    gnum = gIB(kgrid, aIBi, mI, mB, n0, gBB)
+
+    xp = 0.5 * np.dot(Wk_grid, amplitude * dVk)
+    xm = 0.5 * np.dot(Wki_grid, amplitude * dVk)
+    En = ((P**2 - PB**2) / (2 * mI) +
+          np.dot(dVk * Omega_grid, np.abs(amplitude)**2) +
+          gnum * (2 * np.real(xp) + np.sqrt(n0))**2 -
+          gnum * (2 * np.imag(xm))**2)
+
+    return En.real.astype(float)
+
 # ---- OTHER HELPER FUNCTIONS AND DYNAMICS ----
 
 
@@ -88,38 +192,38 @@ def gIB(kgrid, aIBi, mI, mB, n0, gBB):
 #     return DP + PB
 
 
-def spectFunc(t_Vec, S_Vec):
-    # spectral function (Fourier Transform of dynamical overlap)
-    tstep = t_Vec[1] - t_Vec[0]
-    N = t_Vec.size
-    tdecay = 3
-    decayFactor = np.exp(-1 * t_Vec / tdecay)
-    # decayFactor = 1
-    sf = 2 * np.real(np.fft.ifft(S_Vec * decayFactor))
-    omega = 2 * np.pi * np.fft.fftfreq(N, d=tstep)
-    return omega, sf
+# def spectFunc(t_Vec, S_Vec):
+#     # spectral function (Fourier Transform of dynamical overlap)
+#     tstep = t_Vec[1] - t_Vec[0]
+#     N = t_Vec.size
+#     tdecay = 3
+#     decayFactor = np.exp(-1 * t_Vec / tdecay)
+#     # decayFactor = 1
+#     sf = 2 * np.real(np.fft.ifft(S_Vec * decayFactor))
+#     omega = 2 * np.pi * np.fft.fftfreq(N, d=tstep)
+#     return omega, sf
 
 
-def Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB):
-    dVk = kgrid.dV()
-    kzg_flat = kcos_func(kgrid)
-    Wk_grid = Wk(kgrid, mB, n0, gBB)
-    Wki_grid = 1 / Wk_grid
+# def Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB):
+#     dVk = kgrid.dV()
+#     kzg_flat = kcos_func(kgrid)
+#     Wk_grid = Wk(kgrid, mB, n0, gBB)
+#     Wki_grid = 1 / Wk_grid
 
-    amplitude = CSAmp.reshape(CSAmp.size)
-    PB = np.dot(kzg_flat * np.abs(amplitude)**2, dVk).real.astype(float)
-    DP = P - PB
-    Omega_grid = Omega(kgrid, DP, mI, mB, n0, gBB)
-    gnum = gIB(kgrid, aIBi, mI, mB, n0, gBB)
+#     amplitude = CSAmp.reshape(CSAmp.size)
+#     PB = np.dot(kzg_flat * np.abs(amplitude)**2, dVk).real.astype(float)
+#     DP = P - PB
+#     Omega_grid = Omega(kgrid, DP, mI, mB, n0, gBB)
+#     gnum = gIB(kgrid, aIBi, mI, mB, n0, gBB)
 
-    xp = 0.5 * np.dot(Wk_grid, amplitude * dVk)
-    xm = 0.5 * np.dot(Wki_grid, amplitude * dVk)
-    En = ((P**2 - PB**2) / (2 * mI) +
-          np.dot(dVk * Omega_grid, np.abs(amplitude)**2) +
-          gnum * (2 * np.real(xp) + np.sqrt(n0))**2 -
-          gnum * (2 * np.imag(xm))**2)
+#     xp = 0.5 * np.dot(Wk_grid, amplitude * dVk)
+#     xm = 0.5 * np.dot(Wki_grid, amplitude * dVk)
+#     En = ((P**2 - PB**2) / (2 * mI) +
+#           np.dot(dVk * Omega_grid, np.abs(amplitude)**2) +
+#           gnum * (2 * np.real(xp) + np.sqrt(n0))**2 -
+#           gnum * (2 * np.imag(xm))**2)
 
-    return En.real.astype(float)
+#     return En.real.astype(float)
 
 
 def CSAmp_timederiv(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB):

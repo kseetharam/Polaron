@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Coupling': 'frohlich', 'Grid': 'spherical', 'Longtime': 'false', 'CoarseGrainRate': CoarseGrainRate}
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical', 'Longtime': 'false', 'CoarseGrainRate': CoarseGrainRate}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -123,12 +123,12 @@ if __name__ == "__main__":
     IRrat_Vals = np.array([2, 5, 10, 100, 4e3])
     innerdatapath = innerdatapath + '_IRcuts'
 
-    if os.path.isdir(innerdatapath) is False:
-        os.mkdir(innerdatapath)
-    for IRrat in IRrat_Vals:
-        IRdatapath = innerdatapath + '/IRratio_{:.1E}'.format(IRrat)
-        if os.path.isdir(IRdatapath) is False:
-            os.mkdir(IRdatapath)
+    # if os.path.isdir(innerdatapath) is False:
+    #     os.mkdir(innerdatapath)
+    # for IRrat in IRrat_Vals:
+    #     IRdatapath = innerdatapath + '/IRratio_{:.1E}'.format(IRrat)
+    #     if os.path.isdir(IRdatapath) is False:
+    #         os.mkdir(IRdatapath)
 
     for ind, aIBi in enumerate(aIBi_Vals):
         for P in P_Vals:
