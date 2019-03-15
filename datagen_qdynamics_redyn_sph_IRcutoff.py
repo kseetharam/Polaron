@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical', 'Longtime': 'false', 'CoarseGrainRate': CoarseGrainRate}
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Coupling': 'twophonon', 'IRcuts': 'true', 'Grid': 'spherical', 'Longtime': 'false', 'CoarseGrainRate': CoarseGrainRate}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -84,6 +84,11 @@ if __name__ == "__main__":
     if toggleDict['Longtime'] == 'true':
         innerdatapath = innerdatapath + '_longtime'
     elif toggleDict['Longtime'] == 'false':
+        innerdatapath = innerdatapath
+
+    if toggleDict['IRcuts'] == 'true':
+        innerdatapath = innerdatapath + '_IRcuts'
+    elif toggleDict['IRcuts'] == 'false':
         innerdatapath = innerdatapath
 
     # if os.path.isdir(datapath[0:-14]) is False:
