@@ -111,8 +111,7 @@ if __name__ == "__main__":
 
     # # # Concatenate Individual Datasets (aIBi specific, IRcuts)
 
-    # IRrat_Vals = [4e3]
-    # # IRrat_Vals = [2, 5, 10, 100, 4e3]
+    # IRrat_Vals = [2, 5, 10, 100, 4e3]
     # aIBi_List = [-10.0, -5.0, -2.0]
     # for IRrat in IRrat_Vals:
     #     IRdatapath = innerdatapath + '/IRratio_{:.1E}'.format(IRrat)
