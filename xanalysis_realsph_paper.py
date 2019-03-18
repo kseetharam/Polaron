@@ -35,10 +35,11 @@ if __name__ == "__main__":
     # NGridPoints_cart = 1.37e5
 
     massRat = 1.0
+    IRrat = 1
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'frohlich', 'IRcuts': 'true', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'frohlich', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -68,10 +69,13 @@ if __name__ == "__main__":
         innerdatapath = innerdatapath
         animpath = animpath + '_twophonon'
 
-    if toggleDict['IRcuts'] == 'true':
-        innerdatapath = innerdatapath[0:-4] + '_IRcuts'
-    elif toggleDict['IRcuts'] == 'false':
-        innerdatapath = innerdatapath
+    IRrat_Vals = np.array([2, 5, 10, 100, 4e3])
+    qdatapath_Dict = {1.0: innerdatapath}
+
+    for IRrat_val in IRrat_Vals:
+        qdatapath_Dict[IRrat_val] = innerdatapath[0:-4] + '_IRcuts' + '/IRratio_{:.1E}'.format(IRrat_val)
+
+    qdatapath = qdatapath_Dict[IRrat]
 
     # # # Concatenate Individual Datasets (aIBi specific)
 
@@ -149,16 +153,8 @@ if __name__ == "__main__":
     # # Analysis of Total Dataset
 
     aIBi = -2.0
-    # qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
-    # qds_aIBi = qds.sel(aIBi=aIBi)
 
-    if toggleDict['IRcuts'] == 'true':
-        IRrat = 4e3
-        IRdatapath = innerdatapath + '/IRratio_{:.1E}'.format(IRrat)
-        qds = xr.open_dataset(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    elif toggleDict['IRcuts'] == 'false':
-        qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-
+    qds = xr.open_dataset(qdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     qds_aIBi = qds
 
     PVals = qds['P'].values
@@ -172,12 +168,13 @@ if __name__ == "__main__":
     aBB = (mB / (4 * np.pi)) * gBB
     xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
     tscale = xi / nu
+    Pnorm = PVals / mc
 
     kArray = qds.coords['k'].values
     k0 = kArray[0]
     kf = kArray[-1]
 
-    print(mI / mB)
+    print(mI / mB, IRrat)
     IR_lengthscale = 1 / (k0 / (2 * np.pi)) / xi
     UV_lengthscale = 1 / (kf / (2 * np.pi)) / xi
 
@@ -193,8 +190,7 @@ if __name__ == "__main__":
     # tsVals = tVals[tVals < tau]
     # qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
 
-    # Pnorm = PVals / mc
-    # print(Pnorm)
+    # # print(Pnorm)
     # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.35, 1.8, 3.0, 5.0])
     # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
     # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.0, 1.1, 1.3, 1.8, 3.0])
@@ -255,7 +251,7 @@ if __name__ == "__main__":
 
     # fig, ax = plt.subplots()
     # for inda, aIBi in enumerate(aIBi_des):
-    #     qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    #     qds_aIBi = xr.open_dataset(qdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     #     qds_aIBi_ts = qds_aIBi.sel(t=tfVals)
     #     DynOv_Exponents = np.zeros(PVals.size)
     #     PImp_Exponents = np.zeros(PVals.size)
@@ -317,47 +313,40 @@ if __name__ == "__main__":
     prefac = -1
     prefac2 = 1
 
-    # # # Nph (SPHERICAL)
+    # # Nph (SPHERICAL)
 
-    # # IRrat_Vals = np.array([1, 2, 5, 10, 50, 1e2, 5e2, 1e3, 5e3, 1e4])
-    # IRrat_Vals = np.array([1, 2, 5, 10, 50, 1e2])
+    Pind = np.argmin(np.abs(Pnorm - 5.0))
+    aIBi = -2
 
-    # aIBi_List = [-10.0, -5.0, -2.0, -0.5]
+    tau = 100
+    tsVals = tVals[tVals < tau]
+    qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
 
-    # aIBi = aIBi_List[1]
-    # IRrat = IRrat_Vals[0]
-    # IRdatapath = innerdatapath + '/IRratio_{:.1E}'.format(IRrat)
-    # qds_aIBi = (xr.open_dataset(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))).isel(t=-1)
+    DynOv_IRVals = np.zeros(IRrat_Vals.size)
+    for ind, IRrat_val in enumerate(IRrat_Vals):
+        IRdatapath = qdatapath_Dict[IRrat_val]
+        qds_aIBi_ts = xr.open_dataset(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi)).sel(t=tsVals)
+        St = np.abs(qds_aIBi_ts.isel(P=Pind)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=Pind)['Imag_DynOv'].values).real.astype(float)
+        DynOv_IRVals[ind] = St[-1]
 
-    # PVals = qds_aIBi['P'].values
-    # n0 = qds_aIBi.attrs['n0']
-    # gBB = qds_aIBi.attrs['gBB']
-    # mI = qds_aIBi.attrs['mI']
-    # mB = qds_aIBi.attrs['mB']
-    # nu = np.sqrt(n0 * gBB / mB)
+    qds_aIBi_orig = xr.open_dataset(qdatapath_Dict[1.0] + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi)).sel(t=tsVals)
+    DynOv_orig = np.abs(qds_aIBi_orig.isel(P=Pind)['Real_DynOv'].values + 1j * qds_aIBi_orig.isel(P=Pind)['Imag_DynOv'].values).real.astype(float)
 
-    # Nph_ds = qds_aIBi['Nph']
-    # Nph_Vals = Nph_ds.values
+    fig, axes = plt.subplots(nrows=1, ncols=2)
+    axes[0].plot(tsVals / tscale, DynOv_orig, 'k-')
+    axes[0].set_title('Loschmidt Echo (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.1f})'.format(Pnorm[Pind]) + ', Original IR cutoff')
+    axes[0].set_ylabel(r'$|S(t)|$')
+    axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    axes[0].set_xscale('log')
+    axes[0].set_yscale('log')
+    axes[0].set_xlim([1e-1, 1e2])
 
-    # Pind = np.argmin(np.abs(PVals - 3.0 * mI * nu))
-    # Nph_IRcuts = np.zeros(IRrat_Vals.size)
-    # for ind, IRrat in enumerate(IRrat_Vals):
-    #     IRdatapath = innerdatapath + '/IRratio_{:.1E}'.format(IRrat)
-    #     qds_IRrat = (xr.open_dataset(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))).isel(t=-1)
-    #     kmin = np.min(qds_IRrat.coords['k'].values)
-    #     Nph_ds_IRrat = qds_IRrat['Nph']
-    #     Nph_IRcuts[ind] = Nph_ds_IRrat.values[Pind]
-
-    # fig, axes = plt.subplots(nrows=1, ncols=2)
-    # axes[0].plot(PVals / (mI * nu), Nph_Vals, 'k-')
-    # axes[0].set_title('Phonon Number (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    # axes[0].set_xlabel(r'$\frac{P}{m_{I}c_{BEC}}$')
-    # axes[0].set_ylabel(r'$N_{ph}$')
-
-    # axes[1].plot(IRrat_Vals, Nph_IRcuts, 'g-')
-    # axes[1].set_xlabel('IR Cutoff Increase Ratio')
-    # axes[1].set_ylabel(r'$N_{ph}$')
-    # axes[1].set_title('Phonon Number (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.1f})'.format(PVals[Pind] / (mI * nu)))
+    axes[1].plot(IRrat_Vals, 100 * np.abs(DynOv_IRVals - DynOv_IRVals[0]) / DynOv_IRVals[0], 'g-')
+    axes[1].set_xlabel('IR Cutoff Increase Ratio')
+    axes[1].set_ylabel('Percentage Difference in ' + r'$|S(t_{f})|$')
+    axes[1].set_title('Percentage Difference in Loschmidt Echo Final Value (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.1f})'.format(Pnorm[Pind]))
+    axes[1].set_xscale('log')
+    # axes[1].set_ylim([0, 1])
 
     # fig.tight_layout()
-    # plt.show()
+    plt.show()
