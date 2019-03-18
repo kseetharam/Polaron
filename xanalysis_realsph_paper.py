@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'frohlich', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -117,8 +117,9 @@ if __name__ == "__main__":
 
     # IRrat_Vals = [2, 5, 10, 100, 4e3]
     # aIBi_List = [-10.0, -5.0, -2.0]
+    # IRrootpath = innerdatapath + '_IRcuts'
     # for IRrat in IRrat_Vals:
-    #     IRdatapath = innerdatapath + '/IRratio_{:.1E}'.format(IRrat)
+    #     IRdatapath = IRrootpath + '/IRratio_{:.1E}'.format(IRrat)
     #     for aIBi in aIBi_List:
     #         ds_list = []; P_list = []; mI_list = []
     #         for ind, filename in enumerate(os.listdir(IRdatapath)):
@@ -313,40 +314,40 @@ if __name__ == "__main__":
     prefac = -1
     prefac2 = 1
 
-    # # Nph (SPHERICAL)
+    # # # IR Cuts S(t) (SPHERICAL)
 
-    Pind = np.argmin(np.abs(Pnorm - 5.0))
-    aIBi = -2
+    # Pind = np.argmin(np.abs(Pnorm - 5.0))
+    # aIBi = -2
 
-    tau = 100
-    tsVals = tVals[tVals < tau]
-    qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
+    # tau = 100
+    # tsVals = tVals[tVals < tau]
+    # qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
 
-    DynOv_IRVals = np.zeros(IRrat_Vals.size)
-    for ind, IRrat_val in enumerate(IRrat_Vals):
-        IRdatapath = qdatapath_Dict[IRrat_val]
-        qds_aIBi_ts = xr.open_dataset(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi)).sel(t=tsVals)
-        St = np.abs(qds_aIBi_ts.isel(P=Pind)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=Pind)['Imag_DynOv'].values).real.astype(float)
-        DynOv_IRVals[ind] = St[-1]
+    # DynOv_IRVals = np.zeros(IRrat_Vals.size)
+    # for ind, IRrat_val in enumerate(IRrat_Vals):
+    #     IRdatapath = qdatapath_Dict[IRrat_val]
+    #     qds_aIBi_ts = xr.open_dataset(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi)).sel(t=tsVals)
+    #     St = np.abs(qds_aIBi_ts.isel(P=Pind)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=Pind)['Imag_DynOv'].values).real.astype(float)
+    #     DynOv_IRVals[ind] = St[-1]
 
-    qds_aIBi_orig = xr.open_dataset(qdatapath_Dict[1.0] + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi)).sel(t=tsVals)
-    DynOv_orig = np.abs(qds_aIBi_orig.isel(P=Pind)['Real_DynOv'].values + 1j * qds_aIBi_orig.isel(P=Pind)['Imag_DynOv'].values).real.astype(float)
+    # qds_aIBi_orig = xr.open_dataset(qdatapath_Dict[1.0] + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi)).sel(t=tsVals)
+    # DynOv_orig = np.abs(qds_aIBi_orig.isel(P=Pind)['Real_DynOv'].values + 1j * qds_aIBi_orig.isel(P=Pind)['Imag_DynOv'].values).real.astype(float)
 
-    fig, axes = plt.subplots(nrows=1, ncols=2)
-    axes[0].plot(tsVals / tscale, DynOv_orig, 'k-')
-    axes[0].set_title('Loschmidt Echo (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.1f})'.format(Pnorm[Pind]) + ', Original IR cutoff')
-    axes[0].set_ylabel(r'$|S(t)|$')
-    axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    axes[0].set_xscale('log')
-    axes[0].set_yscale('log')
-    axes[0].set_xlim([1e-1, 1e2])
+    # fig, axes = plt.subplots(nrows=1, ncols=2)
+    # axes[0].plot(tsVals / tscale, DynOv_orig, 'k-')
+    # axes[0].set_title('Loschmidt Echo (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.1f})'.format(Pnorm[Pind]) + ', Original IR cutoff')
+    # axes[0].set_ylabel(r'$|S(t)|$')
+    # axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    # axes[0].set_xscale('log')
+    # axes[0].set_yscale('log')
+    # axes[0].set_xlim([1e-1, 1e2])
 
-    axes[1].plot(IRrat_Vals, 100 * np.abs(DynOv_IRVals - DynOv_IRVals[0]) / DynOv_IRVals[0], 'g-')
-    axes[1].set_xlabel('IR Cutoff Increase Ratio')
-    axes[1].set_ylabel('Percentage Difference in ' + r'$|S(t_{f})|$')
-    axes[1].set_title('Percentage Difference in Loschmidt Echo Final Value (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.1f})'.format(Pnorm[Pind]))
-    axes[1].set_xscale('log')
-    # axes[1].set_ylim([0, 1])
+    # axes[1].plot(IRrat_Vals, 100 * np.abs(DynOv_IRVals - DynOv_IRVals[0]) / DynOv_IRVals[0], 'g-')
+    # axes[1].set_xlabel('IR Cutoff Increase Ratio')
+    # axes[1].set_ylabel('Percentage Difference in ' + r'$|S(t_{f})|$')
+    # axes[1].set_title('Percentage Difference in Loschmidt Echo Final Value (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.1f})'.format(Pnorm[Pind]))
+    # axes[1].set_xscale('log')
+    # # axes[1].set_ylim([0, 1])
 
-    # fig.tight_layout()
-    plt.show()
+    # # fig.tight_layout()
+    # plt.show()
