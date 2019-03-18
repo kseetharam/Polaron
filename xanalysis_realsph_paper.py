@@ -73,7 +73,10 @@ if __name__ == "__main__":
     qdatapath_Dict = {1.0: innerdatapath}
 
     for IRrat_val in IRrat_Vals:
-        qdatapath_Dict[IRrat_val] = innerdatapath[0:-4] + '_IRcuts' + '/IRratio_{:.1E}'.format(IRrat_val)
+        if toggleDict['Coupling'] == 'twophonon':
+            qdatapath_Dict[IRrat_val] = innerdatapath + '_IRcuts' + '/IRratio_{:.1E}'.format(IRrat_val)
+        elif toggleDict['Coupling'] == 'frohlich':
+            qdatapath_Dict[IRrat_val] = innerdatapath[0:-4] + '_IRcuts' + '/IRratio_{:.1E}'.format(IRrat_val)
 
     qdatapath = qdatapath_Dict[IRrat]
 
