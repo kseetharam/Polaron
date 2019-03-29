@@ -14,7 +14,7 @@ import pf_dynamic_sph as pfs
 import Grid
 import warnings
 from scipy import interpolate
-from scipy.optimize import curve_fit, OptimizeWarning
+from scipy.optimize import curve_fit, OptimizeWarning, fsolve
 from timeit import default_timer as timer
 
 
@@ -188,54 +188,65 @@ if __name__ == "__main__":
     # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0, -0.75, -0.5])
     aIBi_Vals = np.array([-10.0, -5.0, -2.0])
 
-    # # # # S(t) AND P_Imp CURVES
+    kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds.coords['k'].values); kgrid.initArray_premade('th', qds.coords['th'].values)
+    kVals = kgrid.getArray('k')
+    wk_Vals = pfs.omegak(kVals, mB, n0, gBB)
+    bdiff = 100 * np.abs(wk_Vals - nu * kVals) / kVals
+    kind = np.abs(bdiff - 1).argmin().astype(int)
+    tlin = 2 * np.pi / (nu * kVals[kind])
+    tlin_norm = tlin / tscale
+    print(kVals[kind], tlin_norm)
 
-    # tau = 100
-    # tsVals = tVals[tVals < tau]
-    # qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
+    # # # S(t) AND P_Imp CURVES
 
-    # # print(Pnorm)
-    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.35, 1.8, 3.0, 5.0])
-    # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
-    # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.0, 1.1, 1.3, 1.8, 3.0])
+    tau = 100
+    tsVals = tVals[tVals < tau]
+    qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
 
-    # Pinds = np.zeros(Pnorm_des.size, dtype=int)
-    # for Pn_ind, Pn in enumerate(Pnorm_des):
-    #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
+    # print(Pnorm)
+    Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.35, 1.8, 3.0, 5.0])
+    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
+    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.0, 1.1, 1.3, 1.8, 3.0])
 
-    # fig, axes = plt.subplots(nrows=2, ncols=1)
-    # for indP in Pinds:
-    #     P = PVals[indP]
-    #     DynOv = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
-    #     PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
+    Pinds = np.zeros(Pnorm_des.size, dtype=int)
+    for Pn_ind, Pn in enumerate(Pnorm_des):
+        Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
 
-    #     tfmask = tsVals > 60
-    #     tfVals = tsVals[tfmask]
-    #     z = np.polyfit(np.log(tfVals), np.log(DynOv[tfmask]), deg=1)
-    #     tfLin = tsVals[tsVals > 10]
-    #     fLin = np.exp(z[1]) * tfLin**(z[0])
+    fig, axes = plt.subplots(nrows=2, ncols=1)
+    for indP in Pinds:
+        P = PVals[indP]
+        DynOv = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+        PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
 
-    #     axes[0].plot(tsVals / tscale, DynOv, label='{:.2f}'.format(P / mc))
-    #     axes[0].plot(tfLin / tscale, fLin, 'k--', label='')
-    #     axes[1].plot(tsVals / tscale, PImp, label='{:.2f}'.format(P / mc))
+        tfmask = tsVals > 60
+        tfVals = tsVals[tfmask]
+        z = np.polyfit(np.log(tfVals), np.log(DynOv[tfmask]), deg=1)
+        tfLin = tsVals[tsVals > 10]
+        fLin = np.exp(z[1]) * tfLin**(z[0])
 
-    # axes[0].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
-    # axes[0].set_xscale('log')
-    # axes[0].set_yscale('log')
-    # axes[0].set_xlim([1e-1, 1e2])
-    # axes[0].set_title('Loschmidt Echo (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    # axes[0].set_ylabel(r'$|S(t)|$')
-    # axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+        axes[0].plot(tsVals / tscale, DynOv, label='{:.2f}'.format(P / mc))
+        axes[0].plot(tfLin / tscale, fLin, 'k--', label='')
+        axes[1].plot(tsVals / tscale, PImp, label='{:.2f}'.format(P / mc))
 
-    # axes[1].plot(tsVals / tscale, mc * np.ones(tsVals.size), 'k--', label='$m_{I}c_{BEC}$')
-    # axes[1].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=1, ncol=2)
-    # axes[1].set_xlim([-1, 100])
-    # axes[1].set_title('Average Impurity Momentum (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    # axes[1].set_ylabel(r'$<P_{I}>$')
-    # axes[1].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    axes[0].plot(tlin_norm * np.ones(DynOv.size), np.linspace(np.min(DynOv), np.max(DynOv), DynOv.size), 'k-')
+    axes[0].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
+    axes[0].set_xscale('log')
+    axes[0].set_yscale('log')
+    axes[0].set_xlim([1e-1, 1e2])
+    axes[0].set_title('Loschmidt Echo (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    axes[0].set_ylabel(r'$|S(t)|$')
+    axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
 
-    # fig.tight_layout()
-    # plt.show()
+    # axes[1].plot(tlin_norm * np.ones(PImp.size), np.linspace(np.min(PImp), np.max(PImp), PImp.size), 'ko')
+    axes[1].plot(tsVals / tscale, mc * np.ones(tsVals.size), 'k--', label='$m_{I}c_{BEC}$')
+    axes[1].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=1, ncol=2)
+    axes[1].set_xlim([-1, 100])
+    axes[1].set_title('Average Impurity Momentum (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    axes[1].set_ylabel(r'$<P_{I}>$')
+    axes[1].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+
+    fig.tight_layout()
+    plt.show()
 
     # # # # S(t) AND P_Imp EXPONENTS
 
@@ -354,3 +365,113 @@ if __name__ == "__main__":
 
     # # fig.tight_layout()
     # plt.show()
+
+    # # # # BOGOLIUBOV DISPERSION (SPHERICAL)
+
+    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds.coords['k'].values); kgrid.initArray_premade('th', qds.coords['th'].values)
+    # kVals = kgrid.getArray('k')
+    # wk_Vals = pfs.omegak(kVals, mB, n0, gBB)
+    # bdiff = 100 * np.abs(wk_Vals - nu * kVals) / kVals
+    # kind = np.abs(bdiff - 1).argmin().astype(int)
+    # tlin = 2 * np.pi / (nu * kVals[kind])
+    # print(kVals[kind], tlin / tscale)
+
+    # fig, ax = plt.subplots()
+    # # ax.plot(kVals, bdiff)
+    # ax.plot(kVals, wk_Vals, 'k-', label='')
+    # ax.plot(kVals, nu * kVals, 'b--', label=r'$c_{BEC}|k|$')
+    # ax.plot(kVals, kVals**2 / (2 * mB), 'r--', label=r'$\frac{k^{2}}{2m_{B}}$')
+    # ax.set_title('Bogoliubov Phonon Dispersion')
+    # ax.set_xlabel(r'$|k|$')
+    # ax.set_ylabel(r'$\omega_{|k|}$')
+    # ax.set_xlim([0, 2])
+    # ax.set_ylim([0, 3])
+    # ax.legend(loc=2, fontsize='x-large')
+    # plt.show()
+
+    # # # INDIVIDUAL PHONON MOMENTUM DISTRIBUTION
+
+    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.35, 1.8, 3.0, 5.0])
+    # Pinds = np.zeros(Pnorm_des.size, dtype=int)
+    # for Pn_ind, Pn in enumerate(Pnorm_des):
+    #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
+
+    # indP = Pinds[5]
+    # P = PVals[indP]
+
+    # tau = 100
+    # tsVals = tVals[tVals < tau]
+    # qds_PaIBi = qds_aIBi.sel(t=tsVals, P=P)
+
+    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_PaIBi.coords['k'].values); kgrid.initArray_premade('th', qds_PaIBi.coords['th'].values)
+    # kVec = kgrid.getArray('k')
+    # thVec = kgrid.getArray('th')
+    # kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
+
+    # PhDen_da = xr.DataArray(np.full((tsVals.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tsVals, kVec, thVec], dims=['t', 'k', 'th'])
+    # for tind, t in enumerate(tsVals):
+    #     CSAmp_ds = (qds_PaIBi['Real_CSAmp'] + 1j * qds_PaIBi['Imag_CSAmp']).sel(t=t)
+    #     CSAmp_Vals = CSAmp_ds.values
+    #     Nph = qds_PaIBi.sel(t=t)['Nph'].values
+    #     Pph = qds_PaIBi.sel(t=t)['Pph'].values
+    #     Pimp = P - Pph
+    #     Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
+    #     PhDen_da.sel(t=t)[:] = ((1 / Nph) * np.abs(Bk_2D_vals)**2).real.astype(float)
+
+    # # Animations
+
+    # Pph = qds_PaIBi['Pph'].values
+    # Pimp = P - Pph
+    # zoom = False
+
+    # fig1, ax1 = plt.subplots()
+
+    # vmin = 0
+    # vmax = 700
+    # if zoom is True:
+    #     vmax = 3e3
+
+    # PhDen0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(PhDen_da.isel(t=0), 'k', 'th', 5)
+    # kxg_interp = kg_interp * np.sin(thg_interp)
+    # kzg_interp = kg_interp * np.cos(thg_interp)
+
+    # quad1 = ax1.pcolormesh(kzg_interp, kxg_interp, PhDen0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
+    # quad1m = ax1.pcolormesh(kzg_interp, -1 * kxg_interp, PhDen0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
+    # curve1 = ax1.plot(Pph[0], 0, marker='x', markersize=10, color="magenta", label=r'$P_{ph}$')[0]
+    # curve1m = ax1.plot(Pimp[0], 0, marker='o', markersize=10, color="red", label=r'$P_{imp}$')[0]
+    # curve2 = ax1.plot(mc, 0, marker='*', markersize=10, color="black", label=r'$m_{I}c$')[0]
+    # patch = plt.Circle((0, 0), 1e10, edgecolor='white', facecolor='None', linewidth=2, label=r'$\omega_{|k|}^{-1}(\frac{2\pi}{t})$')
+    # ax1.add_patch(patch)
+
+    # t_text = ax1.text(0.81, 0.9, r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tsVals[0] / tscale), transform=ax1.transAxes, color='r')
+    # ax1.set_xlim([-2, 2])
+    # ax1.set_ylim([-2, 2])
+    # if zoom is True:
+    #     ax1.set_xlim([-0.2, 0.2])
+    #     ax1.set_ylim([-0.2, 0.2])
+    # ax1.legend(loc=2)
+    # ax1.grid(True, linewidth=0.5)
+    # ax1.set_title('Individual Phonon Distribution (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c}=$' + '{:.2f})'.format(Pnorm[indP]))
+    # ax1.set_xlabel(r'$k_{z}$')
+    # ax1.set_ylabel(r'$k_{x}$')
+    # fig1.colorbar(quad1, ax=ax1, extend='both')
+
+    # def animate1(i):
+    #     PhDen_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(PhDen_da.isel(t=i), 'k', 'th', 5)
+    #     quad1.set_array(PhDen_interp_vals[:-1, :-1].ravel())
+    #     quad1m.set_array(PhDen_interp_vals[:-1, :-1].ravel())
+    #     curve1.set_xdata(Pph[i])
+    #     curve1m.set_xdata(Pimp[i])
+    #     t_text.set_text(r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tsVals[i] / tscale))
+
+    #     def rfunc(k): return (pfs.omegak(k, mB, n0, gBB) - 2 * np.pi / tsVals[i])
+    #     kroot = fsolve(rfunc, 1e8); kroot = kroot[kroot >= 0]
+    #     patch.set_radius(kroot[0])
+
+    # anim1 = FuncAnimation(fig1, animate1, interval=1e-5, frames=range(tsVals.size), blit=False)
+    # anim1_filename = '/aIBi_{:d}_P_{:.2f}'.format(int(aIBi), P) + '_indPhononDist_2D_oscBox'
+    # if zoom is True:
+    #     anim1_filename = anim1_filename + '_zoom'
+    # anim1.save(animpath + anim1_filename + '.mp4', writer='mpegWriter')
+    # # anim1.save(animpath + anim1_filename + '.gif', writer='imagemagick')
+    # # plt.show()
