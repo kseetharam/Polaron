@@ -65,13 +65,15 @@ if __name__ == "__main__":
     mB = 1
     n0 = 1
     gBB = (4 * np.pi / mB) * 0.05
+    nu = np.sqrt(n0 * gBB / mB)
 
     Params_List = []
-    mI_Vals = np.array([0.5, 2])
+    mI_Vals = np.array([0.5, 2, 5.0])
     aIBi_Vals = np.array([-10.0, -5.0, -2.0])
-    P_Vals = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 3.0, 22, endpoint=False), np.linspace(3.0, 5.0, 3)))
+    P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.2, 10, endpoint=False), np.linspace(1.2, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 3)))
 
     for mI in mI_Vals:
+        P_Vals = mI * nu * P_Vals_norm
         for aIBi in aIBi_Vals:
             for P in P_Vals:
                 sParams = [mI, mB, n0, gBB]
