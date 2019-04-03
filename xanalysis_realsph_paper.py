@@ -94,7 +94,13 @@ if __name__ == "__main__":
     #             continue
     #         if filename[0:2] == 'mm':
     #             continue
-    #         if float(filename[13:-3]) != aIBi:
+    #         # if float(filename[-8:-3]) != aIBi and float(filename[-9:-3]) != aIBi:
+    #         #     continue
+    #         if filename[3] == '.':
+    #             a = 0
+    #         elif filename[4] == '.':
+    #             a = 1
+    #         if float(filename[13 + a:-3]) != aIBi:
     #             continue
     #         print(filename)
     #         ds = xr.open_dataset(innerdatapath + '/' + filename)
@@ -156,7 +162,7 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -2.0
+    aIBi = -10.0
 
     qds = xr.open_dataset(qdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     qds_aIBi = qds
@@ -197,63 +203,66 @@ if __name__ == "__main__":
     tlin_norm = tlin / tscale
     print(kVals[kind], tlin_norm)
 
-    # # # S(t) AND P_Imp CURVES
+    # # # # S(t) AND P_Imp CURVES
 
-    tau = 100
-    tsVals = tVals[tVals < tau]
-    qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
+    # tau = 100
+    # tsVals = tVals[tVals < tau]
+    # qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
 
-    # print(Pnorm)
-    Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.35, 1.8, 3.0, 5.0])
-    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
-    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.0, 1.1, 1.3, 1.8, 3.0])
+    # # print(Pnorm)
 
-    Pinds = np.zeros(Pnorm_des.size, dtype=int)
-    for Pn_ind, Pn in enumerate(Pnorm_des):
-        Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
+    # Pnorm_des = np.array([0.1, 0.5, 0.8, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2, 1.4, 2.5, 3.0, 5.0])
+    # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.35, 1.8, 3.0, 5.0])
 
-    fig, axes = plt.subplots(nrows=2, ncols=1)
-    for indP in Pinds:
-        P = PVals[indP]
-        DynOv = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
-        PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
+    # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
+    # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.0, 1.1, 1.3, 1.8, 3.0])
 
-        tfmask = tsVals > 60
-        tfVals = tsVals[tfmask]
-        z = np.polyfit(np.log(tfVals), np.log(DynOv[tfmask]), deg=1)
-        tfLin = tsVals[tsVals > 10]
-        fLin = np.exp(z[1]) * tfLin**(z[0])
+    # Pinds = np.zeros(Pnorm_des.size, dtype=int)
+    # for Pn_ind, Pn in enumerate(Pnorm_des):
+    #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
 
-        axes[0].plot(tsVals / tscale, DynOv, label='{:.2f}'.format(P / mc))
-        axes[0].plot(tfLin / tscale, fLin, 'k--', label='')
-        axes[1].plot(tsVals / tscale, PImp, label='{:.2f}'.format(P / mc))
+    # fig, axes = plt.subplots(nrows=2, ncols=1)
+    # for indP in Pinds:
+    #     P = PVals[indP]
+    #     DynOv = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+    #     PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
 
-    axes[0].plot(tlin_norm * np.ones(DynOv.size), np.linspace(np.min(DynOv), np.max(DynOv), DynOv.size), 'k-')
-    axes[0].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
-    axes[0].set_xscale('log')
-    axes[0].set_yscale('log')
-    axes[0].set_xlim([1e-1, 1e2])
-    axes[0].set_title('Loschmidt Echo (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    axes[0].set_ylabel(r'$|S(t)|$')
-    axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    #     tfmask = tsVals > 60
+    #     tfVals = tsVals[tfmask]
+    #     z = np.polyfit(np.log(tfVals), np.log(DynOv[tfmask]), deg=1)
+    #     tfLin = tsVals[tsVals > 10]
+    #     fLin = np.exp(z[1]) * tfLin**(z[0])
 
-    # axes[1].plot(tlin_norm * np.ones(PImp.size), np.linspace(np.min(PImp), np.max(PImp), PImp.size), 'ko')
-    axes[1].plot(tsVals / tscale, mc * np.ones(tsVals.size), 'k--', label='$m_{I}c_{BEC}$')
-    axes[1].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=1, ncol=2)
-    axes[1].set_xlim([-1, 100])
-    axes[1].set_title('Average Impurity Momentum (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    axes[1].set_ylabel(r'$<P_{I}>$')
-    axes[1].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    #     axes[0].plot(tsVals / tscale, DynOv, label='{:.2f}'.format(P / mc))
+    #     axes[0].plot(tfLin / tscale, fLin, 'k--', label='')
+    #     axes[1].plot(tsVals / tscale, PImp / mI, label='{:.2f}'.format(P / mc))
 
-    fig.tight_layout()
-    plt.show()
+    # axes[0].plot(tlin_norm * np.ones(DynOv.size), np.linspace(np.min(DynOv), np.max(DynOv), DynOv.size), 'k-')
+    # axes[0].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
+    # axes[0].set_xscale('log')
+    # axes[0].set_yscale('log')
+    # axes[0].set_xlim([1e-1, 1e2])
+    # axes[0].set_title('Loschmidt Echo (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    # axes[0].set_ylabel(r'$|S(t)|$')
+    # axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+
+    # # axes[1].plot(tlin_norm * np.ones(PImp.size), np.linspace(np.min(PImp), np.max(PImp), PImp.size), 'ko')
+    # axes[1].plot(tsVals / tscale, nu * np.ones(tsVals.size), 'k--', label='$c_{BEC}$')
+    # axes[1].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=1, ncol=2)
+    # axes[1].set_xlim([-1, 100])
+    # axes[1].set_title('Average Impurity Speed (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    # axes[1].set_ylabel(r'$\frac{<P_{I}>}{m_{I}}$')
+    # axes[1].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+
+    # fig.tight_layout()
+    # plt.show()
 
     # # # # S(t) AND P_Imp EXPONENTS
 
     # aIBi_des = np.array([-10.0, -5.0, -2.0])  # Data for stronger interactions (-1.0, -0.75, -0.5) is too noisy to get fits
     # # Another note: The fit for P_{Imp} is also difficult for anything other than very weak interactions -> this is probably because of the diverging convergence time to mI*c due to arguments in Nielsen
 
-    # PVals = PVals[PVals <= 3.0]
+    # PVals = PVals[(PVals / mc) <= 3.0]
     # Pnorm = PVals / mc
 
     # def powerfunc(t, a, b):
@@ -323,15 +332,11 @@ if __name__ == "__main__":
 
     # plt.show()
 
-    # # # RF SPECTRA
-
-    prefac = -1
-    prefac2 = 1
-
     # # # IR Cuts S(t) (SPHERICAL)
 
-    # Pind = np.argmin(np.abs(Pnorm - 5.0))
-    # aIBi = -2
+    # Pdes = 2.5
+    # Pind = np.argmin(np.abs(Pnorm - Pdes))
+    # aIBi = -10
 
     # tau = 100
     # tsVals = tVals[tVals < tau]
