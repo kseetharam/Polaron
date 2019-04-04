@@ -70,7 +70,11 @@ if __name__ == "__main__":
         animpath = animpath + '_twophonon'
 
     IRrat_Vals = np.array([2, 5, 10, 100, 4e3])
-    qdatapath_Dict = {1.0: innerdatapath}
+    qdatapath_Dict = {}
+    if toggleDict['Coupling'] == 'frohlich':
+        qdatapath_Dict[1.0] = innerdatapath
+    elif toggleDict['Coupling'] == 'twophonon':
+        qdatapath_Dict[1.0] = innerdatapath + '_IRcuts' + '/IRratio_{:.1E}'.format(1)
 
     for IRrat_val in IRrat_Vals:
         if toggleDict['Coupling'] == 'twophonon':
@@ -162,9 +166,9 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -10.0
+    aIBi = -2.0
 
-    qds = xr.open_dataset(qdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     qds_aIBi = qds
 
     PVals = qds['P'].values
@@ -275,7 +279,7 @@ if __name__ == "__main__":
 
     # fig, ax = plt.subplots()
     # for inda, aIBi in enumerate(aIBi_des):
-    #     qds_aIBi = xr.open_dataset(qdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    #     qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     #     qds_aIBi_ts = qds_aIBi.sel(t=tfVals)
     #     DynOv_Exponents = np.zeros(PVals.size)
     #     PImp_Exponents = np.zeros(PVals.size)
@@ -393,6 +397,62 @@ if __name__ == "__main__":
     # ax.set_ylim([0, 3])
     # ax.legend(loc=2, fontsize='x-large')
     # plt.show()
+
+    # # # IMPURITY VELOCITY CURVES
+
+    colorList = ['red', 'green', 'orange', 'blue']
+    lineList = ['solid', 'dotted', 'dashed']
+    # aIBi = -2
+    aIBi_des = np.array([-10.0, -5.0, -2.0])
+    # aIBi_des = np.array([aIBi_des[2]])
+    massRat_des = np.array([0.5, 1.0, 2, 5.0])
+    mdatapaths = []
+
+    for mR in massRat_des:
+        mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
+    if toggleDict['Dynamics'] != 'real' or toggleDict['Grid'] != 'spherical' or toggleDict['Coupling'] != 'twophonon':
+        print('SETTING ERROR')
+
+    fig, ax = plt.subplots()
+    for inda, aIBi in enumerate(aIBi_des):
+        for indm, mRat in enumerate(massRat_des):
+            mds = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+            Plen = mds.coords['P'].values.size
+            Pstart_ind = 1
+            PVals = mds.coords['P'].values[Pstart_ind:Plen]
+            n0 = mds.attrs['n0']
+            gBB = mds.attrs['gBB']
+            mI = mds.attrs['mI']
+            mB = mds.attrs['mB']
+            nu = np.sqrt(n0 * gBB / mB)
+
+            vI0_Vals = (PVals - mds.isel(t=0, P=np.arange(Pstart_ind, Plen))['Pph'].values) / mI
+            vIf_Vals = (PVals - mds['Pph'].isel(t=np.arange(-20, 0), P=np.arange(Pstart_ind, Plen)).mean(dim='t').values) / mI
+            # ax.plot(vI0_Vals / nu, vIf_Vals / vI0_Vals, linestyle=lineList[inda], color=colorList[indm], label='{:.1f}'.format(mRat))
+            ax.plot(vI0_Vals / nu, vIf_Vals / vI0_Vals, linestyle=lineList[inda], color=colorList[indm])
+
+    vI0_norm = vI0_Vals / nu
+    refMask = vI0_norm >= 1
+    ax.plot(vI0_norm[refMask], nu / vI0_Vals[refMask], 'k-')
+
+    alegend_elements = []
+    mlegend_elements = []
+    for inda, aIBi in enumerate(aIBi_des):
+        alegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[inda], label='{0}'.format(aIBi)))
+    for indm, mR in enumerate(massRat_des):
+        mlegend_elements.append(Line2D([0], [0], color=colorList[indm], linestyle='solid', label='{0}'.format(mR)))
+
+    ax.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
+    ax.set_ylabel(r'$\frac{<v_{I}(t_{f})>}{<v_{I}(t_{0})>}$')
+    ax.set_title('Average Impurity Speed')
+    # ax.legend(handles=legend_elements, loc=1, ncol=2)
+    alegend = plt.legend(handles=alegend_elements, loc=(0.45, 0.68), title=r'$a_{IB}^{-1}$')
+    plt.gca().add_artist(alegend)
+    mlegend = plt.legend(handles=mlegend_elements, loc=(0.65, 0.75), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
+    plt.gca().add_artist(mlegend)
+    reflegend = plt.legend(handles=[Line2D([0], [0], color='black', linestyle='solid', label=r'$<v_{I}(t_{f})>=c_{BEC}$')], loc=(0.65, 0.65))
+
+    plt.show()
 
     # # # INDIVIDUAL PHONON MOMENTUM DISTRIBUTION
 
