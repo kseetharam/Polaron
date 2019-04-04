@@ -34,7 +34,7 @@ if __name__ == "__main__":
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     # NGridPoints_cart = 1.37e5
 
-    massRat = 1.0
+    massRat = 2.0
     IRrat = 1
 
     # Toggle parameters
@@ -166,7 +166,7 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -2.0
+    aIBi = -10.0
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     qds_aIBi = qds
@@ -207,59 +207,59 @@ if __name__ == "__main__":
     tlin_norm = tlin / tscale
     print(kVals[kind], tlin_norm)
 
-    # # # # S(t) AND P_Imp CURVES
+    # # # S(t) AND P_Imp CURVES
 
-    # tau = 100
-    # tsVals = tVals[tVals < tau]
-    # qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
+    tau = 100
+    tsVals = tVals[tVals < tau]
+    qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
 
-    # # print(Pnorm)
+    # print(Pnorm)
 
-    # Pnorm_des = np.array([0.1, 0.5, 0.8, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2, 1.4, 2.5, 3.0, 5.0])
-    # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.35, 1.8, 3.0, 5.0])
+    Pnorm_des = np.array([0.1, 0.5, 0.8, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2, 1.4, 2.5, 3.0, 5.0])
+    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.35, 1.8, 3.0, 5.0])
 
-    # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
-    # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.0, 1.1, 1.3, 1.8, 3.0])
+    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
+    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.0, 1.1, 1.3, 1.8, 3.0])
 
-    # Pinds = np.zeros(Pnorm_des.size, dtype=int)
-    # for Pn_ind, Pn in enumerate(Pnorm_des):
-    #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
+    Pinds = np.zeros(Pnorm_des.size, dtype=int)
+    for Pn_ind, Pn in enumerate(Pnorm_des):
+        Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
 
-    # fig, axes = plt.subplots(nrows=2, ncols=1)
-    # for indP in Pinds:
-    #     P = PVals[indP]
-    #     DynOv = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
-    #     PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
+    fig, axes = plt.subplots(nrows=2, ncols=1)
+    for indP in Pinds:
+        P = PVals[indP]
+        DynOv = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+        PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
 
-    #     tfmask = tsVals > 60
-    #     tfVals = tsVals[tfmask]
-    #     z = np.polyfit(np.log(tfVals), np.log(DynOv[tfmask]), deg=1)
-    #     tfLin = tsVals[tsVals > 10]
-    #     fLin = np.exp(z[1]) * tfLin**(z[0])
+        tfmask = tsVals > 60
+        tfVals = tsVals[tfmask]
+        z = np.polyfit(np.log(tfVals), np.log(DynOv[tfmask]), deg=1)
+        tfLin = tsVals[tsVals > 10]
+        fLin = np.exp(z[1]) * tfLin**(z[0])
 
-    #     axes[0].plot(tsVals / tscale, DynOv, label='{:.2f}'.format(P / mc))
-    #     axes[0].plot(tfLin / tscale, fLin, 'k--', label='')
-    #     axes[1].plot(tsVals / tscale, PImp / mI, label='{:.2f}'.format(P / mc))
+        axes[0].plot(tsVals / tscale, DynOv, label='{:.2f}'.format(P / mc))
+        axes[0].plot(tfLin / tscale, fLin, 'k--', label='')
+        axes[1].plot(tsVals / tscale, PImp / mI, label='{:.2f}'.format(P / mc))
 
-    # axes[0].plot(tlin_norm * np.ones(DynOv.size), np.linspace(np.min(DynOv), np.max(DynOv), DynOv.size), 'k-')
-    # axes[0].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
-    # axes[0].set_xscale('log')
-    # axes[0].set_yscale('log')
-    # axes[0].set_xlim([1e-1, 1e2])
-    # axes[0].set_title('Loschmidt Echo (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    # axes[0].set_ylabel(r'$|S(t)|$')
-    # axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    axes[0].plot(tlin_norm * np.ones(DynOv.size), np.linspace(np.min(DynOv), np.max(DynOv), DynOv.size), 'k-')
+    axes[0].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
+    axes[0].set_xscale('log')
+    axes[0].set_yscale('log')
+    axes[0].set_xlim([1e-1, 1e2])
+    axes[0].set_title('Loschmidt Echo (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    axes[0].set_ylabel(r'$|S(t)|$')
+    axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
 
-    # # axes[1].plot(tlin_norm * np.ones(PImp.size), np.linspace(np.min(PImp), np.max(PImp), PImp.size), 'ko')
-    # axes[1].plot(tsVals / tscale, nu * np.ones(tsVals.size), 'k--', label='$c_{BEC}$')
-    # axes[1].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=1, ncol=2)
-    # axes[1].set_xlim([-1, 100])
-    # axes[1].set_title('Average Impurity Speed (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    # axes[1].set_ylabel(r'$\frac{<P_{I}>}{m_{I}}$')
-    # axes[1].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    # axes[1].plot(tlin_norm * np.ones(PImp.size), np.linspace(np.min(PImp), np.max(PImp), PImp.size), 'ko')
+    axes[1].plot(tsVals / tscale, nu * np.ones(tsVals.size), 'k--', label='$c_{BEC}$')
+    axes[1].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=1, ncol=2)
+    axes[1].set_xlim([-1, 100])
+    axes[1].set_title('Average Impurity Speed (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    axes[1].set_ylabel(r'$\frac{<P_{I}>}{m_{I}}$')
+    axes[1].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
 
-    # fig.tight_layout()
-    # plt.show()
+    fig.tight_layout()
+    plt.show()
 
     # # # # S(t) AND P_Imp EXPONENTS
 
@@ -398,59 +398,59 @@ if __name__ == "__main__":
     # ax.legend(loc=2, fontsize='x-large')
     # plt.show()
 
-    # # # IMPURITY VELOCITY RATIO CURVES
+    # # # # IMPURITY VELOCITY RATIO CURVES
 
-    colorList = ['red', 'green', 'orange', 'blue']
-    lineList = ['solid', 'dotted', 'dashed']
-    aIBi_des = np.array([-10.0, -5.0, -2.0])
-    # aIBi_des = np.array([aIBi_des[2]])
-    massRat_des = np.array([0.5, 1.0, 2, 5.0])
-    mdatapaths = []
+    # colorList = ['red', 'green', 'orange', 'blue']
+    # lineList = ['solid', 'dotted', 'dashed']
+    # aIBi_des = np.array([-10.0, -5.0, -2.0])
+    # # aIBi_des = np.array([aIBi_des[2]])
+    # massRat_des = np.array([0.5, 1.0, 2, 5.0])
+    # mdatapaths = []
 
-    for mR in massRat_des:
-        mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
-    if toggleDict['Dynamics'] != 'real' or toggleDict['Grid'] != 'spherical' or toggleDict['Coupling'] != 'twophonon':
-        print('SETTING ERROR')
+    # for mR in massRat_des:
+    #     mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
+    # if toggleDict['Dynamics'] != 'real' or toggleDict['Grid'] != 'spherical' or toggleDict['Coupling'] != 'twophonon':
+    #     print('SETTING ERROR')
 
-    fig1, ax1 = plt.subplots()
-    for inda, aIBi in enumerate(aIBi_des):
-        for indm, mRat in enumerate(massRat_des):
-            mds = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-            Plen = mds.coords['P'].values.size
-            Pstart_ind = 1
-            PVals = mds.coords['P'].values[Pstart_ind:Plen]
-            n0 = mds.attrs['n0']
-            gBB = mds.attrs['gBB']
-            mI = mds.attrs['mI']
-            mB = mds.attrs['mB']
-            nu = np.sqrt(n0 * gBB / mB)
+    # fig1, ax1 = plt.subplots()
+    # for inda, aIBi in enumerate(aIBi_des):
+    #     for indm, mRat in enumerate(massRat_des):
+    #         mds = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    #         Plen = mds.coords['P'].values.size
+    #         Pstart_ind = 1
+    #         PVals = mds.coords['P'].values[Pstart_ind:Plen]
+    #         n0 = mds.attrs['n0']
+    #         gBB = mds.attrs['gBB']
+    #         mI = mds.attrs['mI']
+    #         mB = mds.attrs['mB']
+    #         nu = np.sqrt(n0 * gBB / mB)
 
-            vI0_Vals = (PVals - mds.isel(t=0, P=np.arange(Pstart_ind, Plen))['Pph'].values) / mI
-            vIf_Vals = (PVals - mds['Pph'].isel(t=np.arange(-20, 0), P=np.arange(Pstart_ind, Plen)).mean(dim='t').values) / mI
-            ax1.plot(vI0_Vals / nu, vIf_Vals / vI0_Vals, linestyle=lineList[inda], color=colorList[indm])
+    #         vI0_Vals = (PVals - mds.isel(t=0, P=np.arange(Pstart_ind, Plen))['Pph'].values) / mI
+    #         vIf_Vals = (PVals - mds['Pph'].isel(t=np.arange(-20, 0), P=np.arange(Pstart_ind, Plen)).mean(dim='t').values) / mI
+    #         ax1.plot(vI0_Vals / nu, vIf_Vals / vI0_Vals, linestyle=lineList[inda], color=colorList[indm])
 
-    vI0_norm = vI0_Vals / nu
-    refMask = vI0_norm >= 1
-    ax1.plot(vI0_norm[refMask], nu / vI0_Vals[refMask], 'k-')
+    # vI0_norm = vI0_Vals / nu
+    # refMask = vI0_norm >= 1
+    # ax1.plot(vI0_norm[refMask], nu / vI0_Vals[refMask], 'k-')
 
-    alegend_elements = []
-    mlegend_elements = []
-    for inda, aIBi in enumerate(aIBi_des):
-        alegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[inda], label='{0}'.format(aIBi)))
-    for indm, mR in enumerate(massRat_des):
-        mlegend_elements.append(Line2D([0], [0], color=colorList[indm], linestyle='solid', label='{0}'.format(mR)))
+    # alegend_elements = []
+    # mlegend_elements = []
+    # for inda, aIBi in enumerate(aIBi_des):
+    #     alegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[inda], label='{0}'.format(aIBi)))
+    # for indm, mR in enumerate(massRat_des):
+    #     mlegend_elements.append(Line2D([0], [0], color=colorList[indm], linestyle='solid', label='{0}'.format(mR)))
 
-    ax1.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
-    ax1.set_ylabel(r'$\frac{<v_{I}(t_{f})>}{<v_{I}(t_{0})>}$')
-    ax1.set_title('Average Impurity Speed')
-    alegend = ax1.legend(handles=alegend_elements, loc=(0.45, 0.68), title=r'$a_{IB}^{-1}$')
-    plt.gca().add_artist(alegend)
-    mlegend = ax1.legend(handles=mlegend_elements, loc=(0.65, 0.75), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
-    plt.gca().add_artist(mlegend)
-    reflegend = ax1.legend(handles=[Line2D([0], [0], color='black', linestyle='solid', label=r'$<v_{I}(t_{f})>=c_{BEC}$')], loc=(0.65, 0.65))
-    plt.gca().add_artist(reflegend)
+    # ax1.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
+    # ax1.set_ylabel(r'$\frac{<v_{I}(t_{f})>}{<v_{I}(t_{0})>}$')
+    # ax1.set_title('Average Impurity Speed')
+    # alegend = ax1.legend(handles=alegend_elements, loc=(0.45, 0.68), title=r'$a_{IB}^{-1}$')
+    # plt.gca().add_artist(alegend)
+    # mlegend = ax1.legend(handles=mlegend_elements, loc=(0.65, 0.75), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
+    # plt.gca().add_artist(mlegend)
+    # reflegend = ax1.legend(handles=[Line2D([0], [0], color='black', linestyle='solid', label=r'$<v_{I}(t_{f})>=c_{BEC}$')], loc=(0.65, 0.65))
+    # plt.gca().add_artist(reflegend)
 
-    plt.show()
+    # plt.show()
 
     # # # # IMPURITY FINAL VELOCITY CURVES
 
@@ -585,8 +585,6 @@ if __name__ == "__main__":
 
     # anim1 = FuncAnimation(fig1, animate1, interval=1e-5, frames=range(tsVals.size), blit=False)
     # anim1_filename = '/aIBi_{:d}_P_{:.2f}'.format(int(aIBi), P) + '_indPhononDist_2D_oscBox'
-    # if zoom is True:
-    #     anim1_filename = anim1_filename + '_zoom'
-    # anim1.save(animpath + anim1_filename + '.mp4', writer='mpegWriter')
+    # # anim1.save(animpath + anim1_filename + '.mp4', writer='mpegWriter')
     # # anim1.save(animpath + anim1_filename + '.gif', writer='imagemagick')
-    # # plt.show()
+    # plt.show()

@@ -15,8 +15,11 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (21, 21, 21)
-    (dx, dy, dz) = (0.375, 0.375, 0.375)
+    (Lx, Ly, Lz) = (40, 40, 40)
+    (dx, dy, dz) = (0.25, 0.25, 0.25)
+
+    # (Lx, Ly, Lz) = (21, 21, 21)
+    # (dx, dy, dz) = (0.375, 0.375, 0.375)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -44,7 +47,7 @@ if __name__ == "__main__":
     # for realdyn evolution
     tMax = 100
     dt = 0.2
-    CoarseGrainRate = 1
+    CoarseGrainRate = 20
 
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -55,6 +58,7 @@ if __name__ == "__main__":
     print('UV cutoff: {0}'.format(k_max))
     print('dk: {0}'.format(dk))
     print('NGridPoints: {0}'.format(NGridPoints))
+    print(NGridPoints_cart, NGridPoints)
 
     # Toggle parameters
 
@@ -64,12 +68,20 @@ if __name__ == "__main__":
 
     mB = 1
     n0 = 1
-    gBB = (4 * np.pi / mB) * 0.05
+    gBB = (4 * np.pi / mB) * 0.05  # Dresher uses aBB ~ 0.2 instead of 0.5 here
+    # gBB = (4 * np.pi / mB) * 0.02  # Dresher uses aBB ~ 0.2 instead of 0.5 here
     nu = np.sqrt(n0 * gBB / mB)
 
+    aBB = (mB / (4 * np.pi)) * gBB
+    xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
+    print(k_max * xi)
+    print(5 * mB * xi**2)
+    print(-3.0 / xi)
+    print((n0 * aBB * 3)**(-1 / 2) * mB * xi**2)
+
     Params_List = []
-    # mI_Vals = np.array([0.5, 2, 5.0])
-    mI_Vals = np.array([1.0])
+    mI_Vals = np.array([0.5, 1.0, 2, 5.0])
+    # mI_Vals = np.array([1.0])
     aIBi_Vals = np.array([-10.0, -5.0, -2.0])
     P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.2, 10, endpoint=False), np.linspace(1.2, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 3)))
 
@@ -129,6 +141,9 @@ if __name__ == "__main__":
 
     taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
     taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+
+    # taskCount = len(Params_List)
+    # taskID = 72
 
     if(taskCount > len(Params_List)):
         print('ERROR: TASK COUNT MISMATCH')
