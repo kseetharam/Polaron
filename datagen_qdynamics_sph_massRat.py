@@ -15,8 +15,11 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (40, 40, 40)
+    (Lx, Ly, Lz) = (60, 60, 60)
     (dx, dy, dz) = (0.25, 0.25, 0.25)
+
+    # (Lx, Ly, Lz) = (40, 40, 40)
+    # (dx, dy, dz) = (0.25, 0.25, 0.25)
 
     # (Lx, Ly, Lz) = (21, 21, 21)
     # (dx, dy, dz) = (0.375, 0.375, 0.375)
@@ -47,7 +50,7 @@ if __name__ == "__main__":
     # for realdyn evolution
     tMax = 100
     dt = 0.2
-    CoarseGrainRate = 20
+    CoarseGrainRate = 40
 
     tgrid = np.arange(0, tMax + dt, dt)
 
