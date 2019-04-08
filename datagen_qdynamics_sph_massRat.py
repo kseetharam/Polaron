@@ -119,8 +119,6 @@ if __name__ == "__main__":
                 # if os.path.isdir(innerdatapath) is False:
                 #     os.mkdir(innerdatapath)
 
-    print(len(Params_List))
-
     missVals = [18, 19, 20, 21, 22, 23, 25]
     missList = []
     for ind in missVals:
@@ -128,6 +126,8 @@ if __name__ == "__main__":
         missList.append(Params_List[ind])
 
     Params_List = missList
+
+    print(len(Params_List))
 
     # # ---- COMPUTE DATA ON COMPUTER ----
 
