@@ -27,14 +27,14 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (60, 60, 60)
-    (dx, dy, dz) = (0.25, 0.25, 0.25)
+    # (Lx, Ly, Lz) = (60, 60, 60)
+    # (dx, dy, dz) = (0.25, 0.25, 0.25)
 
     # (Lx, Ly, Lz) = (40, 40, 40)
     # (dx, dy, dz) = (0.25, 0.25, 0.25)
 
-    # (Lx, Ly, Lz) = (21, 21, 21)
-    # (dx, dy, dz) = (0.375, 0.375, 0.375)
+    (Lx, Ly, Lz) = (21, 21, 21)
+    (dx, dy, dz) = (0.375, 0.375, 0.375)
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     # NGridPoints_cart = 1.37e5
@@ -213,6 +213,8 @@ if __name__ == "__main__":
     print(kVals[kind], tlin_norm)
 
     print(kVals[-1], kVals[1] - kVals[0])
+    print(tVals[1] - tVals[0])
+    print(tVals[1] / tscale - tVals[0] / tscale)
 
     # # # # S(t) AND P_Imp CURVES
 
@@ -279,10 +281,14 @@ if __name__ == "__main__":
     def powerfunc(t, a, b):
         return b * t**(-1 * a)
 
-    tmin = 40
-    tmax = 60
-    tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
+    # tmin = 40
+    # tmax = 60
+    # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
     # rollwin = 10
+
+    tmin = 80
+    tmax = 100
+    tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
     rollwin = 1
 
     fig, ax = plt.subplots()

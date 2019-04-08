@@ -283,15 +283,24 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
     # Time evolution
 
     # Initialize observable Data Arrays
-    PB_da = xr.DataArray(np.full(tgrid_coarse.size, np.nan, dtype=float), coords=[tgrid_coarse], dims=['t'])
-    NB_da = xr.DataArray(np.full(tgrid_coarse.size, np.nan, dtype=float), coords=[tgrid_coarse], dims=['t'])
-    ReDynOv_da = xr.DataArray(np.full(tgrid_coarse.size, np.nan, dtype=float), coords=[tgrid_coarse], dims=['t'])
-    ImDynOv_da = xr.DataArray(np.full(tgrid_coarse.size, np.nan, dtype=float), coords=[tgrid_coarse], dims=['t'])
-    Phase_da = xr.DataArray(np.full(tgrid_coarse.size, np.nan, dtype=float), coords=[tgrid_coarse], dims=['t'])
-    ReAmp_da = xr.DataArray(np.full((tgrid_coarse.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid_coarse, kVec, thVec], dims=['t', 'k', 'th'])
-    ImAmp_da = xr.DataArray(np.full((tgrid_coarse.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid_coarse, kVec, thVec], dims=['t', 'k', 'th'])
-    # ReDeltaAmp_da = xr.DataArray(np.full((tgrid_coarse.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid_coarse, kVec, thVec], dims=['t', 'k', 'th'])
-    # ImDeltaAmp_da = xr.DataArray(np.full((tgrid_coarse.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid_coarse, kVec, thVec], dims=['t', 'k', 'th'])
+
+    PB_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    NB_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    ReDynOv_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    ImDynOv_da = xr.DataArray(np.full(tgrid.size, np.nan, dtype=float), coords=[tgrid], dims=['t'])
+    Phase_da = xr.DataArray(np.full(tgrid_coarse.size, np.nan, dtype=float), coords=[tgrid_coarse], dims=['tc'])
+    ReAmp_da = xr.DataArray(np.full((tgrid_coarse.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid_coarse, kVec, thVec], dims=['tc', 'k', 'th'])
+    ImAmp_da = xr.DataArray(np.full((tgrid_coarse.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid_coarse, kVec, thVec], dims=['tc', 'k', 'th'])
+
+    # PB_da = xr.DataArray(np.full(tgrid_coarse.size, np.nan, dtype=float), coords=[tgrid_coarse], dims=['t'])
+    # NB_da = xr.DataArray(np.full(tgrid_coarse.size, np.nan, dtype=float), coords=[tgrid_coarse], dims=['t'])
+    # ReDynOv_da = xr.DataArray(np.full(tgrid_coarse.size, np.nan, dtype=float), coords=[tgrid_coarse], dims=['t'])
+    # ImDynOv_da = xr.DataArray(np.full(tgrid_coarse.size, np.nan, dtype=float), coords=[tgrid_coarse], dims=['t'])
+    # Phase_da = xr.DataArray(np.full(tgrid_coarse.size, np.nan, dtype=float), coords=[tgrid_coarse], dims=['t'])
+    # ReAmp_da = xr.DataArray(np.full((tgrid_coarse.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid_coarse, kVec, thVec], dims=['t', 'k', 'th'])
+    # ImAmp_da = xr.DataArray(np.full((tgrid_coarse.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid_coarse, kVec, thVec], dims=['t', 'k', 'th'])
+    # # ReDeltaAmp_da = xr.DataArray(np.full((tgrid_coarse.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid_coarse, kVec, thVec], dims=['t', 'k', 'th'])
+    # # ImDeltaAmp_da = xr.DataArray(np.full((tgrid_coarse.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tgrid_coarse, kVec, thVec], dims=['t', 'k', 'th'])
 
     start = timer()
     for ind, t in enumerate(tgrid):
@@ -304,15 +313,21 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
 
         if t in tgrid_coarse:
             tc_ind = np.nonzero(tgrid_coarse == t)[0][0]
-            PB_da[tc_ind] = cs.get_PhononMomentum()
-            NB_da[tc_ind] = cs.get_PhononNumber()
-            DynOv = cs.get_DynOverlap()
-            ReDynOv_da[tc_ind] = np.real(DynOv)
-            ImDynOv_da[tc_ind] = np.imag(DynOv)
+            # PB_da[tc_ind] = cs.get_PhononMomentum()
+            # NB_da[tc_ind] = cs.get_PhononNumber()
+            # DynOv = cs.get_DynOverlap()
+            # ReDynOv_da[tc_ind] = np.real(DynOv)
+            # ImDynOv_da[tc_ind] = np.imag(DynOv)
             Phase_da[tc_ind] = cs.get_Phase()
             Amp = cs.get_Amplitude().reshape(len(kVec), len(thVec))
             ReAmp_da[tc_ind] = np.real(Amp)
             ImAmp_da[tc_ind] = np.imag(Amp)
+
+        PB_da[ind] = cs.get_PhononMomentum()
+        NB_da[ind] = cs.get_PhononNumber()
+        DynOv = cs.get_DynOverlap()
+        ReDynOv_da[ind] = np.real(DynOv)
+        ImDynOv_da[ind] = np.imag(DynOv)
 
         # PB_da[ind] = cs.get_PhononMomentum()
         # NB_da[ind] = cs.get_PhononNumber()
@@ -347,7 +362,7 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
 
     data_dict = {'Pph': PB_da, 'Nph': NB_da, 'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da}
     # data_dict = {'Pph': PB_da, 'Nph': NB_da, 'Real_DynOv': ReDynOv_da, 'Imag_DynOv': ImDynOv_da, 'Phase': Phase_da, 'Real_CSAmp': ReAmp_da, 'Imag_CSAmp': ImAmp_da, 'Real_Delta_CSAmp': ReDeltaAmp_da, 'Imag_Delta_CSAmp': ImDeltaAmp_da}
-    coords_dict = {'t': tgrid_coarse}
+    coords_dict = {'t': tgrid, 'tc': tgrid_coarse}
     attrs_dict = {'NGridPoints': NGridPoints, 'k_mag_cutoff': k_max, 'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'nu': nu_const, 'gIB': gnum}
 
     dynsph_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
