@@ -121,6 +121,14 @@ if __name__ == "__main__":
 
     print(len(Params_List))
 
+    missVals = [18, 19, 20, 21, 22, 23, 25]
+    missList = []
+    for ind in missVals:
+        # print(Params_List[ind])
+        missList.append(Params_List[ind])
+
+    Params_List = missList
+
     # # ---- COMPUTE DATA ON COMPUTER ----
 
     # runstart = timer()
