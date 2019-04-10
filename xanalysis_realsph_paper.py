@@ -249,8 +249,8 @@ if __name__ == "__main__":
 
     #     axes[0].plot(tsVals / tscale, DynOv, label='{:.2f}'.format(P / mc))
     #     axes[0].plot(tfLin / tscale, fLinD, 'k--', label='')
-    #     axes[1].plot(tsVals / tscale, PImp / mI, marker='x', label='{:.2f}'.format(P / mc))
-    #     axes[1].plot(tfLin / tscale, fLinP, 'k--', label='')
+    #     axes[1].plot(tsVals / tscale, PImp / mI, label='{:.2f}'.format(P / mc))
+    #     # axes[1].plot(tfLin / tscale, fLinP, 'k--', label='')
 
     # axes[0].plot(tlin_norm * np.ones(DynOv.size), np.linspace(np.min(DynOv), np.max(DynOv), DynOv.size), 'k-')
     # axes[0].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
@@ -265,9 +265,9 @@ if __name__ == "__main__":
     # axes[1].plot(tsVals / tscale, nu * np.ones(tsVals.size), 'k--', label='$c_{BEC}$')
     # axes[1].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
     # # axes[1].set_xlim([-1, 100])
-    # axes[1].set_xscale('log')
-    # axes[1].set_yscale('log')
-    # axes[1].set_xlim([1e-1, 1e2])
+    # # axes[1].set_xscale('log')
+    # # axes[1].set_yscale('log')
+    # # axes[1].set_xlim([1e-1, 1e2])
     # axes[1].set_title('Average Impurity Speed (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
     # axes[1].set_ylabel(r'$\frac{<P_{I}>}{m_{I}}$')
     # axes[1].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
@@ -277,7 +277,7 @@ if __name__ == "__main__":
 
     # # # # S(t) AND P_Imp EXPONENTS
 
-    # seperate = False
+    # seperate = True
 
     # aIBi_des = np.array([-10.0, -5.0, -2.0])  # Data for stronger interactions (-1.0, -0.75, -0.5) is too noisy to get fits
     # # Another note: The fit for P_{Imp} is also difficult for anything other than very weak interactions -> this is probably because of the diverging convergence time to mI*c due to arguments in Nielsen
@@ -698,8 +698,12 @@ if __name__ == "__main__":
     for Pn_ind, Pn in enumerate(Pnorm_des):
         Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
 
-    indP = Pinds[5]
+    indP = Pinds[1]
     P = PVals[indP]
+
+    subBool = True
+    vmaxAuto = True
+    FGRBool = True
 
     tau = 100
     tsVals = tVals[tVals < tau]
@@ -712,9 +716,12 @@ if __name__ == "__main__":
     dVk = kgrid.dV()
 
     kIRcut = 0.13
+    # kIRcut = 0.2
+    # kIRcut = 0
     kIRmask = kg < kIRcut
     dVk_IR = dVk.reshape((len(kVec), len(thVec)))[kIRmask]
 
+    Omegak_da = xr.DataArray(np.full((tsVals.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tsVals, kVec, thVec], dims=['t', 'k', 'th'])
     PhDen_da = xr.DataArray(np.full((tsVals.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tsVals, kVec, thVec], dims=['t', 'k', 'th'])
     norm_IRpercent = np.zeros(tsVals.size)
     vmax = 0
@@ -733,23 +740,28 @@ if __name__ == "__main__":
         norm_IRpercent[tind] = 100 * np.abs(norm_IR / norm_tot)
         # print(norm_IRpercent[tind])
 
+        Omegak_da.sel(t=t)[:] = pfs.Omega(kgrid, Pimp, mI, mB, n0, gBB).reshape((len(kVec), len(thVec))).real.astype(float)
+        # print(Omegak_da.sel(t=t))
+
         maxval = np.max(PhDen_da.sel(t=t).values[np.logical_not(kIRmask)])
         if maxval > vmax:
             vmax = maxval
 
     # Animations
 
+    Nph = qds_PaIBi['Nph'].values
     Pph = qds_PaIBi['Pph'].values
     Pimp = P - Pph
-    zoom = False
 
     fig1, ax1 = plt.subplots()
 
     vmin = 0
-    # vmax = 700
+    if vmaxAuto is False:
+        vmax = 700
     print(vmax)
 
-    PhDen0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(PhDen_da.isel(t=0), 'k', 'th', 5)
+    interpmul = 5
+    PhDen0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(PhDen_da.isel(t=0), 'k', 'th', interpmul)
     kxg_interp = kg_interp * np.sin(thg_interp)
     kzg_interp = kg_interp * np.cos(thg_interp)
 
@@ -757,7 +769,8 @@ if __name__ == "__main__":
     quad1m = ax1.pcolormesh(kzg_interp, -1 * kxg_interp, PhDen0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
     curve1 = ax1.plot(Pph[0], 0, marker='x', markersize=10, color="magenta", label=r'$P_{ph}$')[0]
     curve1m = ax1.plot(Pimp[0], 0, marker='o', markersize=10, color="red", label=r'$P_{imp}$')[0]
-    curve2 = ax1.plot(mc, 0, marker='*', markersize=10, color="black", label=r'$m_{I}c$')[0]
+    if subBool is False:
+        curve2 = ax1.plot(mc, 0, marker='*', markersize=10, color="black", label=r'$m_{I}c$')[0]
     patch_Excitation = plt.Circle((0, 0), 1e10, edgecolor='white', facecolor='None', linewidth=2, label=r'$\omega_{|k|}^{-1}(\frac{2\pi}{t})$')
     ax1.add_patch(patch_Excitation)
     patch_IR = plt.Circle((0, 0), kIRcut, edgecolor='#8c564b', facecolor='#8c564b', label=r'Singular region')
@@ -765,13 +778,21 @@ if __name__ == "__main__":
     IR_text = ax1.text(0.72, 0.8, r'Weight: ' + '{:.1f}%'.format(norm_IRpercent[0]), transform=ax1.transAxes, color='#8c564b')
     patch_klin = plt.Circle((0, 0), klin, edgecolor='#ff7f0e', facecolor='None', label=r'Linear Excitations')
     ax1.add_patch(patch_klin)
-
     t_text = ax1.text(0.81, 0.9, r'$t$ [$\frac{\xi}{c}$]: ' + '{:1.2f}'.format(tsVals[0] / tscale), transform=ax1.transAxes, color='r')
+    Nph_text = ax1.text(0.81, 0.7, r'$N_{ph}$: ' + '{:.2f}'.format(Nph[0]), transform=ax1.transAxes, color='magenta')
+
+    if FGRBool is True:
+        Omegak0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Omegak_da.isel(t=0), 'k', 'th', interpmul)
+        FGRmask0 = Omegak0_interp_vals > 1e-6
+        Omegak0_interp_vals[FGRmask0] = np.nan
+        quad2 = ax1.pcolormesh(kzg_interp, kxg_interp, Omegak0_interp_vals[:-1, :-1], cmap='RdPu', alpha=0.05, zorder=10, vmin=vmin, vmax=vmax)
+        quad2m = ax1.pcolormesh(kzg_interp, -1 * kxg_interp, Omegak0_interp_vals[:-1, :-1], cmap='RdPu', alpha=0.05, zorder=10, vmin=vmin, vmax=vmax)
+
     ax1.set_xlim([-2, 2])
     ax1.set_ylim([-2, 2])
-    if zoom is True:
-        ax1.set_xlim([-0.2, 0.2])
-        ax1.set_ylim([-0.2, 0.2])
+    # if subBool is True:
+    #     ax1.set_xlim([-1, 1])
+    #     ax1.set_ylim([-1, 1])
     ax1.legend(loc=2)
     ax1.grid(True, linewidth=0.5)
     ax1.set_title('Individual Phonon Distribution (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c}=$' + '{:.2f})'.format(Pnorm[indP]))
@@ -780,20 +801,33 @@ if __name__ == "__main__":
     fig1.colorbar(quad1, ax=ax1, extend='both')
 
     def animate1(i):
-        PhDen_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(PhDen_da.isel(t=i), 'k', 'th', 5)
+        PhDen_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(PhDen_da.isel(t=i), 'k', 'th', interpmul)
         quad1.set_array(PhDen_interp_vals[:-1, :-1].ravel())
         quad1m.set_array(PhDen_interp_vals[:-1, :-1].ravel())
         curve1.set_xdata(Pph[i])
         curve1m.set_xdata(Pimp[i])
         t_text.set_text(r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tsVals[i] / tscale))
         IR_text.set_text(r'Weight: ' + '{:1.2f}%'.format(norm_IRpercent[i]))
+        Nph_text.set_text(r'$N_{ph}$: ' + '{:.2f}'.format(Nph[i]))
 
         def rfunc(k): return (pfs.omegak(k, mB, n0, gBB) - 2 * np.pi / tsVals[i])
         kroot = fsolve(rfunc, 1e8); kroot = kroot[kroot >= 0]
         patch_Excitation.set_radius(kroot[0])
 
+        if FGRBool is True:
+            Omegak_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Omegak_da.isel(t=i), 'k', 'th', interpmul)
+            FGRmask = Omegak_interp_vals > 1e-6
+            Omegak_interp_vals[FGRmask] = np.nan
+            # # for some reason updating the values below doesn't reset the data as desired...maybe something to do with set_array resetting colors and there being NaNs in the data
+            # quad2.set_array(Omegak_interp_vals[:-1, :-1].ravel())
+            # quad2m.set_array(Omegak_interp_vals[:-1, :-1].ravel())
+
     anim1 = FuncAnimation(fig1, animate1, interval=1e-5, frames=range(tsVals.size), blit=False)
     anim1_filename = '/aIBi_{:d}_P_{:.2f}'.format(int(aIBi), P) + '_indPhononDist_2D_oscBox'
+    if vmaxAuto is True:
+        anim1_filename = anim1_filename + '_vmaxLarge'
+    if FGRBool is True:
+        anim1_filename = anim1_filename + '_FGR'
     # anim1.save(animpath + anim1_filename + '.mp4', writer='mpegWriter')
     anim1.save(animpath + anim1_filename + '.gif', writer='imagemagick')
     plt.show()
