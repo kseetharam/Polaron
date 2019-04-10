@@ -391,15 +391,26 @@ if __name__ == "__main__":
     # tsVals = tVals[tVals < tau]
     # qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
 
+    # fig2, ax2 = plt.subplots()
     # DynOv_IRVals = np.zeros(IRrat_Vals.size)
     # for ind, IRrat_val in enumerate(IRrat_Vals):
     #     IRdatapath = qdatapath_Dict[IRrat_val]
     #     qds_aIBi_ts = xr.open_dataset(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi)).sel(t=tsVals)
     #     St = np.abs(qds_aIBi_ts.isel(P=Pind)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=Pind)['Imag_DynOv'].values).real.astype(float)
     #     DynOv_IRVals[ind] = St[-1]
+    #     ax2.plot(tsVals / tscale, St, label='{:.1E}'.format(IRrat_val))
 
     # qds_aIBi_orig = xr.open_dataset(qdatapath_Dict[1.0] + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi)).sel(t=tsVals)
     # DynOv_orig = np.abs(qds_aIBi_orig.isel(P=Pind)['Real_DynOv'].values + 1j * qds_aIBi_orig.isel(P=Pind)['Imag_DynOv'].values).real.astype(float)
+
+    # ax2.plot(tsVals / tscale, DynOv_orig, label='Original')
+    # ax2.set_title('Loschmidt Echo (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.1f})'.format(Pnorm[Pind]))
+    # ax2.set_ylabel(r'$|S(t)|$')
+    # ax2.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    # ax2.set_xscale('log')
+    # ax2.set_yscale('log')
+    # ax2.set_xlim([1e-1, 1e2])
+    # ax2.legend(title='IR Cutoff Ratio')
 
     # fig, axes = plt.subplots(nrows=1, ncols=2)
     # axes[0].plot(tsVals / tscale, DynOv_orig, 'k-')
@@ -698,14 +709,14 @@ if __name__ == "__main__":
     for Pn_ind, Pn in enumerate(Pnorm_des):
         Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
 
-    indP = Pinds[1]
+    indP = Pinds[5]
     P = PVals[indP]
 
-    subBool = True
-    vmaxAuto = True
+    subBool = False
+    vmaxAuto = False
     FGRBool = True
 
-    tau = 100
+    tau = 10
     tsVals = tVals[tVals < tau]
     qds_PaIBi = qds_aIBi.sel(t=tsVals, P=P)
 
@@ -829,5 +840,5 @@ if __name__ == "__main__":
     if FGRBool is True:
         anim1_filename = anim1_filename + '_FGR'
     # anim1.save(animpath + anim1_filename + '.mp4', writer='mpegWriter')
-    anim1.save(animpath + anim1_filename + '.gif', writer='imagemagick')
+    # anim1.save(animpath + anim1_filename + '.gif', writer='imagemagick')
     plt.show()
