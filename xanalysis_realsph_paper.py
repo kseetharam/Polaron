@@ -796,8 +796,13 @@ if __name__ == "__main__":
         Omegak0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Omegak_da.isel(t=0), 'k', 'th', interpmul)
         FGRmask0 = Omegak0_interp_vals > 1e-6
         Omegak0_interp_vals[FGRmask0] = np.nan
-        quad2 = ax1.pcolormesh(kzg_interp, kxg_interp, Omegak0_interp_vals[:-1, :-1], cmap='RdPu', alpha=0.05, zorder=10, vmin=vmin, vmax=vmax)
-        quad2m = ax1.pcolormesh(kzg_interp, -1 * kxg_interp, Omegak0_interp_vals[:-1, :-1], cmap='RdPu', alpha=0.05, zorder=10, vmin=vmin, vmax=vmax)
+        nanMask = np.isnan(Omegak0_interp_vals)
+        Omegak0_interp_vals[nanMask] = 1
+
+        # quad2 = ax1.pcolormesh(kzg_interp, kxg_interp, Omegak0_interp_vals[:-1, :-1], cmap='RdPu', alpha=0.05, zorder=10, vmin=vmin, vmax=vmax)
+        # quad2m = ax1.pcolormesh(kzg_interp, -1 * kxg_interp, Omegak0_interp_vals[:-1, :-1], cmap='RdPu', alpha=0.05, zorder=10, vmin=vmin, vmax=vmax)
+        quad2 = ax1.contour(kzg_interp, kxg_interp, Omegak0_interp_vals, zorder=10, cmap='RdPu', vmin=vmin, vmax=vmax)
+        quad2m = ax1.contour(kzg_interp, -1 * kxg_interp, Omegak0_interp_vals, zorder=10, cmap='RdPu', vmin=vmin, vmax=vmax)
 
     ax1.set_xlim([-2, 2])
     ax1.set_ylim([-2, 2])
