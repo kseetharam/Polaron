@@ -27,6 +27,9 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
+    higherCutoff = False; cutoffRat = 1.5
+    betterResolution = False; resRat = 0.5
+
     # (Lx, Ly, Lz) = (60, 60, 60)
     # (dx, dy, dz) = (0.25, 0.25, 0.25)
 
@@ -49,11 +52,16 @@ if __name__ == "__main__":
     # ---- SET OUTPUT DATA FOLDER ----
 
     if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, massRat)
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
         animpath = '/home/kis/Dropbox/VariationalResearch/DataAnalysis/figs'
     elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, massRat)
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
         animpath = '/media/kis/Storage/Dropbox/VariationalResearch/DataAnalysis/figs'
+    if higherCutoff is True:
+        datapath = datapath + '_cutoffRat_{:.2f}'.format(cutoffRat)
+    if betterResolution is True:
+        datapath = datapath + '_resRat_{:.2f}'.format(resRat)
+    datapath = datapath + '/massRatio={:.1f}'.format(massRat)
 
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
@@ -94,6 +102,7 @@ if __name__ == "__main__":
     # print(innerdatapath)
 
     # aIBi_List = [-10.0, -5.0, -2.0]
+    # # aIBi_List = [-2.0, -1.0]
     # for aIBi in aIBi_List:
     #     ds_list = []; P_list = []; mI_list = []
     #     for ind, filename in enumerate(os.listdir(innerdatapath)):
@@ -778,10 +787,10 @@ if __name__ == "__main__":
 
     quad1 = ax1.pcolormesh(kzg_interp, kxg_interp, PhDen0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
     quad1m = ax1.pcolormesh(kzg_interp, -1 * kxg_interp, PhDen0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
-    curve1 = ax1.plot(Pph[0], 0, marker='x', markersize=10, color="magenta", label=r'$P_{ph}$')[0]
-    curve1m = ax1.plot(Pimp[0], 0, marker='o', markersize=10, color="red", label=r'$P_{imp}$')[0]
+    curve1 = ax1.plot(Pph[0], 0, marker='x', markersize=10, zorder=11, color="magenta", label=r'$P_{ph}$')[0]
+    curve1m = ax1.plot(Pimp[0], 0, marker='o', markersize=10, zorder=11, color="red", label=r'$P_{imp}$')[0]
     if subBool is False:
-        curve2 = ax1.plot(mc, 0, marker='*', markersize=10, color="black", label=r'$m_{I}c$')[0]
+        curve2 = ax1.plot(mc, 0, marker='*', markersize=10, zorder=11, color="black", label=r'$m_{I}c$')[0]
     patch_Excitation = plt.Circle((0, 0), 1e10, edgecolor='white', facecolor='None', linewidth=2, label=r'$\omega_{|k|}^{-1}(\frac{2\pi}{t})$')
     ax1.add_patch(patch_Excitation)
     patch_IR = plt.Circle((0, 0), kIRcut, edgecolor='#8c564b', facecolor='#8c564b', label=r'Singular region')
@@ -795,14 +804,11 @@ if __name__ == "__main__":
     if FGRBool is True:
         Omegak0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Omegak_da.isel(t=0), 'k', 'th', interpmul)
         FGRmask0 = Omegak0_interp_vals > 1e-6
-        Omegak0_interp_vals[FGRmask0] = np.nan
-        nanMask = np.isnan(Omegak0_interp_vals)
-        Omegak0_interp_vals[nanMask] = 1
-
-        # quad2 = ax1.pcolormesh(kzg_interp, kxg_interp, Omegak0_interp_vals[:-1, :-1], cmap='RdPu', alpha=0.05, zorder=10, vmin=vmin, vmax=vmax)
-        # quad2m = ax1.pcolormesh(kzg_interp, -1 * kxg_interp, Omegak0_interp_vals[:-1, :-1], cmap='RdPu', alpha=0.05, zorder=10, vmin=vmin, vmax=vmax)
-        quad2 = ax1.contour(kzg_interp, kxg_interp, Omegak0_interp_vals, zorder=10, cmap='RdPu', vmin=vmin, vmax=vmax)
-        quad2m = ax1.contour(kzg_interp, -1 * kxg_interp, Omegak0_interp_vals, zorder=10, cmap='RdPu', vmin=vmin, vmax=vmax)
+        Omegak0_interp_vals[FGRmask0] = 0
+        Omegak0_interp_vals[np.logical_not(FGRmask0)] = 1
+        p = []
+        p.append(ax1.contour(kzg_interp, kxg_interp, Omegak0_interp_vals, zorder=10, colors='tab:gray'))
+        p.append(ax1.contour(kzg_interp, -1 * kxg_interp, Omegak0_interp_vals, zorder=10, colors='tab:gray'))
 
     ax1.set_xlim([-2, 2])
     ax1.set_ylim([-2, 2])
@@ -826,6 +832,11 @@ if __name__ == "__main__":
         IR_text.set_text(r'Weight: ' + '{:1.2f}%'.format(norm_IRpercent[i]))
         Nph_text.set_text(r'$N_{ph}$: ' + '{:.2f}'.format(Nph[i]))
 
+        for tp in p[0].collections:
+            tp.remove()
+        for tp in p[1].collections:
+            tp.remove()
+
         def rfunc(k): return (pfs.omegak(k, mB, n0, gBB) - 2 * np.pi / tsVals[i])
         kroot = fsolve(rfunc, 1e8); kroot = kroot[kroot >= 0]
         patch_Excitation.set_radius(kroot[0])
@@ -833,10 +844,10 @@ if __name__ == "__main__":
         if FGRBool is True:
             Omegak_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Omegak_da.isel(t=i), 'k', 'th', interpmul)
             FGRmask = Omegak_interp_vals > 1e-6
-            Omegak_interp_vals[FGRmask] = np.nan
-            # # for some reason updating the values below doesn't reset the data as desired...maybe something to do with set_array resetting colors and there being NaNs in the data
-            # quad2.set_array(Omegak_interp_vals[:-1, :-1].ravel())
-            # quad2m.set_array(Omegak_interp_vals[:-1, :-1].ravel())
+            Omegak_interp_vals[FGRmask] = 0
+            Omegak_interp_vals[np.logical_not(FGRmask)] = 1
+            p[0] = ax1.contour(kzg_interp, kxg_interp, Omegak_interp_vals, zorder=10, colors='tab:gray')
+            p[1] = ax1.contour(kzg_interp, -1 * kxg_interp, Omegak_interp_vals, zorder=10, colors='tab:gray')
 
     anim1 = FuncAnimation(fig1, animate1, interval=1e-5, frames=range(tsVals.size), blit=False)
     anim1_filename = '/aIBi_{:d}_P_{:.2f}'.format(int(aIBi), P) + '_indPhononDist_2D_oscBox'
