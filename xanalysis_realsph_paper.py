@@ -285,65 +285,61 @@ if __name__ == "__main__":
     # fig.tight_layout()
     # plt.show()
 
-    # # # S(t) AND P_Imp CURVES MULTIGRID
+    # # # # S(t) AND P_Imp CURVES MULTIGRID
 
-    tau = 100
-    tsVals = tVals[tVals < tau]
-    qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
+    # massRat = 1.0
+    # aIBi = -2.0
 
-    # print(Pnorm)
+    # Pnorm_des = np.array([0.1, 0.8, 1.2, 2.3, 2.5, 3.0, 5.0])
+    # Pinds = np.zeros(Pnorm_des.size, dtype=int)
+    # for Pn_ind, Pn in enumerate(Pnorm_des):
+    #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
 
-    Pnorm_des = np.array([0.1, 0.5, 0.8, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2, 1.4, 1.6, 2.5, 3.0, 5.0])
-    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.35, 1.8, 3.0, 5.0])
+    # dp1 = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08/massRatio={:.1f}/redyn_spherical'.format(massRat)
+    # dp2 = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08_cutoffRat_1.50/massRatio={:.1f}/redyn_spherical'.format(massRat)
+    # dp3 = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08_resRat_0.50/massRatio={:.1f}/redyn_spherical'.format(massRat)
 
-    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
-    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.0, 1.1, 1.3, 1.8, 3.0])
+    # dpList = [dp1, dp2, dp3]
+    # qdsList = []
+    # for dp in dpList:
+    #     qdsList.append(xr.open_dataset(dp + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi)))
 
-    Pinds = np.zeros(Pnorm_des.size, dtype=int)
-    for Pn_ind, Pn in enumerate(Pnorm_des):
-        Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
+    # lineList = ['solid', 'dotted', 'dashed']
+    # fig, ax = plt.subplots()
 
-    fig, axes = plt.subplots(nrows=2, ncols=1)
-    for indP in Pinds:
-        P = PVals[indP]
-        DynOv = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
-        PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
+    # alegend_elements = []
+    # for ind_ds, ds in enumerate(qdsList):
+    #     n0 = ds.attrs['n0']
+    #     gBB = ds.attrs['gBB']
+    #     mI = ds.attrs['mI']
+    #     mB = ds.attrs['mB']
+    #     nu = np.sqrt(n0 * gBB / mB)
 
-        tfmask = tsVals > 60
-        tfVals = tsVals[tfmask]
-        tfLin = tsVals[tsVals > 10]
-        zD = np.polyfit(np.log(tfVals), np.log(DynOv[tfmask]), deg=1)
-        fLinD = np.exp(zD[1]) * tfLin**(zD[0])
-        zP = np.polyfit(np.log(tfVals), np.log(PImp[tfmask]), deg=1)
-        fLinP = np.exp(zP[1]) * tfLin**(zP[0])
+    #     tVals = qds.coords['t'].values
+    #     tau = 100
+    #     tsVals = tVals[tVals < tau]
+    #     qds_aIBi_ts = ds.sel(t=tsVals)
 
-        axes[0].plot(tsVals / tscale, DynOv, label='{:.2f}'.format(P / mc))
-        axes[0].plot(tfLin / tscale, fLinD, 'k--', label='')
-        axes[1].plot(tsVals / tscale, PImp / mI, label='{:.2f}'.format(P / mc))
-        # axes[1].plot(tfLin / tscale, fLinP, 'k--', label='')
+    #     for indP in Pinds:
+    #         P = PVals[indP]
+    #         DynOv = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+    #         PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
+    #         ax.plot(tsVals / tscale, PImp / (mI * nu), linestyle=lineList[ind_ds])
+    #     kVec = ds.coords['k'].values
+    #     kmax = kVec[-1]
+    #     dk = kVec[1] - kVec[0]
+    #     alegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[ind_ds], label=r'$\Lambda=$' + '{:.2f}, '.format(kmax) + r'$dk=$' + '{:.2E}'.format(dk)))
 
-    axes[0].plot(tlin_norm * np.ones(DynOv.size), np.linspace(np.min(DynOv), np.max(DynOv), DynOv.size), 'k-')
-    axes[0].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
-    axes[0].set_xscale('log')
-    axes[0].set_yscale('log')
-    axes[0].set_xlim([1e-1, 1e2])
-    axes[0].set_title('Loschmidt Echo (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    axes[0].set_ylabel(r'$|S(t)|$')
-    axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    # ax.plot(tsVals / tscale, np.ones(tsVals.size), 'k--')
 
-    # axes[1].plot(tlin_norm * np.ones(PImp.size), np.linspace(np.min(PImp), np.max(PImp), PImp.size), 'ko')
-    axes[1].plot(tsVals / tscale, nu * np.ones(tsVals.size), 'k--', label='$c_{BEC}$')
-    axes[1].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
-    # axes[1].set_xlim([-1, 100])
-    # axes[1].set_xscale('log')
-    # axes[1].set_yscale('log')
-    # axes[1].set_xlim([1e-1, 1e2])
-    axes[1].set_title('Average Impurity Speed (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    axes[1].set_ylabel(r'$\frac{<P_{I}>}{m_{I}}$')
-    axes[1].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-
-    fig.tight_layout()
-    plt.show()
+    # # ax.set_xscale('log')
+    # # ax.set_yscale('log')
+    # # ax.set_xlim([1e-1, 1e2])
+    # alegend = ax.legend(handles=alegend_elements, loc=1, title='Grid Parameters')
+    # ax.set_title('Average Impurity Speed (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    # ax.set_ylabel(r'$\frac{<P_{I}>}{m_{I}c}$')
+    # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    # plt.show()
 
     # # # # S(t) AND P_Imp EXPONENTS
 

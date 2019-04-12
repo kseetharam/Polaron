@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    higherCutoff = True; cutoffRat = 1.5
+    higherCutoff = False; cutoffRat = 1.5
     betterResolution = False; resRat = 0.5
 
     (Lx, Ly, Lz) = (60, 60, 60)

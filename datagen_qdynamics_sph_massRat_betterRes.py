@@ -61,7 +61,7 @@ if __name__ == "__main__":
     # for realdyn evolution
     tMax = 100
     dt = 0.2
-    CoarseGrainRate = 50
+    CoarseGrainRate = 500
 
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -95,12 +95,9 @@ if __name__ == "__main__":
 
     Params_List = []
     mI_Vals = np.array([0.5, 1.0, 2, 5.0])
-    aIBi_Vals = np.array([-10.0, -5.0, -2.0])
-    if higherCutoff is True or betterResolution is True:
-        mI_Vals = np.array([1.0, 5.0])
-        aIBi_Vals = np.array([-2.0, -1.0])
-
-    P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.2, 10, endpoint=False), np.linspace(1.2, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 3)))
+    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0])
+    P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.2, 10, endpoint=False), np.linspace(1.2, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 10, endpoint=False), np.linspace(5.0, 20.0, 20)))
+    print(P_Vals_norm)
 
     for mI in mI_Vals:
         P_Vals = mI * nu * P_Vals_norm
