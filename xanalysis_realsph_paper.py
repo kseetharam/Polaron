@@ -181,7 +181,7 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -2.0
+    aIBi = -10.0
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     qds_aIBi = qds
@@ -359,7 +359,7 @@ if __name__ == "__main__":
     # # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
     # # rollwin = 10
 
-    # tmin = 80
+    # tmin = 60
     # tmax = 100
     # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
     # rollwin = 1
@@ -525,7 +525,7 @@ if __name__ == "__main__":
     # def powerfunc(t, a, b):
     #     return b * t**(-1 * a)
 
-    # tmin = 80
+    # tmin = 77
     # tmax = 100
     # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
     # rollwin = 1
@@ -573,7 +573,6 @@ if __name__ == "__main__":
     #                     vImp_Exponents[indP] = vIopt[0]
     #                     vImp_Constants[indP] = vIopt[1]
     #                     if vIopt[0] < 0:
-    #                         # vImp_Exponents[indP] = np.nan
     #                         vImp_Exponents[indP] = 0
     #                 except OptimizeWarning:
     #                     vImp_Exponents[indP] = 0
@@ -582,7 +581,7 @@ if __name__ == "__main__":
     #                     vImp_Exponents[indP] = 0
     #                     vImp_Constants[indP] = vImpc_Vals[-1]
 
-    #         vIf_Vals = nu + powerfunc(1e25, vImp_Exponents, vImp_Constants)
+    #         vIf_Vals = nu + powerfunc(1e500, vImp_Exponents, vImp_Constants)
     #         # vIf_Vals = (PVals - mds['Pph'].isel(t=np.arange(-5, 0), P=np.arange(Pstart_ind, Plen)).mean(dim='t').values) / mI
     #         ax2.plot(vI0_Vals / nu, vIf_Vals / vI0_Vals, linestyle=lineList[inda], color=colorList[indm])
 
@@ -613,7 +612,7 @@ if __name__ == "__main__":
     # def powerfunc(t, a, b):
     #     return b * t**(-1 * a)
 
-    # tmin = 80
+    # tmin = 77
     # tmax = 100
     # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
     # rollwin = 1
@@ -662,7 +661,6 @@ if __name__ == "__main__":
     #                     vImp_Exponents[indP] = vIopt[0]
     #                     vImp_Constants[indP] = vIopt[1]
     #                     if vIopt[0] < 0:
-    #                         # vImp_Exponents[indP] = np.nan
     #                         vImp_Exponents[indP] = 0
     #                 except OptimizeWarning:
     #                     vImp_Exponents[indP] = 0
@@ -671,8 +669,7 @@ if __name__ == "__main__":
     #                     vImp_Exponents[indP] = 0
     #                     vImp_Constants[indP] = vImpc_Vals[-1]
 
-    #         vIf_Vals = nu + powerfunc(1e25, vImp_Exponents, vImp_Constants)
-    #         # vIf_Vals = (PVals - mds['Pph'].isel(t=np.arange(-5, 0), P=np.arange(Pstart_ind, Plen)).mean(dim='t').values) / mI
+    #         vIf_Vals = nu + powerfunc(1e500, vImp_Exponents, vImp_Constants)
     #         ax1.plot(vI0_Vals / nu, vIf_Vals / nu, linestyle=lineList[inda], color=colorList[indm])
     #         # ax2.plot(vI0_Vals / nu, vIf_Vals / vI0_Vals, linestyle=lineList[inda], color=colorList[indm])
 
