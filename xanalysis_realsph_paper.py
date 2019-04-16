@@ -29,17 +29,16 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
+    (Lx, Ly, Lz) = (60, 60, 60)
+    (dx, dy, dz) = (0.25, 0.25, 0.25)
     higherCutoff = False; cutoffRat = 1.5
     betterResolution = False; resRat = 0.5
-
-    # (Lx, Ly, Lz) = (60, 60, 60)
-    # (dx, dy, dz) = (0.25, 0.25, 0.25)
 
     # (Lx, Ly, Lz) = (40, 40, 40)
     # (dx, dy, dz) = (0.25, 0.25, 0.25)
 
-    (Lx, Ly, Lz) = (21, 21, 21)
-    (dx, dy, dz) = (0.375, 0.375, 0.375)
+    # (Lx, Ly, Lz) = (21, 21, 21)
+    # (dx, dy, dz) = (0.375, 0.375, 0.375)
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     # NGridPoints_cart = 1.37e5
@@ -103,7 +102,7 @@ if __name__ == "__main__":
 
     # print(innerdatapath)
 
-    # aIBi_List = [-10.0, -5.0, -2.0]
+    # aIBi_List = [-10.0, -5.0, -2.0, -1.0]
     # # aIBi_List = [-2.0, -1.0]
     # for aIBi in aIBi_List:
     #     ds_list = []; P_list = []; mI_list = []
@@ -182,7 +181,7 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -10.0
+    aIBi = -2.0
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     qds_aIBi = qds
@@ -226,65 +225,66 @@ if __name__ == "__main__":
 
     print(kVals[-1], kVals[1] - kVals[0])
 
-    # # # # S(t) AND P_Imp CURVES
+    # # # S(t) AND P_Imp CURVES
 
-    # tau = 100
-    # tsVals = tVals[tVals < tau]
-    # qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
+    tau = 100
+    tsVals = tVals[tVals < tau]
+    qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
 
-    # # print(Pnorm)
+    # print(Pnorm)
 
-    # Pnorm_des = np.array([0.1, 0.5, 0.8, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2, 1.4, 1.6, 2.5, 3.0, 5.0])
-    # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.35, 1.8, 3.0, 5.0])
+    # Pnorm_des = np.array([0.1, 0.8, 5.0, 10.0, 20.0])
 
-    # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
-    # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.0, 1.1, 1.3, 1.8, 3.0])
+    Pnorm_des = np.array([0.1, 0.5, 0.8, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2, 1.4, 1.6, 2.5, 3.0, 5.0])
 
-    # Pinds = np.zeros(Pnorm_des.size, dtype=int)
-    # for Pn_ind, Pn in enumerate(Pnorm_des):
-    #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
+    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
+    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.0, 1.1, 1.3, 1.8, 3.0])
 
-    # fig, axes = plt.subplots(nrows=2, ncols=1)
-    # for indP in Pinds:
-    #     P = PVals[indP]
-    #     DynOv = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
-    #     PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
+    Pinds = np.zeros(Pnorm_des.size, dtype=int)
+    for Pn_ind, Pn in enumerate(Pnorm_des):
+        Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
 
-    #     tfmask = tsVals > 60
-    #     tfVals = tsVals[tfmask]
-    #     tfLin = tsVals[tsVals > 10]
-    #     zD = np.polyfit(np.log(tfVals), np.log(DynOv[tfmask]), deg=1)
-    #     fLinD = np.exp(zD[1]) * tfLin**(zD[0])
-    #     zP = np.polyfit(np.log(tfVals), np.log(PImp[tfmask]), deg=1)
-    #     fLinP = np.exp(zP[1]) * tfLin**(zP[0])
+    fig, axes = plt.subplots(nrows=2, ncols=1)
+    for indP in Pinds:
+        P = PVals[indP]
+        DynOv = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+        PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
 
-    #     axes[0].plot(tsVals / tscale, DynOv, label='{:.2f}'.format(P / mc))
-    #     axes[0].plot(tfLin / tscale, fLinD, 'k--', label='')
-    #     axes[1].plot(tsVals / tscale, PImp / mI, label='{:.2f}'.format(P / mc))
-    #     # axes[1].plot(tfLin / tscale, fLinP, 'k--', label='')
+        tfmask = tsVals > 60
+        tfVals = tsVals[tfmask]
+        tfLin = tsVals[tsVals > 10]
+        zD = np.polyfit(np.log(tfVals), np.log(DynOv[tfmask]), deg=1)
+        fLinD = np.exp(zD[1]) * tfLin**(zD[0])
+        zP = np.polyfit(np.log(tfVals), np.log(PImp[tfmask]), deg=1)
+        fLinP = np.exp(zP[1]) * tfLin**(zP[0])
 
-    # axes[0].plot(tlin_norm * np.ones(DynOv.size), np.linspace(np.min(DynOv), np.max(DynOv), DynOv.size), 'k-')
-    # axes[0].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
-    # axes[0].set_xscale('log')
-    # axes[0].set_yscale('log')
-    # axes[0].set_xlim([1e-1, 1e2])
-    # axes[0].set_title('Loschmidt Echo (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    # axes[0].set_ylabel(r'$|S(t)|$')
-    # axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+        axes[0].plot(tsVals / tscale, DynOv, label='{:.2f}'.format(P / mc))
+        axes[0].plot(tfLin / tscale, fLinD, 'k--', label='')
+        axes[1].plot(tsVals / tscale, PImp / (mI * nu), label='{:.2f}'.format(P / mc))
+        # axes[1].plot(tfLin / tscale, fLinP, 'k--', label='')
 
-    # # axes[1].plot(tlin_norm * np.ones(PImp.size), np.linspace(np.min(PImp), np.max(PImp), PImp.size), 'ko')
-    # axes[1].plot(tsVals / tscale, nu * np.ones(tsVals.size), 'k--', label='$c_{BEC}$')
-    # axes[1].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
-    # # axes[1].set_xlim([-1, 100])
-    # # axes[1].set_xscale('log')
-    # # axes[1].set_yscale('log')
-    # # axes[1].set_xlim([1e-1, 1e2])
-    # axes[1].set_title('Average Impurity Speed (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    # axes[1].set_ylabel(r'$\frac{<P_{I}>}{m_{I}}$')
-    # axes[1].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    axes[0].plot(tlin_norm * np.ones(DynOv.size), np.linspace(np.min(DynOv), np.max(DynOv), DynOv.size), 'k-')
+    axes[0].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
+    axes[0].set_xscale('log')
+    axes[0].set_yscale('log')
+    axes[0].set_xlim([1e-1, 1e2])
+    axes[0].set_title('Loschmidt Echo (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    axes[0].set_ylabel(r'$|S(t)|$')
+    axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
 
-    # fig.tight_layout()
-    # plt.show()
+    # axes[1].plot(tlin_norm * np.ones(PImp.size), np.linspace(np.min(PImp), np.max(PImp), PImp.size), 'ko')
+    axes[1].plot(tsVals / tscale, np.ones(tsVals.size), 'k--', label='$c_{BEC}$')
+    axes[1].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=1, ncol=2)
+    # axes[1].set_xlim([-1, 100])
+    # axes[1].set_xscale('log')
+    # axes[1].set_yscale('log')
+    # axes[1].set_xlim([1e-1, 1e2])
+    axes[1].set_title('Average Impurity Speed (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    axes[1].set_ylabel(r'$\frac{<P_{I}>}{m_{I}c_{BEC}}$')
+    axes[1].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+
+    fig.tight_layout()
+    plt.show()
 
     # # # # S(t) AND P_Imp CURVES MULTIGRID
 
@@ -349,7 +349,7 @@ if __name__ == "__main__":
     # aIBi_des = np.array([-10.0, -5.0, -2.0])  # Data for stronger interactions (-1.0, -0.75, -0.5) is too noisy to get fits
     # # Another note: The fit for P_{Imp} is also difficult for anything other than very weak interactions -> this is probably because of the diverging convergence time to mI*c due to arguments in Nielsen
 
-    # PVals = PVals[(PVals / mc) <= 3.0]
+    # # PVals = PVals[(PVals / mc) <= 3.0]
     # Pnorm = PVals / mc
 
     # def powerfunc(t, a, b):
@@ -360,7 +360,7 @@ if __name__ == "__main__":
     # # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
     # # rollwin = 10
 
-    # tmin = 60
+    # tmin = 77
     # tmax = 100
     # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
     # rollwin = 1
@@ -696,6 +696,13 @@ if __name__ == "__main__":
     # plt.gca().add_artist(reflegend)
     # ax1.set_ylim([0, 1.2])
 
+    # Pcrit_norm_gs = np.array([1.086, 1.146, 1.446])
+    # intersec_points = np.array([1.0, 0.925, 0.719])
+    # ax1.plot(Pcrit_norm_gs, intersec_points, 'gx', label='')
+
+    # # for Pc in Pcrit_norm_gs:
+    # #     ax1.plot(Pc * np.ones(10), np.linspace(0, 1.2, 10), 'g-', label='')
+
     # # alegend_elements2 = []
     # # mlegend_elements2 = []
     # # for inda, aIBi in enumerate(aIBi_des):
@@ -773,11 +780,11 @@ if __name__ == "__main__":
     # for Pn_ind, Pn in enumerate(Pnorm_des):
     #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
 
-    # indP = Pinds[5]
+    # indP = Pinds[6]
     # P = PVals[indP]
 
     # vmaxAuto = True
-    # FGRBool = True
+    # FGRBool = False
 
     # tau = 100
     # tsVals = tVals[tVals < tau]
@@ -789,8 +796,11 @@ if __name__ == "__main__":
     # kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
     # dVk = kgrid.dV()
 
-    # axislim = 2
-    # kIRcut = 0.13
+    # # axislim = 2
+    # # kIRcut = 0.13
+    # axislim = 3
+    # kIRcut = 0.2
+
     # kIRmask = kg < kIRcut
     # dVk_IR = dVk.reshape((len(kVec), len(thVec)))[kIRmask]
     # axmask = (kg >= kIRcut) * (kg <= axislim)
@@ -918,61 +928,61 @@ if __name__ == "__main__":
     # if FGRBool is True:
     #     anim1_filename = anim1_filename + '_FGR'
     # # anim1.save(animpath + anim1_filename + '.mp4', writer='mpegWriter')
-    # # anim1.save(animpath + anim1_filename + '.gif', writer='imagemagick')
+    # anim1.save(animpath + anim1_filename + '.gif', writer='imagemagick')
     # plt.show()
 
-    # # # SUBSONIC POLARON STATE OVERLAP
+    # # # # SUBSONIC POLARON STATE OVERLAP
 
-    kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_aIBi.coords['k'].values); kgrid.initArray_premade('th', qds_aIBi.coords['th'].values)
-    kVec = kgrid.getArray('k')
-    thVec = kgrid.getArray('th')
-    kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
-    dVk = kgrid.dV()
+    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_aIBi.coords['k'].values); kgrid.initArray_premade('th', qds_aIBi.coords['th'].values)
+    # kVec = kgrid.getArray('k')
+    # thVec = kgrid.getArray('th')
+    # kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
+    # dVk = kgrid.dV()
 
-    tau = 100
-    tsVals = tVals[tVals < tau]
+    # tau = 100
+    # tsVals = tVals[tVals < tau]
 
-    # Static Interpolation
+    # # Static Interpolation
 
-    Nsteps = 1e2
-    pss.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
+    # Nsteps = 1e2
+    # pss.createSpline_grid(Nsteps, kgrid, mI, mB, n0, gBB)
 
-    aSi_tck = np.load('aSi_spline_sph.npy')
-    PBint_tck = np.load('PBint_spline_sph.npy')
+    # aSi_tck = np.load('aSi_spline_sph.npy')
+    # PBint_tck = np.load('PBint_spline_sph.npy')
 
-    print('Created Splines')
+    # print('Created Splines')
 
-    Pnorm_des = np.array([0.1, 0.2, 0.5, 0.8, 0.9])
+    # Pnorm_des = np.array([0.1, 0.2, 0.5, 0.8, 0.9])
 
-    Pinds = np.zeros(Pnorm_des.size, dtype=int)
-    for Pn_ind, Pn in enumerate(Pnorm_des):
-        Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
+    # Pinds = np.zeros(Pnorm_des.size, dtype=int)
+    # for Pn_ind, Pn in enumerate(Pnorm_des):
+    #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
 
-    fig, ax = plt.subplots()
-    for ip, indP in enumerate(Pinds):
-        P = PVals[indP]
-        DP = pss.DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
-        aSi = pss.aSi_interp(DP, aSi_tck)
-        Bk_static = pss.BetaK(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
-        Phase_static = 0
+    # fig, ax = plt.subplots()
+    # for ip, indP in enumerate(Pinds):
+    #     P = PVals[indP]
+    #     DP = pss.DP_interp(0, P, aIBi, aSi_tck, PBint_tck)
+    #     aSi = pss.aSi_interp(DP, aSi_tck)
+    #     Bk_static = pss.BetaK(kgrid, aIBi, aSi, DP, mI, mB, n0, gBB)
+    #     Phase_static = 0
 
-        qds_PaIBi = qds_aIBi.sel(t=tsVals, P=P)
-        overlapVals = np.zeros(tsVals.size)
-        for tind, t in enumerate(tsVals):
-            CSAmp_ds = (qds_PaIBi['Real_CSAmp'] + 1j * qds_PaIBi['Imag_CSAmp']).sel(t=t)
-            CSAmp_Vals = CSAmp_ds.values
-            CSAmp_Vals = CSAmp_Vals.reshape(CSAmp_Vals.size)
-            Phase = qds_PaIBi['Phase'].sel(t=t).values
-            exparg = np.dot(np.abs(CSAmp_Vals)**2 + np.abs(Bk_static)**2 - 2 * Bk_static.conjugate() * CSAmp_Vals, dVk)
-            overlapVals[tind] = np.abs(np.exp(-1j * (Phase - Phase_static)) * np.exp((-1 / 2) * exparg))
+    #     qds_PaIBi = qds_aIBi.sel(t=tsVals, P=P)
+    #     overlapVals = np.zeros(tsVals.size)
+    #     for tind, t in enumerate(tsVals):
+    #         CSAmp_ds = (qds_PaIBi['Real_CSAmp'] + 1j * qds_PaIBi['Imag_CSAmp']).sel(t=t)
+    #         CSAmp_Vals = CSAmp_ds.values
+    #         CSAmp_Vals = CSAmp_Vals.reshape(CSAmp_Vals.size)
+    #         Phase = qds_PaIBi['Phase'].sel(t=t).values
+    #         exparg = np.dot(np.abs(CSAmp_Vals)**2 + np.abs(Bk_static)**2 - 2 * Bk_static.conjugate() * CSAmp_Vals, dVk)
+    #         overlapVals[tind] = np.abs(np.exp(-1j * (Phase - Phase_static)) * np.exp((-1 / 2) * exparg))
 
-        ax.plot(tsVals / tscale, overlapVals, label='{:.2f}'.format(P / mc))
+    #     ax.plot(tsVals / tscale, overlapVals, label='{:.2f}'.format(P / mc))
 
-    ax.legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=1, ncol=2)
-    # ax.set_xscale('log')
-    # ax.set_yscale('log')
-    # ax.set_xlim([1e-1, 1e2])
-    ax.set_title('Polaron State Overlap (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    ax.set_ylabel(r'$|<\psi_{pol}|\psi(t)>|$')
-    ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    plt.show()
+    # ax.legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=1, ncol=2)
+    # # ax.set_xscale('log')
+    # # ax.set_yscale('log')
+    # # ax.set_xlim([1e-1, 1e2])
+    # ax.set_title('Polaron State Overlap (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    # ax.set_ylabel(r'$|<\psi_{pol}|\psi(t)>|$')
+    # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    # plt.show()

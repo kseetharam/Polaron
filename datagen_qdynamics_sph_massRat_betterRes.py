@@ -95,8 +95,8 @@ if __name__ == "__main__":
 
     Params_List = []
     mI_Vals = np.array([0.5, 1.0, 2, 5.0])
-    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0])
-    P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.2, 10, endpoint=False), np.linspace(1.2, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 10, endpoint=False), np.linspace(5.0, 20.0, 20)))
+    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.5])
+    P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.4, 10, endpoint=False), np.linspace(1.4, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 10, endpoint=False), np.linspace(5.0, 9.0, 20)))
     print(P_Vals_norm)
 
     for mI in mI_Vals:

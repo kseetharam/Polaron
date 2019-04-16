@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'IRcuts': 'true', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'IRcuts': 'false', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -149,23 +149,23 @@ if __name__ == "__main__":
     #             del(ds_tot.attrs['P']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
     #             ds_tot.to_netcdf(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
 
-    # # # Analysis of Total Dataset
+    # # Analysis of Total Dataset
 
-    # aIBi = -2.0
-    # # qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
-    # # qds_aIBi = qds.sel(aIBi=aIBi)
-    # qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    # qds_aIBi = qds
+    aIBi = -2.0
+    # qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
+    # qds_aIBi = qds.sel(aIBi=aIBi)
+    qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    qds_aIBi = qds
 
-    # PVals = qds['P'].values
-    # tVals = qds['t'].values
-    # n0 = qds.attrs['n0']
-    # gBB = qds.attrs['gBB']
-    # mI = qds.attrs['mI']
-    # mB = qds.attrs['mB']
-    # nu = np.sqrt(n0 * gBB / mB)
+    PVals = qds['P'].values
+    tVals = qds['t'].values
+    n0 = qds.attrs['n0']
+    gBB = qds.attrs['gBB']
+    mI = qds.attrs['mI']
+    mB = qds.attrs['mB']
+    nu = np.sqrt(n0 * gBB / mB)
 
-    # aIBi_Vals = np.array([-12.5, -10.0, -9.0, -8.0, -7.0, -5.0, -3.5, -2.0, -1.0, -0.75, -0.5, -0.1])  # used by many plots (spherical)
+    aIBi_Vals = np.array([-12.5, -10.0, -9.0, -8.0, -7.0, -5.0, -3.5, -2.0, -1.0, -0.75, -0.5, -0.1])  # used by many plots (spherical)
 
     # # # # BOGOLIUBOV DISPERSION (SPHERICAL)
 
@@ -183,63 +183,64 @@ if __name__ == "__main__":
     # ax.legend(loc=2, fontsize='x-large')
     # plt.show()
 
-    # # # PHASE DIAGRAM (SPHERICAL)
+    # # PHASE DIAGRAM (SPHERICAL)
 
-    # Pcrit = np.zeros(aIBi_Vals.size)
-    # for aind, aIBi in enumerate(aIBi_Vals):
-    #     qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    #     CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
-    #     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    Pcrit = np.zeros(aIBi_Vals.size)
+    for aind, aIBi in enumerate(aIBi_Vals):
+        qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+        CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+        kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
 
-    #     Energy_Vals_inf = np.zeros(PVals.size)
-    #     for Pind, P in enumerate(PVals):
-    #         CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
-    #         Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+        Energy_Vals_inf = np.zeros(PVals.size)
+        for Pind, P in enumerate(PVals):
+            CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
+            Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
 
-    #     Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
-    #     Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 2 * PVals.size)
-    #     Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
-    #     Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
-    #     # Pcrit[aind] = Pinf_Vals[np.argwhere(Einf_2ndderiv_Vals < 0)[-2][0] + 3]
-    #     Pcrit[aind] = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 0]  # there is a little bit of fudging with the -3 here so that aIBi=-10 gives me Pcrit/(mI*c) = 1 -> I can also just generate data for weaker interactions and see if it's better
+        Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+        Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 2 * PVals.size)
+        Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+        Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+        # Pcrit[aind] = Pinf_Vals[np.argwhere(Einf_2ndderiv_Vals < 0)[-2][0] + 3]
+        Pcrit[aind] = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 0]  # there is a little bit of fudging with the -3 here so that aIBi=-10 gives me Pcrit/(mI*c) = 1 -> I can also just generate data for weaker interactions and see if it's better
 
-    # Pcrit_norm = Pcrit / (mI * nu)
-    # Pcrit_tck = interpolate.splrep(aIBi_Vals, Pcrit_norm, s=0, k=3)
-    # aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
-    # Pcrit_interpVals = 1 * interpolate.splev(aIBi_interpVals, Pcrit_tck, der=0)
+    Pcrit_norm = Pcrit / (mI * nu)
+    Pcrit_tck = interpolate.splrep(aIBi_Vals, Pcrit_norm, s=0, k=3)
+    aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
+    Pcrit_interpVals = 1 * interpolate.splev(aIBi_interpVals, Pcrit_tck, der=0)
 
-    # print(Pcrit_norm)
+    print(Pcrit_norm)
+    print(Pcrit_norm[1], Pcrit_norm[5], Pcrit_norm[-5])
 
-    # scalefac = 1.0
-    # # scalefac = 0.95  # just to align weakly interacting case slightly to 1 (it's pretty much there, would just need higher resolution data)
-    # Pcrit_norm = scalefac * Pcrit_norm
-    # Pcrit_interpVals = scalefac * Pcrit_interpVals
+    scalefac = 1.0
+    # scalefac = 0.95  # just to align weakly interacting case slightly to 1 (it's pretty much there, would just need higher resolution data)
+    Pcrit_norm = scalefac * Pcrit_norm
+    Pcrit_interpVals = scalefac * Pcrit_interpVals
 
-    # xmin = np.min(aIBi_interpVals)
-    # xmax = 1.01 * np.max(aIBi_interpVals)
-    # ymin = 0
-    # ymax = 1.01 * np.max(Pcrit_interpVals)
+    xmin = np.min(aIBi_interpVals)
+    xmax = 1.01 * np.max(aIBi_interpVals)
+    ymin = 0
+    ymax = 1.01 * np.max(Pcrit_interpVals)
 
-    # font = {'family': 'serif', 'color': 'black', 'size': 14}
-    # sfont = {'family': 'serif', 'color': 'black', 'size': 13}
+    font = {'family': 'serif', 'color': 'black', 'size': 14}
+    sfont = {'family': 'serif', 'color': 'black', 'size': 13}
 
-    # fig, ax = plt.subplots()
-    # ax.plot(aIBi_Vals, Pcrit_norm, 'kx')
-    # ax.plot(aIBi_interpVals, Pcrit_interpVals, 'k-')
-    # # f1 = interpolate.interp1d(aIBi_Vals, Pcrit_norm, kind='cubic')
-    # # ax.plot(aIBi_interpVals, f1(aIBi_interpVals), 'k-')
-    # ax.set_title('Ground State Phase Diagram')
-    # ax.set_xlabel(r'$a_{IB}^{-1}$')
-    # ax.set_ylabel(r'$\frac{P}{m_{I}c_{BEC}}$')
-    # ax.set_xlim([xmin, xmax])
-    # ax.set_ylim([ymin, ymax])
-    # ax.fill_between(aIBi_interpVals, Pcrit_interpVals, ymax, facecolor='b', alpha=0.25)
-    # ax.fill_between(aIBi_interpVals, ymin, Pcrit_interpVals, facecolor='g', alpha=0.25)
-    # ax.text(-3.0, ymin + 0.175 * (ymax - ymin), 'Polaron', fontdict=font)
-    # ax.text(-2.9, ymin + 0.1 * (ymax - ymin), '(' + r'$Z>0$' + ')', fontdict=sfont)
-    # ax.text(-6.5, ymin + 0.6 * (ymax - ymin), 'Cherenkov', fontdict=font)
-    # ax.text(-6.35, ymin + 0.525 * (ymax - ymin), '(' + r'$Z=0$' + ')', fontdict=sfont)
-    # plt.show()
+    fig, ax = plt.subplots()
+    ax.plot(aIBi_Vals, Pcrit_norm, 'kx')
+    ax.plot(aIBi_interpVals, Pcrit_interpVals, 'k-')
+    # f1 = interpolate.interp1d(aIBi_Vals, Pcrit_norm, kind='cubic')
+    # ax.plot(aIBi_interpVals, f1(aIBi_interpVals), 'k-')
+    ax.set_title('Ground State Phase Diagram')
+    ax.set_xlabel(r'$a_{IB}^{-1}$')
+    ax.set_ylabel(r'$\frac{P}{m_{I}c_{BEC}}$')
+    ax.set_xlim([xmin, xmax])
+    ax.set_ylim([ymin, ymax])
+    ax.fill_between(aIBi_interpVals, Pcrit_interpVals, ymax, facecolor='b', alpha=0.25)
+    ax.fill_between(aIBi_interpVals, ymin, Pcrit_interpVals, facecolor='g', alpha=0.25)
+    ax.text(-3.0, ymin + 0.175 * (ymax - ymin), 'Polaron', fontdict=font)
+    ax.text(-2.9, ymin + 0.1 * (ymax - ymin), '(' + r'$Z>0$' + ')', fontdict=sfont)
+    ax.text(-6.5, ymin + 0.6 * (ymax - ymin), 'Cherenkov', fontdict=font)
+    ax.text(-6.35, ymin + 0.525 * (ymax - ymin), '(' + r'$Z=0$' + ')', fontdict=sfont)
+    plt.show()
 
     # # # ENERGY DERIVATIVES (SPHERICAL)
 
@@ -431,50 +432,50 @@ if __name__ == "__main__":
     # ax.set_xlabel(r'$a_{IB}^{-1}$')
     # plt.show()
 
-    # # Nph (SPHERICAL)
+    # # # Nph (SPHERICAL)
 
-    # IRrat_Vals = np.array([1, 2, 5, 10, 50, 1e2, 5e2, 1e3, 5e3, 1e4])
-    IRrat_Vals = np.array([1, 2, 5, 10, 50, 1e2])
+    # # IRrat_Vals = np.array([1, 2, 5, 10, 50, 1e2, 5e2, 1e3, 5e3, 1e4])
+    # IRrat_Vals = np.array([1, 2, 5, 10, 50, 1e2])
 
-    aIBi_List = [-10.0, -5.0, -2.0, -0.5]
+    # aIBi_List = [-10.0, -5.0, -2.0, -0.5]
 
-    aIBi = aIBi_List[1]
-    IRrat = IRrat_Vals[0]
-    IRdatapath = innerdatapath + '/IRratio_{:.1E}'.format(IRrat)
-    qds_aIBi = (xr.open_dataset(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))).isel(t=-1)
+    # aIBi = aIBi_List[1]
+    # IRrat = IRrat_Vals[0]
+    # IRdatapath = innerdatapath + '/IRratio_{:.1E}'.format(IRrat)
+    # qds_aIBi = (xr.open_dataset(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))).isel(t=-1)
 
-    PVals = qds_aIBi['P'].values
-    n0 = qds_aIBi.attrs['n0']
-    gBB = qds_aIBi.attrs['gBB']
-    mI = qds_aIBi.attrs['mI']
-    mB = qds_aIBi.attrs['mB']
-    nu = np.sqrt(n0 * gBB / mB)
+    # PVals = qds_aIBi['P'].values
+    # n0 = qds_aIBi.attrs['n0']
+    # gBB = qds_aIBi.attrs['gBB']
+    # mI = qds_aIBi.attrs['mI']
+    # mB = qds_aIBi.attrs['mB']
+    # nu = np.sqrt(n0 * gBB / mB)
 
-    Nph_ds = qds_aIBi['Nph']
-    Nph_Vals = Nph_ds.values
+    # Nph_ds = qds_aIBi['Nph']
+    # Nph_Vals = Nph_ds.values
 
-    Pind = np.argmin(np.abs(PVals - 3.0 * mI * nu))
-    Nph_IRcuts = np.zeros(IRrat_Vals.size)
-    for ind, IRrat in enumerate(IRrat_Vals):
-        IRdatapath = innerdatapath + '/IRratio_{:.1E}'.format(IRrat)
-        qds_IRrat = (xr.open_dataset(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))).isel(t=-1)
-        kmin = np.min(qds_IRrat.coords['k'].values)
-        Nph_ds_IRrat = qds_IRrat['Nph']
-        Nph_IRcuts[ind] = Nph_ds_IRrat.values[Pind]
+    # Pind = np.argmin(np.abs(PVals - 3.0 * mI * nu))
+    # Nph_IRcuts = np.zeros(IRrat_Vals.size)
+    # for ind, IRrat in enumerate(IRrat_Vals):
+    #     IRdatapath = innerdatapath + '/IRratio_{:.1E}'.format(IRrat)
+    #     qds_IRrat = (xr.open_dataset(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))).isel(t=-1)
+    #     kmin = np.min(qds_IRrat.coords['k'].values)
+    #     Nph_ds_IRrat = qds_IRrat['Nph']
+    #     Nph_IRcuts[ind] = Nph_ds_IRrat.values[Pind]
 
-    fig, axes = plt.subplots(nrows=1, ncols=2)
-    axes[0].plot(PVals / (mI * nu), Nph_Vals, 'k-')
-    axes[0].set_title('Phonon Number (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    axes[0].set_xlabel(r'$\frac{P}{m_{I}c_{BEC}}$')
-    axes[0].set_ylabel(r'$N_{ph}$')
+    # fig, axes = plt.subplots(nrows=1, ncols=2)
+    # axes[0].plot(PVals / (mI * nu), Nph_Vals, 'k-')
+    # axes[0].set_title('Phonon Number (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+    # axes[0].set_xlabel(r'$\frac{P}{m_{I}c_{BEC}}$')
+    # axes[0].set_ylabel(r'$N_{ph}$')
 
-    axes[1].plot(IRrat_Vals, Nph_IRcuts, 'g-')
-    axes[1].set_xlabel('IR Cutoff Increase Ratio')
-    axes[1].set_ylabel(r'$N_{ph}$')
-    axes[1].set_title('Phonon Number (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.1f})'.format(PVals[Pind] / (mI * nu)))
+    # axes[1].plot(IRrat_Vals, Nph_IRcuts, 'g-')
+    # axes[1].set_xlabel('IR Cutoff Increase Ratio')
+    # axes[1].set_ylabel(r'$N_{ph}$')
+    # axes[1].set_title('Phonon Number (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.1f})'.format(PVals[Pind] / (mI * nu)))
 
-    fig.tight_layout()
-    plt.show()
+    # fig.tight_layout()
+    # plt.show()
 
     # # IMPURITY DISTRIBUTION ANIMATION WITH CHARACTERIZATION (CARTESIAN)
 
