@@ -138,6 +138,9 @@ if __name__ == "__main__":
                 # if os.path.isdir(innerdatapath) is False:
                 #     os.mkdir(innerdatapath)
 
+    missedVals = np.concatenate((np.arange(0, 171), np.arange(212, 228), np.array([502, 503, 506, 507, 508])))
+    Params_List = [Params_List[i] for i in missedVals]
+
     print(len(Params_List))
 
     # # ---- COMPUTE DATA ON COMPUTER ----
