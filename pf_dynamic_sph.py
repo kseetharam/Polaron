@@ -4,6 +4,9 @@ import xarray as xr
 from scipy.integrate import quad
 from timeit import default_timer as timer
 import os
+from scipy import interpolate
+import Grid
+
 
 # ---- HELPER FUNCTIONS ----
 
@@ -247,6 +250,156 @@ def CSAmp_timederiv(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB):
 
     # DeltaAmp = damp.reshape(len(kgrid.getArray('k')), len(kgrid.getArray('th')))
     return damp
+
+
+def reconstructDistributions(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
+    import pf_dynamic_cart as pfc
+    # Set up
+    P = CSAmp_ds['P'].values
+    aIBi = CSAmp_ds.attrs['aIBi']
+    n0 = CSAmp_ds.attrs['n0']; gBB = CSAmp_ds.attrs['gBB']; mI = CSAmp_ds.attrs['mI']; mB = CSAmp_ds.attrs['mB']
+
+    kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    kVec = kgrid.getArray('k')
+    thVec = kgrid.getArray('th')
+    print('P: {0}'.format(P))
+    print('dk: {0}'.format(kVec[1] - kVec[0]))
+    Bk_2D_vals = CSAmp_ds.values
+    Nph = CSAmp_ds.attrs['Nph']
+    # Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
+    kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
+    # kxg_Sph = kg * np.sin(thg)
+    # kzg_Sph = kg * np.cos(thg)
+    # Normalization of the original data array - this checks out
+    dk = kg[1, 0] - kg[0, 0]
+    dth = thg[0, 1] - thg[0, 0]
+    PhDen_Sph = ((1 / Nph) * np.abs(Bk_2D_vals)**2).real.astype(float)
+    Bk_norm = np.sum(dk * dth * (2 * np.pi)**(-2) * kg**2 * np.sin(thg) * PhDen_Sph)
+    print('Original (1/Nph)|Bk|^2 normalization (Spherical 2D): {0}'.format(Bk_norm))
+
+    # Create linear 3D cartesian grid and reinterpolate Bk_3D onto this grid
+    kxL_pos = np.arange(1e-10, linDimMinor, dkxL); kxL = np.concatenate((1e-10 - 1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
+    kyL_pos = np.arange(1e-10, linDimMinor, dkyL); kyL = np.concatenate((1e-10 - 1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
+    kzL_pos = np.arange(1e-10, linDimMajor, dkzL); kzL = np.concatenate((1e-10 - 1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
+    print('size - kxL: {0}, kyL: {1}, kzL: {2}'.format(kxL.size, kyL.size, kzL.size))
+    kxLg_3D, kyLg_3D, kzLg_3D = np.meshgrid(kxL, kyL, kzL, indexing='ij')
+    print('dkxL: {0}, dkyL: {1}, dkzL: {2}'.format(dkxL, dkyL, dkzL))
+    # Re-interpret grid points of linear 3D Cartesian as nonlinear 3D spherical grid, find unique (k,th) points
+    kg_3Di = np.sqrt(kxLg_3D**2 + kyLg_3D**2 + kzLg_3D**2)
+    thg_3Di = np.arccos(kzLg_3D / kg_3Di)
+    # phig_3Di = np.arctan2(kyLg_3D, kxLg_3D)
+    kg_3Di_flat = kg_3Di.reshape(kg_3Di.size)
+    thg_3Di_flat = thg_3Di.reshape(thg_3Di.size)
+    tups_3Di = np.column_stack((kg_3Di_flat, thg_3Di_flat))
+    tups_3Di_unique, tups_inverse = np.unique(tups_3Di, return_inverse=True, axis=0)
+    # Perform interpolation on 2D projection and reconstruct full matrix on 3D linear cartesian grid
+    print('3D Cartesian grid Ntot: {:1.2E}'.format(kzLg_3D.size))
+    print('Unique interp points: {:1.2E}'.format(tups_3Di_unique[:, 0].size))
+    interpstart = timer()
+    Bk_2D_CartInt = interpolate.griddata((kg.flatten(), thg.flatten()), Bk_2D_vals.flatten(), tups_3Di_unique, method='cubic')
+    interpend = timer()
+    print('Interp Time: {0}'.format(interpend - interpstart))
+    BkLg_3D_flat = Bk_2D_CartInt[tups_inverse]
+    BkLg_3D = BkLg_3D_flat.reshape(kg_3Di.shape)
+    BkLg_3D[np.isnan(BkLg_3D)] = 0
+    PhDenLg_3D = ((1 / Nph) * np.abs(BkLg_3D)**2).real.astype(float)
+    BkLg_3D_norm = np.sum(dkxL * dkyL * dkzL * (2 * np.pi)**(-3) * PhDenLg_3D)
+    print('Interpolated (1/Nph)|Bk|^2 normalization (Linear Cartesian 3D): {0}'.format(BkLg_3D_norm))
+    # Fourier Transform to get 3D position distribution of phonons
+    xL = np.fft.fftshift(np.fft.fftfreq(kxL.size) * 2 * np.pi / dkxL)
+    yL = np.fft.fftshift(np.fft.fftfreq(kyL.size) * 2 * np.pi / dkyL)
+    zL = np.fft.fftshift(np.fft.fftfreq(kzL.size) * 2 * np.pi / dkzL)
+    dxL = xL[1] - xL[0]; dyL = yL[1] - yL[0]; dzL = zL[1] - zL[0]
+    dVxyz = dxL * dyL * dzL
+    xLg_3D, yLg_3D, zLg_3D = np.meshgrid(xL, yL, zL, indexing='ij')
+    beta_kxkykz = np.fft.ifftshift(BkLg_3D)
+    amp_beta_xyz_preshift = np.fft.ifftn(beta_kxkykz) / dVxyz
+    amp_beta_xyz = np.fft.fftshift(amp_beta_xyz_preshift)
+    np_xyz = ((1 / Nph) * np.abs(amp_beta_xyz)**2).real.astype(float)
+    np_xyz_norm = np.sum(dVxyz * np_xyz)
+    print('Linear grid (1/Nph)*n(x,y,z) normalization (Cartesian 3D): {0}'.format(np_xyz_norm))
+    # Calculate total phonon momentum distribution
+    beta2_kxkykz = np.abs(beta_kxkykz)**2
+    beta2_xyz_preshift = np.fft.ifftn(beta2_kxkykz) / dVxyz
+    beta2_xyz = np.fft.fftshift(beta2_xyz_preshift)
+    decay_length = 5
+    decay_xyz = np.exp(-1 * (xLg_3D**2 + yLg_3D**2 + zLg_3D**2) / (2 * decay_length**2))
+    fexp = (np.exp(beta2_xyz - Nph) - np.exp(-Nph)) * decay_xyz
+    nPB_preshift = np.fft.fftn(fexp) * dVxyz
+    nPB_complex = np.fft.fftshift(nPB_preshift) / ((2 * np.pi)**3)  # this is the phonon momentum distribution in 3D Cartesian coordinates
+    nPB = np.abs(nPB_complex)
+    nPB_deltaK0 = np.exp(-Nph)
+    # Produce impurity momentum and total phonon momentum magnitude distributions
+    kgrid_L = Grid.Grid('CARTESIAN_3D')
+    kgrid_L.initArray_premade('kx', kxL); kgrid_L.initArray_premade('ky', kyL); kgrid_L.initArray_premade('kz', kzL)
+    PIgrid = pfc.ImpMomGrid_from_PhononMomGrid(kgrid_L, P)
+    PB_x = kxL; PB_y = kyL; PB_z = kzL
+    PI_x = PIgrid.getArray('kx'); PI_y = PIgrid.getArray('ky'); PI_z = PIgrid.getArray('kz')
+    [PBm, nPBm, PIm, nPIm] = pfc.xyzDist_To_magDist(kgrid_L, nPB, P)
+    # Calculate real space distribution of atoms in the BEC
+    uk2 = 0.5 * (1 + (pfc.epsilon(kxLg_3D, kyLg_3D, kzLg_3D, mB) + gBB * n0) / pfc.omegak(kxLg_3D, kyLg_3D, kzLg_3D, mB, n0, gBB))
+    vk2 = uk2 - 1
+    uk = np.sqrt(uk2); vk = np.sqrt(vk2)
+    uB_kxkykz = np.fft.ifftshift(uk * BkLg_3D)
+    uB_xyz = np.fft.fftshift(np.fft.ifftn(uB_kxkykz) / dVxyz)
+    vB_kxkykz = np.fft.ifftshift(vk * BkLg_3D)
+    vB_xyz = np.fft.fftshift(np.fft.ifftn(vB_kxkykz) / dVxyz)
+    # na_xyz = np.sum(vk2 * dkxL * dkyL * dkzL) + np.abs(uB_xyz - np.conjugate(vB_xyz))**2
+    na_xyz_prenorm = (np.abs(uB_xyz - np.conjugate(vB_xyz))**2).real.astype(float)
+    na_xyz = na_xyz_prenorm / np.sum(na_xyz_prenorm * dVxyz)
+    print(np.sum(vk2 * dkxL * dkyL * dkzL), np.max(np.abs(uB_xyz - np.conjugate(vB_xyz))**2))
+    # Create DataSet for 3D Betak and position distribution slices
+    Nx = len(kxL); Ny = len(kyL); Nz = len(kzL)
+    PhDen_xz_slice_da = xr.DataArray(PhDenLg_3D[:, Ny // 2, :], coords=[kxL, kzL], dims=['kx', 'kz'])
+    PhDen_xy_slice_da = xr.DataArray(PhDenLg_3D[:, :, Nz // 2], coords=[kxL, kyL], dims=['kx', 'ky'])
+    PhDen_yz_slice_da = xr.DataArray(PhDenLg_3D[Nx // 2, :, :], coords=[kyL, kzL], dims=['ky', 'kz'])
+    np_xz_slice_da = xr.DataArray(np_xyz[:, Ny // 2, :], coords=[xL, zL], dims=['x', 'z'])
+    np_xy_slice_da = xr.DataArray(np_xyz[:, :, Nz // 2], coords=[xL, yL], dims=['x', 'y'])
+    np_yz_slice_da = xr.DataArray(np_xyz[Nx // 2, :, :], coords=[yL, zL], dims=['y', 'z'])
+    na_xz_slice_da = xr.DataArray(na_xyz[:, Ny // 2, :], coords=[xL, zL], dims=['x', 'z'])
+    na_xy_slice_da = xr.DataArray(na_xyz[:, :, Nz // 2], coords=[xL, yL], dims=['x', 'y'])
+    na_yz_slice_da = xr.DataArray(na_xyz[Nx // 2, :, :], coords=[yL, zL], dims=['y', 'z'])
+    nPB_xz_slice = nPB[:, Ny // 2, :]; nPB_xz_slice_da = xr.DataArray(nPB_xz_slice, coords=[PB_x, PB_z], dims=['PB_x', 'PB_z'])
+    nPB_xy_slice = nPB[:, :, Nz // 2]; nPB_xy_slice_da = xr.DataArray(nPB_xy_slice, coords=[PB_x, PB_y], dims=['PB_x', 'PB_y'])
+    nPB_yz_slice = nPB[Nx // 2, :, :]; nPB_yz_slice_da = xr.DataArray(nPB_yz_slice, coords=[PB_y, PB_z], dims=['PB_y', 'PB_z'])
+    nPI_xz_slice = np.flip(np.flip(nPB_xz_slice, 0), 1); nPI_xz_slice_da = xr.DataArray(nPI_xz_slice, coords=[PI_x, PI_z], dims=['PI_x', 'PI_z'])
+    nPI_xy_slice = np.flip(np.flip(nPB_xy_slice, 0), 1); nPI_xy_slice_da = xr.DataArray(nPI_xy_slice, coords=[PI_x, PI_y], dims=['PI_x', 'PI_y'])
+    nPI_yz_slice = np.flip(np.flip(nPB_yz_slice, 0), 1); nPI_yz_slice_da = xr.DataArray(nPI_yz_slice, coords=[PI_y, PI_z], dims=['PI_y', 'PI_z'])
+    nPBm_da = xr.DataArray(nPBm, coords=[PBm], dims=['PB_mag'])
+    nPIm_da = xr.DataArray(nPIm, coords=[PIm], dims=['PI_mag'])
+    data_dict = ({'PhDen_xz': PhDen_xz_slice_da, 'PhDen_xy': PhDen_xy_slice_da, 'PhDen_yz': PhDen_yz_slice_da,
+                  'np_xz': np_xz_slice_da, 'np_xy': np_xy_slice_da, 'np_yz': np_yz_slice_da,
+                  'na_xz': na_xz_slice_da, 'na_xy': na_xy_slice_da, 'na_yz': na_yz_slice_da,
+                  'nPB_xz_slice': nPB_xz_slice_da, 'nPB_xy_slice': nPB_xy_slice_da, 'nPB_yz_slice': nPB_yz_slice_da, 'nPB_mag': nPBm_da,
+                  'nPI_xz_slice': nPI_xz_slice_da, 'nPI_xy_slice': nPI_xy_slice_da, 'nPI_yz_slice': nPI_yz_slice_da, 'nPI_mag': nPIm_da})
+    coords_dict = {'kx': kxL, 'ky': kyL, 'kz': kzL, 'x': xL, 'y': yL, 'z': zL, 'PB_x': PB_x, 'PB_y': PB_y, 'PB_z': PB_z, 'PI_x': PI_x, 'PI_y': PI_y, 'PI_z': PI_z, 'PB_mag': PBm, 'PI_mag': PIm}
+    attrs_dict = {'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'mom_deltapeak': nPB_deltaK0}
+    interp_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
+    # interp_ds.to_netcdf(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
+    return interp_ds
+
+    # # compare grids
+    # fig, ax = plt.subplots()
+    # kxLg, kzLg = np.meshgrid(kxL, kzL, indexing='ij')
+    # kxg_Sph = kg * np.sin(thg)
+    # kzg_Sph = kg * np.cos(thg)
+    # ax.scatter(kzg_Sph, kxg_Sph, c='b')
+    # ax.scatter(kzg_Sph, -1 * kxg_Sph, c='b')
+    # ax.scatter(kzLg, kxLg, c='r')
+    # plt.show()
+    # # remove references to objects to free up memory
+    # kxLg_3D, kyLg_3D, kzLg_3D, kg_3Di, thg_3Di, phig_3Di, kg_3Di_flat, thg_3Di_flat
+    # tups_3Di, tups_3Di_unique, tups_inverse
+    # Bk_2D_CartInt, BkLg_3D_flat, BkLg_3D, PhDenLg_3D
+    # xLg_3D, yLg_3D, zLg_3D
+    # beta_kxkykz, amp_beta_xyz_preshift, amp_beta_xyz
+    # uk2, vk2, uk, vk, uB_kxkykz, uB_xyz, vB_kxkykz, vB_xyz
+    # nxyz, np_xyz, na_xyz, na_xyz_norm
+    # PhDenLg_xz_slice, PhDenLg_xy_slice, PhDenLg_yz_slice
+    # np_xz_slice, np_xy_slice, np_yz_slice
+    # na_xz_slice, na_xy_slice, na_yz_slice
+    # PhDen_xz_slice_da, PhDen_xy_slice_da, PhDen_yz_slice_da
+    # np_xz_slice_da, np_xy_slice_da, np_yz_slice_da, na_xz_slice_da, na_xy_slice_da, na_yz_slice_da, interp_ds
 
 
 def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
