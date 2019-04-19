@@ -59,15 +59,21 @@ if __name__ == "__main__":
     # # Analysis of Total Dataset
     interpdatapath = innerdatapath + '/interp'
     aIBi = -10
-    # P = 1.54
-    # # P = 0.6
-    P = 0.8
+    Pnorm_des = 2.0
+    # Pnorm_des = 1.0
+    # Pnorm_des = 0.1
 
-    # linDimList = [(6.5, 0.02)]
     linDimList = [(2, 2)]
-    # linDimList = [(0.2, 0.2)]
-    # linDimList = [(0.1, 0.1)]
     linDimMajor, linDimMinor = linDimList[0]
+
+    qds_orig = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    n0 = qds_orig.attrs['n0']; gBB = qds_orig.attrs['gBB']; mI = qds_orig.attrs['mI']; mB = qds_orig.attrs['mB']
+    nu = np.sqrt(n0 * gBB / mB)
+    mc = mI * nu
+    PVals = qds_orig['P'].values
+    Pnorm = PVals / mc
+    Pind = np.abs(Pnorm - Pnorm_des).argmin().astype(int)
+    P = PVals[Pind]
 
     # Plot
 
@@ -113,7 +119,6 @@ if __name__ == "__main__":
     # All Plotting:
 
     # Individual Phonon Momentum Distribution (Original Spherical data)
-    qds_orig = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     Bk_2D_orig = (qds_orig['Real_CSAmp'] + 1j * qds_orig['Imag_CSAmp']).sel(P=P).isel(t=-1).values
     Nph_orig = qds_orig['Nph'].sel(P=P).isel(t=-1).values
     PhDen_orig_Vals = ((1 / Nph_orig) * np.abs(Bk_2D_orig)**2).real.astype(float)
@@ -192,8 +197,40 @@ if __name__ == "__main__":
     ax5.legend()
     ax5.set_xlim([-0.01, np.max(PI_mag)])
     ax5.set_ylim([0, 1.05])
-    ax5.set_title('Impurity Momentum Magnitude Distribution (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.2f})'.format(P / mc))
+    ax5.set_title('Impurity Momentum Magnitude Distribution (Interp) (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.2f})'.format(P / mc))
     ax5.set_ylabel(r'$n_{|\vec{P_{I}}|}$')
     ax5.set_xlabel(r'$|\vec{P_{I}}|$')
+
+    # Impurity Momentum Magnitude Distribution (Original Cartesian data)
+
+    cartdatapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}/imdyn_cart'.format(NGridPoints_cart, 1)
+    qds_orig_cart = xr.open_dataset(cartdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi)).isel(t=-1)
+
+    qds_nPIm_inf = qds_orig_cart['nPI_mag'].sel(P=P, method='nearest').dropna('PI_mag')
+    P_cart = qds_nPIm_inf.coords['P'].values
+    PI_mag_cart = qds_nPIm_inf.coords['PI_mag'].values
+    nPI_mag_cart = qds_nPIm_inf.values
+    mom_deltapeak_cart = qds_orig_cart.sel(P=P_cart)['mom_deltapeak'].values
+
+    fig6, ax6 = plt.subplots()
+    ax6.plot(mc * np.ones(PI_mag_cart.size), np.linspace(0, 1, PI_mag_cart.size), 'y--', label=r'$m_{I}c_{BEC}$')
+    curve = ax6.plot(PI_mag_cart, nPI_mag_cart, color='k', lw=3, label='')
+    D = nPI_mag_cart - np.max(nPI_mag_cart) / 2
+    indices = np.where(D > 0)[0]
+    ind_s, ind_f = indices[0], indices[-1]
+    FWHMcurve = ax6.plot(np.linspace(PI_mag_cart[ind_s], PI_mag_cart[ind_f], 100), nPI_mag_cart[ind_s] * np.ones(100), 'b-', linewidth=3.0, label='Incoherent Part FWHM')
+    FWHMmarkers = ax6.plot(np.linspace(PI_mag_cart[ind_s], PI_mag_cart[ind_f], 2), nPI_mag_cart[ind_s] * np.ones(2), 'bD', mew=0.75, ms=7.5, label='')
+    Zline = ax6.plot(P_cart * np.ones(PI_mag_cart.size), np.linspace(0, mom_deltapeak_cart, PI_mag_cart.size), 'r-', linewidth=3.0, label='Delta Peak (Z-factor)')
+    Zmarker = ax6.plot(P_cart, mom_deltapeak_cart, 'rx', mew=0.75, ms=7.5, label='')
+    dPIm_cart = PI_mag_cart[1] - PI_mag_cart[0]
+    nPIm_Tot = np.sum(nPI_mag_cart * dPIm_cart) + mom_deltapeak_cart
+    norm_text = ax6.text(0.7, 0.65, r'$\int n_{|\vec{P_{I}}|} d|\vec{P_{I}}| = $' + '{:.2f}'.format(nPIm_Tot), transform=ax6.transAxes, color='k')
+
+    ax6.legend()
+    ax6.set_xlim([-0.01, np.max(PI_mag)])
+    ax6.set_ylim([0, 1.05])
+    ax6.set_title('Impurity Momentum Magnitude Distribution (Cart) (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.2f})'.format(P_cart / mc))
+    ax6.set_ylabel(r'$n_{|\vec{P_{I}}|}$')
+    ax6.set_xlabel(r'$|\vec{P_{I}}|$')
 
     plt.show()

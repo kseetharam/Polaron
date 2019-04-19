@@ -278,9 +278,11 @@ def reconstructDistributions(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkz
     print('Original (1/Nph)|Bk|^2 normalization (Spherical 2D): {0}'.format(Bk_norm))
 
     # Create linear 3D cartesian grid and reinterpolate Bk_3D onto this grid
-    kxL_pos = np.arange(1e-10, linDimMinor, dkxL); kxL = np.concatenate((1e-10 - 1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
-    kyL_pos = np.arange(1e-10, linDimMinor, dkyL); kyL = np.concatenate((1e-10 - 1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
-    kzL_pos = np.arange(1e-10, linDimMajor, dkzL); kzL = np.concatenate((1e-10 - 1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
+    kmin = 1e-10
+    # kmin = 0.14
+    kxL_pos = np.arange(kmin, linDimMinor, dkxL); kxL = np.concatenate((kmin - 1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
+    kyL_pos = np.arange(kmin, linDimMinor, dkyL); kyL = np.concatenate((kmin - 1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
+    kzL_pos = np.arange(kmin, linDimMajor, dkzL); kzL = np.concatenate((kmin - 1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
     print('size - kxL: {0}, kyL: {1}, kzL: {2}'.format(kxL.size, kyL.size, kzL.size))
     kxLg_3D, kyLg_3D, kzLg_3D = np.meshgrid(kxL, kyL, kzL, indexing='ij')
     print('dkxL: {0}, dkyL: {1}, dkzL: {2}'.format(dkxL, dkyL, dkzL))
@@ -297,6 +299,7 @@ def reconstructDistributions(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkz
     print('Unique interp points: {:1.2E}'.format(tups_3Di_unique[:, 0].size))
     interpstart = timer()
     Bk_2D_CartInt = interpolate.griddata((kg.flatten(), thg.flatten()), Bk_2D_vals.flatten(), tups_3Di_unique, method='cubic')
+    # Bk_2D_CartInt = interpolate.griddata((kg.flatten(), thg.flatten()), Bk_2D_vals.flatten(), tups_3Di_unique, method='linear')
     interpend = timer()
     print('Interp Time: {0}'.format(interpend - interpstart))
     BkLg_3D_flat = Bk_2D_CartInt[tups_inverse]

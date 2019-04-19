@@ -54,16 +54,20 @@ if __name__ == "__main__":
         innerdatapath = innerdatapath
         animpath = animpath + '_twophonon'
 
+    interpdatapath = innerdatapath + '/interp'
+
     # # Analysis of Total Dataset
 
-    interpdatapath = innerdatapath + '/interp'
     aIBi = -10
-    # Pind = 2
-    Pind = 10
-
+    Pnorm_des = 2.0
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    n0 = qds.attrs['n0']; gBB = qds.attrs['gBB']; mI = qds.attrs['mI']; mB = qds.attrs['mB']
+    nu = np.sqrt(n0 * gBB / mB)
+    mc = mI * nu
 
     PVals = qds['P'].values
+    Pnorm = PVals / mc
+    Pind = np.abs(Pnorm - Pnorm_des).argmin().astype(int)
     P = PVals[Pind]
 
     # # FULL RECONSTRUCTION OF 3D CARTESIAN BETA_K FROM 2D SPHERICAL BETA_K (doing actual interpolation in 2D spherical instead of 3D nonlinear cartesian)
@@ -81,6 +85,9 @@ if __name__ == "__main__":
 
     dkxL = 1e-2; dkyL = 1e-2; dkzL = 1e-2
     linDimList = [(2, 2)]
+
+    # dkxL = 1e-3; dkyL = 1e-3; dkzL = 1e-3
+    # linDimList = [(1, 1)]
 
     for ldtup in linDimList:
         tupstart = timer()
