@@ -62,6 +62,7 @@ if __name__ == "__main__":
     Pnorm_des = 2.0
     # Pnorm_des = 1.0
     # Pnorm_des = 0.1
+    # Pnorm_des = 0.4
 
     linDimList = [(2, 2)]
     linDimMajor, linDimMinor = linDimList[0]
@@ -78,16 +79,16 @@ if __name__ == "__main__":
     # Plot
 
     interp_ds = xr.open_dataset(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
-    kxL = interp_ds['kx'].values
-    kzL = interp_ds['kz'].values
+    kxL = interp_ds['kx'].values; dkxL = kxL[1] - kxL[0]
+    kzL = interp_ds['kz'].values; dkzL = kzL[1] - kzL[0]
     xL = interp_ds['x'].values
     zL = interp_ds['z'].values
     PI_mag = interp_ds['PI_mag'].values
     kxLg_xz_slice, kzLg_xz_slice = np.meshgrid(kxL, kzL, indexing='ij')
     xLg_xz_slice, zLg_xz_slice = np.meshgrid(xL, zL, indexing='ij')
     PhDenLg_xz_slice = interp_ds['PhDen_xz'].values
-    np_xz_slice = interp_ds['np_xz'].values
-    na_xz_slice = interp_ds['na_xz'].values
+    # np_xz_slice = interp_ds['np_xz'].values
+    # na_xz_slice = interp_ds['na_xz'].values
     nPI_mag = interp_ds['nPI_mag'].values
     mom_deltapeak = interp_ds.attrs['mom_deltapeak']
 
@@ -127,16 +128,20 @@ if __name__ == "__main__":
     kVec = kgrid.getArray('k')
     thVec = kgrid.getArray('th')
     kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
-    PhDen_orig_da = xr.DataArray(PhDen_orig_Vals, coords=[kVec, thVec], dims=['k', 'th'])
+    kxg = kg * np.sin(thg)
+    kzg = kg * np.cos(thg)
 
     interpmul = 5
+    PhDen_orig_da = xr.DataArray(PhDen_orig_Vals, coords=[kVec, thVec], dims=['k', 'th'])
     PhDen_orig_smooth, kg_orig_smooth, thg_orig_smooth = pfc.xinterp2D(PhDen_orig_da, 'k', 'th', interpmul)
     kxg_smooth = kg_orig_smooth * np.sin(thg_orig_smooth)
     kzg_smooth = kg_orig_smooth * np.cos(thg_orig_smooth)
 
     fig1, ax1 = plt.subplots()
-    quad1 = ax1.pcolormesh(kzg_smooth, kxg_smooth, PhDen_orig_smooth, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDenLg_xz_slice)), cmap='inferno')
-    quad1m = ax1.pcolormesh(kzg_smooth, -1 * kxg_smooth, PhDen_orig_smooth, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDenLg_xz_slice)), cmap='inferno')
+    # quad1 = ax1.pcolormesh(kzg_smooth, kxg_smooth, PhDen_orig_smooth, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDenLg_xz_slice)), cmap='inferno')
+    # quad1m = ax1.pcolormesh(kzg_smooth, -1 * kxg_smooth, PhDen_orig_smooth, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDenLg_xz_slice)), cmap='inferno')
+    quad1 = ax1.pcolormesh(kzg, kxg, PhDen_orig_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDenLg_xz_slice)), cmap='inferno')
+    quad1m = ax1.pcolormesh(kzg, -1 * kxg, PhDen_orig_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDenLg_xz_slice)), cmap='inferno')
     ax1.set_xlim([-1 * linDimMajor, linDimMajor])
     ax1.set_ylim([-1 * linDimMinor, linDimMinor])
     ax1.set_xlabel('kz (Impurity Propagation Direction)')
@@ -154,6 +159,10 @@ if __name__ == "__main__":
     ax2.set_ylabel('kx')
     ax2.set_title('Individual Phonon Momentum Distribution (Interp)')
     fig2.colorbar(quad2, ax=ax2, extend='both')
+
+    print(np.sum(PhDen_orig_Vals * dkxL * dkzL * (2 * np.pi)**(-2)), np.sum(PhDen_orig_smooth * dkxL * dkzL * (2 * np.pi)**(-2)), np.sum(PhDenLg_xz_slice * dkxL * dkzL * (2 * np.pi)**(-2)))
+
+    # print(np.sum(PhDen_orig_smooth))
 
     # Individual Phonon Position Distribution (Interp)
     # fig3, ax3 = plt.subplots()
@@ -183,11 +192,11 @@ if __name__ == "__main__":
     fig5, ax5 = plt.subplots()
     ax5.plot(mc * np.ones(PI_mag.size), np.linspace(0, 1, PI_mag.size), 'y--', label=r'$m_{I}c_{BEC}$')
     curve = ax5.plot(PI_mag, nPI_mag, color='k', lw=3, label='')
-    D = nPI_mag - np.max(nPI_mag) / 2
-    indices = np.where(D > 0)[0]
-    ind_s, ind_f = indices[0], indices[-1]
-    FWHMcurve = ax5.plot(np.linspace(PI_mag[ind_s], PI_mag[ind_f], 100), nPI_mag[ind_s] * np.ones(100), 'b-', linewidth=3.0, label='Incoherent Part FWHM')
-    FWHMmarkers = ax5.plot(np.linspace(PI_mag[ind_s], PI_mag[ind_f], 2), nPI_mag[ind_s] * np.ones(2), 'bD', mew=0.75, ms=7.5, label='')
+    # D = nPI_mag - np.max(nPI_mag) / 2
+    # indices = np.where(D > 0)[0]
+    # ind_s, ind_f = indices[0], indices[-1]
+    # FWHMcurve = ax5.plot(np.linspace(PI_mag[ind_s], PI_mag[ind_f], 100), nPI_mag[ind_s] * np.ones(100), 'b-', linewidth=3.0, label='Incoherent Part FWHM')
+    # FWHMmarkers = ax5.plot(np.linspace(PI_mag[ind_s], PI_mag[ind_f], 2), nPI_mag[ind_s] * np.ones(2), 'bD', mew=0.75, ms=7.5, label='')
     Zline = ax5.plot(P * np.ones(PI_mag.size), np.linspace(0, mom_deltapeak, PI_mag.size), 'r-', linewidth=3.0, label='Delta Peak (Z-factor)')
     Zmarker = ax5.plot(P, mom_deltapeak, 'rx', mew=0.75, ms=7.5, label='')
     dPIm = PI_mag[1] - PI_mag[0]
@@ -215,11 +224,11 @@ if __name__ == "__main__":
     fig6, ax6 = plt.subplots()
     ax6.plot(mc * np.ones(PI_mag_cart.size), np.linspace(0, 1, PI_mag_cart.size), 'y--', label=r'$m_{I}c_{BEC}$')
     curve = ax6.plot(PI_mag_cart, nPI_mag_cart, color='k', lw=3, label='')
-    D = nPI_mag_cart - np.max(nPI_mag_cart) / 2
-    indices = np.where(D > 0)[0]
-    ind_s, ind_f = indices[0], indices[-1]
-    FWHMcurve = ax6.plot(np.linspace(PI_mag_cart[ind_s], PI_mag_cart[ind_f], 100), nPI_mag_cart[ind_s] * np.ones(100), 'b-', linewidth=3.0, label='Incoherent Part FWHM')
-    FWHMmarkers = ax6.plot(np.linspace(PI_mag_cart[ind_s], PI_mag_cart[ind_f], 2), nPI_mag_cart[ind_s] * np.ones(2), 'bD', mew=0.75, ms=7.5, label='')
+    # D = nPI_mag_cart - np.max(nPI_mag_cart) / 2
+    # indices = np.where(D > 0)[0]
+    # ind_s, ind_f = indices[0], indices[-1]
+    # FWHMcurve = ax6.plot(np.linspace(PI_mag_cart[ind_s], PI_mag_cart[ind_f], 100), nPI_mag_cart[ind_s] * np.ones(100), 'b-', linewidth=3.0, label='Incoherent Part FWHM')
+    # FWHMmarkers = ax6.plot(np.linspace(PI_mag_cart[ind_s], PI_mag_cart[ind_f], 2), nPI_mag_cart[ind_s] * np.ones(2), 'bD', mew=0.75, ms=7.5, label='')
     Zline = ax6.plot(P_cart * np.ones(PI_mag_cart.size), np.linspace(0, mom_deltapeak_cart, PI_mag_cart.size), 'r-', linewidth=3.0, label='Delta Peak (Z-factor)')
     Zmarker = ax6.plot(P_cart, mom_deltapeak_cart, 'rx', mew=0.75, ms=7.5, label='')
     dPIm_cart = PI_mag_cart[1] - PI_mag_cart[0]

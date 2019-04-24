@@ -60,6 +60,7 @@ if __name__ == "__main__":
 
     aIBi = -10
     Pnorm_des = 2.0
+    # Pnorm_des = 0.4
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     n0 = qds.attrs['n0']; gBB = qds.attrs['gBB']; mI = qds.attrs['mI']; mB = qds.attrs['mB']
     nu = np.sqrt(n0 * gBB / mB)
@@ -93,7 +94,7 @@ if __name__ == "__main__":
         tupstart = timer()
         linDimMajor, linDimMinor = ldtup
         print('lDM: {0}, lDm: {1}'.format(linDimMajor, linDimMinor))
-        interp_ds = pfs.reconstructDistributions(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL)
+        interp_ds = pfs.reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL)
         interp_ds.to_netcdf(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
         tupend = timer()
         print('Total Time: {0}'.format(tupend - tupstart))
