@@ -428,8 +428,8 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     Bk_norm = np.sum(dk * dth * (2 * np.pi)**(-2) * kg**2 * np.sin(thg) * PhDen_Sph)
     print('Original (1/Nph)|Bk|^2 normalization (Spherical 2D): {0}'.format(Bk_norm))
     Bk2_2D = (np.abs(Bk_2D_vals)**2).real.astype(float)
-    jac = (kg**2) * np.sin(thg) * dk * dth  # dphi missing somehow? or should just divide by 2pi when doing interpolation?
-    # jac = 1
+    # jac = (kg**2) * np.sin(thg) * dk * dth  # dphi missing somehow? or should just divide by 2pi when doing interpolation?
+    jac = 1
     Bk2Jac_2D = jac * Bk2_2D
     # Create linear 3D cartesian grid and reinterpolate Bk_3D onto this grid
     kmin = np.min(kVec)
@@ -451,17 +451,31 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     print('3D Cartesian grid Ntot: {:1.2E}'.format(kzLg_3D.size))
     print('Unique interp points: {:1.2E}'.format(tups_3Di_unique[:, 0].size))
     interpstart = timer()
-    Bk2Jac_2D_CartInt = interpolate.griddata((kg.flatten(), thg.flatten()), Bk2Jac_2D.flatten(), tups_3Di_unique, method='linear')
+    PhDen_2D_CartInt = interpolate.griddata((kg.flatten(), thg.flatten()), PhDen_Sph.flatten(), tups_3Di_unique, method='nearest')
+    # Bk2Jac_2D_CartInt = interpolate.griddata((kg.flatten(), thg.flatten()), Bk2Jac_2D.flatten(), tups_3Di_unique, method='nearest')
     # Bk_2D_CartInt = interpolate.griddata((kg.flatten(), thg.flatten()), Bk_2D_vals.flatten(), tups_3Di_unique, method='linear')
     interpend = timer()
     print('Interp Time: {0}'.format(interpend - interpstart))
-    # print('Interpolated (1/Nph)|Bk|^2 normalization (Still in 2D): {0}'.format())
-    Bk2Lg_3D_flat = Bk2Jac_2D_CartInt[tups_inverse] / (dkxL * dkyL * dkzL)
-    Bk2Lg_3D = Bk2Lg_3D_flat.reshape(kg_3Di.shape)
-    Bk2Lg_3D[np.isnan(Bk2Lg_3D)] = 0
-    PhDenLg_3D = ((1 / Nph) * Bk2Lg_3D).real.astype(float)
-    Bk2Lg_3D_norm = np.sum(dkxL * dkyL * dkzL * (2 * np.pi)**(-3) * PhDenLg_3D)
-    print('Interpolated (1/Nph)|Bk|^2 normalization (Linear Cartesian 3D): {0}'.format(Bk2Lg_3D_norm))
+    # Bk2Lg_3D_flat = Bk2Jac_2D_CartInt[tups_inverse]
+    # Bk2Lg_3D = Bk2Lg_3D_flat.reshape(kg_3Di.shape)
+    # Bk2Lg_3D[np.isnan(Bk2Lg_3D)] = 0
+    # PhDenLg_3D = ((1 / Nph) * Bk2Lg_3D).real.astype(float)
+    PhDen_3D_flat = PhDen_2D_CartInt[tups_inverse]
+    PhDenLg_3D = PhDen_3D_flat.reshape(kg_3Di.shape).real.astype(float)
+    PhDenLg_3D[np.isnan(PhDenLg_3D)] = 0
+    PhDenLg_3D_norm = np.sum(dkxL * dkyL * dkzL * (2 * np.pi)**(-3) * PhDenLg_3D)
+
+    cart_mask = kg <= linDimMajor
+    kg_red = kg[cart_mask]
+    thg_red = thg[cart_mask]
+    Bk2_2D_red = Bk2_2D[cart_mask]
+    Nph_red = np.sum(dk * dth * (2 * np.pi)**(-2) * kg_red**2 * np.sin(thg_red) * Bk2_2D_red)
+    print('Rough percentage of phonons in reduced Cartesian grid (Calculated from Spherical 2D): {0}'.format(Nph_red / Nph))
+
+    Bk2Lg_3D = (Nph_red / PhDenLg_3D_norm) * PhDenLg_3D  # SHOULD ACTUALLY MULTIPLY BY WEIGHT OF N_PH LIMITED TO REGION OF CARTESIAN GRID
+    Bk2Lg_3D_norm = (1 / Nph) * np.sum(dkxL * dkyL * dkzL * (2 * np.pi)**(-3) * Bk2Lg_3D)
+    print('Interpolated (1/Nph)|Bk|^2 normalization (Linear Cartesian 3D): {0}'.format(PhDenLg_3D_norm))
+    print('Interpolated (1/Nph)|Bk|^2 forced normalization (Linear Cartesian 3D): {0}'.format(Bk2Lg_3D_norm))
     # Calculate total phonon momentum distribution
     xL = np.fft.fftshift(np.fft.fftfreq(kxL.size) * 2 * np.pi / dkxL)
     yL = np.fft.fftshift(np.fft.fftfreq(kyL.size) * 2 * np.pi / dkyL)
@@ -474,11 +488,11 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     beta2_xyz = np.fft.fftshift(beta2_xyz_preshift)
     decay_length = 5
     decay_xyz = np.exp(-1 * (xLg_3D**2 + yLg_3D**2 + zLg_3D**2) / (2 * decay_length**2))
-    fexp = (np.exp(beta2_xyz - Nph) - np.exp(-Nph)) * decay_xyz
+    fexp = (np.exp(beta2_xyz - Nph_red) - np.exp(-Nph_red)) * decay_xyz
     nPB_preshift = np.fft.fftn(fexp) * dVxyz
     nPB_complex = np.fft.fftshift(nPB_preshift) / ((2 * np.pi)**3)  # this is the phonon momentum distribution in 3D Cartesian coordinates
     nPB = np.abs(nPB_complex)
-    nPB_deltaK0 = np.exp(-Nph)
+    nPB_deltaK0 = np.exp(-Nph_red)
     # Produce impurity momentum and total phonon momentum magnitude distributions
     kgrid_L = Grid.Grid('CARTESIAN_3D')
     kgrid_L.initArray_premade('kx', kxL); kgrid_L.initArray_premade('ky', kyL); kgrid_L.initArray_premade('kz', kzL)

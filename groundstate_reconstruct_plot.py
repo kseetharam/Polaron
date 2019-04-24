@@ -59,7 +59,8 @@ if __name__ == "__main__":
     # # Analysis of Total Dataset
     interpdatapath = innerdatapath + '/interp'
     aIBi = -10
-    Pnorm_des = 2.0
+    # Pnorm_des = 2.0
+    Pnorm_des = 0.9
     # Pnorm_des = 1.0
     # Pnorm_des = 0.1
     # Pnorm_des = 0.4
@@ -80,6 +81,7 @@ if __name__ == "__main__":
 
     interp_ds = xr.open_dataset(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
     kxL = interp_ds['kx'].values; dkxL = kxL[1] - kxL[0]
+    kyL = interp_ds['ky'].values; dkyL = kyL[1] - kyL[0]
     kzL = interp_ds['kz'].values; dkzL = kzL[1] - kzL[0]
     xL = interp_ds['x'].values
     zL = interp_ds['z'].values
@@ -87,8 +89,7 @@ if __name__ == "__main__":
     kxLg_xz_slice, kzLg_xz_slice = np.meshgrid(kxL, kzL, indexing='ij')
     xLg_xz_slice, zLg_xz_slice = np.meshgrid(xL, zL, indexing='ij')
     PhDenLg_xz_slice = interp_ds['PhDen_xz'].values
-    # np_xz_slice = interp_ds['np_xz'].values
-    # na_xz_slice = interp_ds['na_xz'].values
+
     nPI_mag = interp_ds['nPI_mag'].values
     mom_deltapeak = interp_ds.attrs['mom_deltapeak']
 
@@ -99,25 +100,9 @@ if __name__ == "__main__":
     nu = np.sqrt(n0 * gBB / mB)
     mc = mI * nu
 
-    # Interpolate 2D slice of position distribution
-    # posmult = 5
-    # kzL_xz_slice_interp = np.linspace(np.min(kzL), np.max(kzL), posmult * kzL.size); kxL_xz_slice_interp = np.linspace(np.min(kxL), np.max(kxL), posmult * kxL.size)
-    # kxLg_xz_slice_interp, kzLg_xz_slice_interp = np.meshgrid(kxL_xz_slice_interp, kzL_xz_slice_interp, indexing='ij')
-    # PhDenLg_xz_slice_interp = interpolate.griddata((kxLg_xz_slice.flatten(), kzLg_xz_slice.flatten()), PhDenLg_xz_slice.flatten(), (kxLg_xz_slice_interp, kzLg_xz_slice_interp), method='cubic')
-
-    # zL_xz_slice_interp = np.linspace(np.min(zL), np.max(zL), posmult * zL.size); xL_xz_slice_interp = np.linspace(np.min(xL), np.max(xL), posmult * xL.size)
-    # xLg_xz_slice_interp, zLg_xz_slice_interp = np.meshgrid(xL_xz_slice_interp, zL_xz_slice_interp, indexing='ij')
-    # np_xz_slice_interp = interpolate.griddata((xLg_xz_slice.flatten(), zLg_xz_slice.flatten()), np_xz_slice.flatten(), (xLg_xz_slice_interp, zLg_xz_slice_interp), method='cubic')
-    # na_xz_slice_interp = interpolate.griddata((xLg_xz_slice.flatten(), zLg_xz_slice.flatten()), na_xz_slice.flatten(), (xLg_xz_slice_interp, zLg_xz_slice_interp), method='cubic')
-
-    # xLg_xz_slice = xLg_xz_slice_interp
-    # zLg_xz_slice = zLg_xz_slice_interp
-    # np_xz_slice = np_xz_slice_interp
-    # na_xz_slice = na_xz_slice_interp
-
-    # print(np.any(np.isnan(PhDenLg_xz_slice_interp)))
-
     # All Plotting:
+
+    # # MOMENTUM DISTRIBUTIONS
 
     # Individual Phonon Momentum Distribution (Original Spherical data)
     Bk_2D_orig = (qds_orig['Real_CSAmp'] + 1j * qds_orig['Imag_CSAmp']).sel(P=P).isel(t=-1).values
@@ -125,8 +110,8 @@ if __name__ == "__main__":
     PhDen_orig_Vals = ((1 / Nph_orig) * np.abs(Bk_2D_orig)**2).real.astype(float)
 
     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_orig.coords['k'].values); kgrid.initArray_premade('th', qds_orig.coords['th'].values)
-    kVec = kgrid.getArray('k')
-    thVec = kgrid.getArray('th')
+    kVec = kgrid.getArray('k'); dk = kVec[1] - kVec[0]
+    thVec = kgrid.getArray('th'); dth = thVec[1] - thVec[0]
     kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
     kxg = kg * np.sin(thg)
     kzg = kg * np.cos(thg)
@@ -134,8 +119,18 @@ if __name__ == "__main__":
     interpmul = 5
     PhDen_orig_da = xr.DataArray(PhDen_orig_Vals, coords=[kVec, thVec], dims=['k', 'th'])
     PhDen_orig_smooth, kg_orig_smooth, thg_orig_smooth = pfc.xinterp2D(PhDen_orig_da, 'k', 'th', interpmul)
+    dk_smooth = kg_orig_smooth[1, 0] - kg_orig_smooth[0, 0]
+    dth_smooth = thg_orig_smooth[0, 1] - thg_orig_smooth[0, 0]
     kxg_smooth = kg_orig_smooth * np.sin(thg_orig_smooth)
     kzg_smooth = kg_orig_smooth * np.cos(thg_orig_smooth)
+
+    # kxLg_3D, kyLg_3D, kzLg_3D = np.meshgrid(kxL, kyL, kzL, indexing='ij')
+    # kg_3Di = np.sqrt(kxLg_3D**2 + kyLg_3D**2 + kzLg_3D**2)
+    # thg_3Di = np.arccos(kzLg_3D / kg_3Di)
+    # dk_3Di = kg_3Di[1, 0] - kg_3Di[0, 0]
+    # dth_3Di = thg_3Di[0, 1] - thg_3Di[0, 0]
+
+    # print(np.sum(PhDen_orig_Vals * kg**2 * np.sin(thg) * dk * dth * (2 * np.pi)**(-2)), np.sum(PhDen_orig_smooth * kg_orig_smooth**2 * np.sin(thg_orig_smooth) * dk_smooth * dth_smooth * (2 * np.pi)**(-2)), np.sum(PhDenLg_xz_slice ** kg_3Di**2 * np.sin(thg_3Di) * dk_3Di * dth_3Di * (2 * np.pi)**(-2)))
 
     fig1, ax1 = plt.subplots()
     # quad1 = ax1.pcolormesh(kzg_smooth, kxg_smooth, PhDen_orig_smooth, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDenLg_xz_slice)), cmap='inferno')
@@ -159,34 +154,6 @@ if __name__ == "__main__":
     ax2.set_ylabel('kx')
     ax2.set_title('Individual Phonon Momentum Distribution (Interp)')
     fig2.colorbar(quad2, ax=ax2, extend='both')
-
-    print(np.sum(PhDen_orig_Vals * dkxL * dkzL * (2 * np.pi)**(-2)), np.sum(PhDen_orig_smooth * dkxL * dkzL * (2 * np.pi)**(-2)), np.sum(PhDenLg_xz_slice * dkxL * dkzL * (2 * np.pi)**(-2)))
-
-    # print(np.sum(PhDen_orig_smooth))
-
-    # Individual Phonon Position Distribution (Interp)
-    # fig3, ax3 = plt.subplots()
-    # quad3 = ax3.pcolormesh(zLg_xz_slice, xLg_xz_slice, np_xz_slice, norm=colors.LogNorm(vmin=np.abs(np.min(np_xz_slice)), vmax=np.max(np_xz_slice)), cmap='inferno')
-    # poslinDim3 = 2300
-    # ax3.set_xlim([-1 * poslinDim3, poslinDim3])
-    # ax3.set_ylim([-1 * poslinDim3, poslinDim3])
-    # # ax3.set_xlim([-800, 800])
-    # # ax3.set_ylim([-50, 50])
-    # ax3.set_xlabel('z (Impurity Propagation Direction)')
-    # ax3.set_ylabel('x')
-    # ax3.set_title('Individual Phonon Position Distribution (Interp)')
-    # fig3.colorbar(quad3, ax=ax3, extend='both')
-
-    # Bare Atom Position Distribution (Interp)
-    # fig4, ax4 = plt.subplots()
-    # quad4 = ax4.pcolormesh(zLg_xz_slice, xLg_xz_slice, na_xz_slice, norm=colors.LogNorm(vmin=np.abs(np.min(na_xz_slice)), vmax=np.max(na_xz_slice)), cmap='inferno')
-    # poslinDim4 = 1300
-    # ax4.set_xlim([-1 * poslinDim4, poslinDim4])
-    # ax4.set_ylim([-1 * poslinDim4, poslinDim4])
-    # ax4.set_xlabel('z (Impurity Propagation Direction)')
-    # ax4.set_ylabel('x')
-    # ax4.set_title('Individual Atom Position Distribution (Interp)')
-    # fig4.colorbar(quad4, ax=ax4, extend='both')
 
     # Impurity Momentum Magnitude Distribution (Interp)
     fig5, ax5 = plt.subplots()
@@ -241,5 +208,51 @@ if __name__ == "__main__":
     ax6.set_title('Impurity Momentum Magnitude Distribution (Cart) (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.2f})'.format(P_cart / mc))
     ax6.set_ylabel(r'$n_{|\vec{P_{I}}|}$')
     ax6.set_xlabel(r'$|\vec{P_{I}}|$')
+
+    # # POSITION DISTRIBUTIONS
+
+    # Interpolate 2D slice of position distribution
+    # posmult = 5
+    # kzL_xz_slice_interp = np.linspace(np.min(kzL), np.max(kzL), posmult * kzL.size); kxL_xz_slice_interp = np.linspace(np.min(kxL), np.max(kxL), posmult * kxL.size)
+    # kxLg_xz_slice_interp, kzLg_xz_slice_interp = np.meshgrid(kxL_xz_slice_interp, kzL_xz_slice_interp, indexing='ij')
+    # PhDenLg_xz_slice_interp = interpolate.griddata((kxLg_xz_slice.flatten(), kzLg_xz_slice.flatten()), PhDenLg_xz_slice.flatten(), (kxLg_xz_slice_interp, kzLg_xz_slice_interp), method='cubic')
+
+    # zL_xz_slice_interp = np.linspace(np.min(zL), np.max(zL), posmult * zL.size); xL_xz_slice_interp = np.linspace(np.min(xL), np.max(xL), posmult * xL.size)
+    # xLg_xz_slice_interp, zLg_xz_slice_interp = np.meshgrid(xL_xz_slice_interp, zL_xz_slice_interp, indexing='ij')
+    # np_xz_slice_interp = interpolate.griddata((xLg_xz_slice.flatten(), zLg_xz_slice.flatten()), np_xz_slice.flatten(), (xLg_xz_slice_interp, zLg_xz_slice_interp), method='cubic')
+    # na_xz_slice_interp = interpolate.griddata((xLg_xz_slice.flatten(), zLg_xz_slice.flatten()), na_xz_slice.flatten(), (xLg_xz_slice_interp, zLg_xz_slice_interp), method='cubic')
+
+    # xLg_xz_slice = xLg_xz_slice_interp
+    # zLg_xz_slice = zLg_xz_slice_interp
+    # np_xz_slice = np_xz_slice_interp
+    # na_xz_slice = na_xz_slice_interp
+    # # np_xz_slice = interp_ds['np_xz'].values
+    # # na_xz_slice = interp_ds['na_xz'].values
+
+    # print(np.any(np.isnan(PhDenLg_xz_slice_interp)))
+
+    # Individual Phonon Position Distribution (Interp)
+    # fig3, ax3 = plt.subplots()
+    # quad3 = ax3.pcolormesh(zLg_xz_slice, xLg_xz_slice, np_xz_slice, norm=colors.LogNorm(vmin=np.abs(np.min(np_xz_slice)), vmax=np.max(np_xz_slice)), cmap='inferno')
+    # poslinDim3 = 2300
+    # ax3.set_xlim([-1 * poslinDim3, poslinDim3])
+    # ax3.set_ylim([-1 * poslinDim3, poslinDim3])
+    # # ax3.set_xlim([-800, 800])
+    # # ax3.set_ylim([-50, 50])
+    # ax3.set_xlabel('z (Impurity Propagation Direction)')
+    # ax3.set_ylabel('x')
+    # ax3.set_title('Individual Phonon Position Distribution (Interp)')
+    # fig3.colorbar(quad3, ax=ax3, extend='both')
+
+    # Bare Atom Position Distribution (Interp)
+    # fig4, ax4 = plt.subplots()
+    # quad4 = ax4.pcolormesh(zLg_xz_slice, xLg_xz_slice, na_xz_slice, norm=colors.LogNorm(vmin=np.abs(np.min(na_xz_slice)), vmax=np.max(na_xz_slice)), cmap='inferno')
+    # poslinDim4 = 1300
+    # ax4.set_xlim([-1 * poslinDim4, poslinDim4])
+    # ax4.set_ylim([-1 * poslinDim4, poslinDim4])
+    # ax4.set_xlabel('z (Impurity Propagation Direction)')
+    # ax4.set_ylabel('x')
+    # ax4.set_title('Individual Atom Position Distribution (Interp)')
+    # fig4.colorbar(quad4, ax=ax4, extend='both')
 
     plt.show()
