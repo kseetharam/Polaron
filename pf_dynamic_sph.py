@@ -451,7 +451,7 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     print('3D Cartesian grid Ntot: {:1.2E}'.format(kzLg_3D.size))
     print('Unique interp points: {:1.2E}'.format(tups_3Di_unique[:, 0].size))
     interpstart = timer()
-    PhDen_2D_CartInt = interpolate.griddata((kg.flatten(), thg.flatten()), PhDen_Sph.flatten(), tups_3Di_unique, method='nearest')
+    PhDen_2D_CartInt = interpolate.griddata((kg.flatten(), thg.flatten()), PhDen_Sph.flatten(), tups_3Di_unique, method='linear')
     # Bk2Jac_2D_CartInt = interpolate.griddata((kg.flatten(), thg.flatten()), Bk2Jac_2D.flatten(), tups_3Di_unique, method='nearest')
     # Bk_2D_CartInt = interpolate.griddata((kg.flatten(), thg.flatten()), Bk_2D_vals.flatten(), tups_3Di_unique, method='linear')
     interpend = timer()
