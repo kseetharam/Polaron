@@ -59,10 +59,8 @@ if __name__ == "__main__":
     # # Analysis of Total Dataset
     interpdatapath = innerdatapath + '/interp'
     aIBi = -10
-    # Pnorm_des = 2.0
-    Pnorm_des = 1.0
-    # Pnorm_des = 0.1
-    # Pnorm_des = 0.4
+    Pnorm_des = 2.0
+    # Pnorm_des = 1.0
 
     linDimList = [(2, 2)]
     linDimMajor, linDimMinor = linDimList[0]

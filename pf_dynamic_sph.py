@@ -465,7 +465,8 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     PhDenLg_3D[np.isnan(PhDenLg_3D)] = 0
     PhDenLg_3D_norm = np.sum(dkxL * dkyL * dkzL * (2 * np.pi)**(-3) * PhDenLg_3D)
 
-    cart_mask = kg <= linDimMajor
+    k_max_red = ((2 * linDimMajor)**3 / (4 * np.pi / 3))**(1 / 3)  # equating volumes of cartesian and reduced spherical regions. assume cartesian region is box where each axis goes from -linDimMajor to +linDimMajor
+    cart_mask = kg <= k_max_red
     kg_red = kg[cart_mask]
     thg_red = thg[cart_mask]
     Bk2_2D_red = Bk2_2D[cart_mask]
@@ -473,7 +474,8 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     print('Rough percentage of phonons in reduced Cartesian grid (Calculated from Spherical 2D): {0}'.format(Nph_red / Nph))
 
     Bk2Lg_3D = (Nph_red / PhDenLg_3D_norm) * PhDenLg_3D  # SHOULD ACTUALLY MULTIPLY BY WEIGHT OF N_PH LIMITED TO REGION OF CARTESIAN GRID
-    Bk2Lg_3D_norm = (1 / Nph) * np.sum(dkxL * dkyL * dkzL * (2 * np.pi)**(-3) * Bk2Lg_3D)
+    PhDenLg_3D_fixed = (1 / Nph) * Bk2Lg_3D
+    Bk2Lg_3D_norm = np.sum(dkxL * dkyL * dkzL * (2 * np.pi)**(-3) * PhDenLg_3D_fixed)
     print('Interpolated (1/Nph)|Bk|^2 normalization (Linear Cartesian 3D): {0}'.format(PhDenLg_3D_norm))
     print('Interpolated (1/Nph)|Bk|^2 forced normalization (Linear Cartesian 3D): {0}'.format(Bk2Lg_3D_norm))
     # Calculate total phonon momentum distribution
@@ -502,9 +504,9 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     [PBm, nPBm, PIm, nPIm] = pfc.xyzDist_To_magDist(kgrid_L, nPB, P)
     # Create DataSet for 3D Betak and position distribution slices
     Nx = len(kxL); Ny = len(kyL); Nz = len(kzL)
-    PhDen_xz_slice_da = xr.DataArray(PhDenLg_3D[:, Ny // 2, :], coords=[kxL, kzL], dims=['kx', 'kz'])
-    PhDen_xy_slice_da = xr.DataArray(PhDenLg_3D[:, :, Nz // 2], coords=[kxL, kyL], dims=['kx', 'ky'])
-    PhDen_yz_slice_da = xr.DataArray(PhDenLg_3D[Nx // 2, :, :], coords=[kyL, kzL], dims=['ky', 'kz'])
+    PhDen_xz_slice_da = xr.DataArray(PhDenLg_3D_fixed[:, Ny // 2, :], coords=[kxL, kzL], dims=['kx', 'kz'])
+    PhDen_xy_slice_da = xr.DataArray(PhDenLg_3D_fixed[:, :, Nz // 2], coords=[kxL, kyL], dims=['kx', 'ky'])
+    PhDen_yz_slice_da = xr.DataArray(PhDenLg_3D_fixed[Nx // 2, :, :], coords=[kyL, kzL], dims=['ky', 'kz'])
     nPB_xz_slice = nPB[:, Ny // 2, :]; nPB_xz_slice_da = xr.DataArray(nPB_xz_slice, coords=[PB_x, PB_z], dims=['PB_x', 'PB_z'])
     nPB_xy_slice = nPB[:, :, Nz // 2]; nPB_xy_slice_da = xr.DataArray(nPB_xy_slice, coords=[PB_x, PB_y], dims=['PB_x', 'PB_y'])
     nPB_yz_slice = nPB[Nx // 2, :, :]; nPB_yz_slice_da = xr.DataArray(nPB_yz_slice, coords=[PB_y, PB_z], dims=['PB_y', 'PB_z'])
