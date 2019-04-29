@@ -113,7 +113,7 @@ if __name__ == "__main__":
     # Zmarker = ax.plot(PVals[0], nPIm_deltaPeak_Vals[0], 'rx', mew=0.75, ms=7.5, label='')[0]
     # norm_text = ax.text(0.61, 0.7, r'$\int n_{|\vec{P_{I}}|} d|\vec{P_{I}}| = $' + '{:.2f}'.format(nPIm_Tot_Vals[0]), transform=ax.transAxes, color='k')
     # P_text = ax.text(0.61, 0.6, r'$\frac{P}{m_{I}c_{BEC}}=\frac{<v_{I}(t_{0})>}{c_{BEC}}=$' + '{:.2f}'.format(Pnorm[0]), transform=ax.transAxes, color='g')
-    # vIf_text = ax.text(0.61, 0.5, r'$\frac{<v_{I}(t_{f})>}{c_{BEC}}=$' + '{:.2f}'.format(vIf_Vals[0]/nu), transform=ax.transAxes, color='g')
+    # vIf_text = ax.text(0.61, 0.5, r'$\frac{<v_{I}(t_{f})>}{c_{BEC}}=$' + '{:.2f}'.format(vIf_Vals[0] / nu), transform=ax.transAxes, color='g')
     # Z_text = ax.text(0.61, 0.4, r'Z-factor ($e^{-N_{ph}=|S(t)|^{2}}$): ' + '{:.2f}'.format(nPIm_deltaPeak_Vals[0]), transform=ax.transAxes, color='r')
 
     # def animate1(i):
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     #     Zmarker.set_ydata(nPIm_deltaPeak_Vals[i])
     #     norm_text.set_text(r'$\int n_{|\vec{P_{I}}|} d|\vec{P_{I}}| = $' + '{:.2f}'.format(nPIm_Tot_Vals[i]))
     #     P_text.set_text(r'$\frac{P}{m_{I}c_{BEC}}=\frac{<v_{I}(t_{0})>}{c_{BEC}}=$' + '{:.2f}'.format(Pnorm[i]))
-    #     vIf_text.set_text(r'$\frac{<v_{I}(t_{f})>}{c_{BEC}}=$' + '{:.2f}'.format(vIf_Vals[i]/nu))
+    #     vIf_text.set_text(r'$\frac{<v_{I}(t_{f})>}{c_{BEC}}=$' + '{:.2f}'.format(vIf_Vals[i] / nu))
     #     Z_text.set_text(r'Z-factor ($e^{-N_{ph}=|S(t)|^{2}}$): ' + '{:.2f}'.format(nPIm_deltaPeak_Vals[i]))
 
     # ax.legend()
@@ -148,7 +148,7 @@ if __name__ == "__main__":
     # # IMPURITY MOMENTUM DISTRIBUTION 2D SLICE ANIMATION WITH CHARACTERIZATION (CARTESIAN)
 
     # interpmul = 8
-    # vI_Z_ave = np.zeros(PVals.size)
+    # # vI_Z_ave = np.zeros(PVals.size)
     # vI_X_ave = np.zeros(PVals.size)
     # vI0_Vals = np.zeros(PVals.size)
     # vIf_Vals = np.zeros(PVals.size)
@@ -176,7 +176,7 @@ if __name__ == "__main__":
     #     nPIm_deltaPeak_Vals[ind] = qds.sel(P=P).isel(t=-1)['mom_deltapeak'].values
     #     vI0_Vals[ind] = (P - qds['PB'].sel(P=P).isel(t=0).values) / mI
     #     vIf_Vals[ind] = (P - qds['PB'].sel(P=P).isel(t=-1).values) / mI
-    #     vI_Z_ave[ind] = (np.sum(PI_zg * nPI_inf_Vals * dPIx * dPIz) + P*nPIm_deltaPeak_Vals[ind]) / mI
+    #     # vI_Z_ave[ind] = (np.sum(PI_zg * nPI_inf_Vals * dPIx * dPIz) + P * nPIm_deltaPeak_Vals[ind]) / mI
 
     # fig1, ax = plt.subplots()
 
@@ -184,9 +184,9 @@ if __name__ == "__main__":
     # quad = ax.pcolormesh(PI_zg_interp0, PI_xg_interp0, nPI_xz_interp0[:-1, :-1], vmin=vmin, vmax=vmax, cmap='inferno')
     # P_text = ax.text(0.65, 0.9, r'$\frac{P}{m_{I}c_{BEC}}=\frac{<v_{I}(t_{0})>}{c_{BEC}}=$' + '{:.2f}'.format(Pnorm[0]), transform=ax.transAxes, fontsize='small', color='w')
     # vIf_text = ax.text(0.65, 0.82, r'$\frac{<v_{I}(t_{f})>}{c_{BEC}}=$' + '{:.2f}'.format(vIf_Vals[0] / nu), transform=ax.transAxes, fontsize='small', color='w')
-    # vIZ_text = ax.text(0.65, 0.74, r'$\frac{1}{m_{I}c_{BEC}}<P_{I,z}(t_{f})>=$' + '{:.2f}'.format(vI_Z_ave[0] / nu), transform=ax.transAxes, fontsize='small', color='w')  # for some reason this is different than average impurity velocity...***related to not including the delta-peak
-    # vIX_text = ax.text(0.65, 0.66, r'$\frac{1}{m_{I}c_{BEC}}<P_{I,x}(t_{f})>=$' + '{:.2f}'.format(vI_X_ave[0] / nu), transform=ax.transAxes, fontsize='small', color='w')
-    # Z_text = ax.text(0.65, 0.58, r'Z-factor: ' + '{:.2f}'.format(nPIm_deltaPeak_Vals[0]), transform=ax.transAxes, fontsize='small', color='w')
+    # # vIZ_text = ax.text(0.65, 0.58, r'$\frac{1}{m_{I}c_{BEC}}<P_{I,z}(t_{f})>=$' + '{:.2f}'.format(vI_Z_ave[0] / nu), transform=ax.transAxes, fontsize='small', color='w')  # for some reason this is different than average impurity velocity...***related to not including the delta-peak
+    # vIX_text = ax.text(0.65, 0.74, r'$\frac{1}{m_{I}c_{BEC}}<P_{I,x}(t_{f})>=$' + '{:.2f}'.format(vI_X_ave[0] / nu), transform=ax.transAxes, fontsize='small', color='w')
+    # Z_text = ax.text(0.65, 0.66, r'Z-factor: ' + '{:.2f}'.format(nPIm_deltaPeak_Vals[0]), transform=ax.transAxes, fontsize='small', color='w')
     # # Z_text = ax.text(0.6, 0.58, r'Z-factor ($e^{-N_{ph}=|S(t)|^{2}}$): ' + '{:.2f}'.format(nPIm_deltaPeak_Vals[0]), transform=ax.transAxes, fontsize='small', color='w')
 
     # def animate1(i):
@@ -194,7 +194,7 @@ if __name__ == "__main__":
     #     quad.set_array(nPI_xz_interp[:-1, :-1].ravel())
     #     P_text.set_text(r'$\frac{P}{m_{I}c_{BEC}}=\frac{<v_{I}(t_{0})>}{c_{BEC}}=$' + '{:.2f}'.format(Pnorm[i]))
     #     vIf_text.set_text(r'$\frac{<v_{I}(t_{f})>}{c_{BEC}}=$' + '{:.2f}'.format(vIf_Vals[i] / nu))
-    #     vIZ_text.set_text(r'$\frac{1}{m_{I}c_{BEC}}<P_{I,z}(t_{f})>=$' + '{:.2f}'.format(vI_Z_ave[i] / nu))
+    #     # vIZ_text.set_text(r'$\frac{1}{m_{I}c_{BEC}}<P_{I,z}(t_{f})>=$' + '{:.2f}'.format(vI_Z_ave[i] / nu))
     #     vIX_text.set_text(r'$\frac{1}{m_{I}c_{BEC}}<P_{I,x}(t_{f})>=$' + '{:.2f}'.format(vI_X_ave[i] / nu))
     #     Z_text.set_text(r'Z-factor: ' + '{:.2f}'.format(nPIm_deltaPeak_Vals[i]))
     #     # Z_text.set_text(r'Z-factor ($e^{-N_{ph}=|S(t)|^{2}}$): ' + '{:.2f}'.format(nPIm_deltaPeak_Vals[i]))
@@ -209,6 +209,8 @@ if __name__ == "__main__":
 
     # anim1 = FuncAnimation(fig1, animate1, interval=1500, frames=range(PVals.size))
     # # anim1.save(animpath + '/aIBi_{0}'.format(aIBi) + '_ImpDist_xz_slice.gif', writer='imagemagick')
+
+    # plt.show()
 
     # IMPURITY MOMENTUM DISTRIBUTION Z-INTEGRATION ANIMATION WITH CHARACTERIZATION (CARTESIAN)
 
@@ -240,7 +242,7 @@ if __name__ == "__main__":
 
     P_text = ax.text(0.65, 0.9, r'$\frac{P}{m_{I}c_{BEC}}=\frac{<v_{I}(t_{0})>}{c_{BEC}}=$' + '{:.2f}'.format(Pnorm[0]), transform=ax.transAxes, fontsize='small', color='g')
     vIf_text = ax.text(0.65, 0.82, r'$\frac{<v_{I}(t_{f})>}{c_{BEC}}=$' + '{:.2f}'.format(vIf_Vals[0] / nu), transform=ax.transAxes, fontsize='small', color='g')
-    vIZ_text = ax.text(0.65, 0.74, r'$\frac{1}{m_{I}c_{BEC}}<P_{I,z}(t_{f})>=$' + '{:.2f}'.format(vI_Z_ave[0] / nu), transform=ax.transAxes, fontsize='small', color='g')  # for some reason this is different than average impurity velocity...***not including the delta peak
+    vIZ_text = ax.text(0.65, 0.74, r'$\frac{1}{m_{I}c_{BEC}}<P_{I,z}(t_{f})>=$' + '{:.2f}'.format(vI_Z_ave[0] / nu), transform=ax.transAxes, fontsize='small', color='g')  # for some reason this is different than average impurity velocity after large values of P
     Z_text = ax.text(0.65, 0.66, r'Z-factor: ' + '{:.2f}'.format(nPIm_deltaPeak_Vals[0]), transform=ax.transAxes, fontsize='small', color='g')
 
     def animate1(i):
