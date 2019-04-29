@@ -171,6 +171,21 @@ if __name__ == "__main__":
     cartgriddata_sum = np.sum(func_cartinterp * kg_interp**2 * np.sin(thg_interp) * dk_interp * dth_interp * (2 * np.pi)**(-2))
     cartgriddata_sum2 = np.sum(func_cartinterp * kg_cartinterp**2 * np.sin(thg_cartinterp) * dk_cartinterp * dth_cartinterp * (2 * np.pi)**(-2))
 
+    # kmin = np.min(kVec); kmax = np.max(kVec)
+    # dkx = 0.01; dkz = dkx
+    # kxL_pos = np.arange(kmin, kmax, dkx); kxL = np.concatenate((kmin - 1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
+    # kzL_pos = np.arange(kmin, kmax, dkz); kzL = np.concatenate((kmin - 1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
+    # kxg_cart, kzg_cart = np.meshgrid(kxL, kzL, indexing='ij')
+    # func_Vals_cart = (kxg_cart**2 + kzg_cart**2)**(-1)
+    # fullcart_sum = np.sum(func_Vals_cart * dkx * dkz)
+    # kxL_interp = np.linspace(np.min(kxL), np.max(kxL), interpmul * kxL.size); dkxL_interp = kxL_interp[1] - kxL_interp[0]
+    # kzL_interp = np.linspace(np.min(kzL), np.max(kzL), interpmul * kzL.size); dkzL_interp = kzL_interp[1] - kzL_interp[0]
+    # kxLg_interp, kzLg_interp = np.meshgrid(kxL_interp, kzL_interp, indexing='ij')
+    # func_cartL = interpolate.griddata((kxg_cart.flatten(), kzg_cart.flatten()), func_Vals_cart.flatten(), (kxLg_interp, kzLg_interp), method='linear')
+    # fullcartinterp_sum = np.sum(func_cartL * dkxL_interp * dkzL_interp)
+    # # exactfullcart_sum =
+    # print(fullcart_sum, fullcartinterp_sum)
+
     exact_sum = np.max(kVec) / (2 * np.pi**2)  # exact answer if func = k^(-2)
     print(exact_sum)
     print(orig_sum)
