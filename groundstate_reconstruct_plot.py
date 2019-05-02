@@ -13,29 +13,38 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    # (Lx, Ly, Lz) = (105, 105, 105)
-    # (dx, dy, dz) = (0.375, 0.375, 0.375)
+    (Lx, Ly, Lz) = (60, 60, 60)
+    (dx, dy, dz) = (0.25, 0.25, 0.25)
+    higherCutoff = False; cutoffRat = 1.5
+    betterResolution = True; resRat = 0.5
 
-    (Lx, Ly, Lz) = (21, 21, 21)
-    (dx, dy, dz) = (0.375, 0.375, 0.375)
+    # (Lx, Ly, Lz) = (21, 21, 21)
+    # (dx, dy, dz) = (0.375, 0.375, 0.375)
+    # higherCutoff = False; cutoffRat = 1.5
+    # betterResolution = False; resRat = 0.5
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
+    massRat = 1.0
+    IRrat = 1
+
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
     if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, 1)
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
         animpath = '/home/kis/Dropbox/VariationalResearch/DataAnalysis/figs'
     elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, 1)
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
         animpath = '/media/kis/Storage/Dropbox/VariationalResearch/DataAnalysis/figs'
-    elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, 1)
-        animpath = ''
+    if higherCutoff is True:
+        datapath = datapath + '_cutoffRat_{:.2f}'.format(cutoffRat)
+    if betterResolution is True:
+        datapath = datapath + '_resRat_{:.2f}'.format(resRat)
+    datapath = datapath + '/massRatio={:.1f}'.format(massRat)
 
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
@@ -50,7 +59,7 @@ if __name__ == "__main__":
         innerdatapath = innerdatapath + '_spherical'
 
     if toggleDict['Coupling'] == 'frohlich':
-        innerdatapath = innerdatapath + '_froh'
+        innerdatapath = innerdatapath + '_froh_new'
         animpath = animpath + '_frohlich'
     elif toggleDict['Coupling'] == 'twophonon':
         innerdatapath = innerdatapath
@@ -74,35 +83,38 @@ if __name__ == "__main__":
     Pind = np.abs(Pnorm - Pnorm_des).argmin().astype(int)
     P = PVals[Pind]
 
-    # Plot
+    # # Plot
 
-    interp_ds = xr.open_dataset(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
-    kxL = interp_ds['kx'].values; dkxL = kxL[1] - kxL[0]
-    kyL = interp_ds['ky'].values; dkyL = kyL[1] - kyL[0]
-    kzL = interp_ds['kz'].values; dkzL = kzL[1] - kzL[0]
-    xL = interp_ds['x'].values
-    zL = interp_ds['z'].values
-    PI_mag = interp_ds['PI_mag'].values
-    kxLg_xz_slice, kzLg_xz_slice = np.meshgrid(kxL, kzL, indexing='ij')
-    xLg_xz_slice, zLg_xz_slice = np.meshgrid(xL, zL, indexing='ij')
-    PhDenLg_xz_slice = interp_ds['PhDen_xz'].values
+    # interp_ds = xr.open_dataset(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
+    # kxL = interp_ds['kx'].values; dkxL = kxL[1] - kxL[0]
+    # kyL = interp_ds['ky'].values; dkyL = kyL[1] - kyL[0]
+    # kzL = interp_ds['kz'].values; dkzL = kzL[1] - kzL[0]
+    # xL = interp_ds['x'].values
+    # zL = interp_ds['z'].values
+    # PI_mag = interp_ds['PI_mag'].values
+    # kxLg_xz_slice, kzLg_xz_slice = np.meshgrid(kxL, kzL, indexing='ij')
+    # xLg_xz_slice, zLg_xz_slice = np.meshgrid(xL, zL, indexing='ij')
+    # PhDenLg_xz_slice = interp_ds['PhDen_xz'].values
 
-    nPI_mag = interp_ds['nPI_mag'].values
-    mom_deltapeak = interp_ds.attrs['mom_deltapeak']
+    # nPI_mag = interp_ds['nPI_mag'].values
+    # mom_deltapeak = interp_ds.attrs['mom_deltapeak']
 
-    n0 = interp_ds.attrs['n0']
-    gBB = interp_ds.attrs['gBB']
-    mI = interp_ds.attrs['mI']
-    mB = interp_ds.attrs['mB']
-    nu = np.sqrt(n0 * gBB / mB)
-    mc = mI * nu
+    # n0 = interp_ds.attrs['n0']
+    # gBB = interp_ds.attrs['gBB']
+    # mI = interp_ds.attrs['mI']
+    # mB = interp_ds.attrs['mB']
+    # nu = np.sqrt(n0 * gBB / mB)
+    # mc = mI * nu
 
     # All Plotting:
 
     # # MOMENTUM DISTRIBUTIONS
 
-    # Individual Phonon Momentum Distribution (Original Spherical data)
-    Bk_2D_orig = (qds_orig['Real_CSAmp'] + 1j * qds_orig['Imag_CSAmp']).sel(P=P).isel(t=-1).values
+    # Individual Phonon Momentum Distribution(Original Spherical data)
+    if Lx == 60:
+        Bk_2D_orig = (qds_orig['Real_CSAmp'] + 1j * qds_orig['Imag_CSAmp']).sel(P=P).isel(tc=-1).values
+    else:
+        Bk_2D_orig = (qds_orig['Real_CSAmp'] + 1j * qds_orig['Imag_CSAmp']).sel(P=P).isel(t=-1).values
     Nph_orig = qds_orig['Nph'].sel(P=P).isel(t=-1).values
     PhDen_orig_Vals = ((1 / Nph_orig) * np.abs(Bk_2D_orig)**2).real.astype(float)
 
@@ -115,16 +127,82 @@ if __name__ == "__main__":
 
     interpmul = 2
 
-    # PhDen_orig_da = xr.DataArray(PhDen_orig_Vals, coords=[kVec, thVec], dims=['k', 'th'])
-    # PhDen_orig_smooth, kg_orig_smooth, thg_orig_smooth = pfc.xinterp2D(PhDen_orig_da, 'k', 'th', interpmul)
-    # dk_smooth = kg_orig_smooth[1, 0] - kg_orig_smooth[0, 0]
-    # dth_smooth = thg_orig_smooth[0, 1] - thg_orig_smooth[0, 0]
-    # kxg_smooth = kg_orig_smooth * np.sin(thg_orig_smooth)
-    # kzg_smooth = kg_orig_smooth * np.cos(thg_orig_smooth)
+    # # # SINGULARITY TEST - NOTE: proper way is to do interpolation starting from same kmin as original grid but then only take values in the new grid that with k_new >= dk_old - quick and dirty way which gets same result is to just start the new grid at 1.01*dk (not at 1*dk since that still has error)
 
-    # print(np.sum(PhDen_orig_Vals * kg**2 * np.sin(thg) * dk * dth * (2 * np.pi)**(-2)), np.sum(PhDen_orig_smooth * kg_orig_smooth**2 * np.sin(thg_orig_smooth) * dk_smooth * dth_smooth * (2 * np.pi)**(-2)))
+    # print(dk)
+    # kpow = 2
+    # func_Vals = kg**(-kpow)
+    # func_da = xr.DataArray(func_Vals, coords=[kVec, thVec], dims=['k', 'th'])
+    # orig_sum = np.sum(func_Vals * kg**2 * np.sin(thg) * dk * dth * (2 * np.pi)**(-2))
 
-    # interpmul = 5
+    # # kmin_interp = np.min(kVec)
+    # kmin_interp = 1.01 * dk
+    # k_interp = np.linspace(kmin_interp, np.max(kVec), interpmul * kVec.size)
+    # th_interp = np.linspace(np.min(thVec), np.max(thVec), interpmul * thVec.size)
+
+    # kg_interp, thg_interp = np.meshgrid(k_interp, th_interp, indexing='ij')
+    # func_interp = interpolate.griddata((kg.flatten(), thg.flatten()), func_da.values.flatten(), (kg_interp, thg_interp), method='linear')
+
+    # dk_interp = kg_interp[1, 0] - kg_interp[0, 0]
+    # dth_interp = thg_interp[0, 1] - thg_interp[0, 0]
+    # griddata_sum = np.sum(func_interp * kg_interp**2 * np.sin(thg_interp) * dk_interp * dth_interp * (2 * np.pi)**(-2))
+
+    # # rbfi = interpolate.Rbf(kg.flatten(), thg.flatten(), func_da.values.flatten(), function='gaussian')
+    # # func_Rbf = rbfi(kg_interp, thg_interp)
+    # # rbf_sum = np.sum(func_Rbf * kg_interp**2 * np.sin(thg_interp) * dk_interp * dth_interp * (2 * np.pi)**(-2))
+
+    # # f_spline = interpolate.interp2d(x=kVec, y=thVec, z=np.transpose(func_da.values), kind='linear')
+    # # func_spline = np.transpose(f_spline(k_interp, th_interp))
+    # # spline_sum = np.sum(func_spline * kg_interp**2 * np.sin(thg_interp) * dk_interp * dth_interp * (2 * np.pi)**(-2))
+
+    # exact_sum = 2 * (2 * np.pi)**(-2) * (3 - kpow)**(-1) * np.max(kVec)**(3 - kpow)  # exact answer if func = k^(-kpow) with kpow < 3
+    # print(exact_sum)
+    # print(orig_sum)
+    # print(griddata_sum)
+    # # print(rbf_sum)
+    # # print(spline_sum)
+
+    # kmin_val = dk
+    # kg_mask = kg >= kmin_val
+    # kg_interp_mask = kg_interp >= kmin_val
+    # func_Vals_minmask = func_Vals[kg_mask]
+    # func_interp_minmask = func_interp[kg_interp_mask]
+    # orig_sum_min = np.sum(func_Vals_minmask * kg[kg_mask]**2 * np.sin(thg[kg_mask]) * dk * dth * (2 * np.pi)**(-2))
+    # griddata_sum_min = np.sum(func_interp_minmask * kg_interp[kg_interp_mask]**2 * np.sin(thg_interp[kg_interp_mask]) * dk_interp * dth_interp * (2 * np.pi)**(-2))
+    # print(orig_sum_min, griddata_sum_min)
+
+    # fig1, ax1 = plt.subplots()
+    # interp_vals = func_interp
+    # kxg_interp = kg_interp * np.sin(thg_interp)
+    # kzg_interp = kg_interp * np.cos(thg_interp)
+    # quad1 = ax1.pcolormesh(kzg, kxg, func_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(func_Vals)), cmap='inferno')
+    # quad1m = ax1.pcolormesh(kzg, -1 * kxg, func_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(func_Vals)), cmap='inferno')
+    # fig1.colorbar(quad1, ax=ax1, extend='both')
+    # fig, ax = plt.subplots()
+    # quad = ax.pcolormesh(kzg_interp, kxg_interp, interp_vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(func_Vals)), cmap='inferno')
+    # quadm = ax.pcolormesh(kzg_interp, -1 * kxg_interp, interp_vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(func_Vals)), cmap='inferno')
+    # fig.colorbar(quad, ax=ax, extend='both')
+
+    # ax1.set_xlim([-0.5, 0.5])
+    # ax1.set_ylim([-0.5, 0.5])
+    # ax.set_xlim([-0.5, 0.5])
+    # ax.set_ylim([-0.5, 0.5])
+
+    # plt.show()
+
+    # END TEST
+
+    PhDen_orig_da = xr.DataArray(PhDen_orig_Vals, coords=[kVec, thVec], dims=['k', 'th'])
+    PhDen_orig_smooth, kg_orig_smooth, thg_orig_smooth = pfc.xinterp2D(PhDen_orig_da, 'k', 'th', interpmul)
+    dk_smooth = kg_orig_smooth[1, 0] - kg_orig_smooth[0, 0]
+    dth_smooth = thg_orig_smooth[0, 1] - thg_orig_smooth[0, 0]
+    kxg_smooth = kg_orig_smooth * np.sin(thg_orig_smooth)
+    kzg_smooth = kg_orig_smooth * np.cos(thg_orig_smooth)
+    PhDen_orig_sum = np.sum(PhDen_orig_Vals * kg**2 * np.sin(thg) * dk * dth * (2 * np.pi)**(-2))
+    PhDen_smooth_sum = np.sum(PhDen_orig_smooth * kg_orig_smooth**2 * np.sin(thg_orig_smooth) * dk_smooth * dth_smooth * (2 * np.pi)**(-2))
+    print(PhDen_orig_sum, PhDen_smooth_sum)
+
+    # interpmul = 2
     # k2PhDen_orig_da = xr.DataArray(PhDen_orig_Vals * kg**2 * np.sin(thg), coords=[kVec, thVec], dims=['k', 'th'])
     # k2PhDen_orig_smooth, kg_orig_smooth, thg_orig_smooth = pfc.xinterp2D(k2PhDen_orig_da, 'k', 'th', interpmul)
     # dk_smooth = kg_orig_smooth[1, 0] - kg_orig_smooth[0, 0]
@@ -134,109 +212,27 @@ if __name__ == "__main__":
 
     # print(np.sum(k2PhDen_orig_da.values * dk * dth * (2 * np.pi)**(-2)), np.sum(k2PhDen_orig_smooth * dk_smooth * dth_smooth * (2 * np.pi)**(-2)))
 
-    # func_Vals = 1 + 0 * PhDen_orig_Vals
-    func_Vals = kg**(-2)
-    func_da = xr.DataArray(func_Vals, coords=[kVec, thVec], dims=['k', 'th'])
-    orig_sum = np.sum(func_Vals * kg**2 * np.sin(thg) * dk * dth * (2 * np.pi)**(-2))
-
-    k_interp = np.linspace(np.min(kVec), np.max(kVec), interpmul * kVec.size)
-    th_interp = np.linspace(np.min(thVec), np.max(thVec), interpmul * thVec.size)
-
-    func_interp, kg_interp, thg_interp = pfc.xinterp2D(func_da, 'k', 'th', interpmul)
-    dk_interp = kg_interp[1, 0] - kg_interp[0, 0]
-    dth_interp = thg_interp[0, 1] - thg_interp[0, 0]
-    griddata_sum = np.sum(func_interp * kg_interp**2 * np.sin(thg_interp) * dk_interp * dth_interp * (2 * np.pi)**(-2))
-
-    # rbfi = interpolate.Rbf(kg.flatten(), thg.flatten(), func_da.values.flatten(), function='gaussian')
-    # func_Rbf = rbfi(kg_interp, thg_interp)
-    # rbf_sum = np.sum(func_Rbf * kg_interp**2 * np.sin(thg_interp) * dk_interp * dth_interp * (2 * np.pi)**(-2))
-
-    f_spline = interpolate.interp2d(x=kVec, y=thVec, z=np.transpose(func_da.values), kind='linear')
-    func_spline = np.transpose(f_spline(k_interp, th_interp))
-    spline_sum = np.sum(func_spline * kg_interp**2 * np.sin(thg_interp) * dk_interp * dth_interp * (2 * np.pi)**(-2))
-
-    kxg = kg * np.sin(thg)
-    kzg = kg * np.cos(thg)
-    kxg_interp = kg_interp * np.sin(thg_interp)
-    kzg_interp = kg_interp * np.cos(thg_interp)
-    dk_interp = kg_interp[1, 0] - kg_interp[0, 0]
-    dth_interp = thg_interp[0, 1] - thg_interp[0, 0]
-    func_cartinterp = interpolate.griddata((kxg.flatten(), kzg.flatten()), func_Vals.flatten(), (kxg_interp, kzg_interp), method='linear')
-    nanmask = np.isnan(func_cartinterp)
-    func_cartinterp[nanmask] = 0
-    kg_cartinterp = np.sqrt(kxg_interp**2 + kzg_interp**2)
-    thg_cartinterp = np.arccos(kzg_interp / kg_cartinterp)
-    dk_cartinterp = kg_cartinterp[1, 0] - kg_cartinterp[0, 0]
-    dth_cartinterp = thg_cartinterp[0, 1] - thg_cartinterp[0, 0]
-    cartgriddata_sum = np.sum(func_cartinterp * kg_interp**2 * np.sin(thg_interp) * dk_interp * dth_interp * (2 * np.pi)**(-2))
-    cartgriddata_sum2 = np.sum(func_cartinterp * kg_cartinterp**2 * np.sin(thg_cartinterp) * dk_cartinterp * dth_cartinterp * (2 * np.pi)**(-2))
-
-    exact_sum = np.max(kVec) / (2 * np.pi**2)  # exact answer if func = k^(-2)
-    print(exact_sum)
-    print(orig_sum)
-    print(griddata_sum)
-    # print(rbf_sum)
-    print(spline_sum)
-    print(cartgriddata_sum)
-    print(cartgriddata_sum2)
-
-    kmin_val = 0.06
-    kg_mask = kg >= kmin_val
-    kg_interp_mask = kg_interp >= kmin_val
-    orig_sum_min = np.sum(func_Vals[kg_mask] * kg[kg_mask]**2 * np.sin(thg[kg_mask]) * dk * dth * (2 * np.pi)**(-2))
-    griddata_sum_min = np.sum(func_interp[kg_interp_mask] * kg_interp[kg_interp_mask]**2 * np.sin(thg_interp[kg_interp_mask]) * dk_interp * dth_interp * (2 * np.pi)**(-2))
-    print(orig_sum_min, griddata_sum_min)
-
     fig1, ax1 = plt.subplots()
-    interp_vals = func_interp
-    kxg_interp = kg_interp * np.sin(thg_interp)
-    kzg_interp = kg_interp * np.cos(thg_interp)
-    quad1 = ax1.pcolormesh(kzg, kxg, func_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(func_Vals)), cmap='inferno')
-    quad1m = ax1.pcolormesh(kzg, -1 * kxg, func_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(func_Vals)), cmap='inferno')
+    quad1 = ax1.pcolormesh(kzg, kxg, PhDen_orig_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDen_orig_Vals)), cmap='inferno')
+    quad1m = ax1.pcolormesh(kzg, -1 * kxg, PhDen_orig_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDen_orig_Vals)), cmap='inferno')
+    ax1.set_xlim([-1 * linDimMajor, linDimMajor])
+    ax1.set_ylim([-1 * linDimMinor, linDimMinor])
+    ax1.set_xlabel('kz (Impurity Propagation Direction)')
+    ax1.set_ylabel('kx')
+    ax1.set_title('Individual Phonon Momentum Distribution (Orig)')
     fig1.colorbar(quad1, ax=ax1, extend='both')
+
     fig, ax = plt.subplots()
-    quad = ax.pcolormesh(kzg_interp, kxg_interp, interp_vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(func_Vals)), cmap='inferno')
-    quadm = ax.pcolormesh(kzg_interp, -1 * kxg_interp, interp_vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(func_Vals)), cmap='inferno')
+    quad = ax.pcolormesh(kzg_smooth, kxg_smooth, PhDen_orig_smooth, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDen_orig_Vals)), cmap='inferno')
+    quadm = ax.pcolormesh(kzg_smooth, -1 * kxg_smooth, PhDen_orig_smooth, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDen_orig_Vals)), cmap='inferno')
+    ax.set_xlim([-1 * linDimMajor, linDimMajor])
+    ax.set_ylim([-1 * linDimMinor, linDimMinor])
+    ax.set_xlabel('kz (Impurity Propagation Direction)')
+    ax.set_ylabel('kx')
+    ax.set_title('Individual Phonon Momentum Distribution (Sph Interp)')
     fig.colorbar(quad, ax=ax, extend='both')
 
-    ax1.set_xlim([-0.5, 0.5])
-    ax1.set_ylim([-0.5, 0.5])
-    ax.set_xlim([-0.5, 0.5])
-    ax.set_ylim([-0.5, 0.5])
-
-    plt.show()
-
-    # kxLg_3D, kyLg_3D, kzLg_3D = np.meshgrid(kxL, kyL, kzL, indexing='ij')
-    # kg_3Di = np.sqrt(kxLg_3D**2 + kyLg_3D**2 + kzLg_3D**2)
-    # thg_3Di = np.arccos(kzLg_3D / kg_3Di)
-    # dk_3Di = kg_3Di[1, 0] - kg_3Di[0, 0]
-    # dth_3Di = thg_3Di[0, 1] - thg_3Di[0, 0]
-
-    # fig1, ax1 = plt.subplots()
-    # # quad1 = ax1.pcolormesh(kzg_smooth, kxg_smooth, PhDen_orig_smooth, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDenLg_xz_slice)), cmap='inferno')
-    # # quad1m = ax1.pcolormesh(kzg_smooth, -1 * kxg_smooth, PhDen_orig_smooth, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDenLg_xz_slice)), cmap='inferno')
-    # # quad1 = ax1.pcolormesh(kzg, kxg, PhDen_orig_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDenLg_xz_slice)), cmap='inferno')
-    # # quad1m = ax1.pcolormesh(kzg, -1 * kxg, PhDen_orig_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDenLg_xz_slice)), cmap='inferno')
-    # quad1 = ax1.pcolormesh(kzg, kxg, PhDen_orig_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDen_orig_Vals)), cmap='inferno')
-    # quad1m = ax1.pcolormesh(kzg, -1 * kxg, PhDen_orig_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDen_orig_Vals)), cmap='inferno')
-    # ax1.set_xlim([-1 * linDimMajor, linDimMajor])
-    # ax1.set_ylim([-1 * linDimMinor, linDimMinor])
-    # ax1.set_xlabel('kz (Impurity Propagation Direction)')
-    # ax1.set_ylabel('kx')
-    # ax1.set_title('Individual Phonon Momentum Distribution (Orig)')
-    # fig1.colorbar(quad1, ax=ax1, extend='both')
-
-    # fig, ax = plt.subplots()
-    # quad = ax.pcolormesh(kzg_smooth, kxg_smooth, PhDen_orig_smooth, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDen_orig_Vals)), cmap='inferno')
-    # quadm = ax.pcolormesh(kzg_smooth, -1 * kxg_smooth, PhDen_orig_smooth, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDen_orig_Vals)), cmap='inferno')
-    # ax.set_xlim([-1 * linDimMajor, linDimMajor])
-    # ax.set_ylim([-1 * linDimMinor, linDimMinor])
-    # ax.set_xlabel('kz (Impurity Propagation Direction)')
-    # ax.set_ylabel('kx')
-    # ax.set_title('Individual Phonon Momentum Distribution (Sph Interp)')
-    # fig.colorbar(quad, ax=ax, extend='both')
-
-    # # Individual Phonon Momentum Distribution (Interp)
+    # # Individual Phonon Momentum Distribution (Cart Interp)
     # fig2, ax2 = plt.subplots()
     # quad2 = ax2.pcolormesh(kzLg_xz_slice, kxLg_xz_slice, PhDenLg_xz_slice, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDenLg_xz_slice)), cmap='inferno')
     # # quad2 = ax2.pcolormesh(kzLg_xz_slice_interp, kxLg_xz_slice_interp, PhDenLg_xz_slice_interp, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDenLg_xz_slice_interp)), cmap='inferno')
@@ -244,7 +240,7 @@ if __name__ == "__main__":
     # # ax2.set_ylim([-1 * 0.02, 0.02])
     # ax2.set_xlabel('kz (Impurity Propagation Direction)')
     # ax2.set_ylabel('kx')
-    # ax2.set_title('Individual Phonon Momentum Distribution (Interp)')
+    # ax2.set_title('Individual Phonon Momentum Distribution (Cart Interp)')
     # fig2.colorbar(quad2, ax=ax2, extend='both')
 
     # # Impurity Momentum Magnitude Distribution (Interp)

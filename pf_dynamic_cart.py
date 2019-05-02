@@ -185,12 +185,16 @@ def xinterp2D(xdataset, coord1, coord2, mult):
     # returns meshgrid values for C1_interp and C2_interp as well as the function value on this 2D grid -> these are ready to plot
     C1 = xdataset.coords[coord1].values
     C2 = xdataset.coords[coord2].values
+    if coord1 == 'k':
+        C1min = 1.01 * (C1[1] - C1[0])
+        # C1min = np.min(C1)
+    else:
+        C1min = np.min(C1)
     C1g, C2g = np.meshgrid(C1, C2, indexing='ij')
-    C1_interp = np.linspace(np.min(C1), np.max(C1), mult * C1.size)
+    C1_interp = np.linspace(C1min, np.max(C1), mult * C1.size)
     C2_interp = np.linspace(np.min(C2), np.max(C2), mult * C2.size)
     C1g_interp, C2g_interp = np.meshgrid(C1_interp, C2_interp, indexing='ij')
-    # interp_vals = spi.griddata((C1g.flatten(), C2g.flatten()), xdataset.values.flatten(), (C1g_interp, C2g_interp), method='linear')
-    interp_vals = spi.griddata((C1g.flatten(), C2g.flatten()), xdataset.values.flatten(), (C1g_interp, C2g_interp))
+    interp_vals = spi.griddata((C1g.flatten(), C2g.flatten()), xdataset.values.flatten(), (C1g_interp, C2g_interp), method='linear')
     return interp_vals, C1g_interp, C2g_interp
 
 

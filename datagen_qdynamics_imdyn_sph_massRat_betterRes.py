@@ -1,6 +1,4 @@
 import numpy as np
-import pandas as pd
-import xarray as xr
 import Grid
 import pf_dynamic_sph
 import os
@@ -15,17 +13,15 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    higherCutoff = False; cutoffRat = 1.5
-    betterResolution = True; resRat = 0.5
-
     (Lx, Ly, Lz) = (60, 60, 60)
     (dx, dy, dz) = (0.25, 0.25, 0.25)
-
-    # (Lx, Ly, Lz) = (40, 40, 40)
-    # (dx, dy, dz) = (0.25, 0.25, 0.25)
+    higherCutoff = False; cutoffRat = 1.0
+    betterResolution = True; resRat = 0.5
 
     # (Lx, Ly, Lz) = (21, 21, 21)
     # (dx, dy, dz) = (0.375, 0.375, 0.375)
+    # higherCutoff = False; cutoffRat = 1.0
+    # betterResolution = False; resRat = 1.0
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
@@ -58,10 +54,12 @@ if __name__ == "__main__":
         kgrid.initArray_premade('k', kArray)
     kgrid.initArray_premade('th', thetaArray)
 
-    # for realdyn evolution
-    tMax = 100
-    dt = 0.2
-    CoarseGrainRate = 500
+    # for imdyn evolution
+
+    # tMax = 1e5
+    tMax = 30
+    dt = 10
+    CoarseGrainRate = int(1e4)
 
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -71,12 +69,22 @@ if __name__ == "__main__":
     print('Total time steps: {0}'.format(tgrid.size))
     print('UV cutoff: {0}'.format(k_max))
     print('dk: {0}'.format(dk))
+    print('dtheta: {0}'.format(dtheta))
     print('NGridPoints: {0}'.format(NGridPoints))
-    print(NGridPoints_cart, NGridPoints)
+
+    # Basic parameters
+
+    mI = 1
+    # mI = 10
+    mB = 1
+    n0 = 1
+    gBB = (4 * np.pi / mB) * 0.05
+
+    sParams = [mI, mB, n0, gBB]
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical', 'Longtime': 'false', 'CoarseGrainRate': CoarseGrainRate}
+    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Coupling': 'twophonon', 'Grid': 'spherical', 'Longtime': 'false', 'CoarseGrainRate': CoarseGrainRate}
 
     # ---- SET PARAMS ----
 
@@ -94,9 +102,9 @@ if __name__ == "__main__":
     print((n0 * aBB * 3)**(-1 / 2) * mB * xi**2)
 
     Params_List = []
-    mI_Vals = np.array([0.5, 1.0, 2, 5.0])
-    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.5])
-    P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.4, 10, endpoint=False), np.linspace(1.4, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 10, endpoint=False), np.linspace(5.0, 9.0, 20)))
+    mI_Vals = np.array([0.5, 1.0, 2])
+    aIBi_Vals = np.array([-15.0, -12.5, -10.0, -9.0, -8.0, -7.0, -5.0, -3.5, -2.0, -1.0, -0.75, -0.5, -0.1])
+    P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 10, endpoint=False), np.linspace(0.8, 5.0, 40)))
     print(P_Vals_norm)
 
     for mI in mI_Vals:
@@ -164,11 +172,11 @@ if __name__ == "__main__":
 
     runstart = timer()
 
-    taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
-    taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+    # taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
+    # taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    # taskCount = len(Params_List)
-    # taskID = 72
+    taskCount = len(Params_List)
+    taskID = 72
 
     if(taskCount > len(Params_List)):
         print('ERROR: TASK COUNT MISMATCH')
@@ -184,4 +192,4 @@ if __name__ == "__main__":
     dynsph_ds.to_netcdf(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
 
     end = timer()
-    print('Task ID: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, P, aIBi, end - runstart))
+    print('Task ID: {:d}, mI: {:.1f}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(taskID, mI, P, aIBi, end - runstart))

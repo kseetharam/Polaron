@@ -4,7 +4,6 @@ import pf_dynamic_sph
 import os
 import sys
 from timeit import default_timer as timer
-from pf_static_sph import aSi_grid
 
 
 if __name__ == "__main__":
@@ -13,33 +12,16 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    # (Lx, Ly, Lz) = (30, 30, 30)
     (Lx, Ly, Lz) = (21, 21, 21)
-    # (Lx, Ly, Lz) = (12, 12, 12)
-    # (dx, dy, dz) = (0.75, 0.75, 0.75)
     (dx, dy, dz) = (0.375, 0.375, 0.375)
-    # (dx, dy, dz) = (0.25, 0.25, 0.25)
-
-    # (Lx, Ly, Lz) = (105, 105, 105)
-    # (dx, dy, dz) = (0.375, 0.375, 0.375)
-
-    # (Lx, Ly, Lz) = (81, 81, 81)
-    # # (dx, dy, dz) = (0.25, 0.25, 0.25)
-    # (dx, dy, dz) = (0.225, 0.225, 0.225)
 
     xgrid = Grid.Grid('CARTESIAN_3D')
     xgrid.initArray('x', -Lx, Lx, dx); xgrid.initArray('y', -Ly, Ly, dy); xgrid.initArray('z', -Lz, Lz, dz)
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
-    # Ntheta = 250
     Ntheta = 50
     Nk = np.ceil(NGridPoints_desired / Ntheta)
-
-    # # adjust num theta points
-    # Ntheta = 25
-    # Nk = 85
-    # NGridPoints_cart = 0.5 * NGridPoints_cart
 
     theta_max = np.pi
     thetaArray, dtheta = np.linspace(0, theta_max, Ntheta, retstep=True)
@@ -59,10 +41,8 @@ if __name__ == "__main__":
     # for imdyn evolution
     tMax = 1e5
     # tMax = 6e4
-    # CoarseGrainRate = 100
-    # tMax = 1e4
-    dt = 10
     CoarseGrainRate = 100
+    dt = 10
 
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -202,18 +182,10 @@ if __name__ == "__main__":
 
     cParams_List = []
 
-    # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -0.5, -0.1])
-    # aIBi_Vals = np.array([-10.0])
-
-    # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0, -0.75, -0.5])
-    aIBi_Vals = np.array([-15.0, -12.5, -9.0, -8.0, -7.0, -6.0, -3.5])
-
-    # aSi = aSi_grid(kgrid, 0, mI, mB, n0, gBB); aIBi_Vals = aIBi_Vals - aSi
-
-    # P_Vals = np.array([0.4])
+    aIBi_Vals = np.array([-15.0, -12.5, -10.0, -9.0, -8.0, -7.0, -5.0, -3.5, -2.0, -1.0, -0.75, -0.5, -0.1])  # used by many plots (spherical)
     P_Vals = np.concatenate((np.linspace(0.1, 0.8, 10, endpoint=False), np.linspace(0.8, 4.0, 40, endpoint=False), np.linspace(4.0, 5.0, 2)))
-    # P_Vals = np.concatenate((np.array([0.1, 0.4, 0.6]), np.linspace(0.8, 2.8, 20), np.linspace(3.0, 5.0, 3)))
 
+    # P_Vals = np.concatenate((np.array([0.1, 0.4, 0.6]), np.linspace(0.8, 2.8, 20), np.linspace(3.0, 5.0, 3)))
     # P_Vals = np.concatenate((np.linspace(0.1, 7.0, 16, endpoint=False), np.linspace(7.0, 10.0, 15), np.linspace(11.0, 15.0, 3)))
 
     for ind, aIBi in enumerate(aIBi_Vals):

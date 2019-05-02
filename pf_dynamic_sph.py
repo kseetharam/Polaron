@@ -278,8 +278,8 @@ def reconstructDistributions(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkz
     print('Original (1/Nph)|Bk|^2 normalization (Spherical 2D): {0}'.format(Bk_norm))
 
     # Create linear 3D cartesian grid and reinterpolate Bk_3D onto this grid
-    kmin = 1e-10
-    # kmin = 0.14
+    # kmin = np.min(kVec)
+    kmin = dk
     kxL_pos = np.arange(kmin, linDimMinor, dkxL); kxL = np.concatenate((kmin - 1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
     kyL_pos = np.arange(kmin, linDimMinor, dkyL); kyL = np.concatenate((kmin - 1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
     kzL_pos = np.arange(kmin, linDimMajor, dkzL); kzL = np.concatenate((kmin - 1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
@@ -428,11 +428,9 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     Bk_norm = np.sum(dk * dth * (2 * np.pi)**(-2) * kg**2 * np.sin(thg) * PhDen_Sph)
     print('Original (1/Nph)|Bk|^2 normalization (Spherical 2D): {0}'.format(Bk_norm))
     Bk2_2D = (np.abs(Bk_2D_vals)**2).real.astype(float)
-    # jac = (kg**2) * np.sin(thg) * dk * dth  # dphi missing somehow? or should just divide by 2pi when doing interpolation?
-    jac = 1
-    Bk2Jac_2D = jac * Bk2_2D
     # Create linear 3D cartesian grid and reinterpolate Bk_3D onto this grid
-    kmin = np.min(kVec)
+    # kmin = np.min(kVec)
+    kmin = dk
     kxL_pos = np.arange(kmin, linDimMinor, dkxL); kxL = np.concatenate((kmin - 1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
     kyL_pos = np.arange(kmin, linDimMinor, dkyL); kyL = np.concatenate((kmin - 1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
     kzL_pos = np.arange(kmin, linDimMajor, dkzL); kzL = np.concatenate((kmin - 1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
@@ -451,20 +449,9 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     print('3D Cartesian grid Ntot: {:1.2E}'.format(kzLg_3D.size))
     print('Unique interp points: {:1.2E}'.format(tups_3Di_unique[:, 0].size))
     interpstart = timer()
-    PhDen_2D_CartInt = interpolate.griddata((kg.flatten(), thg.flatten()), PhDen_Sph.flatten(), tups_3Di_unique, method='linear')
-    # Bk2Jac_2D_CartInt = interpolate.griddata((kg.flatten(), thg.flatten()), Bk2Jac_2D.flatten(), tups_3Di_unique, method='nearest')
-    # Bk_2D_CartInt = interpolate.griddata((kg.flatten(), thg.flatten()), Bk_2D_vals.flatten(), tups_3Di_unique, method='linear')
+    Bk2_2D_CartInt = interpolate.griddata((kg.flatten(), thg.flatten()), Bk2_2D.flatten(), tups_3Di_unique, method='linear')
     interpend = timer()
     print('Interp Time: {0}'.format(interpend - interpstart))
-    # Bk2Lg_3D_flat = Bk2Jac_2D_CartInt[tups_inverse]
-    # Bk2Lg_3D = Bk2Lg_3D_flat.reshape(kg_3Di.shape)
-    # Bk2Lg_3D[np.isnan(Bk2Lg_3D)] = 0
-    # PhDenLg_3D = ((1 / Nph) * Bk2Lg_3D).real.astype(float)
-    PhDen_3D_flat = PhDen_2D_CartInt[tups_inverse]
-    PhDenLg_3D = PhDen_3D_flat.reshape(kg_3Di.shape).real.astype(float)
-    PhDenLg_3D[np.isnan(PhDenLg_3D)] = 0
-    PhDenLg_3D_norm = np.sum(dkxL * dkyL * dkzL * (2 * np.pi)**(-3) * PhDenLg_3D)
-
     k_max_red = ((2 * linDimMajor)**3 / (4 * np.pi / 3))**(1 / 3)  # equating volumes of cartesian and reduced spherical regions. assume cartesian region is box where each axis goes from -linDimMajor to +linDimMajor
     cart_mask = kg <= k_max_red
     kg_red = kg[cart_mask]
@@ -472,12 +459,13 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     Bk2_2D_red = Bk2_2D[cart_mask]
     Nph_red = np.sum(dk * dth * (2 * np.pi)**(-2) * kg_red**2 * np.sin(thg_red) * Bk2_2D_red)
     print('Rough percentage of phonons in reduced Cartesian grid (Calculated from Spherical 2D): {0}'.format(Nph_red / Nph))
-
-    Bk2Lg_3D = (Nph_red / PhDenLg_3D_norm) * PhDenLg_3D  # SHOULD ACTUALLY MULTIPLY BY WEIGHT OF N_PH LIMITED TO REGION OF CARTESIAN GRID
-    PhDenLg_3D_fixed = (1 / Nph) * Bk2Lg_3D
-    Bk2Lg_3D_norm = np.sum(dkxL * dkyL * dkzL * (2 * np.pi)**(-3) * PhDenLg_3D_fixed)
+    Bk2Lg_3D_flat = Bk2_2D_CartInt[tups_inverse]
+    Bk2Lg_3D = Bk2Lg_3D_flat.reshape(kg_3Di.shape)
+    Bk2Lg_3D[np.isnan(Bk2Lg_3D)] = 0
+    PhDenLg_3D = ((1 / Nph) * Bk2Lg_3D).real.astype(float)
+    PhDenLg_3D_norm = np.sum(dkxL * dkyL * dkzL * (2 * np.pi)**(-3) * PhDenLg_3D)
     print('Interpolated (1/Nph)|Bk|^2 normalization (Linear Cartesian 3D): {0}'.format(PhDenLg_3D_norm))
-    print('Interpolated (1/Nph)|Bk|^2 forced normalization (Linear Cartesian 3D): {0}'.format(Bk2Lg_3D_norm))
+
     # Calculate total phonon momentum distribution
     xL = np.fft.fftshift(np.fft.fftfreq(kxL.size) * 2 * np.pi / dkxL)
     yL = np.fft.fftshift(np.fft.fftfreq(kyL.size) * 2 * np.pi / dkyL)
@@ -504,9 +492,9 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     [PBm, nPBm, PIm, nPIm] = pfc.xyzDist_To_magDist(kgrid_L, nPB, P)
     # Create DataSet for 3D Betak and position distribution slices
     Nx = len(kxL); Ny = len(kyL); Nz = len(kzL)
-    PhDen_xz_slice_da = xr.DataArray(PhDenLg_3D_fixed[:, Ny // 2, :], coords=[kxL, kzL], dims=['kx', 'kz'])
-    PhDen_xy_slice_da = xr.DataArray(PhDenLg_3D_fixed[:, :, Nz // 2], coords=[kxL, kyL], dims=['kx', 'ky'])
-    PhDen_yz_slice_da = xr.DataArray(PhDenLg_3D_fixed[Nx // 2, :, :], coords=[kyL, kzL], dims=['ky', 'kz'])
+    PhDen_xz_slice_da = xr.DataArray(PhDenLg_3D[:, Ny // 2, :], coords=[kxL, kzL], dims=['kx', 'kz'])
+    PhDen_xy_slice_da = xr.DataArray(PhDenLg_3D[:, :, Nz // 2], coords=[kxL, kyL], dims=['kx', 'ky'])
+    PhDen_yz_slice_da = xr.DataArray(PhDenLg_3D[Nx // 2, :, :], coords=[kyL, kzL], dims=['ky', 'kz'])
     nPB_xz_slice = nPB[:, Ny // 2, :]; nPB_xz_slice_da = xr.DataArray(nPB_xz_slice, coords=[PB_x, PB_z], dims=['PB_x', 'PB_z'])
     nPB_xy_slice = nPB[:, :, Nz // 2]; nPB_xy_slice_da = xr.DataArray(nPB_xy_slice, coords=[PB_x, PB_y], dims=['PB_x', 'PB_y'])
     nPB_yz_slice = nPB[Nx // 2, :, :]; nPB_yz_slice_da = xr.DataArray(nPB_yz_slice, coords=[PB_y, PB_z], dims=['PB_y', 'PB_z'])
