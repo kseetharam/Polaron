@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     # Analysis of Total Dataset
 
-    aIBi = -2
+    aIBi = -5
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
 
     # qds['nPI_mag'].sel(aIBi=-10, P=1.5, t=99).dropna('PI_mag').plot()
@@ -62,6 +62,25 @@ if __name__ == "__main__":
     PI_x = qds['PI_x'].values
     PI_y = qds['PI_y'].values
     PI_z = qds['PI_z'].values
+
+    # # # # Nph CURVES
+
+    # tau = 100
+    # tsVals = tVals[tVals < tau]
+    # qds_aIBi_ts = qds.sel(t=tsVals)
+
+    # fig, ax = plt.subplots()
+    # for indP, P in enumerate(PVals):
+    #     Nph = qds_aIBi_ts.isel(P=indP)['NB'].values
+    #     ax.plot(tsVals / tscale, Nph, label='{:.2f}'.format(P / mc))
+
+    # ax.legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=2, ncol=2)
+    # ax.set_xscale('log')
+    # ax.set_title('Total Phonon Number (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    # ax.set_ylabel(r'$N_{ph}$')
+    # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+
+    # plt.show()
 
     # # IMPURITY MOMENTUM MAGNITUDE DISTRIBUTION ANIMATION WITH CHARACTERIZATION (CARTESIAN)
 
@@ -212,61 +231,61 @@ if __name__ == "__main__":
 
     # plt.show()
 
-    # IMPURITY MOMENTUM DISTRIBUTION Z-INTEGRATION ANIMATION WITH CHARACTERIZATION (CARTESIAN)
+    # # IMPURITY MOMENTUM DISTRIBUTION Z-INTEGRATION ANIMATION WITH CHARACTERIZATION (CARTESIAN)
 
-    vI_Z_ave = np.zeros(PVals.size)
-    vI0_Vals = np.zeros(PVals.size)
-    vIf_Vals = np.zeros(PVals.size)
-    nPIm_deltaPeak_Vals = np.zeros(PVals.size)
-    nPI_z_inf = qds['nPI_z_int'].isel(t=-1)
+    # vI_Z_ave = np.zeros(PVals.size)
+    # vI0_Vals = np.zeros(PVals.size)
+    # vIf_Vals = np.zeros(PVals.size)
+    # nPIm_deltaPeak_Vals = np.zeros(PVals.size)
+    # nPI_z_inf = qds['nPI_z_int'].isel(t=-1)
 
-    for ind, P in enumerate(PVals):
-        qds_nPI_inf = nPI_z_inf.sel(P=P).dropna('PI_z')
-        nPI_inf_Vals = qds_nPI_inf.values
+    # for ind, P in enumerate(PVals):
+    #     qds_nPI_inf = nPI_z_inf.sel(P=P).dropna('PI_z')
+    #     nPI_inf_Vals = qds_nPI_inf.values
 
-        nPIm_deltaPeak_Vals[ind] = qds.sel(P=P).isel(t=-1)['mom_deltapeak'].values
-        vI0_Vals[ind] = (P - qds['PB'].sel(P=P).isel(t=0).values) / mI
-        vIf_Vals[ind] = (P - qds['PB'].sel(P=P).isel(t=-1).values) / mI
-        PI_z_inf = qds_nPI_inf['PI_z'].values; dPIz = PI_z_inf[1] - PI_z_inf[0]
-        vI_Z_ave[ind] = (np.sum(PI_z_inf * nPI_inf_Vals * dPIz) + P * nPIm_deltaPeak_Vals[ind]) / mI
+    #     nPIm_deltaPeak_Vals[ind] = qds.sel(P=P).isel(t=-1)['mom_deltapeak'].values
+    #     vI0_Vals[ind] = (P - qds['PB'].sel(P=P).isel(t=0).values) / mI
+    #     vIf_Vals[ind] = (P - qds['PB'].sel(P=P).isel(t=-1).values) / mI
+    #     PI_z_inf = qds_nPI_inf['PI_z'].values; dPIz = PI_z_inf[1] - PI_z_inf[0]
+    #     vI_Z_ave[ind] = (np.sum(PI_z_inf * nPI_inf_Vals * dPIz) + P * nPIm_deltaPeak_Vals[ind]) / mI
 
-        # print(np.sum(nPI_inf_Vals * dPIz) + nPIm_deltaPeak_Vals[ind])
+    #     # print(np.sum(nPI_inf_Vals * dPIz) + nPIm_deltaPeak_Vals[ind])
 
-    fig1, ax = plt.subplots()
+    # fig1, ax = plt.subplots()
 
-    nPI_z_inf_P = nPI_z_inf.isel(P=0).dropna('PI_z')
-    curve = ax.plot(nPI_z_inf_P['PI_z'].values / mc, nPI_z_inf_P.values, 'k-')[0]
-    Zline = ax.plot(PVals[0] * np.ones(100), np.linspace(0, nPIm_deltaPeak_Vals[0], 100), 'r-', linewidth=3.0, label='Delta Peak (Z-factor)')[0]
-    Zmarker = ax.plot(PVals[0], nPIm_deltaPeak_Vals[0], 'rx', mew=0.75, ms=7.5, label='')[0]
-    ax.plot(np.ones(100), np.linspace(0, 1, 100), 'k--', label=r'$c_{BEC}$')
+    # nPI_z_inf_P = nPI_z_inf.isel(P=0).dropna('PI_z')
+    # curve = ax.plot(nPI_z_inf_P['PI_z'].values / mc, nPI_z_inf_P.values, 'k-')[0]
+    # Zline = ax.plot(PVals[0] * np.ones(100), np.linspace(0, nPIm_deltaPeak_Vals[0], 100), 'r-', linewidth=3.0, label='Delta Peak (Z-factor)')[0]
+    # Zmarker = ax.plot(PVals[0], nPIm_deltaPeak_Vals[0], 'rx', mew=0.75, ms=7.5, label='')[0]
+    # ax.plot(np.ones(100), np.linspace(0, 1, 100), 'k--', label=r'$c_{BEC}$')
 
-    P_text = ax.text(0.65, 0.9, r'$\frac{P}{m_{I}c_{BEC}}=\frac{<v_{I}(t_{0})>}{c_{BEC}}=$' + '{:.2f}'.format(Pnorm[0]), transform=ax.transAxes, fontsize='small', color='g')
-    vIf_text = ax.text(0.65, 0.82, r'$\frac{<v_{I}(t_{f})>}{c_{BEC}}=$' + '{:.2f}'.format(vIf_Vals[0] / nu), transform=ax.transAxes, fontsize='small', color='g')
-    vIZ_text = ax.text(0.65, 0.74, r'$\frac{1}{m_{I}c_{BEC}}<P_{I,z}(t_{f})>=$' + '{:.2f}'.format(vI_Z_ave[0] / nu), transform=ax.transAxes, fontsize='small', color='g')  # for some reason this is different than average impurity velocity after large values of P
-    Z_text = ax.text(0.65, 0.66, r'Z-factor: ' + '{:.2f}'.format(nPIm_deltaPeak_Vals[0]), transform=ax.transAxes, fontsize='small', color='g')
+    # P_text = ax.text(0.65, 0.9, r'$\frac{P}{m_{I}c_{BEC}}=\frac{<v_{I}(t_{0})>}{c_{BEC}}=$' + '{:.2f}'.format(Pnorm[0]), transform=ax.transAxes, fontsize='small', color='g')
+    # vIf_text = ax.text(0.65, 0.82, r'$\frac{<v_{I}(t_{f})>}{c_{BEC}}=$' + '{:.2f}'.format(vIf_Vals[0] / nu), transform=ax.transAxes, fontsize='small', color='g')
+    # vIZ_text = ax.text(0.65, 0.74, r'$\frac{1}{m_{I}c_{BEC}}<P_{I,z}(t_{f})>=$' + '{:.2f}'.format(vI_Z_ave[0] / nu), transform=ax.transAxes, fontsize='small', color='g')  # for some reason this is different than average impurity velocity after large values of P
+    # Z_text = ax.text(0.65, 0.66, r'Z-factor: ' + '{:.2f}'.format(nPIm_deltaPeak_Vals[0]), transform=ax.transAxes, fontsize='small', color='g')
 
-    def animate1(i):
-        nPI_z_inf_P = nPI_z_inf.isel(P=i).dropna('PI_z')
-        curve.set_xdata(nPI_z_inf_P['PI_z'].values / mc)
-        curve.set_ydata(nPI_z_inf_P.values)
-        Zline.set_xdata(PVals[i] * np.ones(100))
-        Zline.set_ydata(np.linspace(0, nPIm_deltaPeak_Vals[i], 100))
-        Zmarker.set_xdata(PVals[i])
-        Zmarker.set_ydata(nPIm_deltaPeak_Vals[i])
+    # def animate1(i):
+    #     nPI_z_inf_P = nPI_z_inf.isel(P=i).dropna('PI_z')
+    #     curve.set_xdata(nPI_z_inf_P['PI_z'].values / mc)
+    #     curve.set_ydata(nPI_z_inf_P.values)
+    #     Zline.set_xdata(PVals[i] * np.ones(100))
+    #     Zline.set_ydata(np.linspace(0, nPIm_deltaPeak_Vals[i], 100))
+    #     Zmarker.set_xdata(PVals[i])
+    #     Zmarker.set_ydata(nPIm_deltaPeak_Vals[i])
 
-        P_text.set_text(r'$\frac{P}{m_{I}c_{BEC}}=\frac{<v_{I}(t_{0})>}{c_{BEC}}=$' + '{:.2f}'.format(Pnorm[i]))
-        vIf_text.set_text(r'$\frac{<v_{I}(t_{f})>}{c_{BEC}}=$' + '{:.2f}'.format(vIf_Vals[i] / nu))
-        vIZ_text.set_text(r'$\frac{1}{m_{I}c_{BEC}}<P_{I,z}(t_{f})>=$' + '{:.2f}'.format(vI_Z_ave[i] / nu))
-        Z_text.set_text(r'Z-factor: ' + '{:.2f}'.format(nPIm_deltaPeak_Vals[i]))
+    #     P_text.set_text(r'$\frac{P}{m_{I}c_{BEC}}=\frac{<v_{I}(t_{0})>}{c_{BEC}}=$' + '{:.2f}'.format(Pnorm[i]))
+    #     vIf_text.set_text(r'$\frac{<v_{I}(t_{f})>}{c_{BEC}}=$' + '{:.2f}'.format(vIf_Vals[i] / nu))
+    #     vIZ_text.set_text(r'$\frac{1}{m_{I}c_{BEC}}<P_{I,z}(t_{f})>=$' + '{:.2f}'.format(vI_Z_ave[i] / nu))
+    #     Z_text.set_text(r'Z-factor: ' + '{:.2f}'.format(nPIm_deltaPeak_Vals[i]))
 
-    ax.legend(loc=2)
-    ax.set_title('Final Time Integrated Impurity Momentum Distribution (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
-    ax.set_ylabel(r'$n_{P_{I,z}}=\int dP_{I,x}dP_{I,y} n_{\vec{P_{I}}}$')
-    ax.set_xlabel(r'$\frac{1}{m_{I}c_{BEC}}P_{I,z}$')
-    ax.set_xlim([np.min(PI_z), np.max(PI_z)])
-    ax.set_ylim([0, 1.05])
+    # ax.legend(loc=2)
+    # ax.set_title('Final Time Integrated Impurity Momentum Distribution (' + r'$aIB^{-1}=$' + '{0})'.format(aIBi))
+    # ax.set_ylabel(r'$n_{P_{I,z}}=\int dP_{I,x}dP_{I,y} n_{\vec{P_{I}}}$')
+    # ax.set_xlabel(r'$\frac{1}{m_{I}c_{BEC}}P_{I,z}$')
+    # ax.set_xlim([np.min(PI_z), np.max(PI_z)])
+    # ax.set_ylim([0, 1.05])
 
-    anim1 = FuncAnimation(fig1, animate1, interval=1500, frames=range(PVals.size))
-    # anim1.save(animpath + '/aIBi_{0}'.format(aIBi) + '_ImpDist_z_int.gif', writer='imagemagick')
+    # anim1 = FuncAnimation(fig1, animate1, interval=1500, frames=range(PVals.size))
+    # # anim1.save(animpath + '/aIBi_{0}'.format(aIBi) + '_ImpDist_z_int.gif', writer='imagemagick')
 
-    plt.show()
+    # plt.show()

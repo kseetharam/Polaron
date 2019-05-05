@@ -3,6 +3,7 @@ import xarray as xr
 import pf_dynamic_sph as pfs
 from timeit import default_timer as timer
 import time
+import os
 # import matplotlib
 # import matplotlib.pyplot as plt
 
@@ -11,57 +12,59 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    # (Lx, Ly, Lz) = (105, 105, 105)
-    # (dx, dy, dz) = (0.375, 0.375, 0.375)
+    (Lx, Ly, Lz) = (60, 60, 60)
+    (dx, dy, dz) = (0.25, 0.25, 0.25)
+    higherCutoff = False; cutoffRat = 1.0
+    betterResolution = True; resRat = 0.5
 
-    (Lx, Ly, Lz) = (21, 21, 21)
-    (dx, dy, dz) = (0.375, 0.375, 0.375)
+    # (Lx, Ly, Lz) = (21, 21, 21)
+    # (dx, dy, dz) = (0.375, 0.375, 0.375)
+    # higherCutoff = False; cutoffRat = 1.0
+    # betterResolution = False; resRat = 1.0
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
-    if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, 1)
-        animpath = '/home/kis/Dropbox/VariationalResearch/DataAnalysis/figs'
-    elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, 1)
-        animpath = '/media/kis/Storage/Dropbox/VariationalResearch/DataAnalysis/figs'
-    elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, 1)
-        animpath = ''
+    mRat = 1
 
+    if toggleDict['Location'] == 'home':
+        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    elif toggleDict['Location'] == 'work':
+        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    elif toggleDict['Location'] == 'cluster':
+        datapath = '/n/scratchlfs/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    if higherCutoff is True:
+        datapath = datapath + '_cutoffRat_{:.2f}'.format(cutoffRat)
+    if betterResolution is True:
+        datapath = datapath + '_resRat_{:.2f}'.format(resRat)
+    datapath = datapath + '/massRatio={:.1f}'.format(mRat)
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
-        animpath = animpath + '/rdyn'
     elif toggleDict['Dynamics'] == 'imaginary':
         innerdatapath = datapath + '/imdyn'
-        animpath = animpath + '/idyn'
-
     if toggleDict['Grid'] == 'cartesian':
         innerdatapath = innerdatapath + '_cart'
     elif toggleDict['Grid'] == 'spherical':
         innerdatapath = innerdatapath + '_spherical'
-
     if toggleDict['Coupling'] == 'frohlich':
         innerdatapath = innerdatapath + '_froh'
-        animpath = animpath + '_frohlich'
     elif toggleDict['Coupling'] == 'twophonon':
         innerdatapath = innerdatapath
-        animpath = animpath + '_twophonon'
 
     interpdatapath = innerdatapath + '/interp'
 
+    if os.path.isdir(interpdatapath) is False:
+        os.mkdir(interpdatapath)
+
     # # Analysis of Total Dataset
 
-    aIBi = -10
-    Pnorm_des = 2.0
-    # Pnorm_des = 0.4
-    # Pnorm_des = 1.0
+    aIBi = -5
+    Pnorm_des = 0.12
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     n0 = qds.attrs['n0']; gBB = qds.attrs['gBB']; mI = qds.attrs['mI']; mB = qds.attrs['mB']
     nu = np.sqrt(n0 * gBB / mB)
@@ -74,22 +77,18 @@ if __name__ == "__main__":
 
     # # FULL RECONSTRUCTION OF 3D CARTESIAN BETA_K FROM 2D SPHERICAL BETA_K (doing actual interpolation in 2D spherical instead of 3D nonlinear cartesian)
 
-    CSAmp_ds = (qds['Real_CSAmp'] + 1j * qds['Imag_CSAmp']).sel(P=P).isel(t=-1); CSAmp_ds.attrs = qds.attrs; CSAmp_ds.attrs['Nph'] = qds['Nph'].sel(P=P).isel(t=-1).values
+    if Lx == 60:
+        CSAmp_ds = (qds['Real_CSAmp'] + 1j * qds['Imag_CSAmp']).sel(P=P).isel(tc=-1); CSAmp_ds.attrs = qds.attrs; CSAmp_ds.attrs['Nph'] = qds['Nph'].sel(P=P).isel(t=-1).values
+    else:
+        CSAmp_ds = (qds['Real_CSAmp'] + 1j * qds['Imag_CSAmp']).sel(P=P).isel(t=-1); CSAmp_ds.attrs = qds.attrs; CSAmp_ds.attrs['Nph'] = qds['Nph'].sel(P=P).isel(t=-1).values
 
     # Generate data
 
-    # dkxL = 1e-4; dkyL = 1e-4; dkzL = 1e-3
-    # linDimList = [(0.1, 0.01)]
+    # dkxL = 1e-2; dkyL = 1e-2; dkzL = 1e-2
+    # linDimList = [(2, 2)]
 
-    # dkxL = 1e-3; dkyL = 1e-3; dkzL = 1e-3
-    # # linDimList = [(0.1, 0.1), (0.2, 0.2), (0.5, 0.5), (1, 1), (1.5, 1.5), (2, 2), (2.5, 2.5), (3, 3), (3.5, 3.5), (4, 4), (4.5, 4.5), (5, 5), (5.5, 5.5), (6, 6), (6.5, 6.5)]
-    # linDimList = [(0.2, 0.2)]
-
-    dkxL = 1e-2; dkyL = 1e-2; dkzL = 1e-2
-    linDimList = [(2, 2)]
-
-    # dkxL = 1e-3; dkyL = 1e-3; dkzL = 1e-3
-    # linDimList = [(1, 1)]
+    dkxL = 5e-2; dkyL = 5e-2; dkzL = 5e-2
+    linDimList = [(10, 10)]
 
     for ldtup in linDimList:
         tupstart = timer()

@@ -279,7 +279,7 @@ def reconstructDistributions(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkz
 
     # Create linear 3D cartesian grid and reinterpolate Bk_3D onto this grid
     # kmin = np.min(kVec)
-    kmin = dk
+    kmin = 1.01 * dk
     kxL_pos = np.arange(kmin, linDimMinor, dkxL); kxL = np.concatenate((kmin - 1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
     kyL_pos = np.arange(kmin, linDimMinor, dkyL); kyL = np.concatenate((kmin - 1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
     kzL_pos = np.arange(kmin, linDimMajor, dkzL); kzL = np.concatenate((kmin - 1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
@@ -430,11 +430,13 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     Bk2_2D = (np.abs(Bk_2D_vals)**2).real.astype(float)
     # Create linear 3D cartesian grid and reinterpolate Bk_3D onto this grid
     # kmin = np.min(kVec)
-    kmin = dk
+    kmin = 1.01 * dk
     kxL_pos = np.arange(kmin, linDimMinor, dkxL); kxL = np.concatenate((kmin - 1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
     kyL_pos = np.arange(kmin, linDimMinor, dkyL); kyL = np.concatenate((kmin - 1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
     kzL_pos = np.arange(kmin, linDimMajor, dkzL); kzL = np.concatenate((kmin - 1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
     print('size - kxL: {0}, kyL: {1}, kzL: {2}'.format(kxL.size, kyL.size, kzL.size))
+    np.set_printoptions(linewidth=1000)
+    print(np.diff(kxL))
     kxLg_3D, kyLg_3D, kzLg_3D = np.meshgrid(kxL, kyL, kzL, indexing='ij')
     print('dkxL: {0}, dkyL: {1}, dkzL: {2}'.format(dkxL, dkyL, dkzL))
     # Re-interpret grid points of linear 3D Cartesian as nonlinear 3D spherical grid, find unique (k,th) points
@@ -458,12 +460,14 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     thg_red = thg[cart_mask]
     Bk2_2D_red = Bk2_2D[cart_mask]
     Nph_red = np.sum(dk * dth * (2 * np.pi)**(-2) * kg_red**2 * np.sin(thg_red) * Bk2_2D_red)
-    print('Rough percentage of phonons in reduced Cartesian grid (Calculated from Spherical 2D): {0}'.format(Nph_red / Nph))
+    print('Rough fraction of phonons in reduced Cartesian grid (Calculated from Spherical 2D): {0}'.format(Nph_red / Nph))
     Bk2Lg_3D_flat = Bk2_2D_CartInt[tups_inverse]
     Bk2Lg_3D = Bk2Lg_3D_flat.reshape(kg_3Di.shape)
     Bk2Lg_3D[np.isnan(Bk2Lg_3D)] = 0
-    PhDenLg_3D = ((1 / Nph) * Bk2Lg_3D).real.astype(float)
-    PhDenLg_3D_norm = np.sum(dkxL * dkyL * dkzL * (2 * np.pi)**(-3) * PhDenLg_3D)
+    Bk2Lg_3D = Bk2Lg_3D.real.astype(float)
+    Nph_interp = np.sum(dkxL * dkyL * dkzL * (2 * np.pi)**(-3) * Bk2Lg_3D)
+    PhDenLg_3D_norm = Nph_interp / Nph
+    PhDenLg_3D = (1 / Nph_interp) * Bk2Lg_3D
     print('Interpolated (1/Nph)|Bk|^2 normalization (Linear Cartesian 3D): {0}'.format(PhDenLg_3D_norm))
 
     # Calculate total phonon momentum distribution
@@ -478,11 +482,11 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     beta2_xyz = np.fft.fftshift(beta2_xyz_preshift)
     decay_length = 5
     decay_xyz = np.exp(-1 * (xLg_3D**2 + yLg_3D**2 + zLg_3D**2) / (2 * decay_length**2))
-    fexp = (np.exp(beta2_xyz - Nph_red) - np.exp(-Nph_red)) * decay_xyz
+    fexp = (np.exp(beta2_xyz - Nph_interp) - np.exp(-Nph_interp)) * decay_xyz
     nPB_preshift = np.fft.fftn(fexp) * dVxyz
     nPB_complex = np.fft.fftshift(nPB_preshift) / ((2 * np.pi)**3)  # this is the phonon momentum distribution in 3D Cartesian coordinates
     nPB = np.abs(nPB_complex)
-    nPB_deltaK0 = np.exp(-Nph_red)
+    nPB_deltaK0 = np.exp(-Nph_interp)
     # Produce impurity momentum and total phonon momentum magnitude distributions
     kgrid_L = Grid.Grid('CARTESIAN_3D')
     kgrid_L.initArray_premade('kx', kxL); kgrid_L.initArray_premade('ky', kyL); kgrid_L.initArray_premade('kz', kzL)
@@ -507,7 +511,7 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
                   'nPB_xz_slice': nPB_xz_slice_da, 'nPB_xy_slice': nPB_xy_slice_da, 'nPB_yz_slice': nPB_yz_slice_da, 'nPB_mag': nPBm_da,
                   'nPI_xz_slice': nPI_xz_slice_da, 'nPI_xy_slice': nPI_xy_slice_da, 'nPI_yz_slice': nPI_yz_slice_da, 'nPI_mag': nPIm_da})
     coords_dict = {'kx': kxL, 'ky': kyL, 'kz': kzL, 'x': xL, 'y': yL, 'z': zL, 'PB_x': PB_x, 'PB_y': PB_y, 'PB_z': PB_z, 'PI_x': PI_x, 'PI_y': PI_y, 'PI_z': PI_z, 'PB_mag': PBm, 'PI_mag': PIm}
-    attrs_dict = {'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'mom_deltapeak': nPB_deltaK0}
+    attrs_dict = {'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'mom_deltapeak': nPB_deltaK0, 'Nph_frac': Nph_red / Nph, 'Nph_interp': Nph_interp, 'Nph_orig': Nph}
     interp_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
     # interp_ds.to_netcdf(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
     return interp_ds

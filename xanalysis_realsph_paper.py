@@ -31,16 +31,16 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    # (Lx, Ly, Lz) = (60, 60, 60)
-    # (dx, dy, dz) = (0.25, 0.25, 0.25)
-    # higherCutoff = False; cutoffRat = 1.5
-    # betterResolution = True; resRat = 0.5
+    (Lx, Ly, Lz) = (60, 60, 60)
+    (dx, dy, dz) = (0.25, 0.25, 0.25)
+    higherCutoff = False; cutoffRat = 1.5
+    betterResolution = True; resRat = 0.5
 
     # (Lx, Ly, Lz) = (40, 40, 40)
     # (dx, dy, dz) = (0.25, 0.25, 0.25)
 
-    (Lx, Ly, Lz) = (21, 21, 21)
-    (dx, dy, dz) = (0.375, 0.375, 0.375)
+    # (Lx, Ly, Lz) = (21, 21, 21)
+    # (dx, dy, dz) = (0.375, 0.375, 0.375)
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     # NGridPoints_cart = 1.37e5
@@ -183,7 +183,7 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -2
+    aIBi = -5
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     qds_aIBi = qds
@@ -226,6 +226,34 @@ if __name__ == "__main__":
     print(klin, tlin_norm)
 
     print(kVals[-1], kVals[1] - kVals[0])
+
+    # # # # Nph CURVES
+
+    # tau = 100
+    # tsVals = tVals[tVals < tau]
+    # qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
+
+    # # print(Pnorm)
+
+    # Pnorm_des = np.array([0.1, 0.5, 0.8, 0.9, 1.0, 1.05, 1.1, 1.15, 1.2, 1.4, 1.6, 2.5, 3.0, 5.0])
+
+    # Pinds = np.zeros(Pnorm_des.size, dtype=int)
+    # for Pn_ind, Pn in enumerate(Pnorm_des):
+    #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
+
+    # fig, ax = plt.subplots()
+    # for indP in Pinds:
+    #     P = PVals[indP]
+    #     Nph = qds_aIBi_ts.isel(P=indP)['Nph'].values
+    #     ax.plot(tsVals / tscale, Nph, label='{:.2f}'.format(P / mc))
+
+    # ax.legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=2, ncol=2)
+    # ax.set_xscale('log')
+    # ax.set_title('Total Phonon Number (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    # ax.set_ylabel(r'$N_{ph}$')
+    # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+
+    # plt.show()
 
     # # # # S(t) AND P_Imp CURVES
 
