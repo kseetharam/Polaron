@@ -429,14 +429,23 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     print('Original (1/Nph)|Bk|^2 normalization (Spherical 2D): {0}'.format(Bk_norm))
     Bk2_2D = (np.abs(Bk_2D_vals)**2).real.astype(float)
     # Create linear 3D cartesian grid and reinterpolate Bk_3D onto this grid
-    # kmin = np.min(kVec)
-    kmin = 1.01 * dk
-    kxL_pos = np.arange(kmin, linDimMinor, dkxL); kxL = np.concatenate((kmin - 1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
-    kyL_pos = np.arange(kmin, linDimMinor, dkyL); kyL = np.concatenate((kmin - 1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
-    kzL_pos = np.arange(kmin, linDimMajor, dkzL); kzL = np.concatenate((kmin - 1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
+    # kmin = 1.01 * dk
+    # kxL_pos = np.arange(kmin, linDimMinor, dkxL); kxL = np.concatenate((kmin - 1 * np.flip(kxL_pos[1:], axis=0), kxL_pos))
+    # kyL_pos = np.arange(kmin, linDimMinor, dkyL); kyL = np.concatenate((kmin - 1 * np.flip(kyL_pos[1:], axis=0), kyL_pos))
+    # kzL_pos = np.arange(kmin, linDimMajor, dkzL); kzL = np.concatenate((kmin - 1 * np.flip(kzL_pos[1:], axis=0), kzL_pos))
+
+    Nx_des = 2 * linDimMinor / dkxL
+    kmin_x = linDimMinor / (Nx_des + 1); dkxL = 2 * kmin_x
+    kxL_pos = np.arange(kmin_x, linDimMinor + dkxL, dkxL); kxL = np.concatenate((-1 * kxL_pos[::-1], kxL_pos), axis=0)
+    Ny_des = 2 * linDimMinor / dkyL
+    kmin_y = linDimMinor / (Ny_des + 1); dkyL = 2 * kmin_y
+    kyL_pos = np.arange(kmin_y, linDimMinor + dkyL, dkyL); kyL = np.concatenate((-1 * kyL_pos[::-1], kyL_pos), axis=0)
+    Nz_des = 2 * linDimMajor / dkzL
+    kmin_z = linDimMajor / (Nz_des + 1); dkzL = 2 * kmin_z
+    kzL_pos = np.arange(kmin_z, linDimMajor + dkzL, dkzL); kzL = np.concatenate((-1 * kzL_pos[::-1], kzL_pos), axis=0)
+
     print('size - kxL: {0}, kyL: {1}, kzL: {2}'.format(kxL.size, kyL.size, kzL.size))
-    np.set_printoptions(linewidth=1000)
-    print(np.diff(kxL))
+
     kxLg_3D, kyLg_3D, kzLg_3D = np.meshgrid(kxL, kyL, kzL, indexing='ij')
     print('dkxL: {0}, dkyL: {1}, dkzL: {2}'.format(dkxL, dkyL, dkzL))
     # Re-interpret grid points of linear 3D Cartesian as nonlinear 3D spherical grid, find unique (k,th) points
