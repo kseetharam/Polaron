@@ -65,6 +65,11 @@ if __name__ == "__main__":
 
     tgrid = np.arange(0, tMax + dt, dt)
 
+    tmask = tgrid < 5
+    tshort = tgrid[tmask]
+    trest = tgrid[np.logical_not(tmask)]
+    tgrid_coarse = np.concatenate((tshort, trest[0:-1:20]))
+
     gParams = [xgrid, kgrid, tgrid]
     NGridPoints = kgrid.size()
 
@@ -76,7 +81,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical', 'Longtime': 'false', 'CoarseGrainRate': CoarseGrainRate}
+    toggleDict = {'Location': 'cluster', 'Dynamics': 'real', 'Coupling': 'twophonon', 'Grid': 'spherical', 'Longtime': 'false', 'CoarseGrainRate': CoarseGrainRate, 'ExplicitCoarseGrid': tgrid_coarse}
 
     # ---- SET PARAMS ----
 
@@ -92,6 +97,7 @@ if __name__ == "__main__":
     print(5 * mB * xi**2)
     print(-3.0 / xi)
     print((n0 * aBB * 3)**(-1 / 2) * mB * xi**2)
+    print(xi / nu)
 
     Params_List = []
     mI_Vals = np.array([0.5, 1.0, 2, 5.0])
@@ -167,8 +173,7 @@ if __name__ == "__main__":
     taskCount = int(os.getenv('SLURM_ARRAY_TASK_COUNT'))
     taskID = int(os.getenv('SLURM_ARRAY_TASK_ID'))
 
-    # taskCount = len(Params_List)
-    # taskID = 72
+    # taskCount = len(Params_List); taskID = 72; print(Params_List[taskID])
 
     if(taskCount > len(Params_List)):
         print('ERROR: TASK COUNT MISMATCH')

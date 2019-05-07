@@ -553,7 +553,11 @@ def quenchDynamics_DataGeneration(cParams, gParams, sParams, toggleDict):
     ham = PolaronHamiltonian.PolaronHamiltonian(cs, Params, toggleDict)
 
     # Prepare coarse grained time grid where we save data
-    tgrid_coarse = tgrid[0:-1:toggleDict['CoarseGrainRate']]
+
+    if 'ExplicitCoarseGrid' in toggleDict:
+        tgrid_coarse = toggleDict['ExplicitCoarseGrid']
+    else:
+        tgrid_coarse = tgrid[0:-1:toggleDict['CoarseGrainRate']]
     if tgrid_coarse[-1] != tgrid[-1]:
         tgrid_coarse = np.concatenate((tgrid_coarse, np.array([tgrid[-1]])))
 

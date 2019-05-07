@@ -31,16 +31,16 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (60, 60, 60)
-    (dx, dy, dz) = (0.25, 0.25, 0.25)
-    higherCutoff = False; cutoffRat = 1.5
-    betterResolution = True; resRat = 0.5
+    # (Lx, Ly, Lz) = (60, 60, 60)
+    # (dx, dy, dz) = (0.25, 0.25, 0.25)
+    # higherCutoff = False; cutoffRat = 1.5
+    # betterResolution = True; resRat = 0.5
 
     # (Lx, Ly, Lz) = (40, 40, 40)
     # (dx, dy, dz) = (0.25, 0.25, 0.25)
 
-    # (Lx, Ly, Lz) = (21, 21, 21)
-    # (dx, dy, dz) = (0.375, 0.375, 0.375)
+    (Lx, Ly, Lz) = (21, 21, 21)
+    (dx, dy, dz) = (0.375, 0.375, 0.375)
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     # NGridPoints_cart = 1.37e5
@@ -183,7 +183,7 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -5
+    aIBi = -10
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     qds_aIBi = qds
@@ -810,7 +810,8 @@ if __name__ == "__main__":
     P = PVals[indP]
 
     vmaxAuto = True
-    FGRBool = False
+    FGRBool = True
+    IRpatch = False
 
     tau = 100
     tsVals = tVals[tVals < tau]
@@ -881,27 +882,29 @@ if __name__ == "__main__":
     kxg_interp = kg_interp * np.sin(thg_interp)
     kzg_interp = kg_interp * np.cos(thg_interp)
 
-    quad1 = ax1.pcolormesh(kzg_interp, kxg_interp, PhDen0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
-    quad1m = ax1.pcolormesh(kzg_interp, -1 * kxg_interp, PhDen0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax)
+    quad1 = ax1.pcolormesh(kzg_interp, kxg_interp, PhDen0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax, cmap='inferno')
+    quad1m = ax1.pcolormesh(kzg_interp, -1 * kxg_interp, PhDen0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax, cmap='inferno')
     curve1 = ax1.plot(Pph[0], 0, marker='x', markersize=10, zorder=11, color="magenta")[0]
     curve1m = ax1.plot(Pimp[0], 0, marker='o', markersize=10, zorder=11, color="red")[0]
     curve2 = ax1.plot(mc, 0, marker='*', markersize=10, zorder=11, color="black")[0]
     patch_Excitation = plt.Circle((0, 0), 1e10, edgecolor='white', facecolor='None', linewidth=2)
     ax1.add_patch(patch_Excitation)
-    patch_IR = plt.Circle((0, 0), kIRcut, edgecolor='#8c564b', facecolor='#8c564b')
-    ax1.add_patch(patch_IR)
     patch_klin = plt.Circle((0, 0), klin, edgecolor='#ff7f0e', facecolor='None')
     ax1.add_patch(patch_klin)
     t_text = ax1.text(0.81, 0.9, r'$t$ [$\frac{\xi}{c}$]: ' + '{:1.2f}'.format(tsVals[0] / tscale), transform=ax1.transAxes, fontsize='small', color='r')
-    IR_text = ax1.text(0.61, 0.825, r'Weight (IR patch): ' + '{:.2f}%'.format(norm_IRpercent[0]), transform=ax1.transAxes, fontsize='small', color='#8c564b')
-    rem_text = ax1.text(0.61, 0.75, r'Weight (Rem vis): ' + '{:.2f}%'.format(norm_axpercent[0]), transform=ax1.transAxes, fontsize='small', color='yellow')
     Nph_text = ax1.text(0.81, 0.675, r'$N_{ph}$: ' + '{:.2f}'.format(Nph[0]), transform=ax1.transAxes, fontsize='small', color='magenta')
+
+    if IRpatch is True:
+        patch_IR = plt.Circle((0, 0), kIRcut, edgecolor='#8c564b', facecolor='#8c564b')
+        ax1.add_patch(patch_IR)
+        IR_text = ax1.text(0.61, 0.825, r'Weight (IR patch): ' + '{:.2f}%'.format(norm_IRpercent[0]), transform=ax1.transAxes, fontsize='small', color='#8c564b')
+        rem_text = ax1.text(0.61, 0.75, r'Weight (Rem vis): ' + '{:.2f}%'.format(norm_axpercent[0]), transform=ax1.transAxes, fontsize='small', color='yellow')
 
     if FGRBool is True:
         Omegak0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Omegak_da.isel(t=0), 'k', 'th', interpmul)
-        FGRmask0 = Omegak0_interp_vals > 1e-6
-        Omegak0_interp_vals[FGRmask0] = 0
-        Omegak0_interp_vals[np.logical_not(FGRmask0)] = 1
+        FGRmask0 = np.abs(Omegak0_interp_vals) < 1e-2
+        Omegak0_interp_vals[FGRmask0] = 1
+        Omegak0_interp_vals[np.logical_not(FGRmask0)] = 0
         p = []
         p.append(ax1.contour(kzg_interp, kxg_interp, Omegak0_interp_vals, zorder=10, colors='tab:gray'))
         p.append(ax1.contour(kzg_interp, -1 * kxg_interp, Omegak0_interp_vals, zorder=10, colors='tab:gray'))
@@ -910,8 +913,13 @@ if __name__ == "__main__":
     ax1.set_ylim([-1 * axislim, axislim])
 
     patch_FGR = Patch(facecolor='none', edgecolor='tab:gray')
-    handles = (curve1, curve1m, curve2, patch_Excitation, patch_IR, patch_klin, patch_FGR)
-    labels = (r'$P_{ph}$', r'$P_{imp}$', r'$m_{I}c$', r'$\omega_{|k|}^{-1}(\frac{2\pi}{t})$', r'Singular Region', r'Linear Excitations', 'FGR Phase Space')
+    if IRpatch is True:
+        handles = (curve1, curve1m, curve2, patch_Excitation, patch_IR, patch_klin, patch_FGR)
+        labels = (r'$P_{ph}$', r'$P_{imp}$', r'$m_{I}c$', r'$\omega_{|k|}^{-1}(\frac{2\pi}{t})$', r'Singular Region', r'Linear Excitations', 'FGR Phase Space')
+    else:
+        handles = (curve1, curve1m, curve2, patch_Excitation, patch_klin, patch_FGR)
+        labels = (r'$P_{ph}$', r'$P_{imp}$', r'$m_{I}c$', r'$\omega_{|k|}^{-1}(\frac{2\pi}{t})$', r'Linear Excitations', 'FGR Phase Space')
+
     ax1.legend(handles, labels, loc=2, fontsize='small')
     ax1.grid(True, linewidth=0.5)
     ax1.set_title('Individual Phonon Distribution (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c}=$' + '{:.2f})'.format(Pnorm[indP]))
@@ -926,9 +934,10 @@ if __name__ == "__main__":
         curve1.set_xdata(Pph[i])
         curve1m.set_xdata(Pimp[i])
         t_text.set_text(r'$t$ [$\frac{\xi}{c}$]: ' + '{:.1f}'.format(tsVals[i] / tscale))
-        IR_text.set_text(r'Weight (IR patch): ' + '{:.2f}%'.format(norm_IRpercent[i]))
-        rem_text.set_text(r'Weight (Rem vis): ' + '{:.2f}%'.format(norm_axpercent[i]))
         Nph_text.set_text(r'$N_{ph}$: ' + '{:.2f}'.format(Nph[i]))
+        if IRpatch is True:
+            IR_text.set_text(r'Weight (IR patch): ' + '{:.2f}%'.format(norm_IRpercent[i]))
+            rem_text.set_text(r'Weight (Rem vis): ' + '{:.2f}%'.format(norm_axpercent[i]))
 
         def rfunc(k): return (pfs.omegak(k, mB, n0, gBB) - 2 * np.pi / tsVals[i])
         kroot = fsolve(rfunc, 1e8); kroot = kroot[kroot >= 0]
@@ -936,9 +945,9 @@ if __name__ == "__main__":
 
         if FGRBool is True:
             Omegak_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Omegak_da.isel(t=i), 'k', 'th', interpmul)
-            FGRmask = Omegak_interp_vals > 1e-6
-            Omegak_interp_vals[FGRmask] = 0
-            Omegak_interp_vals[np.logical_not(FGRmask)] = 1
+            FGRmask = np.abs(Omegak_interp_vals) < 1e-2
+            Omegak_interp_vals[FGRmask] = 1
+            Omegak_interp_vals[np.logical_not(FGRmask)] = 0
 
             for tp in p[0].collections:
                 tp.remove()
@@ -954,7 +963,7 @@ if __name__ == "__main__":
     if FGRBool is True:
         anim1_filename = anim1_filename + '_FGR'
     # anim1.save(animpath + anim1_filename + '.mp4', writer='mpegWriter')
-    anim1.save(animpath + anim1_filename + '.gif', writer='imagemagick')
+    # anim1.save(animpath + anim1_filename + '.gif', writer='imagemagick')
     plt.show()
 
     # # # # SUBSONIC POLARON STATE OVERLAP
