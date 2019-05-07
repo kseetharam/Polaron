@@ -806,10 +806,13 @@ if __name__ == "__main__":
     for Pn_ind, Pn in enumerate(Pnorm_des):
         Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
 
+    print(PVals[Pinds])
+
     indP = Pinds[6]
     P = PVals[indP]
+    print(aIBi, P)
 
-    vmaxAuto = True
+    vmaxAuto = False
     FGRBool = True
     IRpatch = False
 
@@ -872,10 +875,10 @@ if __name__ == "__main__":
 
     fig1, ax1 = plt.subplots()
 
+    print(vmax)
     vmin = 0
     if vmaxAuto is False:
         vmax = 700
-    print(vmax)
 
     interpmul = 5
     PhDen0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(PhDen_da.isel(t=0), 'k', 'th', interpmul)
@@ -884,21 +887,22 @@ if __name__ == "__main__":
 
     quad1 = ax1.pcolormesh(kzg_interp, kxg_interp, PhDen0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax, cmap='inferno')
     quad1m = ax1.pcolormesh(kzg_interp, -1 * kxg_interp, PhDen0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax, cmap='inferno')
-    curve1 = ax1.plot(Pph[0], 0, marker='x', markersize=10, zorder=11, color="magenta")[0]
-    curve1m = ax1.plot(Pimp[0], 0, marker='o', markersize=10, zorder=11, color="red")[0]
-    curve2 = ax1.plot(mc, 0, marker='*', markersize=10, zorder=11, color="black")[0]
+    curve1 = ax1.plot(Pph[0], 0, marker='x', markersize=10, zorder=11, color="xkcd:steel grey")[0]
+    curve1m = ax1.plot(Pimp[0], 0, marker='o', markersize=10, zorder=11, color="xkcd:apple green")[0]
+    curve2 = ax1.plot(mc, 0, marker='*', markersize=10, zorder=11, color="cyan")[0]
     patch_Excitation = plt.Circle((0, 0), 1e10, edgecolor='white', facecolor='None', linewidth=2)
     ax1.add_patch(patch_Excitation)
-    patch_klin = plt.Circle((0, 0), klin, edgecolor='#ff7f0e', facecolor='None')
+    # patch_klin = plt.Circle((0, 0), klin, edgecolor='#ff7f0e', facecolor='None')
+    patch_klin = plt.Circle((0, 0), klin, edgecolor='tab:cyan', facecolor='None')
     ax1.add_patch(patch_klin)
     t_text = ax1.text(0.81, 0.9, r'$t$ [$\frac{\xi}{c}$]: ' + '{:1.2f}'.format(tsVals[0] / tscale), transform=ax1.transAxes, fontsize='small', color='r')
-    Nph_text = ax1.text(0.81, 0.675, r'$N_{ph}$: ' + '{:.2f}'.format(Nph[0]), transform=ax1.transAxes, fontsize='small', color='magenta')
+    Nph_text = ax1.text(0.81, 0.825, r'$N_{ph}$: ' + '{:.2f}'.format(Nph[0]), transform=ax1.transAxes, fontsize='small', color='xkcd:steel grey')
 
     if IRpatch is True:
         patch_IR = plt.Circle((0, 0), kIRcut, edgecolor='#8c564b', facecolor='#8c564b')
         ax1.add_patch(patch_IR)
-        IR_text = ax1.text(0.61, 0.825, r'Weight (IR patch): ' + '{:.2f}%'.format(norm_IRpercent[0]), transform=ax1.transAxes, fontsize='small', color='#8c564b')
-        rem_text = ax1.text(0.61, 0.75, r'Weight (Rem vis): ' + '{:.2f}%'.format(norm_axpercent[0]), transform=ax1.transAxes, fontsize='small', color='yellow')
+        IR_text = ax1.text(0.61, 0.75, r'Weight (IR patch): ' + '{:.2f}%'.format(norm_IRpercent[0]), transform=ax1.transAxes, fontsize='small', color='#8c564b')
+        rem_text = ax1.text(0.61, 0.675, r'Weight (Rem vis): ' + '{:.2f}%'.format(norm_axpercent[0]), transform=ax1.transAxes, fontsize='small', color='yellow')
 
     if FGRBool is True:
         Omegak0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Omegak_da.isel(t=0), 'k', 'th', interpmul)
@@ -908,17 +912,21 @@ if __name__ == "__main__":
         p = []
         p.append(ax1.contour(kzg_interp, kxg_interp, Omegak0_interp_vals, zorder=10, colors='tab:gray'))
         p.append(ax1.contour(kzg_interp, -1 * kxg_interp, Omegak0_interp_vals, zorder=10, colors='tab:gray'))
+        p.append(ax1.contour(Pimp[0] - kzg_interp, -1 * kxg_interp, Omegak0_interp_vals, zorder=10, colors='xkcd:military green'))
+        p.append(ax1.contour(Pimp[0] - kzg_interp, -1 * (-1) * kxg_interp, Omegak0_interp_vals, zorder=10, colors='xkcd:military green'))
 
     ax1.set_xlim([-1 * axislim, axislim])
     ax1.set_ylim([-1 * axislim, axislim])
 
-    patch_FGR = Patch(facecolor='none', edgecolor='tab:gray')
+    patch_FGR_ph = Patch(facecolor='none', edgecolor='tab:gray')
+    patch_FGR_imp = Patch(facecolor='none', edgecolor='xkcd:military green')
+
     if IRpatch is True:
-        handles = (curve1, curve1m, curve2, patch_Excitation, patch_IR, patch_klin, patch_FGR)
-        labels = (r'$P_{ph}$', r'$P_{imp}$', r'$m_{I}c$', r'$\omega_{|k|}^{-1}(\frac{2\pi}{t})$', r'Singular Region', r'Linear Excitations', 'FGR Phase Space')
+        handles = (curve1, curve1m, curve2, patch_Excitation, patch_IR, patch_klin, patch_FGR_ph, patch_FGR_imp)
+        labels = (r'$P_{ph}$', r'$P_{imp}$', r'$m_{I}c$', r'$\omega_{|k|}^{-1}(\frac{2\pi}{t})$', r'Singular Region', r'Linear Excitations', 'FGR Phase Space (ph)', 'FGR Phase Space (imp)')
     else:
-        handles = (curve1, curve1m, curve2, patch_Excitation, patch_klin, patch_FGR)
-        labels = (r'$P_{ph}$', r'$P_{imp}$', r'$m_{I}c$', r'$\omega_{|k|}^{-1}(\frac{2\pi}{t})$', r'Linear Excitations', 'FGR Phase Space')
+        handles = (curve1, curve1m, curve2, patch_Excitation, patch_klin, patch_FGR_ph, patch_FGR_imp)
+        labels = (r'$P_{ph}$', r'$P_{imp}$', r'$m_{I}c$', r'$\omega_{|k|}^{-1}(\frac{2\pi}{t})$', r'Linear Excitations', 'FGR Phase Space (ph)', 'FGR Phase Space (imp)')
 
     ax1.legend(handles, labels, loc=2, fontsize='small')
     ax1.grid(True, linewidth=0.5)
@@ -953,8 +961,14 @@ if __name__ == "__main__":
                 tp.remove()
             for tp in p[1].collections:
                 tp.remove()
+            for tp in p[2].collections:
+                tp.remove()
+            for tp in p[3].collections:
+                tp.remove()
             p[0] = ax1.contour(kzg_interp, kxg_interp, Omegak_interp_vals, zorder=10, colors='tab:gray')
             p[1] = ax1.contour(kzg_interp, -1 * kxg_interp, Omegak_interp_vals, zorder=10, colors='tab:gray')
+            p[2] = ax1.contour(Pimp[i] - kzg_interp, -1 * kxg_interp, Omegak_interp_vals, zorder=10, colors='xkcd:military green')
+            p[3] = ax1.contour(Pimp[i] - kzg_interp, -1 * (-1) * kxg_interp, Omegak_interp_vals, zorder=10, colors='xkcd:military green')
 
     anim1 = FuncAnimation(fig1, animate1, interval=1e-5, frames=range(tsVals.size), blit=False)
     anim1_filename = '/aIBi_{:d}_P_{:.2f}'.format(int(aIBi), P) + '_indPhononDist_2D_oscBox'
