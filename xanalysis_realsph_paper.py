@@ -183,7 +183,7 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -10
+    aIBi = -2
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     qds_aIBi = qds
@@ -218,7 +218,7 @@ if __name__ == "__main__":
     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds.coords['k'].values); kgrid.initArray_premade('th', qds.coords['th'].values)
     kVals = kgrid.getArray('k')
     wk_Vals = pfs.omegak(kVals, mB, n0, gBB)
-    bdiff = 100 * np.abs(wk_Vals - nu * kVals) / kVals
+    bdiff = 100 * np.abs(wk_Vals - nu * kVals) / (nu * kVals)
     kind = np.abs(bdiff - 1).argmin().astype(int)
     klin = kVals[kind]
     tlin = 2 * np.pi / (nu * kVals[kind])
@@ -265,7 +265,7 @@ if __name__ == "__main__":
 
     # # Pnorm_des = np.array([0.1, 0.8, 5.0, 10.0])
 
-    # Pnorm_des = np.array([0.1, 0.5, 0.8, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2, 1.4, 1.6, 2.5, 3.0, 5.0])
+    # Pnorm_des = np.array([0.1, 0.5, 0.8, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2, 1.4, 1.6, 2.5, 3.0, 5.0, 6.0, 7.0, 9.0])
 
     # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
     # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.0, 1.1, 1.3, 1.8, 3.0])
@@ -801,18 +801,18 @@ if __name__ == "__main__":
 
     # # INDIVIDUAL PHONON MOMENTUM DISTRIBUTION
 
-    Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.35, 1.8, 3.0, 5.0])
+    Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.5, 1.8, 3.0, 5.0])
     Pinds = np.zeros(Pnorm_des.size, dtype=int)
     for Pn_ind, Pn in enumerate(Pnorm_des):
         Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
 
     print(PVals[Pinds])
 
-    indP = Pinds[6]
+    indP = Pinds[1]
     P = PVals[indP]
     print(aIBi, P)
 
-    vmaxAuto = False
+    vmaxAuto = True
     FGRBool = True
     IRpatch = False
 
@@ -826,10 +826,12 @@ if __name__ == "__main__":
     kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
     dVk = kgrid.dV()
 
-    # axislim = 2
+    axislim = 2
     # kIRcut = 0.13
-    axislim = 3
-    kIRcut = 0.2
+    # axislim = 3
+    kIRcut = 0.1
+    if vmaxAuto is True:
+        kIRcut = -1
 
     kIRmask = kg < kIRcut
     dVk_IR = dVk.reshape((len(kVec), len(thVec)))[kIRmask]
@@ -878,15 +880,20 @@ if __name__ == "__main__":
     print(vmax)
     vmin = 0
     if vmaxAuto is False:
-        vmax = 700
+        vmax = 800
 
     interpmul = 5
     PhDen0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(PhDen_da.isel(t=0), 'k', 'th', interpmul)
     kxg_interp = kg_interp * np.sin(thg_interp)
     kzg_interp = kg_interp * np.cos(thg_interp)
 
-    quad1 = ax1.pcolormesh(kzg_interp, kxg_interp, PhDen0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax, cmap='inferno')
-    quad1m = ax1.pcolormesh(kzg_interp, -1 * kxg_interp, PhDen0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax, cmap='inferno')
+    if vmaxAuto is True:
+        quad1 = ax1.pcolormesh(kzg_interp, kxg_interp, PhDen0_interp_vals[:-1, :-1], norm=colors.LogNorm(vmin=1e-3, vmax=vmax), cmap='inferno')
+        quad1m = ax1.pcolormesh(kzg_interp, -1 * kxg_interp, PhDen0_interp_vals[:-1, :-1], norm=colors.LogNorm(vmin=1e-3, vmax=vmax), cmap='inferno')
+    else:
+        quad1 = ax1.pcolormesh(kzg_interp, kxg_interp, PhDen0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax, cmap='inferno')
+        quad1m = ax1.pcolormesh(kzg_interp, -1 * kxg_interp, PhDen0_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax, cmap='inferno')
+
     curve1 = ax1.plot(Pph[0], 0, marker='x', markersize=10, zorder=11, color="xkcd:steel grey")[0]
     curve1m = ax1.plot(Pimp[0], 0, marker='o', markersize=10, zorder=11, color="xkcd:apple green")[0]
     curve2 = ax1.plot(mc, 0, marker='*', markersize=10, zorder=11, color="cyan")[0]
@@ -973,11 +980,12 @@ if __name__ == "__main__":
     anim1 = FuncAnimation(fig1, animate1, interval=1e-5, frames=range(tsVals.size), blit=False)
     anim1_filename = '/aIBi_{:d}_P_{:.2f}'.format(int(aIBi), P) + '_indPhononDist_2D_oscBox'
     if vmaxAuto is True:
-        anim1_filename = anim1_filename + '_vmaxLarge'
+        anim1_filename = anim1_filename + '_vmaxLog'
     if FGRBool is True:
         anim1_filename = anim1_filename + '_FGR'
     # anim1.save(animpath + anim1_filename + '.mp4', writer='mpegWriter')
-    # anim1.save(animpath + anim1_filename + '.gif', writer='imagemagick')
+    anim1.save(animpath + anim1_filename + '.gif', writer='imagemagick')
+
     plt.show()
 
     # # # # SUBSONIC POLARON STATE OVERLAP

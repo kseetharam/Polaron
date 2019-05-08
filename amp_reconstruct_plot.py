@@ -13,15 +13,15 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (60, 60, 60)
-    (dx, dy, dz) = (0.25, 0.25, 0.25)
-    higherCutoff = False; cutoffRat = 1.5
-    betterResolution = True; resRat = 0.5
-
-    # (Lx, Ly, Lz) = (21, 21, 21)
-    # (dx, dy, dz) = (0.375, 0.375, 0.375)
+    # (Lx, Ly, Lz) = (60, 60, 60)
+    # (dx, dy, dz) = (0.25, 0.25, 0.25)
     # higherCutoff = False; cutoffRat = 1.5
-    # betterResolution = False; resRat = 0.5
+    # betterResolution = True; resRat = 0.5
+
+    (Lx, Ly, Lz) = (21, 21, 21)
+    (dx, dy, dz) = (0.375, 0.375, 0.375)
+    higherCutoff = False; cutoffRat = 1.5
+    betterResolution = False; resRat = 0.5
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -60,11 +60,11 @@ if __name__ == "__main__":
     # # Pnorm_des = 2.64
     # Pnorm_des = 1.0
 
-    aIBi = -5
-    Pnorm_des = 0.12
+    aIBi = -2
+    Pnorm_des = 0.5
 
     linDimList = [(2, 2), (10, 10)]
-    linDimMajor, linDimMinor = linDimList[1]
+    linDimMajor, linDimMinor = linDimList[0]
 
     qds_orig = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     n0 = qds_orig.attrs['n0']; gBB = qds_orig.attrs['gBB']; mI = qds_orig.attrs['mI']; mB = qds_orig.attrs['mB']
@@ -108,8 +108,16 @@ if __name__ == "__main__":
     # print(PhDen_orig_sum, PhDen_smooth_sum)
 
     fig1, ax1 = plt.subplots()
-    quad1 = ax1.pcolormesh(kzg, kxg, PhDen_orig_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDen_orig_Vals)), cmap='inferno')
-    quad1m = ax1.pcolormesh(kzg, -1 * kxg, PhDen_orig_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDen_orig_Vals)), cmap='inferno')
+    vmax = np.max(PhDen_orig_Vals)
+    # vmax = 8414555  # P=2.4
+    # vmax = 2075494  # P=1.20
+    # vmax = 1055106  # P=0.38
+    quad1 = ax1.pcolormesh(kzg, kxg, PhDen_orig_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=vmax), cmap='inferno')
+    quad1m = ax1.pcolormesh(kzg, -1 * kxg, PhDen_orig_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=vmax), cmap='inferno')
+    # quad1 = ax1.pcolormesh(kzg, kxg, PhDen_orig_Vals, vmin=0, vmax=vmax, cmap='inferno')
+    # quad1m = ax1.pcolormesh(kzg, -1 * kxg, PhDen_orig_Vals, vmin=0, vmax=vmax, cmap='inferno')
+
+    print(vmax)
     ax1.set_xlim([-1 * linDimMajor, linDimMajor])
     ax1.set_ylim([-1 * linDimMinor, linDimMinor])
     ax1.set_xlabel('kz (Impurity Propagation Direction)')
@@ -127,94 +135,94 @@ if __name__ == "__main__":
     # ax.set_title('Individual Phonon Momentum Distribution (Sph Interp)', size='smaller')
     # fig.colorbar(quad, ax=ax, extend='both')
 
-    # CARTESIAN INTERPOLATION PLOTS
+    # # CARTESIAN INTERPOLATION PLOTS
 
-    interp_ds = xr.open_dataset(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
-    kxL = interp_ds['kx'].values; dkxL = kxL[1] - kxL[0]
-    kyL = interp_ds['ky'].values; dkyL = kyL[1] - kyL[0]
-    kzL = interp_ds['kz'].values; dkzL = kzL[1] - kzL[0]
-    xL = interp_ds['x'].values
-    zL = interp_ds['z'].values
-    PI_mag = interp_ds['PI_mag'].values
-    kxLg_xz_slice, kzLg_xz_slice = np.meshgrid(kxL, kzL, indexing='ij')
-    xLg_xz_slice, zLg_xz_slice = np.meshgrid(xL, zL, indexing='ij')
-    PhDenLg_xz_slice = interp_ds['PhDen_xz'].values
+    # interp_ds = xr.open_dataset(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
+    # kxL = interp_ds['kx'].values; dkxL = kxL[1] - kxL[0]
+    # kyL = interp_ds['ky'].values; dkyL = kyL[1] - kyL[0]
+    # kzL = interp_ds['kz'].values; dkzL = kzL[1] - kzL[0]
+    # xL = interp_ds['x'].values
+    # zL = interp_ds['z'].values
+    # PI_mag = interp_ds['PI_mag'].values
+    # kxLg_xz_slice, kzLg_xz_slice = np.meshgrid(kxL, kzL, indexing='ij')
+    # xLg_xz_slice, zLg_xz_slice = np.meshgrid(xL, zL, indexing='ij')
+    # PhDenLg_xz_slice = interp_ds['PhDen_xz'].values
 
-    nPI_mag = interp_ds['nPI_mag'].values
-    mom_deltapeak = interp_ds.attrs['mom_deltapeak']
+    # nPI_mag = interp_ds['nPI_mag'].values
+    # mom_deltapeak = interp_ds.attrs['mom_deltapeak']
 
-    n0 = interp_ds.attrs['n0']
-    gBB = interp_ds.attrs['gBB']
-    mI = interp_ds.attrs['mI']
-    mB = interp_ds.attrs['mB']
-    nu = np.sqrt(n0 * gBB / mB)
-    mc = mI * nu
+    # n0 = interp_ds.attrs['n0']
+    # gBB = interp_ds.attrs['gBB']
+    # mI = interp_ds.attrs['mI']
+    # mB = interp_ds.attrs['mB']
+    # nu = np.sqrt(n0 * gBB / mB)
+    # mc = mI * nu
 
-    # Individual Phonon Momentum Distribution (Cart Interp)
-    fig2, ax2 = plt.subplots()
-    quad2 = ax2.pcolormesh(kzLg_xz_slice, kxLg_xz_slice, PhDenLg_xz_slice, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDen_orig_Vals)), cmap='inferno')
-    ax2.set_xlabel('kz (Impurity Propagation Direction)')
-    ax2.set_ylabel('kx')
-    ax2.set_title('Individual Phonon Momentum Distribution (Cart Interp)', size='smaller')
-    fig2.colorbar(quad2, ax=ax2, extend='both')
+    # # Individual Phonon Momentum Distribution (Cart Interp)
+    # fig2, ax2 = plt.subplots()
+    # quad2 = ax2.pcolormesh(kzLg_xz_slice, kxLg_xz_slice, PhDenLg_xz_slice, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDen_orig_Vals)), cmap='inferno')
+    # ax2.set_xlabel('kz (Impurity Propagation Direction)')
+    # ax2.set_ylabel('kx')
+    # ax2.set_title('Individual Phonon Momentum Distribution (Cart Interp)', size='smaller')
+    # fig2.colorbar(quad2, ax=ax2, extend='both')
 
-    # Impurity Momentum Magnitude Distribution (Interp)
-    fig5, ax5 = plt.subplots()
-    ax5.plot(mc * np.ones(PI_mag.size), np.linspace(0, 1, PI_mag.size), 'y--', label=r'$m_{I}c_{BEC}$')
-    curve = ax5.plot(PI_mag, nPI_mag, color='k', lw=3, label='')
-    # D = nPI_mag - np.max(nPI_mag) / 2
-    # indices = np.where(D > 0)[0]
-    # ind_s, ind_f = indices[0], indices[-1]
-    # FWHMcurve = ax5.plot(np.linspace(PI_mag[ind_s], PI_mag[ind_f], 100), nPI_mag[ind_s] * np.ones(100), 'b-', linewidth=3.0, label='Incoherent Part FWHM')
-    # FWHMmarkers = ax5.plot(np.linspace(PI_mag[ind_s], PI_mag[ind_f], 2), nPI_mag[ind_s] * np.ones(2), 'bD', mew=0.75, ms=7.5, label='')
-    Zline = ax5.plot(P * np.ones(PI_mag.size), np.linspace(0, mom_deltapeak, PI_mag.size), 'r-', linewidth=3.0, label='Delta Peak (Z-factor)')
-    Zmarker = ax5.plot(P, mom_deltapeak, 'rx', mew=0.75, ms=7.5, label='')
-    dPIm = PI_mag[1] - PI_mag[0]
-    nPIm_Tot = np.sum(nPI_mag * dPIm) + mom_deltapeak
-    norm_text = ax5.text(0.7, 0.65, r'$\int n_{|\vec{P_{I}}|} d|\vec{P_{I}}| = $' + '{:.2f}'.format(nPIm_Tot), transform=ax5.transAxes, color='k')
+    # # Impurity Momentum Magnitude Distribution (Interp)
+    # fig5, ax5 = plt.subplots()
+    # ax5.plot(mc * np.ones(PI_mag.size), np.linspace(0, 1, PI_mag.size), 'y--', label=r'$m_{I}c_{BEC}$')
+    # curve = ax5.plot(PI_mag, nPI_mag, color='k', lw=3, label='')
+    # # D = nPI_mag - np.max(nPI_mag) / 2
+    # # indices = np.where(D > 0)[0]
+    # # ind_s, ind_f = indices[0], indices[-1]
+    # # FWHMcurve = ax5.plot(np.linspace(PI_mag[ind_s], PI_mag[ind_f], 100), nPI_mag[ind_s] * np.ones(100), 'b-', linewidth=3.0, label='Incoherent Part FWHM')
+    # # FWHMmarkers = ax5.plot(np.linspace(PI_mag[ind_s], PI_mag[ind_f], 2), nPI_mag[ind_s] * np.ones(2), 'bD', mew=0.75, ms=7.5, label='')
+    # Zline = ax5.plot(P * np.ones(PI_mag.size), np.linspace(0, mom_deltapeak, PI_mag.size), 'r-', linewidth=3.0, label='Delta Peak (Z-factor)')
+    # Zmarker = ax5.plot(P, mom_deltapeak, 'rx', mew=0.75, ms=7.5, label='')
+    # dPIm = PI_mag[1] - PI_mag[0]
+    # nPIm_Tot = np.sum(nPI_mag * dPIm) + mom_deltapeak
+    # norm_text = ax5.text(0.7, 0.65, r'$\int n_{|\vec{P_{I}}|} d|\vec{P_{I}}| = $' + '{:.2f}'.format(nPIm_Tot), transform=ax5.transAxes, color='k')
 
-    ax5.legend()
-    ax5.set_xlim([-0.01, np.max(PI_mag)])
-    ax5.set_ylim([0, 1.05])
-    ax5.set_title('Impurity Momentum Magnitude Distribution (Cart Interp) (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.2f})'.format(P / mc), size='smaller')
-    ax5.set_ylabel(r'$n_{|\vec{P_{I}}|}$')
-    ax5.set_xlabel(r'$|\vec{P_{I}}|$')
+    # ax5.legend()
+    # ax5.set_xlim([-0.01, np.max(PI_mag)])
+    # ax5.set_ylim([0, 1.05])
+    # ax5.set_title('Impurity Momentum Magnitude Distribution (Cart Interp) (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.2f})'.format(P / mc), size='smaller')
+    # ax5.set_ylabel(r'$n_{|\vec{P_{I}}|}$')
+    # ax5.set_xlabel(r'$|\vec{P_{I}}|$')
 
-    # ORIGINAL CARTESIAN DATA PLOTS
+    # # ORIGINAL CARTESIAN DATA PLOTS
 
-    # Impurity Momentum Magnitude Distribution (Original Cartesian data)
+    # # Impurity Momentum Magnitude Distribution (Original Cartesian data)
 
-    qds_orig_cart = xr.open_dataset(cartdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi)).isel(t=-1)
-    qds_nPIm_inf = qds_orig_cart['nPI_mag'].sel(P=P, method='nearest').dropna('PI_mag')
-    P_cart = qds_nPIm_inf.coords['P'].values
-    PI_mag_cart = qds_nPIm_inf.coords['PI_mag'].values
-    nPI_mag_cart = qds_nPIm_inf.values
-    mom_deltapeak_cart = qds_orig_cart.sel(P=P_cart)['mom_deltapeak'].values
-    print('P (cart): {:.2f}'.format(P_cart))
+    # qds_orig_cart = xr.open_dataset(cartdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi)).isel(t=-1)
+    # qds_nPIm_inf = qds_orig_cart['nPI_mag'].sel(P=P, method='nearest').dropna('PI_mag')
+    # P_cart = qds_nPIm_inf.coords['P'].values
+    # PI_mag_cart = qds_nPIm_inf.coords['PI_mag'].values
+    # nPI_mag_cart = qds_nPIm_inf.values
+    # mom_deltapeak_cart = qds_orig_cart.sel(P=P_cart)['mom_deltapeak'].values
+    # print('P (cart): {:.2f}'.format(P_cart))
 
-    fig6, ax6 = plt.subplots()
-    ax6.plot(mc * np.ones(PI_mag_cart.size), np.linspace(0, 1, PI_mag_cart.size), 'y--', label=r'$m_{I}c_{BEC}$')
-    curve = ax6.plot(PI_mag_cart, nPI_mag_cart, color='k', lw=3, label='')
-    # D = nPI_mag_cart - np.max(nPI_mag_cart) / 2
-    # indices = np.where(D > 0)[0]
-    # ind_s, ind_f = indices[0], indices[-1]
-    # FWHMcurve = ax6.plot(np.linspace(PI_mag_cart[ind_s], PI_mag_cart[ind_f], 100), nPI_mag_cart[ind_s] * np.ones(100), 'b-', linewidth=3.0, label='Incoherent Part FWHM')
-    # FWHMmarkers = ax6.plot(np.linspace(PI_mag_cart[ind_s], PI_mag_cart[ind_f], 2), nPI_mag_cart[ind_s] * np.ones(2), 'bD', mew=0.75, ms=7.5, label='')
-    Zline = ax6.plot(P_cart * np.ones(PI_mag_cart.size), np.linspace(0, mom_deltapeak_cart, PI_mag_cart.size), 'r-', linewidth=3.0, label='Delta Peak (Z-factor)')
-    Zmarker = ax6.plot(P_cart, mom_deltapeak_cart, 'rx', mew=0.75, ms=7.5, label='')
-    dPIm_cart = PI_mag_cart[1] - PI_mag_cart[0]
-    nPIm_Tot = np.sum(nPI_mag_cart * dPIm_cart) + mom_deltapeak_cart
-    norm_text = ax6.text(0.7, 0.65, r'$\int n_{|\vec{P_{I}}|} d|\vec{P_{I}}| = $' + '{:.2f}'.format(nPIm_Tot), transform=ax6.transAxes, color='k')
+    # fig6, ax6 = plt.subplots()
+    # ax6.plot(mc * np.ones(PI_mag_cart.size), np.linspace(0, 1, PI_mag_cart.size), 'y--', label=r'$m_{I}c_{BEC}$')
+    # curve = ax6.plot(PI_mag_cart, nPI_mag_cart, color='k', lw=3, label='')
+    # # D = nPI_mag_cart - np.max(nPI_mag_cart) / 2
+    # # indices = np.where(D > 0)[0]
+    # # ind_s, ind_f = indices[0], indices[-1]
+    # # FWHMcurve = ax6.plot(np.linspace(PI_mag_cart[ind_s], PI_mag_cart[ind_f], 100), nPI_mag_cart[ind_s] * np.ones(100), 'b-', linewidth=3.0, label='Incoherent Part FWHM')
+    # # FWHMmarkers = ax6.plot(np.linspace(PI_mag_cart[ind_s], PI_mag_cart[ind_f], 2), nPI_mag_cart[ind_s] * np.ones(2), 'bD', mew=0.75, ms=7.5, label='')
+    # Zline = ax6.plot(P_cart * np.ones(PI_mag_cart.size), np.linspace(0, mom_deltapeak_cart, PI_mag_cart.size), 'r-', linewidth=3.0, label='Delta Peak (Z-factor)')
+    # Zmarker = ax6.plot(P_cart, mom_deltapeak_cart, 'rx', mew=0.75, ms=7.5, label='')
+    # dPIm_cart = PI_mag_cart[1] - PI_mag_cart[0]
+    # nPIm_Tot = np.sum(nPI_mag_cart * dPIm_cart) + mom_deltapeak_cart
+    # norm_text = ax6.text(0.7, 0.65, r'$\int n_{|\vec{P_{I}}|} d|\vec{P_{I}}| = $' + '{:.2f}'.format(nPIm_Tot), transform=ax6.transAxes, color='k')
 
-    ax6.legend()
-    ax6.set_xlim([-0.01, np.max(PI_mag)])
-    ax6.set_ylim([0, 1.05])
-    ax6.set_title('Impurity Momentum Magnitude Distribution (Cart Orig) (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.2f})'.format(P_cart / mc), size='smaller')
-    ax6.set_ylabel(r'$n_{|\vec{P_{I}}|}$')
-    ax6.set_xlabel(r'$|\vec{P_{I}}|$')
+    # ax6.legend()
+    # ax6.set_xlim([-0.01, np.max(PI_mag)])
+    # ax6.set_ylim([0, 1.05])
+    # ax6.set_title('Impurity Momentum Magnitude Distribution (Cart Orig) (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.2f})'.format(P_cart / mc), size='smaller')
+    # ax6.set_ylabel(r'$n_{|\vec{P_{I}}|}$')
+    # ax6.set_xlabel(r'$|\vec{P_{I}}|$')
 
-    print(qds_orig.sel(P=P).isel(t=-1)['Nph'].values, interp_ds.attrs['Nph_interp'], qds_orig_cart.sel(P=P_cart)['NB'].values)
-    # print(qds_orig.sel(P=P).isel(t=-1)['Nph'].values, qds_orig_cart.sel(P=P_cart)['NB'].values)
+    # print(qds_orig.sel(P=P).isel(t=-1)['Nph'].values, interp_ds.attrs['Nph_interp'], qds_orig_cart.sel(P=P_cart)['NB'].values)
+    # # print(qds_orig.sel(P=P).isel(t=-1)['Nph'].values, qds_orig_cart.sel(P=P_cart)['NB'].values)
 
     # # # POSITION DISTRIBUTIONS
 
