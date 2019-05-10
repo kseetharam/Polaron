@@ -164,6 +164,9 @@ if __name__ == "__main__":
     mI = qds.attrs['mI']
     mB = qds.attrs['mB']
     nu = np.sqrt(n0 * gBB / mB)
+    aBB = (mB / (4 * np.pi)) * gBB
+    xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
+    print(qds.attrs['k_mag_cutoff'] / xi)
 
     aIBi_Vals = np.array([-12.5, -10.0, -9.0, -8.0, -7.0, -5.0, -3.5, -2.0, -1.0, -0.75, -0.5, -0.1])  # used by many plots (spherical)
 
