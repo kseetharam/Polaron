@@ -166,9 +166,32 @@ if __name__ == "__main__":
     nu = np.sqrt(n0 * gBB / mB)
     aBB = (mB / (4 * np.pi)) * gBB
     xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
-    print(qds.attrs['k_mag_cutoff'] / xi)
+    print(qds.attrs['k_mag_cutoff'] * xi)
 
     aIBi_Vals = np.array([-12.5, -10.0, -9.0, -8.0, -7.0, -5.0, -3.5, -2.0, -1.0, -0.75, -0.5, -0.1])  # used by many plots (spherical)
+
+    # # PHASE DIAGRAM (SPHERICAL)
+
+    Pnormdes = 0.5
+    Pind = np.abs(PVals / (mI * nu) - Pnormdes).argmin()
+    P = PVals[Pind]
+
+    ZVals = np.zeros(aIBi_Vals.size)
+    for aind, aIBi in enumerate(aIBi_Vals):
+        qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+        ZVals[aind] = np.exp(-1 * qds_aIBi.isel(P=Pind, t=-1)['Nph'].values)
+
+    xmin = np.min(aIBi_Vals)
+    xmax = 1.01 * np.max(aIBi_Vals)
+
+    fig, ax = plt.subplots()
+    ax.plot(aIBi_Vals, ZVals, 'g-')
+    ax.set_title('Quasiparticle Residue (' + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.2f})'.format(P / (mI * nu)))
+    ax.set_xlabel(r'$a_{IB}^{-1}$')
+    ax.set_ylabel(r'$Z=e^{-N_{ph}}$')
+    ax.set_xlim([xmin, xmax])
+    ax.set_ylim([0, 1.1])
+    plt.show()
 
     # # # # BOGOLIUBOV DISPERSION (SPHERICAL)
 

@@ -229,7 +229,7 @@ if __name__ == "__main__":
     print(klin, tlin_norm)
 
     print(kVals[-1], kVals[1] - kVals[0])
-    print(qds.attrs['k_mag_cutoff'] / xi)
+    print(qds.attrs['k_mag_cutoff'] * xi)
 
     # # # # Nph CURVES
 
@@ -752,93 +752,93 @@ if __name__ == "__main__":
 
     # plt.show()
 
-    # # # IMPURITY FINAL LOSCHMIDT ECHO CURVES
+    # # # # IMPURITY FINAL LOSCHMIDT ECHO CURVES
 
-    def powerfunc(t, a, b):
-        return b * t**(-1 * a)
+    # def powerfunc(t, a, b):
+    #     return b * t**(-1 * a)
 
-    tmin = 90
-    tmax = 100
-    tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
-    rollwin = 1
+    # tmin = 90
+    # tmax = 100
+    # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
+    # rollwin = 1
 
-    colorList = ['red', 'green', 'orange', 'blue']
-    lineList = ['solid', 'dotted', 'dashed', '-.']
-    aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5])
-    massRat_des = np.array([0.5, 1.0, 2, 5.0])
-    mdatapaths = []
+    # colorList = ['red', 'green', 'orange', 'blue']
+    # lineList = ['solid', 'dotted', 'dashed', '-.']
+    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5])
+    # massRat_des = np.array([0.5, 1.0, 2, 5.0])
+    # mdatapaths = []
 
-    for mR in massRat_des:
-        if toggleDict['Old'] is True:
-            mdatapaths.append(datapath[0:-7] + '{:.1f}_old'.format(mR))
-        else:
-            mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
-    if toggleDict['Dynamics'] != 'real' or toggleDict['Grid'] != 'spherical' or toggleDict['Coupling'] != 'twophonon':
-        print('SETTING ERROR')
+    # for mR in massRat_des:
+    #     if toggleDict['Old'] is True:
+    #         mdatapaths.append(datapath[0:-7] + '{:.1f}_old'.format(mR))
+    #     else:
+    #         mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
+    # if toggleDict['Dynamics'] != 'real' or toggleDict['Grid'] != 'spherical' or toggleDict['Coupling'] != 'twophonon':
+    #     print('SETTING ERROR')
 
-    fig1, ax1 = plt.subplots()
-    for inda, aIBi in enumerate(aIBi_des):
-        for indm, mRat in enumerate(massRat_des):
-            mds = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-            Plen = mds.coords['P'].values.size
-            Pstart_ind = 0
-            PVals = mds.coords['P'].values[Pstart_ind:Plen]
-            n0 = mds.attrs['n0']
-            gBB = mds.attrs['gBB']
-            mI = mds.attrs['mI']
-            mB = mds.attrs['mB']
-            nu = np.sqrt(n0 * gBB / mB)
+    # fig1, ax1 = plt.subplots()
+    # for inda, aIBi in enumerate(aIBi_des):
+    #     for indm, mRat in enumerate(massRat_des):
+    #         mds = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    #         Plen = mds.coords['P'].values.size
+    #         Pstart_ind = 0
+    #         PVals = mds.coords['P'].values[Pstart_ind:Plen]
+    #         n0 = mds.attrs['n0']
+    #         gBB = mds.attrs['gBB']
+    #         mI = mds.attrs['mI']
+    #         mB = mds.attrs['mB']
+    #         nu = np.sqrt(n0 * gBB / mB)
 
-            vI0_Vals = (PVals - mds.isel(t=0, P=np.arange(Pstart_ind, Plen))['Pph'].values) / mI
+    #         vI0_Vals = (PVals - mds.isel(t=0, P=np.arange(Pstart_ind, Plen))['Pph'].values) / mI
 
-            mds_ts = mds.sel(t=tfVals)
-            DynOv_Exponents = np.zeros(PVals.size)
-            DynOv_Constants = np.zeros(PVals.size)
+    #         mds_ts = mds.sel(t=tfVals)
+    #         DynOv_Exponents = np.zeros(PVals.size)
+    #         DynOv_Constants = np.zeros(PVals.size)
 
-            for indP, P in enumerate(PVals):
-                DynOv_raw = np.abs(mds_ts.isel(P=indP)['Real_DynOv'].values + 1j * mds_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
-                DynOv_ds = xr.DataArray(DynOv_raw, coords=[tfVals], dims=['t'])
-                DynOv_ds = DynOv_ds.rolling(t=rollwin, center=True).mean().dropna('t')
-                DynOv_Vals = DynOv_ds.values
+    #         for indP, P in enumerate(PVals):
+    #             DynOv_raw = np.abs(mds_ts.isel(P=indP)['Real_DynOv'].values + 1j * mds_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+    #             DynOv_ds = xr.DataArray(DynOv_raw, coords=[tfVals], dims=['t'])
+    #             DynOv_ds = DynOv_ds.rolling(t=rollwin, center=True).mean().dropna('t')
+    #             DynOv_Vals = DynOv_ds.values
 
-                tDynOvc_Vals = DynOv_ds['t'].values
+    #             tDynOvc_Vals = DynOv_ds['t'].values
 
-                with warnings.catch_warnings():
-                    warnings.simplefilter("error", OptimizeWarning)
-                    try:
-                        Sopt, Dcov = curve_fit(powerfunc, tDynOvc_Vals, DynOv_Vals)
-                        DynOv_Exponents[indP] = Sopt[0]
-                        DynOv_Constants[indP] = Sopt[1]
-                        if Sopt[0] < 0:
-                            DynOv_Exponents[indP] = 0
-                    except OptimizeWarning:
-                        DynOv_Exponents[indP] = 0
-                        DynOv_Constants[indP] = DynOv_Vals[-1]
-                    except RuntimeError:
-                        DynOv_Exponents[indP] = 0
-                        DynOv_Constants[indP] = DynOv_Vals[-1]
+    #             with warnings.catch_warnings():
+    #                 warnings.simplefilter("error", OptimizeWarning)
+    #                 try:
+    #                     Sopt, Dcov = curve_fit(powerfunc, tDynOvc_Vals, DynOv_Vals)
+    #                     DynOv_Exponents[indP] = Sopt[0]
+    #                     DynOv_Constants[indP] = Sopt[1]
+    #                     if Sopt[0] < 0:
+    #                         DynOv_Exponents[indP] = 0
+    #                 except OptimizeWarning:
+    #                     DynOv_Exponents[indP] = 0
+    #                     DynOv_Constants[indP] = DynOv_Vals[-1]
+    #                 except RuntimeError:
+    #                     DynOv_Exponents[indP] = 0
+    #                     DynOv_Constants[indP] = DynOv_Vals[-1]
 
-            DynOvf_Vals = powerfunc(1e1000, DynOv_Exponents, DynOv_Constants)
-            ax1.plot(vI0_Vals / nu, DynOvf_Vals, linestyle=lineList[inda], color=colorList[indm])
+    #         DynOvf_Vals = powerfunc(1e1000, DynOv_Exponents, DynOv_Constants)
+    #         ax1.plot(vI0_Vals / nu, DynOvf_Vals, linestyle=lineList[inda], color=colorList[indm])
 
-    alegend_elements = []
-    mlegend_elements = []
-    for inda, aIBi in enumerate(aIBi_des):
-        alegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[inda], label='{0}'.format(aIBi)))
-    for indm, mR in enumerate(massRat_des):
-        mlegend_elements.append(Line2D([0], [0], color=colorList[indm], linestyle='solid', label='{0}'.format(mR)))
+    # alegend_elements = []
+    # mlegend_elements = []
+    # for inda, aIBi in enumerate(aIBi_des):
+    #     alegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[inda], label='{0}'.format(aIBi)))
+    # for indm, mR in enumerate(massRat_des):
+    #     mlegend_elements.append(Line2D([0], [0], color=colorList[indm], linestyle='solid', label='{0}'.format(mR)))
 
-    ax1.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
-    ax1.set_ylabel(r'$S(t_{\infty})$')
-    ax1.set_title('Loschmidt Echo')
-    alegend = ax1.legend(handles=alegend_elements, loc=(0.45, 0.65), title=r'$a_{IB}^{-1}$')
-    plt.gca().add_artist(alegend)
-    mlegend = ax1.legend(handles=mlegend_elements, loc=(0.65, 0.75), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
-    plt.gca().add_artist(mlegend)
-    ax1.set_ylim([0, 1.2])
-    ax1.set_xlim([0, np.max(vI0_Vals / nu)])
+    # ax1.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
+    # ax1.set_ylabel(r'$S(t_{\infty})$')
+    # ax1.set_title('Loschmidt Echo')
+    # alegend = ax1.legend(handles=alegend_elements, loc=(0.45, 0.65), title=r'$a_{IB}^{-1}$')
+    # plt.gca().add_artist(alegend)
+    # mlegend = ax1.legend(handles=mlegend_elements, loc=(0.65, 0.75), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
+    # plt.gca().add_artist(mlegend)
+    # ax1.set_ylim([0, 1.2])
+    # ax1.set_xlim([0, np.max(vI0_Vals / nu)])
 
-    plt.show()
+    # plt.show()
 
     # # # INDIVIDUAL PHONON MOMENTUM DISTRIBUTION
 
