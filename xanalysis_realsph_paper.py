@@ -173,7 +173,7 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -10
+    aIBi = -1.5
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     qds_aIBi = qds
@@ -829,14 +829,14 @@ if __name__ == "__main__":
 
     # # # INDIVIDUAL PHONON MOMENTUM DISTRIBUTION
 
-    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.5, 1.8, 3.0, 5.0])
+    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.5, 1.8, 3.0, 4.0, 5.0, 8.0])
     # Pinds = np.zeros(Pnorm_des.size, dtype=int)
     # for Pn_ind, Pn in enumerate(Pnorm_des):
     #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
 
     # print(PVals[Pinds])
 
-    # indP = Pinds[5]
+    # indP = Pinds[9]
     # P = PVals[indP]
     # print(aIBi, P)
 
@@ -863,7 +863,9 @@ if __name__ == "__main__":
     # kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
     # dVk = kgrid.dV()
 
-    # axislim = 1.01 * P
+    # axislim = 1.2
+    # if shortTime is True:
+    #     axislim = 1.01 * P
     # # kIRcut = 0.13
     # # axislim = 3
     # kIRcut = 0.1
@@ -1039,14 +1041,14 @@ if __name__ == "__main__":
     # else:
     #     intanim = 1e-5
     # anim1 = animation.FuncAnimation(fig1, animate1, interval=intanim, frames=range(tsVals.size), blit=False)
-    # anim1_filename = '/aIBi_{:d}_P_{:.2f}'.format(int(aIBi), P) + '_indPhononDist_2D_oscBox'
+    # anim1_filename = '/aIBi_{:.2f}_P_{:.2f}'.format(aIBi, P) + '_indPhononDist_2D_oscBox'
     # if vmaxAuto is True:
     #     anim1_filename = anim1_filename + '_vmaxLog'
     # if FGRBool is True:
     #     anim1_filename = anim1_filename + '_FGR'
     # if shortTime is True:
     #     anim1_filename = anim1_filename + '_shortTime'
-    # # anim1.save(animpath + anim1_filename + '.mp4', writer=mpegWriter)
+    # anim1.save(animpath + anim1_filename + '.mp4', writer=mpegWriter)
     # # anim1.save(animpath + anim1_filename + '.gif', writer='imagemagick')
 
     # plt.show()
