@@ -4,6 +4,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import pf_dynamic_cart as pfc
+import pf_dynamic_sph as pfs
 import Grid
 from scipy import interpolate
 from timeit import default_timer as timer
@@ -60,8 +61,8 @@ if __name__ == "__main__":
     # # Pnorm_des = 2.64
     # Pnorm_des = 1.0
 
-    aIBi = -2
-    Pnorm_des = 0.5
+    aIBi = -1
+    Pnorm_des = 4.0
 
     linDimList = [(2, 2), (10, 10)]
     linDimMajor, linDimMinor = linDimList[0]
@@ -107,23 +108,49 @@ if __name__ == "__main__":
     # PhDen_smooth_sum = np.sum(PhDen_orig_smooth * kg_orig_smooth**2 * np.sin(thg_orig_smooth) * dk_smooth * dth_smooth * (2 * np.pi)**(-2))
     # print(PhDen_orig_sum, PhDen_smooth_sum)
 
-    fig1, ax1 = plt.subplots()
-    vmax = np.max(PhDen_orig_Vals)
-    # vmax = 8414555  # P=2.4
-    # vmax = 2075494  # P=1.20
-    # vmax = 1055106  # P=0.38
-    quad1 = ax1.pcolormesh(kzg, kxg, PhDen_orig_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=vmax), cmap='inferno')
-    quad1m = ax1.pcolormesh(kzg, -1 * kxg, PhDen_orig_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=vmax), cmap='inferno')
-    # quad1 = ax1.pcolormesh(kzg, kxg, PhDen_orig_Vals, vmin=0, vmax=vmax, cmap='inferno')
-    # quad1m = ax1.pcolormesh(kzg, -1 * kxg, PhDen_orig_Vals, vmin=0, vmax=vmax, cmap='inferno')
+    # fig1, ax1 = plt.subplots()
+    # vmax = np.max(PhDen_orig_Vals)
+    # # vmax = 8414555  # P=2.4
+    # # vmax = 2075494  # P=1.20
+    # # vmax = 1055106  # P=0.38
+    # # quad1 = ax1.pcolormesh(kzg, kxg, PhDen_orig_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=vmax), cmap='inferno')
+    # # quad1m = ax1.pcolormesh(kzg, -1 * kxg, PhDen_orig_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=vmax), cmap='inferno')
+    # # ax1.set_xlim([-1 * linDimMajor, linDimMajor])
+    # # ax1.set_ylim([-1 * linDimMinor, linDimMinor])
+    # print(vmax)
+    # ax1.set_xlabel('kz (Impurity Propagation Direction)')
+    # ax1.set_ylabel('kx')
+    # ax1.set_title('Individual Phonon Momentum Distribution (Sph Orig)', size='smaller')
+    # fig1.colorbar(quad1, ax=ax1, extend='both')
 
-    print(vmax)
-    ax1.set_xlim([-1 * linDimMajor, linDimMajor])
-    ax1.set_ylim([-1 * linDimMinor, linDimMinor])
-    ax1.set_xlabel('kz (Impurity Propagation Direction)')
-    ax1.set_ylabel('kx')
-    ax1.set_title('Individual Phonon Momentum Distribution (Sph Orig)', size='smaller')
-    fig1.colorbar(quad1, ax=ax1, extend='both')
+    # GROUND STATE PLOTS
+    # fig1, ax1 = plt.subplots()
+    # vmax = 17000
+    # axislim = 1.2
+    # interpmul = 5
+    # wk_Vals = pfs.omegak(kVec, mB, n0, gBB)
+    # bdiff = 100 * np.abs(wk_Vals - nu * kVec) / (nu * kVec)
+    # kind = np.abs(bdiff - 1).argmin().astype(int)
+    # klin = kVec[kind]
+    # PhDen_orig_da = xr.DataArray(PhDen_orig_Vals, coords=[kVec, thVec], dims=['k', 'th'])
+    # PhDen_orig_smooth, kg_orig_smooth, thg_orig_smooth = pfc.xinterp2D(PhDen_orig_da, 'k', 'th', interpmul)
+    # kxg_smooth = kg_orig_smooth * np.sin(thg_orig_smooth)
+    # kzg_smooth = kg_orig_smooth * np.cos(thg_orig_smooth)
+    # quad1 = ax1.pcolormesh(kzg_smooth, kxg_smooth, PhDen_orig_smooth, vmin=0, vmax=vmax, cmap='inferno')
+    # quad1m = ax1.pcolormesh(kzg_smooth, -1 * kxg_smooth, PhDen_orig_smooth, vmin=0, vmax=vmax, cmap='inferno')
+    # patch_klin = plt.Circle((0, 0), klin, edgecolor='tab:cyan', facecolor='None')
+    # ax1.add_patch(patch_klin)
+    # ax1.set_xlim([-1 * axislim, axislim])
+    # ax1.set_ylim([-1 * axislim, axislim])
+    # ax1.grid(True, linewidth=0.5)
+    # ax1.legend([patch_klin], [r'Linear Excitations'], loc=2, fontsize='small')
+    # ax1.set_xlabel('kz (Impurity Propagation Direction)')
+    # ax1.set_ylabel('kx')
+    # ax1.set_title('Individual Phonon Distribution (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c}=$' + '{:.2f})'.format(Pnorm[Pind]))
+    # fig1.colorbar(quad1, ax=ax1, extend='both')
+    # filepath = '/media/kis/Storage/Dropbox/VariationalResearch/DataAnalysis/figs/rdyn_twophonon/distributionAnims/GroundStatePlots'
+    # filename = '/aIBi_{:.2f}_P_{:.2f}'.format(aIBi, P) + '_indPhononDist_2D_GS'
+    # plt.savefig(filepath + filename + '.png')
 
     # fig, ax = plt.subplots()
     # quad = ax.pcolormesh(kzg_smooth, kxg_smooth, PhDen_orig_smooth, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDen_orig_Vals)), cmap='inferno')
