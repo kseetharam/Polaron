@@ -411,23 +411,24 @@ if __name__ == "__main__":
     #             warnings.simplefilter("error", OptimizeWarning)
     #             try:
     #                 Sopt, Scov = curve_fit(powerfunc, tDynOv_Vals, DynOv_Vals)
-    #                 vIopt, vIcov = curve_fit(powerfunc, tvImpc_Vals, vImpc_Vals)
     #                 DynOv_Exponents[indP] = Sopt[0]
-    #                 vImp_Exponents[indP] = vIopt[0]
-
     #                 if Sopt[0] < 0:
-    #                     # DynOv_Exponents[indP] = np.nan
     #                     DynOv_Exponents[indP] = 0
-    #                 if vIopt[0] < 0:
-    #                     # vImp_Exponents[indP] = np.nan
-    #                     vImp_Exponents[indP] = 0
-
     #             except OptimizeWarning:
     #                 DynOv_Exponents[indP] = 0
-    #                 vImp_Exponents[indP] = 0
-
     #             except RuntimeError:
     #                 DynOv_Exponents[indP] = 0
+
+    #         with warnings.catch_warnings():
+    #             warnings.simplefilter("error", OptimizeWarning)
+    #             try:
+    #                 vIopt, vIcov = curve_fit(powerfunc, tvImpc_Vals, vImpc_Vals)
+    #                 vImp_Exponents[indP] = vIopt[0]
+    #                 if vIopt[0] < 0:
+    #                     vImp_Exponents[indP] = 0
+    #             except OptimizeWarning:
+    #                 vImp_Exponents[indP] = 0
+    #             except RuntimeError:
     #                 vImp_Exponents[indP] = 0
 
     #     if seperate:
@@ -643,7 +644,10 @@ if __name__ == "__main__":
     # mdatapaths = []
 
     # for mR in massRat_des:
-    #     mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
+    #     if toggleDict['Old'] is True:
+    #         mdatapaths.append(datapath[0:-7] + '{:.1f}_old'.format(mR))
+    #     else:
+    #         mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
     # if toggleDict['Dynamics'] != 'real' or toggleDict['Grid'] != 'spherical' or toggleDict['Coupling'] != 'twophonon':
     #     print('SETTING ERROR')
 
@@ -687,6 +691,8 @@ if __name__ == "__main__":
     #                     vImp_Exponents[indP] = 0
     #                     vImp_Constants[indP] = vImpc_Vals[-1]
 
+    #         if aIBi == -1.5 and mRat == 1.0:
+    #             print(vImp_Exponents)
     #         vIf_Vals = nu + powerfunc(1e1000, vImp_Exponents, vImp_Constants)
     #         ax1.plot(vI0_Vals / nu, vIf_Vals / nu, linestyle=lineList[inda], color=colorList[indm])
     #         # ax2.plot(vI0_Vals / nu, vIf_Vals / vI0_Vals, linestyle=lineList[inda], color=colorList[indm])
@@ -793,7 +799,7 @@ if __name__ == "__main__":
     #             with warnings.catch_warnings():
     #                 warnings.simplefilter("error", OptimizeWarning)
     #                 try:
-    #                     Sopt, Dcov = curve_fit(powerfunc, tDynOvc_Vals, DynOv_Vals)
+    #                     Sopt, Scov = curve_fit(powerfunc, tDynOvc_Vals, DynOv_Vals)
     #                     DynOv_Exponents[indP] = Sopt[0]
     #                     DynOv_Constants[indP] = Sopt[1]
     #                     if Sopt[0] < 0:
@@ -805,6 +811,9 @@ if __name__ == "__main__":
     #                     DynOv_Exponents[indP] = 0
     #                     DynOv_Constants[indP] = DynOv_Vals[-1]
 
+    #         if aIBi == -1.5 and mRat == 1.0:
+    #             print(mdatapaths[indm] + '/redyn_spherical/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    #             print(DynOv_Exponents)
     #         DynOvf_Vals = powerfunc(1e1000, DynOv_Exponents, DynOv_Constants)
     #         ax1.plot(vI0_Vals / nu, DynOvf_Vals, linestyle=lineList[inda], color=colorList[indm])
 
@@ -826,6 +835,49 @@ if __name__ == "__main__":
     # ax1.set_xlim([0, np.max(vI0_Vals / nu)])
 
     # plt.show()
+
+    # Pnorm = PVals / mc
+    # for inda, aIBi in enumerate(aIBi_des):
+    #     qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    #     qds_aIBi_ts = qds_aIBi.sel(t=tfVals)
+    #     DynOv_Exponents = np.zeros(PVals.size)
+    #     vImp_Exponents = np.zeros(PVals.size)
+
+    #     for indP, P in enumerate(PVals):
+    #         DynOv_raw = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+    #         DynOv_ds = xr.DataArray(DynOv_raw, coords=[tfVals], dims=['t'])
+
+    #         DynOv_ds = DynOv_ds.rolling(t=rollwin, center=True).mean().dropna('t')
+    #         Pph_ds = qds_aIBi_ts.isel(P=indP)['Pph'].rolling(t=rollwin, center=True).mean().dropna('t')
+
+    #         DynOv_Vals = DynOv_ds.values
+    #         tDynOv_Vals = DynOv_ds['t'].values
+
+    #         vImpc_Vals = (P - Pph_ds.values) / mc - 1
+    #         tvImpc_Vals = Pph_ds['t'].values
+
+    #         with warnings.catch_warnings():
+    #             warnings.simplefilter("error", OptimizeWarning)
+    #             try:
+    #                 Sopt, Scov = curve_fit(powerfunc, tDynOv_Vals, DynOv_Vals)
+    #                 vIopt, vIcov = curve_fit(powerfunc, tvImpc_Vals, vImpc_Vals)
+    #                 DynOv_Exponents[indP] = Sopt[0]
+    #                 vImp_Exponents[indP] = vIopt[0]
+
+    #                 if Sopt[0] < 0:
+    #                     # DynOv_Exponents[indP] = np.nan
+    #                     DynOv_Exponents[indP] = 0
+    #                 if vIopt[0] < 0:
+    #                     # vImp_Exponents[indP] = np.nan
+    #                     vImp_Exponents[indP] = 0
+
+    #             except OptimizeWarning:
+    #                 DynOv_Exponents[indP] = 0
+    #                 vImp_Exponents[indP] = 0
+
+    #             except RuntimeError:
+    #                 DynOv_Exponents[indP] = 0
+    #                 vImp_Exponents[indP] = 0
 
     # # # INDIVIDUAL PHONON MOMENTUM DISTRIBUTION
 
