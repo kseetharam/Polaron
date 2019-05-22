@@ -53,6 +53,8 @@ if __name__ == "__main__":
     massRat = 1.0
     IRrat = 1
 
+    # git test
+
     # Toggle parameters
 
     toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Old': True}
