@@ -455,7 +455,7 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     kg_3Di_flat = kg_3Di.reshape(kg_3Di.size)
     thg_3Di_flat = thg_3Di.reshape(thg_3Di.size)
     tups_3Di = np.column_stack((kg_3Di_flat, thg_3Di_flat))
-    tups_3Di_unique, tups_inverse = np.unique(tups_3Di, return_inverse=True, axis=0)
+    tups_3Di_unique, tups_inverse = np.unique(tups_3Di, return_inverse=True, axis=0)  # THIS PART OF REDUCING NUMBER OF POINTS BY FINDING UNIQUE ONES PROBABLY TAKES A LOT LONGER THAN INTERPOLATING ON THE LARGER NONUNIQUE GRID
     # Perform interpolation on 2D projection and reconstruct full matrix on 3D linear cartesian grid
     print('3D Cartesian grid Ntot: {:1.2E}'.format(kzLg_3D.size))
     print('Unique interp points: {:1.2E}'.format(tups_3Di_unique[:, 0].size))
@@ -486,7 +486,10 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     dxL = xL[1] - xL[0]; dyL = yL[1] - yL[0]; dzL = zL[1] - zL[0]
     dVxyz = dxL * dyL * dzL
     xLg_3D, yLg_3D, zLg_3D = np.meshgrid(xL, yL, zL, indexing='ij')
-    beta2_kxkykz = Bk2Lg_3D
+
+    # beta2_kxkykz = Bk2Lg_3D
+    beta2_kxkykz = np.fft.ifftshift(Bk2Lg_3D)  # Not sure why the shift is needed but it works?
+
     beta2_xyz_preshift = np.fft.ifftn(beta2_kxkykz) / dVxyz
     beta2_xyz = np.fft.fftshift(beta2_xyz_preshift)
     decay_length = 5

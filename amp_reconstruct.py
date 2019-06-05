@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon'}
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Old': True}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -43,6 +43,10 @@ if __name__ == "__main__":
     if betterResolution is True:
         datapath = datapath + '_resRat_{:.2f}'.format(resRat)
     datapath = datapath + '/massRatio={:.1f}'.format(mRat)
+
+    if toggleDict['Old'] is True:
+        datapath = datapath + '_old'
+
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
     elif toggleDict['Dynamics'] == 'imaginary':
@@ -64,7 +68,11 @@ if __name__ == "__main__":
     # # Analysis of Total Dataset
 
     aIBi = -5
-    Pnorm_des = 0.12
+
+    # Pnorm_des = 2.64
+    # Pnorm_des = 1.0
+    Pnorm_des = 0.1
+
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     n0 = qds.attrs['n0']; gBB = qds.attrs['gBB']; mI = qds.attrs['mI']; mB = qds.attrs['mB']
     nu = np.sqrt(n0 * gBB / mB)
@@ -74,6 +82,7 @@ if __name__ == "__main__":
     Pnorm = PVals / mc
     Pind = np.abs(Pnorm - Pnorm_des).argmin().astype(int)
     P = PVals[Pind]
+    print(P)
 
     # # FULL RECONSTRUCTION OF 3D CARTESIAN BETA_K FROM 2D SPHERICAL BETA_K (doing actual interpolation in 2D spherical instead of 3D nonlinear cartesian)
 
