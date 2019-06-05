@@ -448,21 +448,7 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
 
     kxLg_3D, kyLg_3D, kzLg_3D = np.meshgrid(kxL, kyL, kzL, indexing='ij')
     print('dkxL: {0}, dkyL: {1}, dkzL: {2}'.format(dkxL, dkyL, dkzL))
-    # Re-interpret grid points of linear 3D Cartesian as nonlinear 3D spherical grid, find unique (k,th) points
-    kg_3Di = np.sqrt(kxLg_3D**2 + kyLg_3D**2 + kzLg_3D**2)
-    thg_3Di = np.arccos(kzLg_3D / kg_3Di)
-    # phig_3Di = np.arctan2(kyLg_3D, kxLg_3D)
-    kg_3Di_flat = kg_3Di.reshape(kg_3Di.size)
-    thg_3Di_flat = thg_3Di.reshape(thg_3Di.size)
-    tups_3Di = np.column_stack((kg_3Di_flat, thg_3Di_flat))
-    tups_3Di_unique, tups_inverse = np.unique(tups_3Di, return_inverse=True, axis=0)  # THIS PART OF REDUCING NUMBER OF POINTS BY FINDING UNIQUE ONES PROBABLY TAKES A LOT LONGER THAN INTERPOLATING ON THE LARGER NONUNIQUE GRID
-    # Perform interpolation on 2D projection and reconstruct full matrix on 3D linear cartesian grid
-    print('3D Cartesian grid Ntot: {:1.2E}'.format(kzLg_3D.size))
-    print('Unique interp points: {:1.2E}'.format(tups_3Di_unique[:, 0].size))
-    interpstart = timer()
-    Bk2_2D_CartInt = interpolate.griddata((kg.flatten(), thg.flatten()), Bk2_2D.flatten(), tups_3Di_unique, method='linear')
-    interpend = timer()
-    print('Interp Time: {0}'.format(interpend - interpstart))
+
     k_max_red = ((2 * linDimMajor)**3 / (4 * np.pi / 3))**(1 / 3)  # equating volumes of cartesian and reduced spherical regions. assume cartesian region is box where each axis goes from -linDimMajor to +linDimMajor
     cart_mask = kg <= k_max_red
     kg_red = kg[cart_mask]
@@ -470,8 +456,35 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     Bk2_2D_red = Bk2_2D[cart_mask]
     Nph_red = np.sum(dk * dth * (2 * np.pi)**(-2) * kg_red**2 * np.sin(thg_red) * Bk2_2D_red)
     print('Rough fraction of phonons in reduced Cartesian grid (Calculated from Spherical 2D): {0}'.format(Nph_red / Nph))
-    Bk2Lg_3D_flat = Bk2_2D_CartInt[tups_inverse]
-    Bk2Lg_3D = Bk2Lg_3D_flat.reshape(kg_3Di.shape)
+
+    # Re-interpret grid points of linear 3D Cartesian as nonlinear 3D spherical grid, find unique (k,th) points
+    kg_3Di = np.sqrt(kxLg_3D**2 + kyLg_3D**2 + kzLg_3D**2)
+    thg_3Di = np.arccos(kzLg_3D / kg_3Di)
+    # phig_3Di = np.arctan2(kyLg_3D, kxLg_3D)
+
+    # # UNIQUE POINTS METHOD (REDUCES NUMBER OF POINTS BY FACTOR OF 10 BUT ALSO TAKES A WHILE TO FIND THE UNIQUE POINTS)
+    # kg_3Di_flat = kg_3Di.reshape(kg_3Di.size)
+    # thg_3Di_flat = thg_3Di.reshape(thg_3Di.size)
+    # tups_3Di = np.column_stack((kg_3Di_flat, thg_3Di_flat))
+    # tups_3Di_unique, tups_inverse = np.unique(tups_3Di, return_inverse=True, axis=0)
+    # # Perform interpolation on 2D projection and reconstruct full matrix on 3D linear cartesian grid
+    # print('3D Cartesian grid Ntot: {:1.2E}'.format(kzLg_3D.size))
+    # print('Unique interp points: {:1.2E}'.format(tups_3Di_unique[:, 0].size))
+    # interpstart = timer()
+    # Bk2_2D_CartInt = interpolate.griddata((kg.flatten(), thg.flatten()), Bk2_2D.flatten(), tups_3Di_unique, method='linear')
+    # interpend = timer()
+    # print('Interp Time: {0}'.format(interpend - interpstart))
+    # Bk2Lg_3D_flat = Bk2_2D_CartInt[tups_inverse]
+    # Bk2Lg_3D = Bk2Lg_3D_flat.reshape(kg_3Di.shape)
+
+    # DIRECT INTERPOLATION METHOD (THIS IS A LITTLE FASTER THAN THE UNQIUE POINTS METHOD)
+    interpstart = timer()
+    Bk2_2D_CartInt = interpolate.griddata((kg.flatten(), thg.flatten()), Bk2_2D.flatten(), (kg_3Di, thg_3Di), method='linear')
+    interpend = timer()
+    print('Interp Time: {0}'.format(interpend - interpstart))
+    Bk2Lg_3D = Bk2_2D_CartInt
+
+    # RESUME CALCULATION IRRESPECTIVE OF INTERPOLATION METHOD
     Bk2Lg_3D[np.isnan(Bk2Lg_3D)] = 0
     Bk2Lg_3D = Bk2Lg_3D.real.astype(float)
     Nph_interp = np.sum(dkxL * dkyL * dkzL * (2 * np.pi)**(-3) * Bk2Lg_3D)

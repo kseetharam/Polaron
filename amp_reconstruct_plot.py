@@ -64,10 +64,10 @@ if __name__ == "__main__":
     # # Pnorm_des = 2.64
     # Pnorm_des = 1.0
 
-    aIBi = -5
-    # Pnorm_des = 2.64
+    aIBi = -10
+    Pnorm_des = 2.64
     # Pnorm_des = 1.0
-    Pnorm_des = 0.1
+    # Pnorm_des = 0.1
 
     linDimList = [(2, 2), (10, 10)]
     linDimMajor, linDimMinor = linDimList[1]
@@ -170,7 +170,7 @@ if __name__ == "__main__":
     # CARTESIAN INTERPOLATION PLOTS
 
     interp_ds = xr.open_dataset(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
-    # interp_ds = xr.open_dataset(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}_fftshift.nc'.format(P, aIBi, linDimMajor, linDimMinor))
+    # interp_ds = xr.open_dataset(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}_unique.nc'.format(P, aIBi, linDimMajor, linDimMinor)); print('unique')
     kxL = interp_ds['kx'].values; dkxL = kxL[1] - kxL[0]
     kyL = interp_ds['ky'].values; dkyL = kyL[1] - kyL[0]
     kzL = interp_ds['kz'].values; dkzL = kzL[1] - kzL[0]
