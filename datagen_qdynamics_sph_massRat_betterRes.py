@@ -65,10 +65,16 @@ if __name__ == "__main__":
 
     tgrid = np.arange(0, tMax + dt, dt)
 
-    tmask = tgrid < 5
-    tshort = tgrid[tmask]
-    trest = tgrid[np.logical_not(tmask)]
-    tgrid_coarse = np.concatenate((tshort, trest[0:-1:20]))
+    # COLLECT DISTRIBUTION DATA OVER TIME (MORE DENSE AT SHORT TIMES)
+    # tmask = tgrid < 5
+    # tshort = tgrid[tmask]
+    # trest = tgrid[np.logical_not(tmask)]
+    # tgrid_coarse = np.concatenate((tshort, trest[0:-1:20]))
+
+    # DON'T COLLECT DISTRIBUTION DATA EXCEPT FOR LAST POINT
+    tgrid_coarse = tgrid[0:-1:CoarseGrainRate]
+    if tgrid_coarse[-1] != tgrid[-1]:
+        tgrid_coarse = np.concatenate((tgrid_coarse, np.array([tgrid[-1]])))
 
     gParams = [xgrid, kgrid, tgrid]
     NGridPoints = kgrid.size()
@@ -100,7 +106,8 @@ if __name__ == "__main__":
     print(xi / nu)
 
     Params_List = []
-    mI_Vals = np.array([0.5, 1.0, 2, 5.0])
+    mI_Vals = np.array([0.75])
+    # mI_Vals = np.array([0.5, 1.0, 2, 5.0])
     aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.5])
     P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.4, 10, endpoint=False), np.linspace(1.4, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 10, endpoint=False), np.linspace(5.0, 9.0, 20)))
     print(P_Vals_norm)
