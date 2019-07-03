@@ -50,7 +50,7 @@ if __name__ == "__main__":
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     # NGridPoints_cart = 1.37e5
 
-    massRat = 0.75
+    massRat = 1.0
     IRrat = 1
 
     # git test
@@ -181,7 +181,7 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -2
+    aIBi = -10
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     qds_aIBi = qds
@@ -253,6 +253,69 @@ if __name__ == "__main__":
     # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
 
     # plt.show()
+
+    # # # PARTICIPATION RATIO CURVES
+
+    shortTime = True; tau = 5
+
+    Pnorm_des = np.array([0.1, 0.5, 0.8, 1.0, 1.3, 1.5, 1.8, 2.2, 2.5, 3.0, 4.0, 5.0])
+    # Pnorm_des = np.array([0.1, 0.5, 1.0, 3.0])
+
+    Pinds = np.zeros(Pnorm_des.size, dtype=int)
+    for Pn_ind, Pn in enumerate(Pnorm_des):
+        Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
+
+    kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_aIBi.coords['k'].values); kgrid.initArray_premade('th', qds_aIBi.coords['th'].values)
+    kVec = kgrid.getArray('k')
+    thVec = kgrid.getArray('th')
+    kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
+    dVk = kgrid.dV()
+
+    fig, ax = plt.subplots()
+    for indP in Pinds:
+        P = PVals[indP]
+
+        if Lx == 60:
+            qds_PaIBi = xr.open_dataset(distdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+            tsVals = qds_PaIBi.coords['tc'].values
+
+        else:
+            qds_PaIBi = qds_aIBi.sel(P=P)
+            tsVals = qds_PaIBi.coords['t'].values
+
+        CSAmp_ds = (qds_PaIBi['Real_CSAmp'] + 1j * qds_PaIBi['Imag_CSAmp'])
+        Nph_ds = qds_PaIBi['Nph']
+
+        if Lx == 60:
+            CSAmp_ds = CSAmp_ds.rename({'tc': 't'})
+
+        if shortTime is True:
+            tsVals = tsVals[tsVals <= tau]
+            CSAmp_ds = CSAmp_ds.sel(t=tsVals)
+            Nph_ds = Nph_ds.sel(t=tsVals)
+
+        PR_Vals = np.zeros(tsVals.size)
+
+        for indt, t in enumerate(tsVals):
+            CSAmp_Vals = CSAmp_ds.sel(t=t).values
+            Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
+            PhDen_Vals = ((1 / Nph_ds.sel(t=t).values) * np.abs(Bk_2D_vals)**2).real.astype(float)
+            # norm_tot = np.dot(PhDen_Vals.flatten(), dVk); print(norm_tot)
+            PR_Vals[indt] = np.dot((PhDen_Vals**2).flatten(), dVk) * ((2 * np.pi)**(-3))
+
+            # PhDen_Vals = ((1 / np.sum(np.abs(Bk_2D_vals)**2)) * np.abs(Bk_2D_vals)**2).real.astype(float)
+            # # norm_tot = np.sum(PhDen_Vals); print(norm_tot)
+            # PR_Vals[indt] = np.sum(PhDen_Vals**2)
+
+        ax.plot(tsVals / tscale, PR_Vals, label='{:.2f}'.format(P / mc))
+
+    ax.legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=2, ncol=2)
+    # ax.set_xscale('log')
+    ax.set_title('Participation Ratio (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    ax.set_ylabel(r'$PR = \sum_{\vec{k}} (\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2}$')
+    ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+
+    plt.show()
 
     # # # # S(t) AND P_Imp CURVES
 
@@ -375,8 +438,8 @@ if __name__ == "__main__":
 
     # seperate = False
 
-    # # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5])  # Data for stronger interactions (-1.0, -0.75, -0.5) is too noisy to get fits
-    # aIBi_des = np.array([-10.0, -5.0, -2.0])  # Data for stronger interactions (-1.0, -0.75, -0.5) is too noisy to get fits
+    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5])  # Data for stronger interactions (-1.0, -0.75, -0.5) is too noisy to get fits
+    # # aIBi_des = np.array([-10.0, -5.0, -2.0])  # Data for stronger interactions (-1.0, -0.75, -0.5) is too noisy to get fits
     # # Another note: The fit for P_{Imp} is also difficult for anything other than very weak interactions -> this is probably because of the diverging convergence time to mI*c due to arguments in Nielsen
 
     # # PVals = PVals[(PVals / mc) <= 3.0]
@@ -385,9 +448,11 @@ if __name__ == "__main__":
     # def powerfunc(t, a, b):
     #     return b * t**(-1 * a)
 
-    # # tmin = 77
-    # tmin = 90
+    # # tmin = 90
+    # # tmax = 100
+    # tmin = 70
     # tmax = 100
+
     # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
     # rollwin = 1
 
@@ -400,6 +465,7 @@ if __name__ == "__main__":
     # for inda, aIBi in enumerate(aIBi_des):
     #     qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     #     qds_aIBi_ts = qds_aIBi.sel(t=tfVals)
+    #     PVals = qds_aIBi['P'].values; Pnorm = PVals / mc
     #     DynOv_Exponents = np.zeros(PVals.size)
     #     vImp_Exponents = np.zeros(PVals.size)
 
@@ -413,7 +479,8 @@ if __name__ == "__main__":
     #         DynOv_Vals = DynOv_ds.values
     #         tDynOv_Vals = DynOv_ds['t'].values
 
-    #         vImpc_Vals = (P - Pph_ds.values) / mc - 1
+    #         # vImpc_Vals = (P - Pph_ds.values) / mc - 1
+    #         vImpc_Vals = (P - Pph_ds.values) / mI - nu
     #         tvImpc_Vals = Pph_ds['t'].values
 
     #         with warnings.catch_warnings():
@@ -434,6 +501,8 @@ if __name__ == "__main__":
     #                 vIopt, vIcov = curve_fit(powerfunc, tvImpc_Vals, vImpc_Vals)
     #                 vImp_Exponents[indP] = vIopt[0]
     #                 if vIopt[0] < 0:
+    #                     vImp_Exponents[indP] = 0
+    #                 if vImpc_Vals[-1] < 0:
     #                     vImp_Exponents[indP] = 0
     #             except OptimizeWarning:
     #                 vImp_Exponents[indP] = 0
@@ -473,7 +542,7 @@ if __name__ == "__main__":
     #     mlegend = ax.legend(handles=mlegend_elements, loc=(0.12, 0.85), title='Observable')
     #     plt.gca().add_artist(mlegend)
 
-    # # ax.set_ylim([0, 1])
+    # ax.set_ylim([0, 0.6])
 
     # plt.show()
 
@@ -555,7 +624,7 @@ if __name__ == "__main__":
     # def powerfunc(t, a, b):
     #     return b * t**(-1 * a)
 
-    # tmin = 90
+    # tmin = 70
     # tmax = 100
     # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
     # rollwin = 1
@@ -568,7 +637,10 @@ if __name__ == "__main__":
     # mdatapaths = []
 
     # for mR in massRat_des:
-    #     mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
+    #     if toggleDict['Old'] is True:
+    #         mdatapaths.append(datapath[0:-7] + '{:.1f}_old'.format(mR))
+    #     else:
+    #         mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
     # if toggleDict['Dynamics'] != 'real' or toggleDict['Grid'] != 'spherical' or toggleDict['Coupling'] != 'twophonon':
     #     print('SETTING ERROR')
 
@@ -604,6 +676,9 @@ if __name__ == "__main__":
     #                     vImp_Constants[indP] = vIopt[1]
     #                     if vIopt[0] < 0:
     #                         vImp_Exponents[indP] = 0
+    #                     if vImpc_Vals[-1] < 0:
+    #                         vImp_Exponents[indP] = 0
+    #                         vImp_Constants[indP] = vImpc_Vals[-1]
     #                 except OptimizeWarning:
     #                     vImp_Exponents[indP] = 0
     #                     vImp_Constants[indP] = vImpc_Vals[-1]
@@ -611,7 +686,7 @@ if __name__ == "__main__":
     #                     vImp_Exponents[indP] = 0
     #                     vImp_Constants[indP] = vImpc_Vals[-1]
 
-    #         vIf_Vals = nu + powerfunc(1e500, vImp_Exponents, vImp_Constants)
+    #         vIf_Vals = nu + powerfunc(1e1000, vImp_Exponents, vImp_Constants)
     #         # vIf_Vals = (PVals - mds['Pph'].isel(t=np.arange(-5, 0), P=np.arange(Pstart_ind, Plen)).mean(dim='t').values) / mI
     #         ax2.plot(vI0_Vals / nu, vIf_Vals / vI0_Vals, linestyle=lineList[inda], color=colorList[indm])
 
@@ -628,11 +703,11 @@ if __name__ == "__main__":
     # ax2.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
     # ax2.set_ylabel(r'$\frac{<v_{I}(t_{f})>}{<v_{I}(t_{0})>}$')
     # ax2.set_title('Average Impurity Speed')
-    # alegend2 = ax2.legend(handles=alegend_elements2, loc=(0.45, 0.68), title=r'$a_{IB}^{-1}$')
+    # alegend2 = ax2.legend(handles=alegend_elements2, loc=(0.45, 0.65), title=r'$a_{IB}^{-1}$')
     # plt.gca().add_artist(alegend2)
-    # mlegend2 = ax2.legend(handles=mlegend_elements2, loc=(0.65, 0.75), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
+    # mlegend2 = ax2.legend(handles=mlegend_elements2, loc=(0.64, 0.70), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
     # plt.gca().add_artist(mlegend2)
-    # reflegend = ax2.legend(handles=[Line2D([0], [0], color='black', linestyle='solid', label=r'$<v_{I}(t_{f})>=c_{BEC}$')], loc=(0.65, 0.65))
+    # reflegend = ax2.legend(handles=[Line2D([0], [0], color='black', linestyle='solid', label=r'$<v_{I}(t_{f})>=c_{BEC}$')], loc=(0.65, 0.60))
     # plt.gca().add_artist(reflegend)
 
     # plt.show()
@@ -642,7 +717,7 @@ if __name__ == "__main__":
     # def powerfunc(t, a, b):
     #     return b * t**(-1 * a)
 
-    # tmin = 90
+    # tmin = 70
     # tmax = 100
     # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
     # rollwin = 1
@@ -695,6 +770,9 @@ if __name__ == "__main__":
     #                     vImp_Constants[indP] = vIopt[1]
     #                     if vIopt[0] < 0:
     #                         vImp_Exponents[indP] = 0
+    #                     if vImpc_Vals[-1] < 0:
+    #                         vImp_Exponents[indP] = 0
+    #                         vImp_Constants[indP] = vImpc_Vals[-1]
     #                 except OptimizeWarning:
     #                     vImp_Exponents[indP] = 0
     #                     vImp_Constants[indP] = vImpc_Vals[-1]
@@ -724,7 +802,7 @@ if __name__ == "__main__":
     # ax1.set_title('Average Impurity Speed')
     # alegend = ax1.legend(handles=alegend_elements, loc=(0.45, 0.08), title=r'$a_{IB}^{-1}$')
     # plt.gca().add_artist(alegend)
-    # mlegend = ax1.legend(handles=mlegend_elements, loc=(0.65, 0.15), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
+    # mlegend = ax1.legend(handles=mlegend_elements, loc=(0.64, 0.15), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
     # plt.gca().add_artist(mlegend)
     # reflegend = ax1.legend(handles=[Line2D([0], [0], color='black', linestyle='solid', label=r'$<v_{I}(t_{\infty})>=c_{BEC}$')], loc=(0.65, 0.05))
     # plt.gca().add_artist(reflegend)
@@ -761,7 +839,7 @@ if __name__ == "__main__":
     # def powerfunc(t, a, b):
     #     return b * t**(-1 * a)
 
-    # tmin = 90
+    # tmin = 70
     # tmax = 100
     # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
     # rollwin = 1
@@ -840,7 +918,7 @@ if __name__ == "__main__":
     # ax1.set_title('Loschmidt Echo')
     # alegend = ax1.legend(handles=alegend_elements, loc=(0.45, 0.65), title=r'$a_{IB}^{-1}$')
     # plt.gca().add_artist(alegend)
-    # mlegend = ax1.legend(handles=mlegend_elements, loc=(0.65, 0.75), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
+    # mlegend = ax1.legend(handles=mlegend_elements, loc=(0.64, 0.70), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
     # plt.gca().add_artist(mlegend)
     # ax1.set_ylim([0, 1.2])
     # ax1.set_xlim([0, np.max(vI0_Vals / nu)])
