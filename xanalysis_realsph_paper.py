@@ -181,7 +181,7 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -10
+    aIBi = -1.5
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     qds_aIBi = qds
@@ -258,7 +258,7 @@ if __name__ == "__main__":
 
     shortTime = True; tau = 5
 
-    Pnorm_des = np.array([0.1, 0.5, 0.8, 1.0, 1.3, 1.5, 1.8, 2.2, 2.5, 3.0, 4.0, 5.0])
+    Pnorm_des = np.array([0.1, 0.5, 1.0, 1.3, 1.5, 2.1, 2.5, 3.0, 4.0, 5.0])
     # Pnorm_des = np.array([0.1, 0.5, 1.0, 3.0])
 
     Pinds = np.zeros(Pnorm_des.size, dtype=int)
@@ -319,7 +319,11 @@ if __name__ == "__main__":
 
     # # # # S(t) AND P_Imp CURVES
 
-    # tau = 100
+    # tailFit = False
+    # logScale = False
+
+    # # tau = 100
+    # tau = 5
     # tsVals = tVals[tVals < tau]
     # qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
 
@@ -330,7 +334,7 @@ if __name__ == "__main__":
     # # Pnorm_des = np.array([0.1, 0.5, 0.8, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2, 1.4, 1.6, 2.5, 3.0, 5.0, 6.0, 7.0, 9.0])
 
     # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
-    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.0, 1.3, 1.5, 1.8, 2.2, 2.5, 3.0, 4.0, 5.0])
+    # Pnorm_des = np.array([0.1, 0.5, 1.0, 1.3, 1.5, 2.1, 2.5, 3.0, 4.0, 5.0])
 
     # Pinds = np.zeros(Pnorm_des.size, dtype=int)
     # for Pn_ind, Pn in enumerate(Pnorm_des):
@@ -342,24 +346,21 @@ if __name__ == "__main__":
     #     DynOv = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
     #     PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
 
-    #     tfmask = tsVals > 60
-    #     tfVals = tsVals[tfmask]
-    #     tfLin = tsVals[tsVals > 10]
-    #     zD = np.polyfit(np.log(tfVals), np.log(DynOv[tfmask]), deg=1)
-    #     fLinD = np.exp(zD[1]) * tfLin**(zD[0])
-    #     zP = np.polyfit(np.log(tfVals), np.log(PImp[tfmask]), deg=1)
-    #     fLinP = np.exp(zP[1]) * tfLin**(zP[0])
+    #     if tailFit is True:
+    #         tfmask = tsVals > 60
+    #         tfVals = tsVals[tfmask]
+    #         tfLin = tsVals[tsVals > 10]
+    #         zD = np.polyfit(np.log(tfVals), np.log(DynOv[tfmask]), deg=1)
+    #         fLinD = np.exp(zD[1]) * tfLin**(zD[0])
+    #         zP = np.polyfit(np.log(tfVals), np.log(PImp[tfmask]), deg=1)
+    #         fLinP = np.exp(zP[1]) * tfLin**(zP[0])
+    #         axes[0].plot(tfLin / tscale, fLinD, 'k--', label='')
 
     #     axes[0].plot(tsVals / tscale, DynOv, label='{:.2f}'.format(P / mc))
-    #     axes[0].plot(tfLin / tscale, fLinD, 'k--', label='')
     #     axes[1].plot(tsVals / tscale, PImp / (mI * nu), label='{:.2f}'.format(P / mc))
     #     # axes[1].plot(tfLin / tscale, fLinP, 'k--', label='')
 
-    # axes[0].plot(tlin_norm * np.ones(DynOv.size), np.linspace(np.min(DynOv), np.max(DynOv), DynOv.size), 'k-')
     # axes[0].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
-    # axes[0].set_xscale('log')
-    # axes[0].set_yscale('log')
-    # axes[0].set_xlim([1e-1, 1e2])
     # axes[0].set_title('Loschmidt Echo (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
     # axes[0].set_ylabel(r'$|S(t)|$')
     # axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
@@ -367,13 +368,19 @@ if __name__ == "__main__":
     # # axes[1].plot(tlin_norm * np.ones(PImp.size), np.linspace(np.min(PImp), np.max(PImp), PImp.size), 'ko')
     # axes[1].plot(tsVals / tscale, np.ones(tsVals.size), 'k--', label='$c_{BEC}$')
     # axes[1].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=1, ncol=2)
-    # axes[1].set_xlim([-1, tau / tscale])
     # # axes[1].set_xscale('log')
     # # axes[1].set_yscale('log')
     # # axes[1].set_xlim([1e-1, 1e2])
     # axes[1].set_title('Average Impurity Speed (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
     # axes[1].set_ylabel(r'$\frac{<P_{I}>}{m_{I}c_{BEC}}$')
     # axes[1].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+
+    # if logScale is True:
+    #     axes[0].plot(tlin_norm * np.ones(DynOv.size), np.linspace(np.min(DynOv), np.max(DynOv), DynOv.size), 'k-')
+    #     axes[0].set_xscale('log')
+    #     axes[0].set_yscale('log')
+    #     axes[0].set_xlim([1e-1, 1e2])
+    #     axes[1].set_xlim([-1, tau / tscale])
 
     # fig.tight_layout()
     # plt.show()
