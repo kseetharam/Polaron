@@ -254,69 +254,6 @@ if __name__ == "__main__":
 
     # plt.show()
 
-    # # # PARTICIPATION RATIO CURVES
-
-    shortTime = True; tau = 5
-
-    Pnorm_des = np.array([0.1, 0.5, 1.0, 1.3, 1.5, 2.1, 2.5, 3.0, 4.0, 5.0])
-    # Pnorm_des = np.array([0.1, 0.5, 1.0, 3.0])
-
-    Pinds = np.zeros(Pnorm_des.size, dtype=int)
-    for Pn_ind, Pn in enumerate(Pnorm_des):
-        Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
-
-    kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_aIBi.coords['k'].values); kgrid.initArray_premade('th', qds_aIBi.coords['th'].values)
-    kVec = kgrid.getArray('k')
-    thVec = kgrid.getArray('th')
-    kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
-    dVk = kgrid.dV()
-
-    fig, ax = plt.subplots()
-    for indP in Pinds:
-        P = PVals[indP]
-
-        if Lx == 60:
-            qds_PaIBi = xr.open_dataset(distdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
-            tsVals = qds_PaIBi.coords['tc'].values
-
-        else:
-            qds_PaIBi = qds_aIBi.sel(P=P)
-            tsVals = qds_PaIBi.coords['t'].values
-
-        CSAmp_ds = (qds_PaIBi['Real_CSAmp'] + 1j * qds_PaIBi['Imag_CSAmp'])
-        Nph_ds = qds_PaIBi['Nph']
-
-        if Lx == 60:
-            CSAmp_ds = CSAmp_ds.rename({'tc': 't'})
-
-        if shortTime is True:
-            tsVals = tsVals[tsVals <= tau]
-            CSAmp_ds = CSAmp_ds.sel(t=tsVals)
-            Nph_ds = Nph_ds.sel(t=tsVals)
-
-        PR_Vals = np.zeros(tsVals.size)
-
-        for indt, t in enumerate(tsVals):
-            CSAmp_Vals = CSAmp_ds.sel(t=t).values
-            Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
-            PhDen_Vals = ((1 / Nph_ds.sel(t=t).values) * np.abs(Bk_2D_vals)**2).real.astype(float)
-            # norm_tot = np.dot(PhDen_Vals.flatten(), dVk); print(norm_tot)
-            PR_Vals[indt] = np.dot((PhDen_Vals**2).flatten(), dVk) * ((2 * np.pi)**(-3))
-
-            # PhDen_Vals = ((1 / np.sum(np.abs(Bk_2D_vals)**2)) * np.abs(Bk_2D_vals)**2).real.astype(float)
-            # # norm_tot = np.sum(PhDen_Vals); print(norm_tot)
-            # PR_Vals[indt] = np.sum(PhDen_Vals**2)
-
-        ax.plot(tsVals / tscale, PR_Vals, label='{:.2f}'.format(P / mc))
-
-    ax.legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=2, ncol=2)
-    # ax.set_xscale('log')
-    ax.set_title('Participation Ratio (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    ax.set_ylabel(r'$PR = \sum_{\vec{k}} (\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2}$')
-    ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-
-    plt.show()
-
     # # # # S(t) AND P_Imp CURVES
 
     # tailFit = False
@@ -1212,4 +1149,228 @@ if __name__ == "__main__":
     # ax.set_title('Polaron State Overlap (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
     # ax.set_ylabel(r'$|<\psi_{pol}|\psi(t)>|$')
     # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    # plt.show()
+
+    # # # # PARTICIPATION RATIO CURVES
+
+    # shortTime = True; tau = 5
+
+    # Pnorm_des = np.array([0.1, 0.5, 1.0, 1.3, 1.5, 2.1, 2.5, 3.0, 4.0, 5.0])
+    # # Pnorm_des = np.array([0.1, 0.5, 1.0, 3.0])
+
+    # Pinds = np.zeros(Pnorm_des.size, dtype=int)
+    # for Pn_ind, Pn in enumerate(Pnorm_des):
+    #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
+
+    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_aIBi.coords['k'].values); kgrid.initArray_premade('th', qds_aIBi.coords['th'].values)
+    # kVec = kgrid.getArray('k')
+    # thVec = kgrid.getArray('th')
+    # kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
+    # dVk = kgrid.dV()
+
+    # fig, ax = plt.subplots()
+    # for indP in Pinds:
+    #     P = PVals[indP]
+
+    #     if Lx == 60:
+    #         qds_PaIBi = xr.open_dataset(distdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    #         tsVals = qds_PaIBi.coords['tc'].values
+
+    #     else:
+    #         qds_PaIBi = qds_aIBi.sel(P=P)
+    #         tsVals = qds_PaIBi.coords['t'].values
+
+    #     CSAmp_ds = (qds_PaIBi['Real_CSAmp'] + 1j * qds_PaIBi['Imag_CSAmp'])
+    #     Nph_ds = qds_PaIBi['Nph']
+
+    #     if Lx == 60:
+    #         CSAmp_ds = CSAmp_ds.rename({'tc': 't'})
+
+    #     if shortTime is True:
+    #         tsVals = tsVals[tsVals <= tau]
+    #         CSAmp_ds = CSAmp_ds.sel(t=tsVals)
+    #         Nph_ds = Nph_ds.sel(t=tsVals)
+
+    #     PR_Vals = np.zeros(tsVals.size)
+
+    #     for indt, t in enumerate(tsVals):
+    #         CSAmp_Vals = CSAmp_ds.sel(t=t).values
+    #         Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
+
+    #         # PhDen_Vals = ((1 / Nph_ds.sel(t=t).values) * np.abs(Bk_2D_vals)**2).real.astype(float)
+    #         # # norm_tot = np.dot(PhDen_Vals.flatten(), dVk); print(norm_tot)
+    #         # PR_Vals[indt] = np.dot((PhDen_Vals**2).flatten(), dVk) * ((2 * np.pi)**(-3))
+
+    #         PhDen_Vals = ((2 * np.pi)**(-3)) * ((1 / Nph_ds.sel(t=t).values) * np.abs(Bk_2D_vals)**2).real.astype(float)
+    #         dVk_n = ((2 * np.pi)**(3)) * dVk
+    #         # norm_tot = np.dot(PhDen_Vals.flatten(), dVk_n); print(norm_tot)
+    #         PR_Vals[indt] = np.dot((PhDen_Vals**2).flatten(), dVk_n)
+
+    #         # # PhDen_Vals_disc = ((1 / np.sum(np.abs(Bk_2D_vals)**2)) * np.abs(Bk_2D_vals)**2).real.astype(float)
+    #         # PhDen_Vals_disc = ((2 * np.pi)**(-3)) * ((1 / Nph_ds.sel(t=t).values) * np.abs(Bk_2D_vals)**2).real.astype(float)
+    #         # dk = kVec[1] - kVec[0]
+    #         # norm_tot = 2 * np.pi * np.sum(PhDen_Vals_disc) / (dk**2); print(norm_tot)
+    #         # PR_Vals[indt] = np.sum(PhDen_Vals_disc**2)
+
+    #     ax.plot(tsVals / tscale, PR_Vals, label='{:.2f}'.format(P / mc))
+
+    # ax.legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=2, ncol=2)
+    # # ax.set_xscale('log')
+    # ax.set_title('Participation Ratio (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    # ax.set_ylabel(r'$PR = \sum_{\vec{k}} (\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2}$')
+    # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+
+    # plt.show()
+
+    # # # # PARTICIPATION RATIO CURVES
+
+    # shortTime = True; tau = 5
+
+    # Pnorm_des = np.array([0.1, 0.5, 1.0, 1.3, 1.5, 2.1, 2.5, 3.0, 4.0, 5.0])
+    # # Pnorm_des = np.array([0.1, 0.5, 1.0, 3.0])
+
+    # Pinds = np.zeros(Pnorm_des.size, dtype=int)
+    # for Pn_ind, Pn in enumerate(Pnorm_des):
+    #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
+
+    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_aIBi.coords['k'].values); kgrid.initArray_premade('th', qds_aIBi.coords['th'].values)
+    # kVec = kgrid.getArray('k')
+    # thVec = kgrid.getArray('th')
+    # kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
+    # dVk = kgrid.dV()
+
+    # fig, ax = plt.subplots()
+    # for indP in Pinds:
+    #     P = PVals[indP]
+
+    #     if Lx == 60:
+    #         qds_PaIBi = xr.open_dataset(distdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    #         tsVals = qds_PaIBi.coords['tc'].values
+
+    #     else:
+    #         qds_PaIBi = qds_aIBi.sel(P=P)
+    #         tsVals = qds_PaIBi.coords['t'].values
+
+    #     CSAmp_ds = (qds_PaIBi['Real_CSAmp'] + 1j * qds_PaIBi['Imag_CSAmp'])
+    #     Nph_ds = qds_PaIBi['Nph']
+
+    #     if Lx == 60:
+    #         CSAmp_ds = CSAmp_ds.rename({'tc': 't'})
+
+    #     if shortTime is True:
+    #         tsVals = tsVals[tsVals <= tau]
+    #         CSAmp_ds = CSAmp_ds.sel(t=tsVals)
+    #         Nph_ds = Nph_ds.sel(t=tsVals)
+
+    #     PR_Vals = np.zeros(tsVals.size)
+
+    #     for indt, t in enumerate(tsVals):
+    #         CSAmp_Vals = CSAmp_ds.sel(t=t).values
+    #         Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
+
+    #         # PhDen_Vals = ((1 / Nph_ds.sel(t=t).values) * np.abs(Bk_2D_vals)**2).real.astype(float)
+    #         # # norm_tot = np.dot(PhDen_Vals.flatten(), dVk); print(norm_tot)
+    #         # PR_Vals[indt] = np.dot((PhDen_Vals**2).flatten(), dVk) * ((2 * np.pi)**(-3))
+
+    #         PhDen_Vals = ((2 * np.pi)**(-3)) * ((1 / Nph_ds.sel(t=t).values) * np.abs(Bk_2D_vals)**2).real.astype(float)
+    #         dVk_n = ((2 * np.pi)**(3)) * dVk
+    #         # norm_tot = np.dot(PhDen_Vals.flatten(), dVk_n); print(norm_tot)
+    #         PR_Vals[indt] = np.dot((PhDen_Vals**2).flatten(), dVk_n)
+
+    #         # # PhDen_Vals_disc = ((1 / np.sum(np.abs(Bk_2D_vals)**2)) * np.abs(Bk_2D_vals)**2).real.astype(float)
+    #         # PhDen_Vals_disc = ((2 * np.pi)**(-3)) * ((1 / Nph_ds.sel(t=t).values) * np.abs(Bk_2D_vals)**2).real.astype(float)
+    #         # dk = kVec[1] - kVec[0]
+    #         # norm_tot = 2 * np.pi * np.sum(PhDen_Vals_disc) / (dk**2); print(norm_tot)
+    #         # PR_Vals[indt] = np.sum(PhDen_Vals_disc**2)
+
+    #     ax.plot(tsVals / tscale, PR_Vals, label='{:.2f}'.format(P / mc))
+
+    # ax.legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=2, ncol=2)
+    # # ax.set_xscale('log')
+    # ax.set_title('Participation Ratio (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    # ax.set_ylabel(r'$PR = \sum_{\vec{k}} (\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2}$')
+    # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+
+    # plt.show()
+
+    # # # # IMPURITY FINAL LOSCHMIDT ECHO CURVES
+
+    # # NOTE: We need the massRatio_1.0_old folder (or technically any of the _old folders) and the constants determined at the beginning of the script for this to run
+
+    # tau = 5
+
+    # colorList = ['red', '#7e1e9c', 'green', 'orange', 'blue']
+    # lineList = ['solid', 'dotted', 'dashed', '-.']
+    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5])
+    # massRat_des = np.array([1.0])
+    # mdatapaths = []
+
+    # for mR in massRat_des:
+    #     if toggleDict['Old'] is True:
+    #         mdatapaths.append(datapath[0:-7] + '{:.1f}'.format(mR))
+    #     else:
+    #         mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
+
+    # if toggleDict['Dynamics'] != 'real' or toggleDict['Grid'] != 'spherical' or toggleDict['Coupling'] != 'twophonon':
+    #     print('SETTING ERROR')
+
+    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_aIBi.coords['k'].values); kgrid.initArray_premade('th', qds_aIBi.coords['th'].values)
+    # kVec = kgrid.getArray('k')
+    # thVec = kgrid.getArray('th')
+    # kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
+    # dVk = kgrid.dV()
+
+    # fig1, ax1 = plt.subplots()
+    # for inda, aIBi in enumerate(aIBi_des):
+    #     for indm, mRat in enumerate(massRat_des):
+
+    #         vI0_Vals = np.zeros(PVals.size)
+    #         PR_Averages = np.zeros(PVals.size)
+
+    #         for indP, P in enumerate(PVals):
+    #             qds_PaIBi = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    #             CSAmp_ds = (qds_PaIBi['Real_CSAmp'] + 1j * qds_PaIBi['Imag_CSAmp'])
+    #             Nph_ds = qds_PaIBi['Nph']
+
+    #             if Lx == 60:
+    #                 CSAmp_ds = CSAmp_ds.rename({'tc': 't'})
+
+    #             tsVals = CSAmp_ds.coords['t'].values
+
+    #             tsVals = tsVals[tsVals <= tau]
+    #             CSAmp_ds = CSAmp_ds.sel(t=tsVals)
+    #             Nph_ds = Nph_ds.sel(t=tsVals)
+
+    #             PR_Vals = np.zeros(tsVals.size)
+
+    #             for indt, t in enumerate(tsVals):
+    #                 CSAmp_Vals = CSAmp_ds.sel(t=t).values
+    #                 Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
+
+    #                 PhDen_Vals = ((2 * np.pi)**(-3)) * ((1 / Nph_ds.sel(t=t).values) * np.abs(Bk_2D_vals)**2).real.astype(float)
+    #                 dVk_n = ((2 * np.pi)**(3)) * dVk
+    #                 # norm_tot = np.dot(PhDen_Vals.flatten(), dVk_n); print(norm_tot)
+    #                 PR_Vals[indt] = np.dot((PhDen_Vals**2).flatten(), dVk_n)
+
+    #             vI0_Vals[indP] = (P - qds_PaIBi.isel(t=0)['Pph'].values) / mI
+    #             PR_Averages[indP] = np.nanmean(PR_Vals)
+    #         print(PR_Averages)
+    #         ax1.plot(vI0_Vals / nu, PR_Averages, linestyle=lineList[inda], color=colorList[indm])
+
+    # alegend_elements = []
+    # mlegend_elements = []
+    # for inda, aIBi in enumerate(aIBi_des):
+    #     alegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[inda], label='{0}'.format(aIBi)))
+    # for indm, mR in enumerate(massRat_des):
+    #     mlegend_elements.append(Line2D([0], [0], color=colorList[indm], linestyle='solid', label='{0}'.format(mR)))
+
+    # ax1.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
+    # ax1.set_ylabel(r'Average $PR$ with $PR = \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2}$')
+    # ax1.set_title('Time-Averaged Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
+    # alegend = ax1.legend(handles=alegend_elements, loc=(0.65, 0.65), title=r'$a_{IB}^{-1}$')
+    # plt.gca().add_artist(alegend)
+    # mlegend = ax1.legend(handles=mlegend_elements, loc=(0.84, 0.70), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
+    # plt.gca().add_artist(mlegend)
+    # ax1.set_xlim([0, np.max(vI0_Vals / nu)])
+
     # plt.show()
