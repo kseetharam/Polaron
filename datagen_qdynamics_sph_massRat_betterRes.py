@@ -66,15 +66,15 @@ if __name__ == "__main__":
     tgrid = np.arange(0, tMax + dt, dt)
 
     # COLLECT DISTRIBUTION DATA OVER TIME (MORE DENSE AT SHORT TIMES)
-    # tmask = tgrid < 5
-    # tshort = tgrid[tmask]
-    # trest = tgrid[np.logical_not(tmask)]
-    # tgrid_coarse = np.concatenate((tshort, trest[0:-1:20]))
+    tmask = tgrid < 5
+    tshort = tgrid[tmask]
+    trest = tgrid[np.logical_not(tmask)]
+    tgrid_coarse = np.concatenate((tshort, trest[0:-1:20]))
 
-    # DON'T COLLECT DISTRIBUTION DATA EXCEPT FOR LAST POINT
-    tgrid_coarse = tgrid[0:-1:CoarseGrainRate]
-    if tgrid_coarse[-1] != tgrid[-1]:
-        tgrid_coarse = np.concatenate((tgrid_coarse, np.array([tgrid[-1]])))
+    # # DON'T COLLECT DISTRIBUTION DATA EXCEPT FOR LAST POINT
+    # tgrid_coarse = tgrid[0:-1:CoarseGrainRate]
+    # if tgrid_coarse[-1] != tgrid[-1]:
+    #     tgrid_coarse = np.concatenate((tgrid_coarse, np.array([tgrid[-1]])))
 
     gParams = [xgrid, kgrid, tgrid]
     NGridPoints = kgrid.size()

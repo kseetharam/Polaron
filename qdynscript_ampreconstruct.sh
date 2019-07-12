@@ -4,7 +4,7 @@
 #SBATCH -N 1
 #SBATCH -t 0-05:00
 #SBATCH -p shared
-#SBATCH --mem=45000
+#SBATCH --mem=65000
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=kis@mit.edu 
 #SBATCH --open-mode=append
