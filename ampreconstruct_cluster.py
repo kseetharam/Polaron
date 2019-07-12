@@ -105,7 +105,7 @@ if __name__ == "__main__":
     #         tloopstart = timer()
     #         CSAmp_ds = (qds_PaIBi['Real_CSAmp'] + 1j * qds_PaIBi['Imag_CSAmp']).sel(tc=t); CSAmp_ds.attrs = qds_PaIBi.attrs; CSAmp_ds.attrs['Nph'] = qds_PaIBi['Nph'].sel(t=t).values
     #         interp_ds = pf_dynamic_sph.reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL)
-    #         # interp_ds.to_netcdf(innerdatapath + '/amp3D/interp_P_{:.3f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
+    #         # interp_ds.to_netcdf(innerdatapath + '/amp3D/interp_P_{:.3f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}_tind_{:d}.nc'.format(P, aIBi, linDimMajor, linDimMinor,tind))
     #         ds_list.append(interp_ds); t_list.append(t)
 
     #         tloopend = timer()
@@ -155,7 +155,7 @@ if __name__ == "__main__":
         tloopstart = timer()
         CSAmp_ds = (qds_PaIBi['Real_CSAmp'] + 1j * qds_PaIBi['Imag_CSAmp']).sel(tc=t); CSAmp_ds.attrs = qds_PaIBi.attrs; CSAmp_ds.attrs['Nph'] = qds_PaIBi['Nph'].sel(t=t).values
         interp_ds = pf_dynamic_sph.reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL)
-        # interp_ds.to_netcdf(innerdatapath + '/amp3D/interp_P_{:.3f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
+        # interp_ds.to_netcdf(innerdatapath + '/amp3D/interp_P_{:.3f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}_tind_{:d}.nc'.format(P, aIBi, linDimMajor, linDimMinor,tind))
         ds_list.append(interp_ds); t_list.append(t)
         tloopend = timer()
         print('tLoop time: {:.2f}'.format(tloopend - tloopstart))
