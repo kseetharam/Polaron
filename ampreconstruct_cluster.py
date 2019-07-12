@@ -81,7 +81,7 @@ if __name__ == "__main__":
                 # if os.path.isdir(innerdatapath + '/amp3D') is False:
                 #     os.mkdir(innerdatapath + '/amp3D')
 
-    Params_List = Params_List[0:2]
+    # Params_List = Params_List[0:2]
     print(len(Params_List))
 
     # # ---- COMPUTE DATA ON COMPUTER ----
