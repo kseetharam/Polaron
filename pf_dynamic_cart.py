@@ -113,56 +113,116 @@ def xyzDist_ProjSlices(phonon_pos_dist, phonon_mom_dist, grid_size_args, grid_di
 
 
 # @profile
+# def xyzDist_To_magDist(kgrid, phonon_mom_dist, P):
+#     nPB = phonon_mom_dist
+#     # kgrid is the Cartesian grid upon which the 3D matrix nPB is defined -> nPB is the phonon momentum distribution in kx,ky,kz
+#     kxg, kyg, kzg = np.meshgrid(kgrid.getArray('kx'), kgrid.getArray('ky'), kgrid.getArray('kz'), indexing='ij', sparse=True)  # can optimize speed by taking this from the coherent_state precalculation
+#     dVk_const = kgrid.dV()[0] * (2 * np.pi)**(3)
+
+#     PB = np.sqrt(kxg**2 + kyg**2 + kzg**2)
+#     PI = np.sqrt((-kxg)**2 + (-kyg)**2 + (P - kzg)**2)
+#     PB_flat = PB.reshape(PB.size)
+#     PI_flat = PI.reshape(PI.size)
+#     nPB_flat = nPB.reshape(nPB.size)
+
+#     PB_series = pd.Series(nPB_flat, index=PB_flat)
+#     PI_series = pd.Series(nPB_flat, index=PI_flat)
+
+#     nPBm_unique = PB_series.groupby(PB_series.index).sum() * dVk_const
+#     nPIm_unique = PI_series.groupby(PI_series.index).sum() * dVk_const
+
+#     PB_unique = nPBm_unique.keys().values
+#     PI_unique = nPIm_unique.keys().values
+
+#     nPBm_cum = nPBm_unique.cumsum()
+#     nPIm_cum = nPIm_unique.cumsum()
+
+#     # CDF and PDF pre-processing
+
+#     PBm_Vec, dPBm = np.linspace(0, np.max(PB_unique), 200, retstep=True)
+#     PIm_Vec, dPIm = np.linspace(0, np.max(PI_unique), 200, retstep=True)
+
+#     nPBm_cum_smooth = nPBm_cum.groupby(pd.cut(x=nPBm_cum.index, bins=PBm_Vec, right=True, include_lowest=True)).mean()
+#     nPIm_cum_smooth = nPIm_cum.groupby(pd.cut(x=nPIm_cum.index, bins=PIm_Vec, right=True, include_lowest=True)).mean()
+
+#     # one less bin than bin edge so consider each bin average to correspond to left bin edge and throw out last (rightmost) edge
+#     PBm_Vec = PBm_Vec[0:-1]
+#     PIm_Vec = PIm_Vec[0:-1]
+
+#     # smooth data has NaNs in it from bins that don't contain any points - forward fill these holes
+#     PBmapping = dict(zip(nPBm_cum_smooth.keys(), PBm_Vec))
+#     PImapping = dict(zip(nPIm_cum_smooth.keys(), PIm_Vec))
+#     # PBmapping = pd.Series(PBm_Vec, index=nPBm_cum_smooth.keys())
+#     # PImapping = pd.Series(PIm_Vec, index=nPIm_cum_smooth.keys())
+#     nPBm_cum_smooth = nPBm_cum_smooth.rename(PBmapping).fillna(method='ffill')
+#     nPIm_cum_smooth = nPIm_cum_smooth.rename(PImapping).fillna(method='ffill')
+
+#     nPBm_Vec = np.gradient(nPBm_cum_smooth, dPBm)
+#     nPIm_Vec = np.gradient(nPIm_cum_smooth, dPIm)
+
+#     mag_dist_List = [PBm_Vec, nPBm_Vec, PIm_Vec, nPIm_Vec]
+
+#     return mag_dist_List
+
 def xyzDist_To_magDist(kgrid, phonon_mom_dist, P):
-    nPB = phonon_mom_dist
-    # kgrid is the Cartesian grid upon which the 3D matrix nPB is defined -> nPB is the phonon momentum distribution in kx,ky,kz
-    kxg, kyg, kzg = np.meshgrid(kgrid.getArray('kx'), kgrid.getArray('ky'), kgrid.getArray('kz'), indexing='ij', sparse=True)  # can optimize speed by taking this from the coherent_state precalculation
-    dVk_const = kgrid.dV()[0] * (2 * np.pi)**(3)
-
-    PB = np.sqrt(kxg**2 + kyg**2 + kzg**2)
-    PI = np.sqrt((-kxg)**2 + (-kyg)**2 + (P - kzg)**2)
-    PB_flat = PB.reshape(PB.size)
-    PI_flat = PI.reshape(PI.size)
-    nPB_flat = nPB.reshape(nPB.size)
-
-    PB_series = pd.Series(nPB_flat, index=PB_flat)
-    PI_series = pd.Series(nPB_flat, index=PI_flat)
-
-    nPBm_unique = PB_series.groupby(PB_series.index).sum() * dVk_const
-    nPIm_unique = PI_series.groupby(PI_series.index).sum() * dVk_const
-
-    PB_unique = nPBm_unique.keys().values
-    PI_unique = nPIm_unique.keys().values
-
-    nPBm_cum = nPBm_unique.cumsum()
-    nPIm_cum = nPIm_unique.cumsum()
-
-    # CDF and PDF pre-processing
-
-    PBm_Vec, dPBm = np.linspace(0, np.max(PB_unique), 200, retstep=True)
-    PIm_Vec, dPIm = np.linspace(0, np.max(PI_unique), 200, retstep=True)
-
-    nPBm_cum_smooth = nPBm_cum.groupby(pd.cut(x=nPBm_cum.index, bins=PBm_Vec, right=True, include_lowest=True)).mean()
-    nPIm_cum_smooth = nPIm_cum.groupby(pd.cut(x=nPIm_cum.index, bins=PIm_Vec, right=True, include_lowest=True)).mean()
-
-    # one less bin than bin edge so consider each bin average to correspond to left bin edge and throw out last (rightmost) edge
-    PBm_Vec = PBm_Vec[0:-1]
-    PIm_Vec = PIm_Vec[0:-1]
-
-    # smooth data has NaNs in it from bins that don't contain any points - forward fill these holes
-    PBmapping = dict(zip(nPBm_cum_smooth.keys(), PBm_Vec))
-    PImapping = dict(zip(nPIm_cum_smooth.keys(), PIm_Vec))
-    # PBmapping = pd.Series(PBm_Vec, index=nPBm_cum_smooth.keys())
-    # PImapping = pd.Series(PIm_Vec, index=nPIm_cum_smooth.keys())
-    nPBm_cum_smooth = nPBm_cum_smooth.rename(PBmapping).fillna(method='ffill')
-    nPIm_cum_smooth = nPIm_cum_smooth.rename(PImapping).fillna(method='ffill')
-
-    nPBm_Vec = np.gradient(nPBm_cum_smooth, dPBm)
-    nPIm_Vec = np.gradient(nPIm_cum_smooth, dPIm)
-
+    [PBm_Vec, nPBm_Vec] = xyzDist_To_PBmagDist(kgrid, phonon_mom_dist, P)
+    [PIm_Vec, nPIm_Vec] = xyzDist_To_PImagDist(kgrid, phonon_mom_dist, P)
     mag_dist_List = [PBm_Vec, nPBm_Vec, PIm_Vec, nPIm_Vec]
 
     return mag_dist_List
+
+
+def xyzDist_To_PBmagDist(kgrid, phonon_mom_dist, P):
+    # kgrid is the Cartesian grid upon which the 3D matrix nPB is defined -> nPB is the phonon momentum distribution in kx,ky,kz
+    kxg, kyg, kzg = np.meshgrid(kgrid.getArray('kx'), kgrid.getArray('ky'), kgrid.getArray('kz'), indexing='ij', sparse=True)  # can optimize speed by taking this from the coherent_state precalculation
+    dVk_const = kgrid.dV()[0] * (2 * np.pi)**(3)
+    PB = np.sqrt(kxg**2 + kyg**2 + kzg**2)
+    PB_flat = PB.reshape(PB.size)
+    nPB_flat = phonon_mom_dist.reshape(phonon_mom_dist.size)
+    PB_series = pd.Series(nPB_flat, index=PB_flat)
+    nPBm_unique = PB_series.groupby(PB_series.index).sum() * dVk_const
+    PB_unique = nPBm_unique.keys().values
+    nPBm_cum = nPBm_unique.cumsum()
+    # CDF and PDF pre-processing
+    PBm_Vec, dPBm = np.linspace(0, np.max(PB_unique), 200, retstep=True)
+    nPBm_cum_smooth = nPBm_cum.groupby(pd.cut(x=nPBm_cum.index, bins=PBm_Vec, right=True, include_lowest=True)).mean()
+    # one less bin than bin edge so consider each bin average to correspond to left bin edge and throw out last (rightmost) edge
+    PBm_Vec = PBm_Vec[0:-1]
+    # smooth data has NaNs in it from bins that don't contain any points - forward fill these holes
+    PBmapping = dict(zip(nPBm_cum_smooth.keys(), PBm_Vec))
+    # PBmapping = pd.Series(PBm_Vec, index=nPBm_cum_smooth.keys())
+    nPBm_cum_smooth = nPBm_cum_smooth.rename(PBmapping).fillna(method='ffill')
+    nPBm_Vec = np.gradient(nPBm_cum_smooth, dPBm)
+    PBmag_dist_List = [PBm_Vec, nPBm_Vec]
+
+    return PBmag_dist_List
+
+
+def xyzDist_To_PImagDist(kgrid, phonon_mom_dist, P):
+    # kgrid is the Cartesian grid upon which the 3D matrix nPB is defined -> nPB is the phonon momentum distribution in kx,ky,kz
+    kxg, kyg, kzg = np.meshgrid(kgrid.getArray('kx'), kgrid.getArray('ky'), kgrid.getArray('kz'), indexing='ij', sparse=True)  # can optimize speed by taking this from the coherent_state precalculation
+    dVk_const = kgrid.dV()[0] * (2 * np.pi)**(3)
+    PI = np.sqrt((-kxg)**2 + (-kyg)**2 + (P - kzg)**2)
+    PI_flat = PI.reshape(PI.size)
+    nPB_flat = phonon_mom_dist.reshape(phonon_mom_dist.size)
+    PI_series = pd.Series(nPB_flat, index=PI_flat)
+    nPIm_unique = PI_series.groupby(PI_series.index).sum() * dVk_const
+    PI_unique = nPIm_unique.keys().values
+    nPIm_cum = nPIm_unique.cumsum()
+    # CDF and PDF pre-processing
+    PIm_Vec, dPIm = np.linspace(0, np.max(PI_unique), 200, retstep=True)
+    nPIm_cum_smooth = nPIm_cum.groupby(pd.cut(x=nPIm_cum.index, bins=PIm_Vec, right=True, include_lowest=True)).mean()
+    # one less bin than bin edge so consider each bin average to correspond to left bin edge and throw out last (rightmost) edge
+    PIm_Vec = PIm_Vec[0:-1]
+    # smooth data has NaNs in it from bins that don't contain any points - forward fill these holes
+    PImapping = dict(zip(nPIm_cum_smooth.keys(), PIm_Vec))
+    # PImapping = pd.Series(PIm_Vec, index=nPIm_cum_smooth.keys())
+    nPIm_cum_smooth = nPIm_cum_smooth.rename(PImapping).fillna(method='ffill')
+    nPIm_Vec = np.gradient(nPIm_cum_smooth, dPIm)
+    PImag_dist_List = [PIm_Vec, nPIm_Vec]
+
+    return PImag_dist_List
+
 
 # ---- ANALYSIS FUNCTIONS ----
 

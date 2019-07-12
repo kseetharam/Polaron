@@ -409,7 +409,7 @@ def reconstructDistributions(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkz
 def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     import pf_dynamic_cart as pfc
     # Set up
-    P = CSAmp_ds['P'].values
+    P = CSAmp_ds.attrs['P']
     aIBi = CSAmp_ds.attrs['aIBi']
     n0 = CSAmp_ds.attrs['n0']; gBB = CSAmp_ds.attrs['gBB']; mI = CSAmp_ds.attrs['mI']; mB = CSAmp_ds.attrs['mB']
 
@@ -519,6 +519,15 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     PB_x = kxL; PB_y = kyL; PB_z = kzL
     PI_x = PIgrid.getArray('kx'); PI_y = PIgrid.getArray('ky'); PI_z = PIgrid.getArray('kz')
     [PBm, nPBm, PIm, nPIm] = pfc.xyzDist_To_magDist(kgrid_L, nPB, P)
+
+    # Calculate bare participation ratio (without normalizing constant)
+    pk = (2 * np.pi)**(-3) * PhDenLg_3D
+    pk_norm = np.sum(dkxL * dkyL * dkzL * pk); print('Cartesian probability density (1/(2pi)^3)(1/Nph)|Bk|^2 normalization: {0}'.format(pk_norm))
+    PR_bare_cont = np.sum(dkxL * dkyL * dkzL * (pk**2))
+    PR_bare_discrete = np.sum((pk / np.sum(pk))**2)
+    Npoints3D = pk.size
+    Vxyz = (xL[-1] - xL[0]) * (yL[-1] - yL[0]) * (zL[-1] - zL[0])
+
     # Create DataSet for 3D Betak and position distribution slices
     Nx = len(kxL); Ny = len(kyL); Nz = len(kzL)
     PhDen_xz_slice_da = xr.DataArray(PhDenLg_3D[:, Ny // 2, :], coords=[kxL, kzL], dims=['kx', 'kz'])
@@ -536,7 +545,7 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
                   'nPB_xz_slice': nPB_xz_slice_da, 'nPB_xy_slice': nPB_xy_slice_da, 'nPB_yz_slice': nPB_yz_slice_da, 'nPB_mag': nPBm_da,
                   'nPI_xz_slice': nPI_xz_slice_da, 'nPI_xy_slice': nPI_xy_slice_da, 'nPI_yz_slice': nPI_yz_slice_da, 'nPI_mag': nPIm_da})
     coords_dict = {'kx': kxL, 'ky': kyL, 'kz': kzL, 'x': xL, 'y': yL, 'z': zL, 'PB_x': PB_x, 'PB_y': PB_y, 'PB_z': PB_z, 'PI_x': PI_x, 'PI_y': PI_y, 'PI_z': PI_z, 'PB_mag': PBm, 'PI_mag': PIm}
-    attrs_dict = {'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'mom_deltapeak': nPB_deltaK0, 'Nph_frac': Nph_red / Nph, 'Nph_interp': Nph_interp, 'Nph_orig': Nph}
+    attrs_dict = {'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'mom_deltapeak': nPB_deltaK0, 'Nph_frac': Nph_red / Nph, 'Nph_interp': Nph_interp, 'Nph_orig': Nph, 'PR_bare_cont': PR_bare_cont, 'PR_bare_discrete': PR_bare_discrete, 'Npoints3D': Npoints3D, 'Vxyz': Vxyz}
     interp_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
     # interp_ds.to_netcdf(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
     return interp_ds
