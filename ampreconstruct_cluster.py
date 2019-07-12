@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     # ---- SET PARAMS ----
 
-    tau = 0.6
+    tau = 5
     dkxL = 5e-2; dkyL = 5e-2; dkzL = 5e-2
     linDimMajor = 0.99 * (k_max * np.sqrt(2) / 2)
     linDimMinor = linDimMajor
