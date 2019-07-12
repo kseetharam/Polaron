@@ -541,13 +541,28 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     nPI_yz_slice = np.flip(np.flip(nPB_yz_slice, 0), 1); nPI_yz_slice_da = xr.DataArray(nPI_yz_slice, coords=[PI_y, PI_z], dims=['PI_y', 'PI_z'])
     nPBm_da = xr.DataArray(nPBm, coords=[PBm], dims=['PB_mag'])
     nPIm_da = xr.DataArray(nPIm, coords=[PIm], dims=['PI_mag'])
+
+    mom_deltapeak_da = xr.DataArray(nPB_deltaK0)
+    Nph_frac_da = xr.DataArray(Nph_red / Nph)
+    Nph_interp_da = xr.DataArray(Nph_interp)
+    Nph_orig_da = xr.DataArray(Nph)
+    PR_bare_cont_da = xr.DataArray(PR_bare_cont)
+    PR_bare_discrete_da = xr.DataArray(PR_bare_discrete)
+
+    # data_dict = ({'PhDen_xz': PhDen_xz_slice_da, 'PhDen_xy': PhDen_xy_slice_da, 'PhDen_yz': PhDen_yz_slice_da,
+    #               'nPB_xz_slice': nPB_xz_slice_da, 'nPB_xy_slice': nPB_xy_slice_da, 'nPB_yz_slice': nPB_yz_slice_da, 'nPB_mag': nPBm_da,
+    #               'nPI_xz_slice': nPI_xz_slice_da, 'nPI_xy_slice': nPI_xy_slice_da, 'nPI_yz_slice': nPI_yz_slice_da, 'nPI_mag': nPIm_da})
+    # coords_dict = {'kx': kxL, 'ky': kyL, 'kz': kzL, 'x': xL, 'y': yL, 'z': zL, 'PB_x': PB_x, 'PB_y': PB_y, 'PB_z': PB_z, 'PI_x': PI_x, 'PI_y': PI_y, 'PI_z': PI_z, 'PB_mag': PBm, 'PI_mag': PIm}
+    # attrs_dict = {'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'mom_deltapeak': nPB_deltaK0, 'Nph_frac': Nph_red / Nph, 'Nph_interp': Nph_interp, 'Nph_orig': Nph, 'PR_bare_cont': PR_bare_cont, 'PR_bare_discrete': PR_bare_discrete, 'Npoints3D': Npoints3D, 'Vxyz': Vxyz}
+
     data_dict = ({'PhDen_xz': PhDen_xz_slice_da, 'PhDen_xy': PhDen_xy_slice_da, 'PhDen_yz': PhDen_yz_slice_da,
                   'nPB_xz_slice': nPB_xz_slice_da, 'nPB_xy_slice': nPB_xy_slice_da, 'nPB_yz_slice': nPB_yz_slice_da, 'nPB_mag': nPBm_da,
-                  'nPI_xz_slice': nPI_xz_slice_da, 'nPI_xy_slice': nPI_xy_slice_da, 'nPI_yz_slice': nPI_yz_slice_da, 'nPI_mag': nPIm_da})
+                  'nPI_xz_slice': nPI_xz_slice_da, 'nPI_xy_slice': nPI_xy_slice_da, 'nPI_yz_slice': nPI_yz_slice_da, 'nPI_mag': nPIm_da,
+                  'mom_deltapeak': mom_deltapeak_da, 'Nph_frac': Nph_frac_da, 'Nph_interp': Nph_interp_da, 'Nph_orig': Nph_orig_da, 'PR_bare_cont': PR_bare_cont_da, 'PR_bare_discrete': PR_bare_discrete_da})
     coords_dict = {'kx': kxL, 'ky': kyL, 'kz': kzL, 'x': xL, 'y': yL, 'z': zL, 'PB_x': PB_x, 'PB_y': PB_y, 'PB_z': PB_z, 'PI_x': PI_x, 'PI_y': PI_y, 'PI_z': PI_z, 'PB_mag': PBm, 'PI_mag': PIm}
-    attrs_dict = {'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'mom_deltapeak': nPB_deltaK0, 'Nph_frac': Nph_red / Nph, 'Nph_interp': Nph_interp, 'Nph_orig': Nph, 'PR_bare_cont': PR_bare_cont, 'PR_bare_discrete': PR_bare_discrete, 'Npoints3D': Npoints3D, 'Vxyz': Vxyz}
+    attrs_dict = {'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'Npoints3D': Npoints3D, 'Vxyz': Vxyz}
     interp_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
-    # interp_ds.to_netcdf(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
+
     return interp_ds
 
 

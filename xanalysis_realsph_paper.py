@@ -51,6 +51,10 @@ if __name__ == "__main__":
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     # NGridPoints_cart = 1.37e5
 
+    k_max = ((2 * np.pi / dx)**3 / (4 * np.pi / 3))**(1 / 3)
+    linDimMajor = 0.99 * (k_max * np.sqrt(2) / 2)
+    linDimMinor = linDimMajor
+
     massRat = 1.0
     IRrat = 1
 
@@ -182,7 +186,7 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -1.5
+    aIBi = -10
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     qds_aIBi = qds
@@ -1223,7 +1227,7 @@ if __name__ == "__main__":
 
     # plt.show()
 
-    # # # # PARTICIPATION RATIO CURVES (VS TIME)
+    # # # # PARTICIPATION RATIO CURVES (VS TIME) - SPHERICAL
 
     # shortTime = True; tau = 5
 
@@ -1294,104 +1298,139 @@ if __name__ == "__main__":
 
     # plt.show()
 
-    # # # PARTICIPATION RATIO CURVES (VS INITIAL VELOCITY)
+    # # # # PARTICIPATION RATIO CURVES (VS INITIAL VELOCITY) - SPHERICAL
 
-    # NOTE: We need the massRatio_1.0_old folder (or technically any of the _old folders) and the constants determined at the beginning of the script for this to run
+    # # NOTE: We need the massRatio_1.0_old folder (or technically any of the _old folders) and the constants determined at the beginning of the script for this to run
 
-    inversePlot = True
-    PRconst = True
-    tau = 10
+    # inversePlot = True
+    # PRconst = True
+    # tau = 10
 
-    if PRconst is True:
-        PRconst = (2 * np.pi)**3
-    else:
-        PRconst = 1
+    # if PRconst is True:
+    #     PRconst = (2 * np.pi)**3
+    # else:
+    #     PRconst = 1
 
-    colorList = ['red', '#7e1e9c', 'green', 'orange', 'blue']
-    lineList = ['solid', 'dotted', 'dashed', '-.']
-    aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5])
-    massRat_des = np.array([1.0])
-    # massRat_des = np.array([0.5, 0.75, 1.0, 2, 5.0])
-    mdatapaths = []
+    # colorList = ['red', '#7e1e9c', 'green', 'orange', 'blue']
+    # lineList = ['solid', 'dotted', 'dashed', '-.']
+    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5])
+    # massRat_des = np.array([1.0])
+    # # massRat_des = np.array([0.5, 0.75, 1.0, 2, 5.0])
+    # mdatapaths = []
 
-    for mR in massRat_des:
-        if toggleDict['Old'] is True:
-            mdatapaths.append(datapath[0:-7] + '{:.1f}'.format(mR))
-        else:
-            mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
+    # for mR in massRat_des:
+    #     if toggleDict['Old'] is True:
+    #         mdatapaths.append(datapath[0:-7] + '{:.1f}'.format(mR))
+    #     else:
+    #         mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
 
-    if toggleDict['Dynamics'] != 'real' or toggleDict['Grid'] != 'spherical' or toggleDict['Coupling'] != 'twophonon':
-        print('SETTING ERROR')
+    # if toggleDict['Dynamics'] != 'real' or toggleDict['Grid'] != 'spherical' or toggleDict['Coupling'] != 'twophonon':
+    #     print('SETTING ERROR')
 
-    kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_aIBi.coords['k'].values); kgrid.initArray_premade('th', qds_aIBi.coords['th'].values)
-    kVec = kgrid.getArray('k')
-    thVec = kgrid.getArray('th')
-    kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
-    dVk = kgrid.dV()
-    print(kVec[-1], kVec[1] - kVec[0])
+    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_aIBi.coords['k'].values); kgrid.initArray_premade('th', qds_aIBi.coords['th'].values)
+    # kVec = kgrid.getArray('k')
+    # thVec = kgrid.getArray('th')
+    # kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
+    # dVk = kgrid.dV()
+    # print(kVec[-1], kVec[1] - kVec[0])
+
+    # fig1, ax1 = plt.subplots()
+    # for inda, aIBi in enumerate(aIBi_des):
+    #     for indm, mRat in enumerate(massRat_des):
+
+    #         vI0_Vals = np.zeros(PVals.size)
+    #         PR_Averages = np.zeros(PVals.size)
+
+    #         for indP, P in enumerate(PVals):
+    #             qds_PaIBi = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    #             CSAmp_ds = (qds_PaIBi['Real_CSAmp'] + 1j * qds_PaIBi['Imag_CSAmp'])
+    #             Nph_ds = qds_PaIBi['Nph']
+
+    #             if Lx == 60:
+    #                 CSAmp_ds = CSAmp_ds.rename({'tc': 't'})
+
+    #             tsVals = CSAmp_ds.coords['t'].values
+    #             tsVals = tsVals[tsVals <= tau]
+    #             CSAmp_ds = CSAmp_ds.sel(t=tsVals)
+    #             Nph_ds = Nph_ds.sel(t=tsVals)
+
+    #             PR_Vals = np.zeros(tsVals.size)
+
+    #             dt = tsVals[1] - tsVals[0]
+
+    #             for indt, t in enumerate(tsVals):
+    #                 CSAmp_Vals = CSAmp_ds.sel(t=t).values
+    #                 Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
+
+    #                 PhDen_Vals = ((2 * np.pi)**(-3)) * ((1 / Nph_ds.sel(t=t).values) * np.abs(Bk_2D_vals)**2).real.astype(float)
+    #                 dVk_n = ((2 * np.pi)**(3)) * dVk
+    #                 # norm_tot = np.dot(PhDen_Vals.flatten(), dVk_n); print(norm_tot)
+    #                 PR_Vals[indt] = PRconst * np.dot((PhDen_Vals**2).flatten(), dVk_n)
+
+    #             vI0_Vals[indP] = (P - qds_PaIBi.isel(t=0)['Pph'].values) / mI
+    #             # PR_Averages[indP] = np.nanmean(PR_Vals)
+    #             PR_Vals_del = np.delete(PR_Vals, 0); PR_Averages[indP] = (1 / (tsVals[-1] - tsVals[1])) * simps(y=PR_Vals_del, dx=dt)
+    #         print(PVals.size, tsVals.size)
+    #         print(PR_Averages)
+    #         if inversePlot is True:
+    #             ax1.plot(vI0_Vals / nu, 1 / PR_Averages, linestyle=lineList[inda], color=colorList[indm])
+    #         else:
+    #             ax1.plot(vI0_Vals / nu, PR_Averages, linestyle=lineList[inda], color=colorList[indm])
+
+    # alegend_elements = []
+    # mlegend_elements = []
+    # for inda, aIBi in enumerate(aIBi_des):
+    #     alegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[inda], label='{0}'.format(aIBi)))
+    # for indm, mR in enumerate(massRat_des):
+    #     mlegend_elements.append(Line2D([0], [0], color=colorList[indm], linestyle='solid', label='{0}'.format(mR)))
+
+    # ax1.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
+
+    # if inversePlot is True:
+    #     ax1.set_title('Time-Averaged Inverse Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
+    #     ax1.set_ylabel(r'Average $IPR$ with $IPR = ((2\pi)^{3} \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2})^{-1}$')
+    # else:
+    #     ax1.set_title('Time-Averaged Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
+    #     ax1.set_ylabel(r'Average $PR$ with $PR = (2\pi)^{3} \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2}$')
+    # alegend = ax1.legend(handles=alegend_elements, loc=(0.65, 0.65), title=r'$a_{IB}^{-1}$')
+    # plt.gca().add_artist(alegend)
+    # mlegend = ax1.legend(handles=mlegend_elements, loc=(0.84, 0.70), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
+    # plt.gca().add_artist(mlegend)
+    # ax1.set_xlim([0, np.max(vI0_Vals / nu)])
+
+    # plt.show()
+
+    # # # PARTICIPATION RATIO CURVES (VS TIME) - CARTESIAN AMP RECONSTRUCT
+
+    # Pnorm_des = np.array([0.1, 0.5, 1.0, 1.3, 1.5, 2.1, 2.5, 3.0, 4.0, 5.0])
+    Pnorm_des = np.array([0.1])
+
+    Pinds = np.zeros(Pnorm_des.size, dtype=int)
+    for Pn_ind, Pn in enumerate(Pnorm_des):
+        Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
 
     fig1, ax1 = plt.subplots()
-    for inda, aIBi in enumerate(aIBi_des):
-        for indm, mRat in enumerate(massRat_des):
+    fig2, ax2 = plt.subplots()
+    for indP in Pinds:
+        P = PVals[indP]
 
-            vI0_Vals = np.zeros(PVals.size)
-            PR_Averages = np.zeros(PVals.size)
+        interpds_PaIBi = xr.open_dataset(distdatapath + '/amp3D/interp_P_{:.3f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
 
-            for indP, P in enumerate(PVals):
-                qds_PaIBi = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
-                CSAmp_ds = (qds_PaIBi['Real_CSAmp'] + 1j * qds_PaIBi['Imag_CSAmp'])
-                Nph_ds = qds_PaIBi['Nph']
+        tsVals = interpds_PaIBi.coords['t'].values
+        PRcont_Vals = interpds_PaIBi['PR_bare_cont'].values
+        PRdisc_Vals = interpds_PaIBi['PR_bare_discrete'].values
 
-                if Lx == 60:
-                    CSAmp_ds = CSAmp_ds.rename({'tc': 't'})
+        ax1.plot(tsVals / tscale, 1 / PRcont_Vals, label='{:.2f}'.format(P / mc))
+        ax2.plot(tsVals / tscale, 1 / PRdisc_Vals, label='{:.2f}'.format(P / mc))
 
-                tsVals = CSAmp_ds.coords['t'].values
-                tsVals = tsVals[tsVals <= tau]
-                CSAmp_ds = CSAmp_ds.sel(t=tsVals)
-                Nph_ds = Nph_ds.sel(t=tsVals)
+    ax1.legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=2, ncol=2)
+    ax1.set_title('Inverse Participation Ratio (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    ax1.set_ylabel(r'$IPR = ((2\pi)^{3} \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2})^{-1}$')
+    ax1.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
 
-                PR_Vals = np.zeros(tsVals.size)
-
-                dt = tsVals[1] - tsVals[0]
-
-                for indt, t in enumerate(tsVals):
-                    CSAmp_Vals = CSAmp_ds.sel(t=t).values
-                    Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
-
-                    PhDen_Vals = ((2 * np.pi)**(-3)) * ((1 / Nph_ds.sel(t=t).values) * np.abs(Bk_2D_vals)**2).real.astype(float)
-                    dVk_n = ((2 * np.pi)**(3)) * dVk
-                    # norm_tot = np.dot(PhDen_Vals.flatten(), dVk_n); print(norm_tot)
-                    PR_Vals[indt] = PRconst * np.dot((PhDen_Vals**2).flatten(), dVk_n)
-
-                vI0_Vals[indP] = (P - qds_PaIBi.isel(t=0)['Pph'].values) / mI
-                # PR_Averages[indP] = np.nanmean(PR_Vals)
-                PR_Vals_del = np.delete(PR_Vals, 0); PR_Averages[indP] = (1 / (tsVals[-1] - tsVals[1])) * simps(y=PR_Vals_del, dx=dt)
-            print(PVals.size, tsVals.size)
-            print(PR_Averages)
-            if inversePlot is True:
-                ax1.plot(vI0_Vals / nu, 1 / PR_Averages, linestyle=lineList[inda], color=colorList[indm])
-            else:
-                ax1.plot(vI0_Vals / nu, PR_Averages, linestyle=lineList[inda], color=colorList[indm])
-
-    alegend_elements = []
-    mlegend_elements = []
-    for inda, aIBi in enumerate(aIBi_des):
-        alegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[inda], label='{0}'.format(aIBi)))
-    for indm, mR in enumerate(massRat_des):
-        mlegend_elements.append(Line2D([0], [0], color=colorList[indm], linestyle='solid', label='{0}'.format(mR)))
-
-    ax1.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
-
-    if inversePlot is True:
-        ax1.set_title('Time-Averaged Inverse Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
-        ax1.set_ylabel(r'Average $IPR$ with $IPR = ((2\pi)^{3} \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2})^{-1}$')
-    else:
-        ax1.set_title('Time-Averaged Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
-        ax1.set_ylabel(r'Average $PR$ with $PR = (2\pi)^{3} \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2}$')
-    alegend = ax1.legend(handles=alegend_elements, loc=(0.65, 0.65), title=r'$a_{IB}^{-1}$')
-    plt.gca().add_artist(alegend)
-    mlegend = ax1.legend(handles=mlegend_elements, loc=(0.84, 0.70), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
-    plt.gca().add_artist(mlegend)
-    ax1.set_xlim([0, np.max(vI0_Vals / nu)])
+    ax2.legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=2, ncol=2)
+    ax2.set_title('Inverse Participation Ratio (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    ax2.set_ylabel(r'$IPR = ((2\pi)^{3} \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2})^{-1}$')
+    ax2.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
 
     plt.show()
