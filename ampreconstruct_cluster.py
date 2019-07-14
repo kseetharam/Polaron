@@ -82,6 +82,8 @@ if __name__ == "__main__":
                 #     os.mkdir(innerdatapath + '/amp3D')
 
     # Params_List = Params_List[0:2]
+    remList = []; remList.append(Params_List[9]); remList.append(Params_List[74]); remList.append(Params_List[79]); remList.append(Params_List[102]); remList.append(Params_List[198])
+    Params_List = remList
     print(len(Params_List))
 
     # # ---- COMPUTE DATA ON COMPUTER ----
