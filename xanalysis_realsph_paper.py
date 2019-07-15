@@ -1346,7 +1346,7 @@ if __name__ == "__main__":
 
     # inversePlot = True
     # PRconst = True
-    # tau = 10
+    # tau = 2.3
 
     # if PRconst is True:
     #     PRconst = (2 * np.pi)**3
@@ -1476,3 +1476,76 @@ if __name__ == "__main__":
     # ax2.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
 
     # plt.show()
+
+    # # # PARTICIPATION RATIO CURVES (VS INITIAL VELOCITY) - CARTESIAN AMP RECONSTRUCT
+
+    inversePlot = True
+    PRconst = True
+    tau = 2.3
+
+    if PRconst is True:
+        PRconst = (2 * np.pi)**3
+    else:
+        PRconst = 1
+
+    colorList = ['red', '#7e1e9c', 'green', 'orange', 'blue']
+    lineList = ['solid', 'dotted', 'dashed', '-.']
+    aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5])
+    massRat_des = np.array([1.0])
+    # massRat_des = np.array([0.5, 0.75, 1.0, 2, 5.0])
+    mdatapaths = []
+
+    for mR in massRat_des:
+        if toggleDict['Old'] is True:
+            mdatapaths.append(datapath[0:-7] + '{:.1f}'.format(mR))
+        else:
+            mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
+
+    fig1, ax1 = plt.subplots()
+    for inda, aIBi in enumerate(aIBi_des):
+        for indm, mRat in enumerate(massRat_des):
+
+            vI0_Vals = np.zeros(PVals.size)
+            PRcont_Averages = np.zeros(PVals.size)
+            PRdisc_Averages = np.zeros(PVals.size)
+
+            for indP, P in enumerate(PVals):
+                qds_PaIBi = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+                interpds_PaIBi = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/amp3D/interp_P_{:.3f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
+
+                tsVals = interpds_PaIBi.coords['t'].values
+                tsVals = tsVals[tsVals <= tau]
+                dt = tsVals[1] - tsVals[0]
+                PRcont_Vals = interpds_PaIBi['PR_bare_cont'].sel(t=tsVals).values
+                PRdisc_Vals = interpds_PaIBi['PR_bare_discrete'].sel(t=tsVals).values
+
+                vI0_Vals[indP] = (P - qds_PaIBi.isel(t=0)['Pph'].values) / mI
+                PRcont_Averages[indP] = (1 / (tsVals[-1] - tsVals[1])) * simps(y=PRcont_Vals, dx=dt)
+                PRdisc_Averages[indP] = (1 / (tsVals[-1] - tsVals[1])) * simps(y=PRdisc_Vals, dx=dt)
+            if inversePlot is True:
+                ax1.plot(vI0_Vals / nu, 1 / PRcont_Averages, linestyle=lineList[inda], color=colorList[indm])
+            else:
+                ax1.plot(vI0_Vals / nu, PRcont_Averages, linestyle=lineList[inda], color=colorList[indm])
+
+    alegend_elements = []
+    mlegend_elements = []
+    for inda, aIBi in enumerate(aIBi_des):
+        alegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[inda], label='{0}'.format(aIBi)))
+    for indm, mR in enumerate(massRat_des):
+        mlegend_elements.append(Line2D([0], [0], color=colorList[indm], linestyle='solid', label='{0}'.format(mR)))
+
+    ax1.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
+
+    if inversePlot is True:
+        ax1.set_title('Time-Averaged Inverse Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
+        ax1.set_ylabel(r'Average $IPR$ with $IPR = ((2\pi)^{3} \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2})^{-1}$')
+    else:
+        ax1.set_title('Time-Averaged Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
+        ax1.set_ylabel(r'Average $PR$ with $PR = (2\pi)^{3} \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2}$')
+    alegend = ax1.legend(handles=alegend_elements, loc=(0.65, 0.65), title=r'$a_{IB}^{-1}$')
+    plt.gca().add_artist(alegend)
+    mlegend = ax1.legend(handles=mlegend_elements, loc=(0.84, 0.70), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
+    plt.gca().add_artist(mlegend)
+    ax1.set_xlim([0, np.max(vI0_Vals / nu)])
+
+    plt.show()
