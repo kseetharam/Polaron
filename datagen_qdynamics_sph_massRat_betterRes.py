@@ -153,8 +153,11 @@ if __name__ == "__main__":
                 # if os.path.isdir(innerdatapath) is False:
                 #     os.mkdir(innerdatapath)
 
-    # missedVals = np.concatenate((np.arange(0, 171), np.arange(212, 228), np.array([502, 503, 506, 507, 508])))
-    # Params_List = [Params_List[i] for i in missedVals]
+    # missInds = [0, 1, 2, 3, 173, 174, 175, 176, 177, 178, 179, 180]
+    # missList = []
+    # for mind in missInds:
+    #     missList.append(Params_List[mind])
+    # Params_List = missList
 
     print(len(Params_List))
 
