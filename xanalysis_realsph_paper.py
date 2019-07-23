@@ -1472,18 +1472,26 @@ if __name__ == "__main__":
                 #     PR_AveragesC = PRdisc_Averages * Npoints_xyz
                 # END OF CARTESIAN
 
-            print(1 / PR_Averages)
-            print('cont mul')
-            print(1 / PRcont_Averages)
-            print((1 / PR_Averages) / (1 / PRcont_Averages))
-            print('disc mul')
-            print(1 / PRdisc_Averages)
-            print((1 / PR_Averages) / (1 / PRdisc_Averages))
+            PRA_sum = np.sum(PR_Averages)
+            PRC_sum = np.sum(PRcont_Averages)
+            PRD_sum = np.sum(PRdisc_Averages)
+
+            # print(1 / PR_Averages)
+            # print('cont mul')
+            # print(1 / PRcont_Averages)
+            # print((1 / PR_Averages) / (1 / PRcont_Averages))
+            # print('disc mul')
+            # print(1 / PRdisc_Averages)
+            # print((1 / PR_Averages) / (1 / PRdisc_Averages))
+
             # print(PVals.size, tsVals.size)
             if inversePlot is True:
                 ax1.plot(vI0_Vals / nu, 1 / PR_Averages, linestyle=lineList[inda], color=colorList[indm])
             else:
                 ax1.plot(vI0_Vals / nu, PR_Averages, linestyle=lineList[inda], color=colorList[indm])
+
+            ax1.plot(vI0_Vals / nu, 1 / ((PRA_sum / PRC_sum) * PRcont_Averages), linestyle=lineList[inda], color=colorList[indm + 1])
+            ax1.plot(vI0_Vals / nu, 1 / ((PRA_sum / PRD_sum) * PRdisc_Averages), linestyle=lineList[inda], color=colorList[indm + 2])
 
     alegend_elements = []
     mlegend_elements = []
