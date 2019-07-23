@@ -44,7 +44,8 @@ if __name__ == "__main__":
     Params_List = []
     mI_Vals = np.array([1.0])
     # mI_Vals = np.array([0.5, 1.0, 2, 5.0])
-    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.5])
+    # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.5])
+    aIBi_Vals = np.array([-1.25, -1.0])
     P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.4, 10, endpoint=False), np.linspace(1.4, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 10, endpoint=False), np.linspace(5.0, 9.0, 20)))
 
     for mI in mI_Vals:
@@ -81,9 +82,9 @@ if __name__ == "__main__":
                 # if os.path.isdir(innerdatapath + '/amp3D') is False:
                 #     os.mkdir(innerdatapath + '/amp3D')
 
-    # Params_List = Params_List[0:2]
-    remList = []; remList.append(Params_List[9]); remList.append(Params_List[74]); remList.append(Params_List[79]); remList.append(Params_List[102]); remList.append(Params_List[198])
-    Params_List = remList
+    # # Params_List = Params_List[0:2]
+    # remList = []; remList.append(Params_List[9]); remList.append(Params_List[74]); remList.append(Params_List[79]); remList.append(Params_List[102]); remList.append(Params_List[198])
+    # Params_List = remList
     print(len(Params_List))
 
     # # ---- COMPUTE DATA ON COMPUTER ----

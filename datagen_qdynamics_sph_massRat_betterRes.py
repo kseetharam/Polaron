@@ -161,6 +161,12 @@ if __name__ == "__main__":
 
     print(len(Params_List))
 
+    # for ind, paramL in enumerate(Params_List):
+    #     [sParams, cParams, innerdatapath] = Params_List[ind]
+    #     [mI, mB, n0, gBB] = sParams
+    #     [P, aIBi] = cParams
+    #     print(mI / mB, aIBi)
+
     # # ---- COMPUTE DATA ON COMPUTER ----
 
     # runstart = timer()
