@@ -63,7 +63,7 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Old': True}
+    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'noCSAmp': True}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -76,8 +76,8 @@ if __name__ == "__main__":
     datapath = datapath + '/massRatio={:.1f}'.format(massRat)
     distdatapath = copy(datapath)
 
-    if toggleDict['Old'] is True:
-        datapath = datapath + '_old'
+    if toggleDict['noCSAmp'] is True:
+        datapath = datapath + '_noCSAmp'
 
     innerdatapath = datapath + '/redyn_spherical'
     distdatapath = distdatapath + '/redyn_spherical'
@@ -108,7 +108,7 @@ if __name__ == "__main__":
 
     # print(innerdatapath)
 
-    # aIBi_List = [-10.0, -5.0, -2.0, -1.5]
+    # aIBi_List = [-10.0, -5.0, -2.0, -1.5, -1.25, -1.0]
     # # aIBi_List = [-10.0, -5.0, -2.0]
     # for aIBi in aIBi_List:
     #     ds_list = []; P_list = []; mI_list = []
@@ -185,9 +185,21 @@ if __name__ == "__main__":
     #             del(ds_tot.attrs['P']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
     #             ds_tot.to_netcdf(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
 
+    # # # Remove Data From Data sets
+
+    # outpath = datapath + '_noCSAmp/redyn_spherical'
+
+    # for ind, filename in enumerate(os.listdir(innerdatapath)):
+    #     if filename[0:3] == 'amp':
+    #         continue
+    #     ds = xr.open_dataset(innerdatapath + '/' + filename)
+    #     dropds = ds.drop(['Real_CSAmp', 'Imag_CSAmp'])
+    #     dropds.to_netcdf(outpath + '/' + filename)
+    # print('Drop Done')
+
     # # Analysis of Total Dataset
 
-    aIBi = -2
+    aIBi = -1.25
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     qds_aIBi = qds
@@ -388,7 +400,7 @@ if __name__ == "__main__":
 
     # seperate = False
 
-    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5])  # Data for stronger interactions (-1.0, -0.75, -0.5) is too noisy to get fits
+    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])  # Data for stronger interactions (-1.0, -0.75, -0.5) is too noisy to get fits
     # # aIBi_des = np.array([-10.0, -5.0, -2.0])  # Data for stronger interactions (-1.0, -0.75, -0.5) is too noisy to get fits
     # # Another note: The fit for P_{Imp} is also difficult for anything other than very weak interactions -> this is probably because of the diverging convergence time to mI*c due to arguments in Nielsen
 
@@ -406,7 +418,7 @@ if __name__ == "__main__":
     # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
     # rollwin = 1
 
-    # colorList = ['red', 'green', 'orange', 'blue']
+    # colorList = ['red', '#7e1e9c', 'green', 'orange', 'blue', '#60460f']
     # lineList = ['solid', 'dotted', 'dashed']
 
     # fig, ax = plt.subplots()
@@ -428,6 +440,7 @@ if __name__ == "__main__":
     #     DynOv_Pvalues = np.zeros(PVals.size)
     #     DynOv_stderr = np.zeros(PVals.size)
     #     DynOv_tstat = np.zeros(PVals.size)
+    #     DynOv_logAve = np.zeros(PVals.size)
 
     #     for indP, P in enumerate(PVals):
     #         DynOv_raw = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
@@ -443,33 +456,33 @@ if __name__ == "__main__":
     #         vImpc_Vals = (P - Pph_ds.values) / mI - nu
     #         tvImpc_Vals = Pph_ds['t'].values
 
-    #         with warnings.catch_warnings():
-    #             warnings.simplefilter("error", OptimizeWarning)
-    #             try:
-    #                 Sopt, Scov = curve_fit(powerfunc, tDynOv_Vals, DynOv_Vals)
-    #                 DynOv_Exponents[indP] = Sopt[0]
-    #                 # DynOv_Cov[indP] = Scov[0]
-    #                 if Sopt[0] < 0:
-    #                     DynOv_Exponents[indP] = 0
-    #             except OptimizeWarning:
-    #                 DynOv_Exponents[indP] = 0
-    #             except RuntimeError:
-    #                 DynOv_Exponents[indP] = 0
+    #         # with warnings.catch_warnings():
+    #         #     warnings.simplefilter("error", OptimizeWarning)
+    #         #     try:
+    #         #         Sopt, Scov = curve_fit(powerfunc, tDynOv_Vals, DynOv_Vals)
+    #         #         DynOv_Exponents[indP] = Sopt[0]
+    #         #         # DynOv_Cov[indP] = Scov[0]
+    #         #         if Sopt[0] < 0:
+    #         #             DynOv_Exponents[indP] = 0
+    #         #     except OptimizeWarning:
+    #         #         DynOv_Exponents[indP] = 0
+    #         #     except RuntimeError:
+    #         #         DynOv_Exponents[indP] = 0
 
-    #         with warnings.catch_warnings():
-    #             warnings.simplefilter("error", OptimizeWarning)
-    #             try:
-    #                 vIopt, vIcov = curve_fit(powerfunc, tvImpc_Vals, vImpc_Vals)
-    #                 vImp_Exponents[indP] = vIopt[0]
-    #                 # vImp_Cov[indP] = vIcov[0]
-    #                 if vIopt[0] < 0:
-    #                     vImp_Exponents[indP] = 0
-    #                 if vImpc_Vals[-1] < 0:
-    #                     vImp_Exponents[indP] = 0
-    #             except OptimizeWarning:
-    #                 vImp_Exponents[indP] = 0
-    #             except RuntimeError:
-    #                 vImp_Exponents[indP] = 0
+    #         # with warnings.catch_warnings():
+    #         #     warnings.simplefilter("error", OptimizeWarning)
+    #         #     try:
+    #         #         vIopt, vIcov = curve_fit(powerfunc, tvImpc_Vals, vImpc_Vals)
+    #         #         vImp_Exponents[indP] = vIopt[0]
+    #         #         # vImp_Cov[indP] = vIcov[0]
+    #         #         if vIopt[0] < 0:
+    #         #             vImp_Exponents[indP] = 0
+    #         #         if vImpc_Vals[-1] < 0:
+    #         #             vImp_Exponents[indP] = 0
+    #         #     except OptimizeWarning:
+    #         #         vImp_Exponents[indP] = 0
+    #         #     except RuntimeError:
+    #         #         vImp_Exponents[indP] = 0
 
     #         S_slope, S_intercept, S_rvalue, S_pvalue, S_stderr = ss.linregress(np.log(tDynOv_Vals), np.log(DynOv_Vals))
     #         DynOv_Exponents_LR[indP] = -1 * S_slope
@@ -479,30 +492,34 @@ if __name__ == "__main__":
     #         DynOv_tstat[indP] = S_slope / S_stderr
     #         # print(S_rvalue, S_pvalue, S_stderr, S_slope / S_stderr)
 
-    #         # if (-1 * S_slope) < 0:
-    #         #     DynOv_Exponents_LR[indP] = 0
+    #         DynOv_logAve[indP] = np.average(np.log(DynOv_Vals))
+
+    #         if (-1 * S_slope) < 0:
+    #             DynOv_Exponents_LR[indP] = 0
 
     #         if vImpc_Vals[-1] < 0:
     #             vImp_Exponents_LR[indP] = 0
     #         else:
     #             vI_slope, vI_intercept, vI_rvalue, vI_pvalue, vI_stderr = ss.linregress(np.log(tvImpc_Vals), np.log(vImpc_Vals))
     #             vImp_Exponents_LR[indP] = -1 * vI_slope
-    #             # if (-1 * vI_slope) < 0:
-    #             #     vImp_Exponents_LR[indP] = 0
+    #             if (-1 * vI_slope) < 0:
+    #                 vImp_Exponents_LR[indP] = 0
 
-    #     if np.isclose(aIBi, -1.5):
-    #         Smask = DynOv_Exponents_LR > -np.inf
-    #         # Smask = DynOv_Exponents_LR > 0
-    #         print('\n')
-    #         print(DynOv_Exponents_LR[Smask])
-    #         print('\n')
-    #         print(DynOv_Pvalues[Smask])
-    #         print('\n')
-    #         print(DynOv_Rvalues[Smask]**2)
-    #         print('\n')
-    #         print(DynOv_stderr[Smask])
-    #         print('\n')
-    #         print(DynOv_tstat[Smask])
+    #     print(aIBi)
+    #     print(DynOv_Exponents_LR)
+    #     print('\n')
+    #     print(DynOv_Pvalues)
+    #     print('\n')
+    #     print(DynOv_Rvalues**2)
+    #     print('\n')
+    #     print(DynOv_stderr)
+    #     print('\n')
+    #     # print(DynOv_tstat)
+    #     # print('\n')
+    #     print(DynOv_stderr / DynOv_logAve)
+
+    #     badFitmask = np.abs(DynOv_stderr / DynOv_logAve) > 1e-3
+    #     DynOv_Exponents_LR[badFitmask] = 0
 
     #     if seperate:
     #         ax.plot(Pnorm, DynOv_Exponents_LR, color=colorList[inda], linestyle='solid', marker='x', label='{:.1f}'.format(aIBi))
@@ -715,23 +732,23 @@ if __name__ == "__main__":
     # def powerfunc(t, a, b):
     #     return b * t**(-1 * a)
 
-    # tmin = 70
+    # tmin = 80
     # tmax = 100
     # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
     # rollwin = 1
 
     # colorList = ['red', '#7e1e9c', 'green', 'orange', 'blue']
     # lineList = ['solid', 'dotted', 'dashed', '-.']
-    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5])
+    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.25])
     # # aIBi_des = np.array([aIBi_des[2]])
-    # massRat_des = np.array([0.5, 0.75, 1.0, 2.0])
+    # massRat_des = np.array([0.5, 1.0, 2.0])
     # mdatapaths = []
 
     # for mR in massRat_des:
-    #     if toggleDict['Old'] is True:
-    #         mdatapaths.append(datapath[0:-7] + '{:.1f}_old'.format(mR))
+    #     if toggleDict['noCSAmp'] is True:
+    #         mdatapaths.append(datapath[0:-11] + '{:.1f}_noCSAmp'.format(mR))
     #     else:
-    #         mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
+    #         mdatapaths.append(datapath[0:-3] + '{:.1f}_noCSAmp'.format(mR))
     # if toggleDict['Dynamics'] != 'real' or toggleDict['Grid'] != 'spherical' or toggleDict['Coupling'] != 'twophonon':
     #     print('SETTING ERROR')
 
@@ -792,7 +809,7 @@ if __name__ == "__main__":
     #         if aIBi == -1.5 and mRat == 1.0:
     #             print(vImp_Exponents)
     #         vIf_Vals = nu + powerfunc(1e1000, vImp_Exponents, vImp_Constants)
-    #         ax1.plot(vI0_Vals / nu, vIf_Vals / nu, linestyle=lineList[inda], color=colorList[indm])
+    #         ax1.plot(vI0_Vals / nu, vIf_Vals / nu, linestyle=lineList[indm], color=colorList[inda])
     #         # ax2.plot(vI0_Vals / nu, vIf_Vals / vI0_Vals, linestyle=lineList[inda], color=colorList[indm])
 
     # ax1.plot(vI0_Vals / nu, np.ones(vI0_Vals.size), 'k-')
@@ -802,9 +819,9 @@ if __name__ == "__main__":
     # alegend_elements = []
     # mlegend_elements = []
     # for inda, aIBi in enumerate(aIBi_des):
-    #     alegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[inda], label='{0}'.format(aIBi)))
+    #     alegend_elements.append(Line2D([0], [0], color=colorList[inda], linestyle='solid', label='{0}'.format(aIBi)))
     # for indm, mR in enumerate(massRat_des):
-    #     mlegend_elements.append(Line2D([0], [0], color=colorList[indm], linestyle='solid', label='{0}'.format(mR)))
+    #     mlegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[indm], label='{0}'.format(mR)))
 
     # ax1.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
     # ax1.set_ylabel(r'$\frac{<v_{I}(t_{\infty})>}{c_{BEC}}$')
@@ -817,29 +834,9 @@ if __name__ == "__main__":
     # plt.gca().add_artist(reflegend)
     # ax1.set_ylim([0, 1.2])
 
-    # Pcrit_norm_gs = np.array([1.086, 1.146, 1.446])
-    # intersec_points = np.array([1.0, 0.925, 0.719])
-    # ax1.plot(Pcrit_norm_gs, intersec_points, 'gx', label='')
-
-    # # for Pc in Pcrit_norm_gs:
-    # #     ax1.plot(Pc * np.ones(10), np.linspace(0, 1.2, 10), 'g-', label='')
-
-    # # alegend_elements2 = []
-    # # mlegend_elements2 = []
-    # # for inda, aIBi in enumerate(aIBi_des):
-    # #     alegend_elements2.append(Line2D([0], [0], color='magenta', linestyle=lineList[inda], label='{0}'.format(aIBi)))
-    # # for indm, mR in enumerate(massRat_des):
-    # #     mlegend_elements2.append(Line2D([0], [0], color=colorList[indm], linestyle='solid', label='{0}'.format(mR)))
-
-    # # ax2.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
-    # # ax2.set_ylabel(r'$\frac{<v_{I}(t_{f})>}{<v_{I}(t_{0})>}$')
-    # # ax2.set_title('Average Impurity Speed')
-    # # alegend2 = ax2.legend(handles=alegend_elements2, loc=(0.45, 0.68), title=r'$a_{IB}^{-1}$')
-    # # plt.gca().add_artist(alegend2)
-    # # mlegend2 = ax2.legend(handles=mlegend_elements2, loc=(0.65, 0.75), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
-    # # plt.gca().add_artist(mlegend2)
-    # # reflegend = ax2.legend(handles=[Line2D([0], [0], color='black', linestyle='solid', label=r'$<v_{I}(t_{f})>=c_{BEC}$')], loc=(0.65, 0.65))
-    # # plt.gca().add_artist(reflegend)
+    # # Pcrit_norm_gs = np.array([1.086, 1.146, 1.446])
+    # # intersec_points = np.array([1.0, 0.925, 0.719])
+    # # ax1.plot(Pcrit_norm_gs, intersec_points, 'gx', label='')
 
     # plt.show()
 
@@ -848,22 +845,22 @@ if __name__ == "__main__":
     # def powerfunc(t, a, b):
     #     return b * t**(-1 * a)
 
-    # tmin = 70
+    # tmin = 80
     # tmax = 100
     # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
     # rollwin = 1
 
     # colorList = ['red', '#7e1e9c', 'green', 'orange', 'blue']
     # lineList = ['solid', 'dotted', 'dashed', '-.']
-    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5])
-    # massRat_des = np.array([0.5, 0.75, 1.0, 2])
+    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.25])
+    # massRat_des = np.array([0.5, 1.0, 2])
     # mdatapaths = []
 
     # for mR in massRat_des:
-    #     if toggleDict['Old'] is True:
-    #         mdatapaths.append(datapath[0:-7] + '{:.1f}_old'.format(mR))
+    #     if toggleDict['noCSAmp'] is True:
+    #         mdatapaths.append(datapath[0:-11] + '{:.1f}_noCSAmp'.format(mR))
     #     else:
-    #         mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
+    #         mdatapaths.append(datapath[0:-3] + '{:.1f}_noCSAmp'.format(mR))
     # if toggleDict['Dynamics'] != 'real' or toggleDict['Grid'] != 'spherical' or toggleDict['Coupling'] != 'twophonon':
     #     print('SETTING ERROR')
 
@@ -898,12 +895,17 @@ if __name__ == "__main__":
     #             DynOv_Exponents[indP] = -1 * S_slope
     #             DynOv_Constants[indP] = np.exp(S_intercept)
 
-    #             if (np.abs(DynOv_Exponents[indP]) < 0.05) and (aIBi == -1.5):
+    #             if DynOv_Exponents[indP] < 0:
     #                 DynOv_Exponents[indP] = 0
-    #                 # DynOv_Constants[indP] = DynOv_Vals[-1]
 
-    #             if (DynOv_Exponents[indP] < 0) and (aIBi != -1.5):
+    #             if (np.abs(DynOv_Exponents[indP]) < 0.01) and (aIBi == -1.25):
     #                 DynOv_Exponents[indP] = 0
+
+    #             # if (np.abs(DynOv_Exponents[indP]) < 0.05) and (aIBi == -1.5):
+    #             #     DynOv_Exponents[indP] = 0
+    #             #     # DynOv_Constants[indP] = DynOv_Vals[-1]
+    #             # if (DynOv_Exponents[indP] < 0) and (aIBi != -1.5):
+    #             #     DynOv_Exponents[indP] = 0
 
     #             # with warnings.catch_warnings():
     #             #     warnings.simplefilter("error", OptimizeWarning)
@@ -920,18 +922,18 @@ if __name__ == "__main__":
     #             #         DynOv_Exponents[indP] = 0
     #             #         DynOv_Constants[indP] = DynOv_Vals[-1]
 
-    #         if aIBi == -1.5 and mRat == 1.0:
-    #             print(mdatapaths[indm] + '/redyn_spherical/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    #             print(DynOv_Exponents)
+    #         # if aIBi == -1.5 and mRat == 1.0:
+    #         #     print(mdatapaths[indm] + '/redyn_spherical/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    #         #     print(DynOv_Exponents)
     #         DynOvf_Vals = powerfunc(1e1000, DynOv_Exponents, DynOv_Constants)
-    #         ax1.plot(vI0_Vals / nu, DynOvf_Vals, linestyle=lineList[inda], color=colorList[indm])
+    #         ax1.plot(vI0_Vals / nu, DynOvf_Vals, linestyle=lineList[indm], color=colorList[inda])
 
     # alegend_elements = []
     # mlegend_elements = []
     # for inda, aIBi in enumerate(aIBi_des):
-    #     alegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[inda], label='{0}'.format(aIBi)))
+    #     alegend_elements.append(Line2D([0], [0], color=colorList[inda], linestyle='solid', label='{0}'.format(aIBi)))
     # for indm, mR in enumerate(massRat_des):
-    #     mlegend_elements.append(Line2D([0], [0], color=colorList[indm], linestyle='solid', label='{0}'.format(mR)))
+    #     mlegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[indm], label='{0}'.format(mR)))
 
     # ax1.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
     # ax1.set_ylabel(r'$S(t_{\infty})$')
@@ -1227,77 +1229,6 @@ if __name__ == "__main__":
     # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
     # plt.show()
 
-    # # # # PARTICIPATION RATIO CURVES (VS TIME)
-
-    # shortTime = True; tau = 5
-
-    # Pnorm_des = np.array([0.1, 0.5, 1.0, 1.3, 1.5, 2.1, 2.5, 3.0, 4.0, 5.0])
-    # # Pnorm_des = np.array([0.1, 0.5, 1.0, 3.0])
-
-    # Pinds = np.zeros(Pnorm_des.size, dtype=int)
-    # for Pn_ind, Pn in enumerate(Pnorm_des):
-    #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
-
-    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_aIBi.coords['k'].values); kgrid.initArray_premade('th', qds_aIBi.coords['th'].values)
-    # kVec = kgrid.getArray('k')
-    # thVec = kgrid.getArray('th')
-    # kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
-    # dVk = kgrid.dV()
-
-    # fig, ax = plt.subplots()
-    # for indP in Pinds:
-    #     P = PVals[indP]
-
-    #     if Lx == 60:
-    #         qds_PaIBi = xr.open_dataset(distdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
-    #         tsVals = qds_PaIBi.coords['tc'].values
-
-    #     else:
-    #         qds_PaIBi = qds_aIBi.sel(P=P)
-    #         tsVals = qds_PaIBi.coords['t'].values
-
-    #     CSAmp_ds = (qds_PaIBi['Real_CSAmp'] + 1j * qds_PaIBi['Imag_CSAmp'])
-    #     Nph_ds = qds_PaIBi['Nph']
-
-    #     if Lx == 60:
-    #         CSAmp_ds = CSAmp_ds.rename({'tc': 't'})
-
-    #     if shortTime is True:
-    #         tsVals = tsVals[tsVals <= tau]
-    #         CSAmp_ds = CSAmp_ds.sel(t=tsVals)
-    #         Nph_ds = Nph_ds.sel(t=tsVals)
-
-    #     PR_Vals = np.zeros(tsVals.size)
-
-    #     for indt, t in enumerate(tsVals):
-    #         CSAmp_Vals = CSAmp_ds.sel(t=t).values
-    #         Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
-
-    #         # PhDen_Vals = ((1 / Nph_ds.sel(t=t).values) * np.abs(Bk_2D_vals)**2).real.astype(float)
-    #         # # norm_tot = np.dot(PhDen_Vals.flatten(), dVk); print(norm_tot)
-    #         # PR_Vals[indt] = np.dot((PhDen_Vals**2).flatten(), dVk) * ((2 * np.pi)**(-3))
-
-    #         PhDen_Vals = ((2 * np.pi)**(-3)) * ((1 / Nph_ds.sel(t=t).values) * np.abs(Bk_2D_vals)**2).real.astype(float)
-    #         dVk_n = ((2 * np.pi)**(3)) * dVk
-    #         # norm_tot = np.dot(PhDen_Vals.flatten(), dVk_n); print(norm_tot)
-    #         PR_Vals[indt] = np.dot((PhDen_Vals**2).flatten(), dVk_n)
-
-    #         # # PhDen_Vals_disc = ((1 / np.sum(np.abs(Bk_2D_vals)**2)) * np.abs(Bk_2D_vals)**2).real.astype(float)
-    #         # PhDen_Vals_disc = ((2 * np.pi)**(-3)) * ((1 / Nph_ds.sel(t=t).values) * np.abs(Bk_2D_vals)**2).real.astype(float)
-    #         # dk = kVec[1] - kVec[0]
-    #         # norm_tot = 2 * np.pi * np.sum(PhDen_Vals_disc) / (dk**2); print(norm_tot)
-    #         # PR_Vals[indt] = np.sum(PhDen_Vals_disc**2)
-
-    #     ax.plot(tsVals / tscale, PR_Vals, label='{:.2f}'.format(P / mc))
-
-    # ax.legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=2, ncol=2)
-    # # ax.set_xscale('log')
-    # ax.set_title('Participation Ratio (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    # ax.set_ylabel(r'$PR = \sum_{\vec{k}} (\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2}$')
-    # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-
-    # plt.show()
-
     # # # # PARTICIPATION RATIO CURVES (VS TIME) - SPHERICAL
 
     # shortTime = True; tau = 5
@@ -1369,152 +1300,162 @@ if __name__ == "__main__":
 
     # plt.show()
 
-    # # # PARTICIPATION RATIO CURVES (VS INITIAL VELOCITY) - SPHERICAL
+# # # # PARTICIPATION RATIO CURVES (VS INITIAL VELOCITY) - SPHERICAL APPROXIMATION TO CARTESIAN INTERPOLATION
 
-    # NOTE: We need the massRatio_1.0_old folder (or technically any of the _old folders) and the constants determined at the beginning of the script for this to run
+# # NOTE: We need the massRatio_1.0_old folder (or technically any of the _old folders) and the constants determined at the beginning of the script for this to run
 
-    inversePlot = True
-    PRconst = True
-    tau = 2.3
+#     inversePlot = True
 
-    if PRconst is True:
-        PRconst = (2 * np.pi)**3
-    else:
-        PRconst = 1
+#     # PRtype = 'continuous'
+#     PRtype = 'discrete'; discPR_norm = True
 
-    colorList = ['red', '#7e1e9c', 'green', 'orange', 'blue']
-    lineList = ['solid', 'dotted', 'dashed', '-.']
-    aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5])
-    massRat_des = np.array([1.0])
-    # massRat_des = np.array([0.5, 0.75, 1.0, 2, 5.0])
-    mdatapaths = []
+#     Vol_fac = False
 
-    for mR in massRat_des:
-        if toggleDict['Old'] is True:
-            mdatapaths.append(datapath[0:-7] + '{:.1f}'.format(mR))
-        else:
-            mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
+#     tau = 2.3
+#     # tau = 5
 
-    if toggleDict['Dynamics'] != 'real' or toggleDict['Grid'] != 'spherical' or toggleDict['Coupling'] != 'twophonon':
-        print('SETTING ERROR')
+#     # NOTE: The following constants are grid dependent (both on original spherical grid and interpolated cartesian grid)
+#     dVk_cart = 0.0001241449577749997  # = dkx*dky*dkz from cartesian interpolation
+#     Npoints_xyz = 85184000
+#     Vxyz = 1984476.915083265
+#     contToDisc_factor = dVk_cart / ((2 * np.pi)**3)
 
-    kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_aIBi.coords['k'].values); kgrid.initArray_premade('th', qds_aIBi.coords['th'].values)
-    kVec = kgrid.getArray('k')
-    thVec = kgrid.getArray('th')
-    kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
-    dVk = kgrid.dV()
-    print(kVec[-1], kVec[1] - kVec[0])
+#     colorList = ['red', '#7e1e9c', 'green', 'orange', 'blue', '#60460f']
+#     lineList = ['solid', 'dotted', 'dashed', 'dashdot']
+#     # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5])
+#     aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5, -1.25, -1.0])
+#     # massRat_des = np.array([1.0])
+#     massRat_des = np.array([0.5, 1.0, 2])
+#     mdatapaths = []
 
-    PRcont_Averages = np.zeros(PVals.size)
-    PRdisc_Averages = np.zeros(PVals.size)
+#     for mR in massRat_des:
+#         if toggleDict['Old'] is True:
+#             mdatapaths.append(datapath[0:-7] + '{:.1f}'.format(mR))
+#         else:
+#             mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
 
-    fig1, ax1 = plt.subplots()
-    for inda, aIBi in enumerate(aIBi_des):
-        for indm, mRat in enumerate(massRat_des):
+#     if toggleDict['Dynamics'] != 'real' or toggleDict['Grid'] != 'spherical' or toggleDict['Coupling'] != 'twophonon':
+#         print('SETTING ERROR')
 
-            vI0_Vals = np.zeros(PVals.size)
-            PR_Averages = np.zeros(PVals.size)
+#     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_aIBi.coords['k'].values); kgrid.initArray_premade('th', qds_aIBi.coords['th'].values)
+#     kVec = kgrid.getArray('k')
+#     thVec = kgrid.getArray('th')
+#     kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
+#     dVk = kgrid.dV()
+#     print(kVec[-1], kVec[1] - kVec[0])
 
-            for indP, P in enumerate(PVals):
-                qds_PaIBi = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
-                CSAmp_ds = (qds_PaIBi['Real_CSAmp'] + 1j * qds_PaIBi['Imag_CSAmp'])
-                Nph_ds = qds_PaIBi['Nph']
+#     PRcont_Averages = np.zeros(PVals.size)
+#     PRdisc_Averages = np.zeros(PVals.size)
 
-                if Lx == 60:
-                    CSAmp_ds = CSAmp_ds.rename({'tc': 't'})
+#     P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.4, 10, endpoint=False), np.linspace(1.4, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 10, endpoint=False), np.linspace(5.0, 9.0, 20)))
 
-                tsVals = CSAmp_ds.coords['t'].values
-                tsVals = tsVals[tsVals <= tau]
-                CSAmp_ds = CSAmp_ds.sel(t=tsVals)
-                Nph_ds = Nph_ds.sel(t=tsVals)
+#     fig1, ax1 = plt.subplots()
+#     for inda, aIBi in enumerate(aIBi_des):
+#         for indm, mRat in enumerate(massRat_des):
 
-                PR_Vals = np.zeros(tsVals.size)
+#             vI0_Vals = np.zeros(PVals.size)
+#             PR_Averages = np.zeros(PVals.size)
+#             PVals = mRat * mB * nu * P_Vals_norm
 
-                dt = tsVals[1] - tsVals[0]
+#             for indP, P in enumerate(PVals):
+#                 qds_PaIBi = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+#                 CSAmp_ds = (qds_PaIBi['Real_CSAmp'] + 1j * qds_PaIBi['Imag_CSAmp'])
+#                 Nph_ds = qds_PaIBi['Nph']
+#                 mI = qds_PaIBi.attrs['mI']
 
-                for indt, t in enumerate(tsVals):
-                    CSAmp_Vals = CSAmp_ds.sel(t=t).values
-                    Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
+#                 if Lx == 60:
+#                     CSAmp_ds = CSAmp_ds.rename({'tc': 't'})
 
-                    PhDen_Vals = ((2 * np.pi)**(-3)) * ((1 / Nph_ds.sel(t=t).values) * np.abs(Bk_2D_vals)**2).real.astype(float)
-                    dVk_n = ((2 * np.pi)**(3)) * dVk
-                    # norm_tot = np.dot(PhDen_Vals.flatten(), dVk_n); print(norm_tot)
-                    PR_Vals[indt] = PRconst * np.dot((PhDen_Vals**2).flatten(), dVk_n)
+#                 tsVals = CSAmp_ds.coords['t'].values
+#                 tsVals = tsVals[tsVals <= tau]
+#                 CSAmp_ds = CSAmp_ds.sel(t=tsVals)
+#                 Nph_ds = Nph_ds.sel(t=tsVals)
 
-                vI0_Vals[indP] = (P - qds_PaIBi.isel(t=0)['Pph'].values) / mI
-                # PR_Averages[indP] = np.nanmean(PR_Vals)
-                PR_Vals_del = np.delete(PR_Vals, 0); PR_Averages[indP] = (1 / (tsVals[-1] - tsVals[1])) * simps(y=PR_Vals_del, dx=dt)
+#                 PR_Vals = np.zeros(tsVals.size)
 
-                # Cartesian reconstruct
-                interpds_PaIBi = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/amp3D/interp_P_{:.3f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
-                PRconst = True; Vconst = False
-                PRtype = 'discrete'
-                tsValsC = interpds_PaIBi.coords['t'].values
-                tsValsC = tsValsC[tsValsC <= tau]
-                dt = tsValsC[1] - tsValsC[0]
-                if Vconst is True:
-                    Vxyz = interpds_PaIBi.attrs['Vxyz']
-                else:
-                    Vxyz = 1
-                if PRconst is True:
-                    PRcont_const = (2 * np.pi)**3
-                else:
-                    PRcont_const = 1
-                Npoints_xyz = interpds_PaIBi.attrs['Npoints3D']
-                PRcont_Vals = Vxyz * PRcont_const * interpds_PaIBi['PR_bare_cont'].sel(t=tsValsC).values
-                PRdisc_Vals = interpds_PaIBi['PR_bare_discrete'].sel(t=tsValsC).values
+#                 dt = tsVals[1] - tsVals[0]
 
-                PRcont_Averages[indP] = (1 / (tsValsC[-1] - tsValsC[1])) * simps(y=PRcont_Vals, dx=dt)
-                PRdisc_Averages[indP] = (1 / (tsValsC[-1] - tsValsC[1])) * simps(y=PRdisc_Vals, dx=dt)
-                # if PRtype == 'continuous':
-                #     PR_AveragesC = PRcont_Averages
-                # elif PRtype == 'discrete':
-                #     PR_AveragesC = PRdisc_Averages * Npoints_xyz
-                # END OF CARTESIAN
+#                 for indt, t in enumerate(tsVals):
+#                     CSAmp_Vals = CSAmp_ds.sel(t=t).values
+#                     Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
 
-            PRA_sum = np.sum(PR_Averages)
-            PRC_sum = np.sum(PRcont_Averages)
-            PRD_sum = np.sum(PRdisc_Averages)
+#                     PhDen_Vals = ((2 * np.pi)**(-3)) * ((1 / Nph_ds.sel(t=t).values) * np.abs(Bk_2D_vals)**2).real.astype(float)
+#                     dVk_n = ((2 * np.pi)**(3)) * dVk
+#                     PR_Vals[indt] = (2 * np.pi)**3 * np.dot((PhDen_Vals**2).flatten(), dVk_n)
 
-            # print(1 / PR_Averages)
-            # print('cont mul')
-            # print(1 / PRcont_Averages)
-            # print((1 / PR_Averages) / (1 / PRcont_Averages))
-            # print('disc mul')
-            # print(1 / PRdisc_Averages)
-            # print((1 / PR_Averages) / (1 / PRdisc_Averages))
+#                 vI0_Vals[indP] = (P - qds_PaIBi.isel(t=0)['Pph'].values) / mI
+#                 PR_Vals_del = np.delete(PR_Vals, 0); PR_Averages[indP] = (1 / (tsVals[-1] - tsVals[1])) * simps(y=PR_Vals_del, dx=dt)
 
-            # print(PVals.size, tsVals.size)
-            if inversePlot is True:
-                ax1.plot(vI0_Vals / nu, 1 / PR_Averages, linestyle=lineList[inda], color=colorList[indm])
-            else:
-                ax1.plot(vI0_Vals / nu, PR_Averages, linestyle=lineList[inda], color=colorList[indm])
+#             #     # Cartesian reconstruct
+#             #     interpds_PaIBi = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/amp3D/interp_P_{:.3f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
+#             #     # kx = interpds_PaIBi.coords['kx'].values; ky = interpds_PaIBi.coords['ky'].values; kz = interpds_PaIBi.coords['kz'].values
+#             #     # dkx = kx[1] - kx[0]; dky = ky[1] - ky[0]; dkz = kz[1] - kz[0]
+#             #     # Vconst = False
+#             #     tsValsC = interpds_PaIBi.coords['t'].values
+#             #     tsValsC = tsValsC[tsValsC <= tau]
+#             #     dt = tsValsC[1] - tsValsC[0]
+#             #     # if Vconst is True:
+#             #     #     Vxyz = interpds_PaIBi.attrs['Vxyz']
+#             #     # else:
+#             #     #     Vxyz = 1
+#             #     # Npoints_xyz = interpds_PaIBi.attrs['Npoints3D']
+#             #     # PRcont_Vals = Vxyz * (2 * np.pi)**3 * interpds_PaIBi['PR_bare_cont'].sel(t=tsValsC).values
+#             #     PRdisc_Vals = interpds_PaIBi['PR_bare_discrete'].sel(t=tsValsC).values
+#             #     # PRcont_Averages[indP] = (1 / (tsValsC[-1] - tsValsC[0])) * simps(y=PRcont_Vals, dx=dt)
+#             #     PRdisc_Averages[indP] = (1 / (tsValsC[-1] - tsValsC[0])) * simps(y=PRdisc_Vals, dx=dt)
+#             # ax1.plot(vI0_Vals / nu, 1 / (PRdisc_Averages * Npoints_xyz), linestyle=lineList[inda], color=colorList[indm + 1])
+#             #     # END OF CARTESIAN
 
-            ax1.plot(vI0_Vals / nu, 1 / ((PRA_sum / PRC_sum) * PRcont_Averages), linestyle=lineList[inda], color=colorList[indm + 1])
-            ax1.plot(vI0_Vals / nu, 1 / ((PRA_sum / PRD_sum) * PRdisc_Averages), linestyle=lineList[inda], color=colorList[indm + 2])
+#             if Vol_fac is True:
+#                 PR_Averages = Vxyz * PR_Averages
+#             else:
+#                 PR_Averages = PR_Averages
 
-    alegend_elements = []
-    mlegend_elements = []
-    for inda, aIBi in enumerate(aIBi_des):
-        alegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[inda], label='{0}'.format(aIBi)))
-    for indm, mR in enumerate(massRat_des):
-        mlegend_elements.append(Line2D([0], [0], color=colorList[indm], linestyle='solid', label='{0}'.format(mR)))
+#             if PRtype == 'continuous':
+#                 PR_Averages = PR_Averages
+#             elif PRtype == 'discrete':
+#                 PR_Averages = PR_Averages * contToDisc_factor
+#                 if discPR_norm is True:
+#                     PR_Averages = PR_Averages * Npoints_xyz
 
-    ax1.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
+#             if inversePlot is True:
+#                 ax1.plot(vI0_Vals / nu, 1 / PR_Averages, linestyle=lineList[indm], color=colorList[inda])
+#             else:
+#                 ax1.plot(vI0_Vals / nu, PR_Averages, linestyle=lineList[indm], color=colorList[inda])
 
-    if inversePlot is True:
-        ax1.set_title('Time-Averaged Inverse Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
-        ax1.set_ylabel(r'Average $IPR$ with $IPR = ((2\pi)^{3} \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2})^{-1}$')
-    else:
-        ax1.set_title('Time-Averaged Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
-        ax1.set_ylabel(r'Average $PR$ with $PR = (2\pi)^{3} \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2}$')
-    alegend = ax1.legend(handles=alegend_elements, loc=(0.65, 0.65), title=r'$a_{IB}^{-1}$')
-    plt.gca().add_artist(alegend)
-    mlegend = ax1.legend(handles=mlegend_elements, loc=(0.84, 0.70), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
-    plt.gca().add_artist(mlegend)
-    ax1.set_xlim([0, np.max(vI0_Vals / nu)])
+#     alegend_elements = []
+#     mlegend_elements = []
+#     # for inda, aIBi in enumerate(aIBi_des):
+#     #     alegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[inda], label='{0}'.format(aIBi)))
+#     # for indm, mR in enumerate(massRat_des):
+#     #     mlegend_elements.append(Line2D([0], [0], color=colorList[indm], linestyle='solid', label='{0}'.format(mR)))
 
-    plt.show()
+#     for inda, aIBi in enumerate(aIBi_des):
+#         alegend_elements.append(Line2D([0], [0], color=colorList[inda], linestyle='solid', label='{0}'.format(aIBi)))
+#     for indm, mR in enumerate(massRat_des):
+#         mlegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[indm], label='{0}'.format(mR)))
+
+#     ax1.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
+
+#     if inversePlot is True:
+#         ax1.set_title('Short-Time-Averaged Inverse Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
+#         if PRtype == 'continuous':
+#             ax1.set_ylabel(r'Average $IPR$ with $IPR = ((2\pi)^{3} \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2})^{-1}$')
+#         elif PRtype == 'discrete':
+#             if discPR_norm is True:
+#                 ax1.set_ylabel(r'Average $IPR$ (Normalized by $N_{tot}$ modes in system)')
+#             else:
+#                 ax1.set_ylabel(r'Average $IPR$')
+#     else:
+#         ax1.set_title('Time-Averaged Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
+#         ax1.set_ylabel(r'Average $PR$ with $PR = (2\pi)^{3} \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2}$')
+#     alegend = ax1.legend(handles=alegend_elements, loc=(0.03, 0.5), title=r'$a_{IB}^{-1}$')
+#     plt.gca().add_artist(alegend)
+#     mlegend = ax1.legend(handles=mlegend_elements, loc=(0.22, 0.70), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
+#     plt.gca().add_artist(mlegend)
+#     ax1.set_xlim([0, np.max(vI0_Vals / nu)])
+
+#     plt.show()
 
     # # # # PARTICIPATION RATIO CURVES (VS TIME) - CARTESIAN AMP RECONSTRUCT
 
