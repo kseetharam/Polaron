@@ -45,10 +45,11 @@ if __name__ == "__main__":
     mI_Vals = np.array([1.0])
     # mI_Vals = np.array([0.5, 1.0, 2, 5.0])
     # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.5])
-    # aIBi_Vals = np.array([-1.25, -1.0])
-    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.5, -1.25, -1.0])
+    aIBi_Vals = np.array([-1.25, -1.0])
+    # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.5, -1.25, -1.0])
     P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.4, 10, endpoint=False), np.linspace(1.4, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 10, endpoint=False), np.linspace(5.0, 9.0, 20)))
 
+    # counter = 0
     for mI in mI_Vals:
         P_Vals = mI * nu * P_Vals_norm
         for aIBi in aIBi_Vals:
@@ -80,12 +81,22 @@ if __name__ == "__main__":
                     innerdatapath = innerdatapath
                 Params_List.append([cParams, innerdatapath])
 
+                # print(P, aIBi, counter)
+                # counter += 1
+
                 # if os.path.isdir(innerdatapath + '/amp3D') is False:
                 #     os.mkdir(innerdatapath + '/amp3D')
 
     # # Params_List = Params_List[0:2]
-    # remList = []; remList.append(Params_List[9]); remList.append(Params_List[74]); remList.append(Params_List[79]); remList.append(Params_List[102]); remList.append(Params_List[198])
-    # Params_List = remList
+    missInds = [74, 101]
+    missList = []
+    for mind in missInds:
+        missList.append(Params_List[mind])
+        [cParams, innerdatapath] = Params_List[mind]
+        [P, aIBi] = cParams
+        # print(P, aIBi)
+
+    Params_List = missList
     print(len(Params_List))
 
     # # ---- COMPUTE DATA ON COMPUTER ----
@@ -93,7 +104,7 @@ if __name__ == "__main__":
     # runstart = timer()
 
     # for ind, Params in enumerate(Params_List):
-    #     loopstart = timer()
+    #     pstart = timer()
     #     [cParams, innerdatapath] = Params_List[ind]
     #     [P, aIBi] = cParams
 
@@ -102,7 +113,6 @@ if __name__ == "__main__":
     #     tsVals = qds_PaIBi.coords['tc'].values
     #     tsVals = tsVals[tsVals <= tau]
     #     tsVals = tsVals[1::]
-
     #     ds_list = []
     #     t_list = []
     #     for tind, t in enumerate(tsVals):
@@ -111,10 +121,8 @@ if __name__ == "__main__":
     #         interp_ds = pf_dynamic_sph.reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL)
     #         # interp_ds.to_netcdf(innerdatapath + '/amp3D/interp_P_{:.3f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}_tind_{:d}.nc'.format(P, aIBi, linDimMajor, linDimMinor,tind))
     #         ds_list.append(interp_ds); t_list.append(t)
-
     #         tloopend = timer()
     #         print('tLoop time: {:.2f}'.format(tloopend - tloopstart))
-
     #     s = sorted(zip(t_list, ds_list))
     #     g = itertools.groupby(s, key=lambda x: x[0])
     #     t_keys = []; t_ds_list = []
@@ -126,11 +134,11 @@ if __name__ == "__main__":
     #         filename = innerdatapath + '/amp3D/interp_P_{:.3f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor)
     #         ds_tot.to_netcdf(filename)
 
-    #     loopend = timer()
-    #     print('Index: {:d}, P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(ind, P, aIBi, loopend - loopstart))
+    #     pend = timer()
+    #     print('P: {:.2f}, aIBi: {:.2f} Time: {:.2f}'.format(P, aIBi, pend - pstart))
 
-    # end = timer()
-    # print('Total Time: {:.2f}'.format(end - runstart))
+    # runend = timer()
+    # print('Total Time: {:.2f}'.format(runend - runstart))
 
     # ---- COMPUTE DATA ON CLUSTER ----
 
