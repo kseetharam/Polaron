@@ -2,7 +2,7 @@
 #SBATCH -J ampreconstruct
 #SBATCH -n 2
 #SBATCH -N 1
-#SBATCH -t 0-07:30
+#SBATCH -t 0-04:00
 #SBATCH -p shared
 #SBATCH --mem=70000
 #SBATCH --mail-type=ALL

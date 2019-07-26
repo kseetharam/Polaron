@@ -1425,11 +1425,6 @@ if __name__ == "__main__":
 
 #     alegend_elements = []
 #     mlegend_elements = []
-#     # for inda, aIBi in enumerate(aIBi_des):
-#     #     alegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[inda], label='{0}'.format(aIBi)))
-#     # for indm, mR in enumerate(massRat_des):
-#     #     mlegend_elements.append(Line2D([0], [0], color=colorList[indm], linestyle='solid', label='{0}'.format(mR)))
-
 #     for inda, aIBi in enumerate(aIBi_des):
 #         alegend_elements.append(Line2D([0], [0], color=colorList[inda], linestyle='solid', label='{0}'.format(aIBi)))
 #     for indm, mR in enumerate(massRat_des):
@@ -1492,91 +1487,91 @@ if __name__ == "__main__":
 
     # plt.show()
 
-    # # # # PARTICIPATION RATIO CURVES (VS INITIAL VELOCITY) - CARTESIAN AMP RECONSTRUCT
+    # # # PARTICIPATION RATIO CURVES (VS INITIAL VELOCITY) - CARTESIAN AMP RECONSTRUCT
 
-    # inversePlot = True
-    # PRconst = True; Vconst = False
-    # PRtype = 'discrete'
-    # tau = 2.3
+    inversePlot = True
+    PRconst = True; Vconst = False
+    PRtype = 'discrete'
+    tau = 2.3
 
-    # if PRconst is True:
-    #     PRcont_const = (2 * np.pi)**3
-    # else:
-    #     PRcont_const = 1
+    if PRconst is True:
+        PRcont_const = (2 * np.pi)**3
+    else:
+        PRcont_const = 1
 
-    # colorList = ['red', '#7e1e9c', 'green', 'orange', 'blue']
-    # lineList = ['solid', 'dotted', 'dashed', '-.']
-    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5])
-    # massRat_des = np.array([1.0])
-    # # massRat_des = np.array([0.5, 0.75, 1.0, 2, 5.0])
-    # mdatapaths = []
+    colorList = ['red', '#7e1e9c', 'green', 'orange', 'blue', '#60460f']
+    lineList = ['solid', 'dotted', 'dashed', 'dashdot']
+    aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5, -1.25, -1.0])
+    massRat_des = np.array([1.0])
+    # massRat_des = np.array([0.5, 0.75, 1.0, 2, 5.0])
+    mdatapaths = []
 
-    # for mR in massRat_des:
-    #     if toggleDict['Old'] is True:
-    #         mdatapaths.append(datapath[0:-7] + '{:.1f}'.format(mR))
-    #     else:
-    #         mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
+    for mR in massRat_des:
+        if toggleDict['noCSAmp'] is True:
+            mdatapaths.append(datapath[0:-11] + '{:.1f}'.format(mR))
+        else:
+            mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
 
-    # fig1, ax1 = plt.subplots()
-    # for inda, aIBi in enumerate(aIBi_des):
-    #     for indm, mRat in enumerate(massRat_des):
+    fig1, ax1 = plt.subplots()
+    for inda, aIBi in enumerate(aIBi_des):
+        for indm, mRat in enumerate(massRat_des):
 
-    #         vI0_Vals = np.zeros(PVals.size)
-    #         PRcont_Averages = np.zeros(PVals.size)
-    #         PRdisc_Averages = np.zeros(PVals.size)
+            vI0_Vals = np.zeros(PVals.size)
+            PRcont_Averages = np.zeros(PVals.size)
+            PRdisc_Averages = np.zeros(PVals.size)
 
-    #         for indP, P in enumerate(PVals):
-    #             qds_PaIBi = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
-    #             interpds_PaIBi = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/amp3D/interp_P_{:.3f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
+            for indP, P in enumerate(PVals):
+                qds_PaIBi = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+                interpds_PaIBi = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/amp3D/interp_P_{:.3f}_aIBi_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, linDimMajor, linDimMinor))
 
-    #             tsVals = interpds_PaIBi.coords['t'].values
-    #             tsVals = tsVals[tsVals <= tau]
-    #             dt = tsVals[1] - tsVals[0]
-    #             if Vconst is True:
-    #                 Vxyz = interpds_PaIBi.attrs['Vxyz']
-    #             else:
-    #                 Vxyz = 1
-    #             Npoints_xyz = interpds_PaIBi.attrs['Npoints3D']
-    #             PRcont_Vals = Vxyz * PRcont_const * interpds_PaIBi['PR_bare_cont'].sel(t=tsVals).values
-    #             PRdisc_Vals = interpds_PaIBi['PR_bare_discrete'].sel(t=tsVals).values
+                tsVals = interpds_PaIBi.coords['t'].values
+                tsVals = tsVals[tsVals <= tau]
+                dt = tsVals[1] - tsVals[0]
+                if Vconst is True:
+                    Vxyz = interpds_PaIBi.attrs['Vxyz']
+                else:
+                    Vxyz = 1
+                Npoints_xyz = interpds_PaIBi.attrs['Npoints3D']
+                PRcont_Vals = Vxyz * PRcont_const * interpds_PaIBi['PR_bare_cont'].sel(t=tsVals).values
+                PRdisc_Vals = interpds_PaIBi['PR_bare_discrete'].sel(t=tsVals).values
 
-    #             vI0_Vals[indP] = (P - qds_PaIBi.isel(t=0)['Pph'].values) / mI
-    #             PRcont_Averages[indP] = (1 / (tsVals[-1] - tsVals[1])) * simps(y=PRcont_Vals, dx=dt)
-    #             PRdisc_Averages[indP] = (1 / (tsVals[-1] - tsVals[1])) * simps(y=PRdisc_Vals, dx=dt)
-    #             if PRtype == 'continuous':
-    #                 PR_Averages = PRcont_Averages
-    #             elif PRtype == 'discrete':
-    #                 PR_Averages = PRdisc_Averages * Npoints_xyz
-    #                 # print(Npoints_xyz)
-    #             else:
-    #                 print('PR ERROR')
-    #         if inversePlot is True:
-    #             ax1.plot(vI0_Vals / nu, 1 / PR_Averages, linestyle=lineList[inda], color=colorList[indm])
-    #         else:
-    #             ax1.plot(vI0_Vals / nu, PR_Averages, linestyle=lineList[inda], color=colorList[indm])
+                vI0_Vals[indP] = (P - qds_PaIBi.isel(t=0)['Pph'].values) / mI
+                PRcont_Averages[indP] = (1 / (tsVals[-1] - tsVals[1])) * simps(y=PRcont_Vals, dx=dt)
+                PRdisc_Averages[indP] = (1 / (tsVals[-1] - tsVals[1])) * simps(y=PRdisc_Vals, dx=dt)
+                if PRtype == 'continuous':
+                    PR_Averages = PRcont_Averages
+                elif PRtype == 'discrete':
+                    PR_Averages = PRdisc_Averages * Npoints_xyz
+                    # print(Npoints_xyz)
+                else:
+                    print('PR ERROR')
+            if inversePlot is True:
+                ax1.plot(vI0_Vals / nu, 1 / PR_Averages, linestyle=lineList[indm], color=colorList[inda])
+            else:
+                ax1.plot(vI0_Vals / nu, PR_Averages, linestyle=lineList[indm], color=colorList[inda])
 
-    # alegend_elements = []
-    # mlegend_elements = []
-    # for inda, aIBi in enumerate(aIBi_des):
-    #     alegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[inda], label='{0}'.format(aIBi)))
-    # for indm, mR in enumerate(massRat_des):
-    #     mlegend_elements.append(Line2D([0], [0], color=colorList[indm], linestyle='solid', label='{0}'.format(mR)))
+    alegend_elements = []
+    mlegend_elements = []
+    for inda, aIBi in enumerate(aIBi_des):
+        alegend_elements.append(Line2D([0], [0], color=colorList[inda], linestyle='solid', label='{0}'.format(aIBi)))
+    for indm, mR in enumerate(massRat_des):
+        mlegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[indm], label='{0}'.format(mR)))
 
-    # ax1.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
+    ax1.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
 
-    # if inversePlot is True:
-    #     ax1.set_title('Short-Time-Averaged Inverse Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
-    #     if PRtype == 'continuous':
-    #         ax1.set_ylabel(r'Average $IPR$ with $IPR = ((2\pi)^{3} \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2})^{-1}$')
-    #     elif PRtype == 'discrete':
-    #         ax1.set_ylabel(r'Average $IPR$ (Normalized by $N_{tot}$ modes in system)')
-    # else:
-    #     ax1.set_title('Time-Averaged Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
-    #     ax1.set_ylabel(r'Average $PR$ with $PR = (2\pi)^{3} \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2}$')
-    # alegend = ax1.legend(handles=alegend_elements, loc=(0.65, 0.65), title=r'$a_{IB}^{-1}$')
-    # plt.gca().add_artist(alegend)
-    # mlegend = ax1.legend(handles=mlegend_elements, loc=(0.84, 0.70), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
-    # plt.gca().add_artist(mlegend)
-    # ax1.set_xlim([0, np.max(vI0_Vals / nu)])
+    if inversePlot is True:
+        ax1.set_title('Short-Time-Averaged Inverse Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
+        if PRtype == 'continuous':
+            ax1.set_ylabel(r'Average $IPR$ with $IPR = ((2\pi)^{3} \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2})^{-1}$')
+        elif PRtype == 'discrete':
+            ax1.set_ylabel(r'Average $IPR$ (Normalized by $N_{tot}$ modes in system)')
+    else:
+        ax1.set_title('Time-Averaged Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
+        ax1.set_ylabel(r'Average $PR$ with $PR = (2\pi)^{3} \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2}$')
+    alegend = ax1.legend(handles=alegend_elements, loc=(0.03, 0.55), title=r'$a_{IB}^{-1}$')
+    plt.gca().add_artist(alegend)
+    mlegend = ax1.legend(handles=mlegend_elements, loc=(0.22, 0.70), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
+    plt.gca().add_artist(mlegend)
+    ax1.set_xlim([0, np.max(vI0_Vals / nu)])
 
-    # plt.show()
+    plt.show()
