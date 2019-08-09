@@ -88,15 +88,15 @@ if __name__ == "__main__":
                 #     os.mkdir(innerdatapath + '/amp3D')
 
     # # Params_List = Params_List[0:2]
-    missInds = [74, 101]
-    missList = []
-    for mind in missInds:
-        missList.append(Params_List[mind])
-        [cParams, innerdatapath] = Params_List[mind]
-        [P, aIBi] = cParams
-        # print(P, aIBi)
+    # missInds = [74, 101]
+    # missList = []
+    # for mind in missInds:
+    #     missList.append(Params_List[mind])
+    #     [cParams, innerdatapath] = Params_List[mind]
+    #     [P, aIBi] = cParams
+    #     # print(P, aIBi)
 
-    Params_List = missList
+    # Params_List = missList
     print(len(Params_List))
 
     # # ---- COMPUTE DATA ON COMPUTER ----
