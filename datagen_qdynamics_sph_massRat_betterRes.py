@@ -59,22 +59,22 @@ if __name__ == "__main__":
     kgrid.initArray_premade('th', thetaArray)
 
     # for realdyn evolution
-    tMax = 100
+    tMax = 300
     dt = 0.2
-    CoarseGrainRate = 500
+    CoarseGrainRate = 10000
 
     tgrid = np.arange(0, tMax + dt, dt)
 
-    # COLLECT DISTRIBUTION DATA OVER TIME (MORE DENSE AT SHORT TIMES)
-    tmask = tgrid < 5
-    tshort = tgrid[tmask]
-    trest = tgrid[np.logical_not(tmask)]
-    tgrid_coarse = np.concatenate((tshort, trest[0:-1:20]))
+    # # COLLECT DISTRIBUTION DATA OVER TIME (MORE DENSE AT SHORT TIMES)
+    # tmask = tgrid < 5
+    # tshort = tgrid[tmask]
+    # trest = tgrid[np.logical_not(tmask)]
+    # tgrid_coarse = np.concatenate((tshort, trest[0:-1:20]))
 
-    # # DON'T COLLECT DISTRIBUTION DATA EXCEPT FOR LAST POINT
-    # tgrid_coarse = tgrid[0:-1:CoarseGrainRate]
-    # if tgrid_coarse[-1] != tgrid[-1]:
-    #     tgrid_coarse = np.concatenate((tgrid_coarse, np.array([tgrid[-1]])))
+    # DON'T COLLECT DISTRIBUTION DATA EXCEPT FOR LAST POINT
+    tgrid_coarse = tgrid[0:-1:CoarseGrainRate]
+    if tgrid_coarse[-1] != tgrid[-1]:
+        tgrid_coarse = np.concatenate((tgrid_coarse, np.array([tgrid[-1]])))
 
     gParams = [xgrid, kgrid, tgrid]
     NGridPoints = kgrid.size()
@@ -108,9 +108,10 @@ if __name__ == "__main__":
     Params_List = []
     # mI_Vals = np.array([0.75])
     # mI_Vals = np.array([0.5, 1.0, 2, 5.0])
-    mI_Vals = np.array([0.5, 1.0, 2])
-    # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.5])
-    aIBi_Vals = np.array([-1.25, -1.0])
+    # mI_Vals = np.array([0.5, 1.0, 2])
+    mI_Vals = np.array([1.0])
+    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])
+    # aIBi_Vals = np.array([-1.25, -1.0])
     P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.4, 10, endpoint=False), np.linspace(1.4, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 10, endpoint=False), np.linspace(5.0, 9.0, 20)))
     # print(P_Vals_norm)
 
