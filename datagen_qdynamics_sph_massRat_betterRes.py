@@ -59,9 +59,9 @@ if __name__ == "__main__":
     kgrid.initArray_premade('th', thetaArray)
 
     # for realdyn evolution
-    tMax = 300
+    tMax = 1000
     dt = 0.2
-    CoarseGrainRate = 10000
+    CoarseGrainRate = 1000000
 
     tgrid = np.arange(0, tMax + dt, dt)
 
@@ -112,11 +112,13 @@ if __name__ == "__main__":
     mI_Vals = np.array([1.0])
     aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])
     # aIBi_Vals = np.array([-1.25, -1.0])
-    P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.4, 10, endpoint=False), np.linspace(1.4, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 10, endpoint=False), np.linspace(5.0, 9.0, 20)))
+    # P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.4, 10, endpoint=False), np.linspace(1.4, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 10, endpoint=False), np.linspace(5.0, 9.0, 20)))
+    P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.4, 10, endpoint=False), np.linspace(1.4, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 10, endpoint=False), np.linspace(5.0, 9.0, 20, endpoint=False), np.linspace(9.0, 18.0, 20)))
     # print(P_Vals_norm)
 
     for mI in mI_Vals:
         P_Vals = mI * nu * P_Vals_norm
+        print(P_Vals)
         for aIBi in aIBi_Vals:
             for P in P_Vals:
                 sParams = [mI, mB, n0, gBB]

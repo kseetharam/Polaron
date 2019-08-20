@@ -56,7 +56,7 @@ if __name__ == "__main__":
     linDimMajor = 0.99 * (k_max * np.sqrt(2) / 2)
     linDimMinor = linDimMajor
 
-    massRat = 1.0
+    massRat = 1
     IRrat = 1
 
     # git test
@@ -108,7 +108,7 @@ if __name__ == "__main__":
 
     # print(innerdatapath)
 
-    # aIBi_List = [-10.0, -5.0, -2.0, -1.5, -1.25, -1.0]
+    # aIBi_List = [-10.0, -5.0, -2.0, -1.25, -1.0]
     # # aIBi_List = [-10.0, -5.0, -2.0]
     # for aIBi in aIBi_List:
     #     ds_list = []; P_list = []; mI_list = []
@@ -199,7 +199,7 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -10
+    aIBi = -1
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     qds_aIBi = qds
@@ -277,7 +277,8 @@ if __name__ == "__main__":
     # tailFit = True
     # logScale = True
 
-    # tau = 100
+    # tau = 100; tfCutoff = 90
+    # tau = 300; tfCutoff = 290
     # # tau = 5
     # tsVals = tVals[tVals < tau]
     # qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
@@ -287,7 +288,8 @@ if __name__ == "__main__":
     # # Pnorm_des = np.array([0.1, 0.8, 5.0, 10.0])
 
     # # Pnorm_des = np.array([0.1, 0.5, 0.8, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2, 1.4, 1.6, 2.5, 3.0, 5.0, 6.0, 7.0, 9.0])
-    # Pnorm_des = np.array([0.1, 0.5, 0.9, 1.4, 3.0, 5.0, 6.0, 7.0])
+    # # Pnorm_des = np.array([0.1, 0.5, 0.9, 1.4, 3.0, 5.0, 6.0, 7.0])
+    # Pnorm_des = np.array([5.0, 6.0, 7.0, 7.5, 8.0, 8.5, 9.0])
 
     # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
     # # Pnorm_des = np.array([0.1, 0.5, 1.0, 1.3, 1.5, 2.1, 2.5, 3.0, 4.0, 5.0])
@@ -303,7 +305,7 @@ if __name__ == "__main__":
     #     PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
 
     #     if tailFit is True:
-    #         tfmask = tsVals > 90
+    #         tfmask = tsVals > tfCutoff
     #         tfVals = tsVals[tfmask]
     #         tfLin = tsVals[tsVals > 10]
     #         zD = np.polyfit(np.log(tfVals), np.log(DynOv[tfmask]), deg=1)
@@ -335,7 +337,7 @@ if __name__ == "__main__":
     #     axes[0].plot(tlin_norm * np.ones(DynOv.size), np.linspace(np.min(DynOv), np.max(DynOv), DynOv.size), 'k-')
     #     axes[0].set_xscale('log')
     #     axes[0].set_yscale('log')
-    #     axes[0].set_xlim([1e-1, 1e2])
+    #     # axes[0].set_xlim([1e-1, 1e2])
     #     axes[1].set_xlim([-1, tau / tscale])
 
     # fig.tight_layout()
@@ -411,10 +413,8 @@ if __name__ == "__main__":
     # def powerfunc(t, a, b):
     #     return b * t**(-1 * a)
 
-    # # tmin = 90
-    # # tmax = 100
-    # tmin = 90
-    # tmax = 100
+    # # tmin = 90; tmax = 100
+    # tmin = 290; tmax = 300
 
     # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
     # rollwin = 1
@@ -495,8 +495,8 @@ if __name__ == "__main__":
 
     #         DynOv_logAve[indP] = np.average(np.log(DynOv_Vals))
 
-    #         if (-1 * S_slope) < 0:
-    #             DynOv_Exponents_LR[indP] = 0
+    #         # if (-1 * S_slope) < 0:
+    #         #     DynOv_Exponents_LR[indP] = 0
 
     #         if vImpc_Vals[-1] < 0:
     #             vImp_Exponents_LR[indP] = 0
@@ -515,12 +515,12 @@ if __name__ == "__main__":
     #     print('\n')
     #     print(DynOv_stderr)
     #     print('\n')
-    #     # print(DynOv_tstat)
-    #     # print('\n')
+    #     print(DynOv_tstat)
+    #     print('\n')
     #     print(DynOv_stderr / DynOv_logAve)
 
-    #     badFitmask = np.abs(DynOv_stderr / DynOv_logAve) > 1e-3
-    #     DynOv_Exponents_LR[badFitmask] = 0
+    #     # badFitmask = np.abs(DynOv_stderr / DynOv_logAve) > 1e-3
+    #     # DynOv_Exponents_LR[badFitmask] = 0
 
     #     if seperate:
     #         ax.plot(Pnorm, DynOv_Exponents_LR, color=colorList[inda], linestyle='solid', marker='x', label='{:.1f}'.format(aIBi))
@@ -559,7 +559,7 @@ if __name__ == "__main__":
     #     mlegend = ax.legend(handles=mlegend_elements, loc=(0.12, 0.75), title='Observable')
     #     plt.gca().add_artist(mlegend)
 
-    # ax.set_xlim([0, 7])
+    # # ax.set_xlim([0, 7])
 
     # plt.show()
 
@@ -848,15 +848,17 @@ if __name__ == "__main__":
     # def powerfunc(t, a, b):
     #     return b * t**(-1 * a)
 
-    # tmin = 90
-    # tmax = 100
+    # # tmin = 90; tmax = 100
+    # tmin = 250; tmax = 300
     # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
     # rollwin = 1
 
     # colorList = ['red', '#7e1e9c', 'green', 'orange', 'blue']
     # lineList = ['solid', 'dotted', 'dashed', '-.']
-    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.25])
-    # massRat_des = np.array([0.5, 1.0, 2])
+    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])
+    # # massRat_des = np.array([0.5, 1.0, 2])
+    # massRat_des = np.array([1.0])
+
     # mdatapaths = []
 
     # for mR in massRat_des:
@@ -901,8 +903,11 @@ if __name__ == "__main__":
     #             if DynOv_Exponents[indP] < 0:
     #                 DynOv_Exponents[indP] = 0
 
-    #             if (np.abs(DynOv_Exponents[indP]) < 0.01) and (aIBi == -1.25):
+    #             if (np.abs(DynOv_Exponents[indP]) < 0.001):
     #                 DynOv_Exponents[indP] = 0
+
+    #             # if (np.abs(DynOv_Exponents[indP]) < 0.01) and (aIBi == -1.25):
+    #             #     DynOv_Exponents[indP] = 0
 
     #             # if (np.abs(DynOv_Exponents[indP]) < 0.05) and (aIBi == -1.5):
     #             #     DynOv_Exponents[indP] = 0
@@ -947,7 +952,7 @@ if __name__ == "__main__":
     # plt.gca().add_artist(mlegend)
     # ax1.set_ylim([0, 1.2])
     # # ax1.set_xlim([0, np.max(vI0_Vals / nu)])
-    # ax1.set_xlim([0, 7])
+    # # ax1.set_xlim([0, 7])
 
     # plt.show()
 
