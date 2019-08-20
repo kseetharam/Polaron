@@ -60,7 +60,8 @@ if __name__ == "__main__":
 
     # for realdyn evolution
     tMax = 1000
-    dt = 0.2
+    # dt = 0.2
+    dt = 1.0
     CoarseGrainRate = 1000000
 
     tgrid = np.arange(0, tMax + dt, dt)
