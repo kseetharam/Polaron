@@ -119,7 +119,7 @@ if __name__ == "__main__":
 
     for mI in mI_Vals:
         P_Vals = mI * nu * P_Vals_norm
-        print(P_Vals)
+        # print(P_Vals)
         for aIBi in aIBi_Vals:
             for P in P_Vals:
                 sParams = [mI, mB, n0, gBB]
@@ -157,11 +157,12 @@ if __name__ == "__main__":
                 # if os.path.isdir(innerdatapath) is False:
                 #     os.mkdir(innerdatapath)
 
-    # missInds = [0, 1, 2, 3, 173, 174, 175, 176, 177, 178, 179, 180]
-    # missList = []
-    # for mind in missInds:
-    #     missList.append(Params_List[mind])
-    # Params_List = missList
+    missInds = [50, 51, 52, 53, 54, 55, 56]
+    missList = []
+    for mind in missInds:
+        missList.append(Params_List[mind])
+        # print(Params_List[mind])
+    Params_List = missList
 
     print(len(Params_List))
 
