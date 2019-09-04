@@ -199,7 +199,7 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -1.0
+    aIBi = -1
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     qds_aIBi = qds
@@ -272,82 +272,84 @@ if __name__ == "__main__":
 
     # plt.show()
 
-    # # # S(t) AND P_Imp CURVES
+    # # # # S(t) AND P_Imp CURVES
 
-    tailFit = True
-    logScale = True
-    PimpData_roll = False; PimpData_rollwin = 2
+    # tailFit = True
+    # logScale = True
+    # PimpData_roll = False; PimpData_rollwin = 2
 
-    # tau = 100; tfCutoff = 90; tfstart = 10
-    # tau = 1000; tfCutoff = 900; tfstart = 500
-    tau = 600; tfCutoff = 500; tfstart = 100
-    # tau = 5
-    tsVals = tVals[tVals < tau]
-    qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
+    # # tau = 100; tfCutoff = 90; tfstart = 10
+    # tau = 1000; tfCutoff = 900; tfstart = 100
+    # # tau = 600; tfCutoff = 500; tfstart = 100
+    # # tau = 5
+    # tsVals = tVals[tVals < tau]
+    # qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
 
-    # print(Pnorm)
+    # # print(Pnorm)
 
-    # Pnorm_des = np.array([0.1, 0.8, 5.0, 10.0])
+    # # Pnorm_des = np.array([0.1, 0.8, 5.0, 10.0])
 
-    # Pnorm_des = np.array([0.1, 0.5, 0.8, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2, 1.4, 1.6, 2.5, 3.0, 5.0, 6.0, 7.0, 9.0])
+    # # Pnorm_des = np.array([0.1, 0.5, 0.8, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2, 1.4, 1.6, 2.5, 3.0, 5.0, 6.0, 7.0, 9.0])
     # Pnorm_des = np.array([0.1, 0.5, 0.9, 1.4, 3.0, 5.0, 6.0, 7.0])
-    Pnorm_des = np.array([0.1, 0.8, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 12.0, 14.0, 16.0, 18.0])
-    # Pnorm_des = np.array([0.1, 0.8, 2.0, 2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0])
+    # # Pnorm_des = np.array([0.1, 0.8, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 12.0, 14.0, 16.0, 18.0])
+    # # Pnorm_des = np.array([0.1, 0.8, 2.0, 2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0])
 
-    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
-    # Pnorm_des = np.array([0.1, 0.5, 1.0, 1.3, 1.5, 2.1, 2.5, 3.0, 4.0, 5.0])
+    # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
+    # # Pnorm_des = np.array([0.1, 0.5, 1.0, 1.3, 1.5, 2.1, 2.5, 3.0, 4.0, 5.0])
 
-    Pinds = np.zeros(Pnorm_des.size, dtype=int)
-    for Pn_ind, Pn in enumerate(Pnorm_des):
-        Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
+    # Pinds = np.zeros(Pnorm_des.size, dtype=int)
+    # for Pn_ind, Pn in enumerate(Pnorm_des):
+    #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
 
-    fig, axes = plt.subplots(nrows=2, ncols=1)
-    for indP in Pinds:
-        P = PVals[indP]
-        DynOv = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
-        # PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
-        Pph_ds = xr.DataArray(qds_aIBi_ts.isel(P=indP)['Pph'].values, coords=[tsVals], dims=['t'])
-        if PimpData_roll:
-            Pph_ds = Pph_ds.rolling(t=PimpData_rollwin, center=True).mean().dropna('t')
-        vImp_Vals = (P - Pph_ds.values) / mI
-        tvImp_Vals = Pph_ds['t'].values
+    # fig, axes = plt.subplots(nrows=2, ncols=1)
+    # for indP in Pinds:
+    #     P = PVals[indP]
+    #     DynOv = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+    #     # PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
+    #     Pph_ds = xr.DataArray(qds_aIBi_ts.isel(P=indP)['Pph'].values, coords=[tsVals], dims=['t'])
+    #     if PimpData_roll:
+    #         Pph_ds = Pph_ds.rolling(t=PimpData_rollwin, center=True).mean().dropna('t')
+    #     vImp_Vals = (P - Pph_ds.values) / mI
+    #     tvImp_Vals = Pph_ds['t'].values
 
-        if tailFit is True:
-            tfmask = tsVals > tfCutoff
-            tfVals = tsVals[tfmask]
-            tfLin = tsVals[tsVals > tfstart]
-            zD = np.polyfit(np.log(tfVals), np.log(DynOv[tfmask]), deg=1)
-            fLinD = np.exp(zD[1]) * tfLin**(zD[0])
-            axes[0].plot(tfLin / tscale, fLinD, 'k--', label='')
+    #     if tailFit is True:
+    #         tfmask = tsVals > tfCutoff
+    #         tfVals = tsVals[tfmask]
+    #         tfLin = tsVals[tsVals > tfstart]
+    #         zD = np.polyfit(np.log(tfVals), np.log(DynOv[tfmask]), deg=1)
+    #         fLinD = np.exp(zD[1]) * tfLin**(zD[0])
+    #         axes[0].plot(tfLin / tscale, fLinD, 'k--', label='')
 
-        axes[0].plot(tsVals / tscale, DynOv, label='{:.2f}'.format(P / mc))
-        # axes[1].plot(tsVals / tscale, PImp / (mI * nu), label='{:.2f}'.format(P / mc))
-        axes[1].plot(tvImp_Vals / tscale, vImp_Vals / nu, label='{:.2f}'.format(P / mc))
+    #     axes[0].plot(tsVals / tscale, DynOv, label='{:.2f}'.format(P / mc))
+    #     # axes[1].plot(tsVals / tscale, PImp / (mI * nu), label='{:.2f}'.format(P / mc))
+    #     axes[1].plot(tvImp_Vals / tscale, vImp_Vals / nu, label='{:.2f}'.format(P / mc))
 
-    axes[0].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
-    axes[0].set_title('Loschmidt Echo (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    axes[0].set_ylabel(r'$|S(t)|$')
-    axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    # axes[0].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
+    # axes[0].set_title('Loschmidt Echo (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    # axes[0].set_ylabel(r'$|S(t)|$')
+    # axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
 
-    # axes[1].plot(tlin_norm * np.ones(PImp.size), np.linspace(np.min(PImp), np.max(PImp), PImp.size), 'ko')
-    axes[1].plot(tsVals / tscale, np.ones(tsVals.size), 'k--', label='$c_{BEC}$')
-    axes[1].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=1, ncol=2)
-    # axes[1].set_xscale('log')
-    # axes[1].set_yscale('log')
-    # axes[1].set_xlim([1e-1, 1e2])
-    axes[1].set_title('Average Impurity Speed (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    axes[1].set_ylabel(r'$\frac{<P_{I}>}{m_{I}c_{BEC}}$')
-    axes[1].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
+    # # axes[1].plot(tlin_norm * np.ones(PImp.size), np.linspace(np.min(PImp), np.max(PImp), PImp.size), 'ko')
+    # axes[1].plot(tsVals / tscale, np.ones(tsVals.size), 'k--', label='$c_{BEC}$')
+    # axes[1].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=1, ncol=2)
+    # # axes[1].set_xscale('log')
+    # # axes[1].set_yscale('log')
+    # # axes[1].set_xlim([1e-1, 1e2])
+    # axes[1].set_title('Average Impurity Speed (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    # axes[1].set_ylabel(r'$\frac{<P_{I}>}{m_{I}c_{BEC}}$')
+    # axes[1].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
 
-    if logScale is True:
-        axes[0].plot(tlin_norm * np.ones(DynOv.size), np.linspace(np.min(DynOv), np.max(DynOv), DynOv.size), 'k-')
-        axes[0].set_xscale('log')
-        axes[0].set_yscale('log')
-        # axes[0].set_xlim([1e-1, 1e2])
-        axes[1].set_xlim([-1, tau / tscale])
+    # if logScale is True:
+    #     axes[0].plot(tlin_norm * np.ones(DynOv.size), np.linspace(np.min(DynOv), np.max(DynOv), DynOv.size), 'k-')
+    #     axes[0].set_xscale('log')
+    #     axes[0].set_yscale('log')
+    #     # axes[0].set_xlim([1e-1, 1e2])
+    #     # axes[1].set_xlim([-1, tau / tscale])
+    #     axes[1].set_xscale('log')
+    #     axes[1].set_yscale('log')
 
-    fig.tight_layout()
-    plt.show()
+    # fig.tight_layout()
+    # plt.show()
 
     # # # # S(t) AND P_Imp CURVES MULTIGRID
 
@@ -412,14 +414,13 @@ if __name__ == "__main__":
     # PimpData_roll = False; PimpData_rollwin = 2
     # DynOvExp_roll = False; DynOvExp_rollwin = 2
     # DynOvExp_NegMask = False
+    # DynOvExp_Cut = True; cut = 5e-4
+    # consecDetection = True; consecSamples = 10
 
     # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])
     # # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.0])
 
     # Pnorm = PVals / mc
-
-    # def powerfunc(t, a, b):
-    #     return b * t**(-1 * a)
 
     # # tmin = 90; tmax = 100
     # tmin = 900; tmax = 1000
@@ -492,17 +493,28 @@ if __name__ == "__main__":
     #     if DynOvExp_NegMask:
     #         ExpMask = DynOvExponents_da.values < 0
     #         DynOvExponents_da[ExpMask] = 0
+    #     if DynOvExp_Cut:
+    #         ExpMask = np.abs(DynOvExponents_da.values) < cut
+    #         DynOvExponents_da[ExpMask] = 0
+    #     DynOv_Exponents = DynOvExponents_da.values
+    #     if consecDetection:
+    #         crit_ind = 0
+    #         for indE, exp in enumerate(DynOv_Exponents):
+    #             if indE > DynOv_Exponents.size - consecDetection:
+    #                 break
+    #             expSlice = DynOv_Exponents[indE:(indE + consecSamples)]
+    #             if np.all(expSlice > 0):
+    #                 crit_ind = indE
+    #                 break
+    #         DynOvExponents_da[0:crit_ind] = 0
 
-    #     # ExpMask = np.abs(DynOvExponents_da.values) < 5e-2
     #     DynOv_Exponents = DynOvExponents_da.values
     #     Pnorm_dynov = DynOvExponents_da['P'].values / mc
 
     #     print(aIBi); print(DynOv_Exponents)
-    #     print('\n'); print(DynOv_Pvalues); print('\n'); print(DynOv_Rvalues**2); print('\n'); print(DynOv_stderr); print('\n'); print(DynOv_tstat); print('\n'); print(DynOv_stderr / DynOv_logAve)
+    #     # print('\n'); print(DynOv_Pvalues); print('\n'); print(DynOv_Rvalues**2); print('\n'); print(DynOv_stderr); print('\n'); print(DynOv_tstat); print('\n'); print(DynOv_stderr / DynOv_logAve)
     #     # badFitmask = np.abs(DynOv_stderr / DynOv_logAve) > 1e-3
     #     # DynOv_Exponents_LR[badFitmask] = 0
-    #     if np.isclose(aIBi, -2.0):
-    #         print(vImp_Exponents_LR)
 
     #     if seperate:
     #         ax.plot(Pnorm_dynov, DynOv_Exponents, color=colorList[inda], linestyle='solid', marker='x', label='{:.2f}'.format(aIBi))
@@ -517,8 +529,9 @@ if __name__ == "__main__":
     #     ax.set_title('Long Time Power-Law Behavior of Loschmidt Echo')
     #     ax.legend(title=r'$a_{IB}^{-1}$', loc=2)
     #     # ax.set_xlim([0, 10.0])
-    #     ax.set_ylim([-.01, 1.2])
+    #     # ax.set_ylim([-.01, 1.2])
     #     # ax.set_xlim([0, 5.0]); ax.set_ylim([-.01, 0.1])
+    #     ax.set_xlim([0, 7.0]); ax.set_ylim([-.01, 0.5])
 
     #     ax1.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
     #     ax1.set_ylabel(r'$\gamma$' + ' for ' + r'$|S(t)|\propto t^{-\gamma}$')
@@ -540,13 +553,15 @@ if __name__ == "__main__":
     #     plt.gca().add_artist(alegend)
     #     mlegend = ax.legend(handles=mlegend_elements, loc=(0.12, 0.75), title='Observable')
     #     plt.gca().add_artist(mlegend)
-    #     ax.set_xlim([0, 10.0])
+    #     # ax.set_xlim([0, 7.0])
     #     ax.set_ylim([0, 1.2])
 
     # plt.show()
 
     # # # OLD EXPONENT FITTING CODE (EXCEPTIONS PART)
 
+    # def powerfunc(t, a, b):
+    #     return b * t**(-1 * a)
     # with warnings.catch_warnings():
     #     warnings.simplefilter("error", OptimizeWarning)
     #     try:
@@ -742,6 +757,8 @@ if __name__ == "__main__":
 
     # # # # IMPURITY FINAL VELOCITY CURVES
 
+    # flattenAboveC = True
+
     # def powerfunc(t, a, b):
     #     return b * t**(-1 * a)
 
@@ -753,6 +770,7 @@ if __name__ == "__main__":
     # colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue']
     # lineList = ['solid', 'dotted', 'dashed', '-.']
     # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])
+    # # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.0])
     # # aIBi_des = np.array([aIBi_des[2]])
     # # massRat_des = np.array([0.5, 1.0, 2.0])
     # massRat_des = np.array([1.0])
@@ -823,6 +841,8 @@ if __name__ == "__main__":
     #         if aIBi == -1.5 and mRat == 1.0:
     #             print(vImp_Exponents)
     #         vIf_Vals = nu + powerfunc(1e1000, vImp_Exponents, vImp_Constants)
+    #         if flattenAboveC:
+    #             vIf_Vals[vIf_Vals > nu] = nu
     #         ax1.plot(vI0_Vals / nu, vIf_Vals / nu, linestyle=lineList[indm], color=colorList[inda])
     #         # ax2.plot(vI0_Vals / nu, vIf_Vals / vI0_Vals, linestyle=lineList[inda], color=colorList[indm])
 
@@ -857,6 +877,10 @@ if __name__ == "__main__":
 
     # # # # IMPURITY FINAL LOSCHMIDT ECHO CURVES
 
+    # DynOvExp_NegMask = False
+    # magCutoff = True; cut = 1e-4
+    # consecDetection = True; consecSamples = 10
+
     # def powerfunc(t, a, b):
     #     return b * t**(-1 * a)
 
@@ -864,11 +888,12 @@ if __name__ == "__main__":
     # # tmin = 250; tmax = 300
     # tmin = 900; tmax = 1000
     # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
-    # rollwin = 1
+    # # rollwin = 1
 
-    # colorList = ['red', '#7e1e9c', 'green', 'orange', 'blue']
+    # colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue']
     # lineList = ['solid', 'dotted', 'dashed', '-.']
-    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])
+    # # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])
+    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.0])
     # # massRat_des = np.array([0.5, 1.0, 2])
     # massRat_des = np.array([1.0])
 
@@ -883,6 +908,8 @@ if __name__ == "__main__":
     #     print('SETTING ERROR')
 
     # fig1, ax1 = plt.subplots()
+    # # fig2, ax2 = plt.subplots()
+    # Pcrit_Vals = np.zeros(aIBi_des.size)
     # for inda, aIBi in enumerate(aIBi_des):
     #     for indm, mRat in enumerate(massRat_des):
     #         mds = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
@@ -904,7 +931,7 @@ if __name__ == "__main__":
     #         for indP, P in enumerate(PVals):
     #             DynOv_raw = np.abs(mds_ts.isel(P=indP)['Real_DynOv'].values + 1j * mds_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
     #             DynOv_ds = xr.DataArray(DynOv_raw, coords=[tfVals], dims=['t'])
-    #             DynOv_ds = DynOv_ds.rolling(t=rollwin, center=True).mean().dropna('t')
+    #             # DynOv_ds = DynOv_ds.rolling(t=rollwin, center=True).mean().dropna('t')
     #             DynOv_Vals = DynOv_ds.values
 
     #             tDynOvc_Vals = DynOv_ds['t'].values
@@ -913,41 +940,27 @@ if __name__ == "__main__":
     #             DynOv_Exponents[indP] = -1 * S_slope
     #             DynOv_Constants[indP] = np.exp(S_intercept)
 
-    #             if DynOv_Exponents[indP] < 0:
-    #                 DynOv_Exponents[indP] = 0
+    #         if DynOvExp_NegMask:
+    #             DynOv_Exponents[DynOv_Exponents < 0] = 0
 
-    #             # if (np.abs(DynOv_Exponents[indP]) < 0.001):
-    #             #     DynOv_Exponents[indP] = 0
+    #         if magCutoff:
+    #             DynOv_Exponents[np.abs(DynOv_Exponents) < cut] = 0
 
-    #             # if (np.abs(DynOv_Exponents[indP]) < 0.01) and (aIBi == -1.25):
-    #             #     DynOv_Exponents[indP] = 0
-
-    #             # if (np.abs(DynOv_Exponents[indP]) < 0.05) and (aIBi == -1.5):
-    #             #     DynOv_Exponents[indP] = 0
-    #             #     # DynOv_Constants[indP] = DynOv_Vals[-1]
-    #             # if (DynOv_Exponents[indP] < 0) and (aIBi != -1.5):
-    #             #     DynOv_Exponents[indP] = 0
-
-    #             # with warnings.catch_warnings():
-    #             #     warnings.simplefilter("error", OptimizeWarning)
-    #             #     try:
-    #             #         Sopt, Scov = curve_fit(powerfunc, tDynOvc_Vals, DynOv_Vals)
-    #             #         DynOv_Exponents[indP] = Sopt[0]
-    #             #         DynOv_Constants[indP] = Sopt[1]
-    #             #         if Sopt[0] < 0:
-    #             #             DynOv_Exponents[indP] = 0
-    #             #     except OptimizeWarning:
-    #             #         DynOv_Exponents[indP] = 0
-    #             #         DynOv_Constants[indP] = DynOv_Vals[-1]
-    #             #     except RuntimeError:
-    #             #         DynOv_Exponents[indP] = 0
-    #             #         DynOv_Constants[indP] = DynOv_Vals[-1]
-
-    #         # if aIBi == -1.5 and mRat == 1.0:
-    #         #     print(mdatapaths[indm] + '/redyn_spherical/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    #         #     print(DynOv_Exponents)
+    #         if consecDetection:
+    #             crit_ind = 0
+    #             for indE, exp in enumerate(DynOv_Exponents):
+    #                 if indE > DynOv_Exponents.size - consecDetection:
+    #                     break
+    #                 expSlice = DynOv_Exponents[indE:(indE + consecSamples)]
+    #                 if np.all(expSlice > 0):
+    #                     crit_ind = indE
+    #                     break
+    #             DynOv_Exponents[0:crit_ind] = 0
     #         DynOvf_Vals = powerfunc(1e1000, DynOv_Exponents, DynOv_Constants)
     #         ax1.plot(vI0_Vals / nu, DynOvf_Vals, linestyle=lineList[indm], color=colorList[inda])
+    #     Pcrit_Vals[inda] = PVals[crit_ind]
+    # print(Pcrit_Vals / (mI * nu))
+    # # ax2.plot(aIBi_des, Pcrit_Vals / (mI * nu), 'bx-')
 
     # alegend_elements = []
     # mlegend_elements = []
@@ -965,7 +978,7 @@ if __name__ == "__main__":
     # plt.gca().add_artist(mlegend)
     # ax1.set_ylim([0, 1.2])
     # # ax1.set_xlim([0, np.max(vI0_Vals / nu)])
-    # # ax1.set_xlim([0, 7])
+    # ax1.set_xlim([0, 7])
 
     # plt.show()
 

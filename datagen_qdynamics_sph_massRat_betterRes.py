@@ -110,9 +110,10 @@ if __name__ == "__main__":
     # mI_Vals = np.array([0.75])
     # mI_Vals = np.array([0.5, 1.0, 2, 5.0])
     # mI_Vals = np.array([0.5, 1.0, 2])
-    mI_Vals = np.array([1.0])
-    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])
-    # aIBi_Vals = np.array([-1.25, -1.0])
+    # mI_Vals = np.array([1.0])
+    mI_Vals = np.array([0.5, 2])
+    # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])
+    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0])
     # P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.4, 10, endpoint=False), np.linspace(1.4, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 10, endpoint=False), np.linspace(5.0, 9.0, 20)))
     P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.4, 10, endpoint=False), np.linspace(1.4, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 10, endpoint=False), np.linspace(5.0, 9.0, 20, endpoint=False), np.linspace(9.0, 18.0, 20)))
     # print(P_Vals_norm)
@@ -157,12 +158,12 @@ if __name__ == "__main__":
                 # if os.path.isdir(innerdatapath) is False:
                 #     os.mkdir(innerdatapath)
 
-    missInds = [50, 51, 52, 53, 54, 55, 56]
-    missList = []
-    for mind in missInds:
-        missList.append(Params_List[mind])
-        # print(Params_List[mind])
-    Params_List = missList
+    # missInds = [50, 51, 52, 53, 54, 55, 56]
+    # missList = []
+    # for mind in missInds:
+    #     missList.append(Params_List[mind])
+    #     # print(Params_List[mind])
+    # Params_List = missList
 
     print(len(Params_List))
 
