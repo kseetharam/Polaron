@@ -199,7 +199,7 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -2
+    aIBi = -1.0
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     qds_aIBi = qds
@@ -276,9 +276,11 @@ if __name__ == "__main__":
 
     tailFit = True
     logScale = True
+    PimpData_roll = False; PimpData_rollwin = 2
 
     # tau = 100; tfCutoff = 90; tfstart = 10
-    tau = 1000; tfCutoff = 900; tfstart = 500
+    # tau = 1000; tfCutoff = 900; tfstart = 500
+    tau = 600; tfCutoff = 500; tfstart = 100
     # tau = 5
     tsVals = tVals[tVals < tau]
     qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
@@ -289,7 +291,8 @@ if __name__ == "__main__":
 
     # Pnorm_des = np.array([0.1, 0.5, 0.8, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2, 1.4, 1.6, 2.5, 3.0, 5.0, 6.0, 7.0, 9.0])
     # Pnorm_des = np.array([0.1, 0.5, 0.9, 1.4, 3.0, 5.0, 6.0, 7.0])
-    Pnorm_des = np.array([0.1, 0.8, 3.0, 5.0, 6.0, 7.0, 7.5, 8.0, 8.5, 9.0, 12.0, 14.0, 15.0, 16.0, 17.0, 18.0])
+    Pnorm_des = np.array([0.1, 0.8, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 12.0, 14.0, 16.0, 18.0])
+    # Pnorm_des = np.array([0.1, 0.8, 2.0, 2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0])
 
     # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
     # Pnorm_des = np.array([0.1, 0.5, 1.0, 1.3, 1.5, 2.1, 2.5, 3.0, 4.0, 5.0])
@@ -302,7 +305,12 @@ if __name__ == "__main__":
     for indP in Pinds:
         P = PVals[indP]
         DynOv = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
-        PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
+        # PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
+        Pph_ds = xr.DataArray(qds_aIBi_ts.isel(P=indP)['Pph'].values, coords=[tsVals], dims=['t'])
+        if PimpData_roll:
+            Pph_ds = Pph_ds.rolling(t=PimpData_rollwin, center=True).mean().dropna('t')
+        vImp_Vals = (P - Pph_ds.values) / mI
+        tvImp_Vals = Pph_ds['t'].values
 
         if tailFit is True:
             tfmask = tsVals > tfCutoff
@@ -310,13 +318,11 @@ if __name__ == "__main__":
             tfLin = tsVals[tsVals > tfstart]
             zD = np.polyfit(np.log(tfVals), np.log(DynOv[tfmask]), deg=1)
             fLinD = np.exp(zD[1]) * tfLin**(zD[0])
-            zP = np.polyfit(np.log(tfVals), np.log(PImp[tfmask]), deg=1)
-            fLinP = np.exp(zP[1]) * tfLin**(zP[0])
             axes[0].plot(tfLin / tscale, fLinD, 'k--', label='')
 
         axes[0].plot(tsVals / tscale, DynOv, label='{:.2f}'.format(P / mc))
-        axes[1].plot(tsVals / tscale, PImp / (mI * nu), label='{:.2f}'.format(P / mc))
-        # axes[1].plot(tfLin / tscale, fLinP, 'k--', label='')
+        # axes[1].plot(tsVals / tscale, PImp / (mI * nu), label='{:.2f}'.format(P / mc))
+        axes[1].plot(tvImp_Vals / tscale, vImp_Vals / nu, label='{:.2f}'.format(P / mc))
 
     axes[0].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=3, ncol=2)
     axes[0].set_title('Loschmidt Echo (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
@@ -401,13 +407,15 @@ if __name__ == "__main__":
 
     # # # # S(t) AND P_Imp EXPONENTS
 
-    # seperate = False
+    # seperate = True
+    # DynOvData_roll = False; DynOvData_rollwin = 2
+    # PimpData_roll = False; PimpData_rollwin = 2
+    # DynOvExp_roll = False; DynOvExp_rollwin = 2
+    # DynOvExp_NegMask = False
 
-    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])  # Data for stronger interactions (-1.0, -0.75, -0.5) is too noisy to get fits
-    # # aIBi_des = np.array([-10.0, -5.0, -2.0])  # Data for stronger interactions (-1.0, -0.75, -0.5) is too noisy to get fits
-    # # Another note: The fit for P_{Imp} is also difficult for anything other than very weak interactions -> this is probably because of the diverging convergence time to mI*c due to arguments in Nielsen
+    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])
+    # # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.0])
 
-    # # PVals = PVals[(PVals / mc) <= 3.0]
     # Pnorm = PVals / mc
 
     # def powerfunc(t, a, b):
@@ -415,9 +423,9 @@ if __name__ == "__main__":
 
     # # tmin = 90; tmax = 100
     # tmin = 900; tmax = 1000
+    # # tmin = 500; tmax = 600
 
     # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
-    # rollwin = 5
 
     # colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue']
     # lineList = ['solid', 'dotted', 'dashed']
@@ -446,44 +454,18 @@ if __name__ == "__main__":
     #     for indP, P in enumerate(PVals):
     #         DynOv_raw = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
     #         DynOv_ds = xr.DataArray(DynOv_raw, coords=[tfVals], dims=['t'])
+    #         Pph_ds = xr.DataArray(qds_aIBi_ts.isel(P=indP)['Pph'].values, coords=[tfVals], dims=['t'])
 
-    #         DynOv_ds = DynOv_ds.rolling(t=rollwin, center=True).mean().dropna('t')
-    #         Pph_ds = qds_aIBi_ts.isel(P=indP)['Pph'].rolling(t=rollwin, center=True).mean().dropna('t')
+    #         if DynOvData_roll:
+    #             DynOv_ds = DynOv_ds.rolling(t=DynOvData_rollwin, center=True).mean().dropna('t')
+    #         if PimpData_roll:
+    #             Pph_ds = Pph_ds.rolling(t=PimpData_rollwin, center=True).mean().dropna('t')
 
     #         DynOv_Vals = DynOv_ds.values
     #         tDynOv_Vals = DynOv_ds['t'].values
 
-    #         # vImpc_Vals = (P - Pph_ds.values) / mc - 1
     #         vImpc_Vals = (P - Pph_ds.values) / mI - nu
     #         tvImpc_Vals = Pph_ds['t'].values
-
-    #         # with warnings.catch_warnings():
-    #         #     warnings.simplefilter("error", OptimizeWarning)
-    #         #     try:
-    #         #         Sopt, Scov = curve_fit(powerfunc, tDynOv_Vals, DynOv_Vals)
-    #         #         DynOv_Exponents[indP] = Sopt[0]
-    #         #         # DynOv_Cov[indP] = Scov[0]
-    #         #         if Sopt[0] < 0:
-    #         #             DynOv_Exponents[indP] = 0
-    #         #     except OptimizeWarning:
-    #         #         DynOv_Exponents[indP] = 0
-    #         #     except RuntimeError:
-    #         #         DynOv_Exponents[indP] = 0
-
-    #         # with warnings.catch_warnings():
-    #         #     warnings.simplefilter("error", OptimizeWarning)
-    #         #     try:
-    #         #         vIopt, vIcov = curve_fit(powerfunc, tvImpc_Vals, vImpc_Vals)
-    #         #         vImp_Exponents[indP] = vIopt[0]
-    #         #         # vImp_Cov[indP] = vIcov[0]
-    #         #         if vIopt[0] < 0:
-    #         #             vImp_Exponents[indP] = 0
-    #         #         if vImpc_Vals[-1] < 0:
-    #         #             vImp_Exponents[indP] = 0
-    #         #     except OptimizeWarning:
-    #         #         vImp_Exponents[indP] = 0
-    #         #     except RuntimeError:
-    #         #         vImp_Exponents[indP] = 0
 
     #         S_slope, S_intercept, S_rvalue, S_pvalue, S_stderr = ss.linregress(np.log(tDynOv_Vals), np.log(DynOv_Vals))
     #         DynOv_Exponents_LR[indP] = -1 * S_slope
@@ -491,8 +473,6 @@ if __name__ == "__main__":
     #         DynOv_Pvalues[indP] = S_pvalue
     #         DynOv_stderr[indP] = S_stderr
     #         DynOv_tstat[indP] = S_slope / S_stderr
-    #         # print(S_rvalue, S_pvalue, S_stderr, S_slope / S_stderr)
-
     #         DynOv_logAve[indP] = np.average(np.log(DynOv_Vals))
 
     #         # if (-1 * S_slope) < 0:
@@ -506,46 +486,47 @@ if __name__ == "__main__":
     #             if (-1 * vI_slope) < 0:
     #                 vImp_Exponents_LR[indP] = 0
 
-    #     print(aIBi)
-    #     print(DynOv_Exponents_LR)
-    #     # print('\n')
-    #     # print(DynOv_Pvalues)
-    #     # print('\n')
-    #     # print(DynOv_Rvalues**2)
-    #     # print('\n')
-    #     # print(DynOv_stderr)
-    #     # print('\n')
-    #     # print(DynOv_tstat)
-    #     # print('\n')
-    #     # print(DynOv_stderr / DynOv_logAve)
+    #     DynOvExponents_da = xr.DataArray(DynOv_Exponents_LR, coords=[PVals], dims=['P'])
+    #     if DynOvExp_roll:
+    #         DynOvExponents_da = DynOvExponents_da.rolling(P=DynOvExp_rollwin, center=True).mean().dropna('P')
+    #     if DynOvExp_NegMask:
+    #         ExpMask = DynOvExponents_da.values < 0
+    #         DynOvExponents_da[ExpMask] = 0
 
+    #     # ExpMask = np.abs(DynOvExponents_da.values) < 5e-2
+    #     DynOv_Exponents = DynOvExponents_da.values
+    #     Pnorm_dynov = DynOvExponents_da['P'].values / mc
+
+    #     print(aIBi); print(DynOv_Exponents)
+    #     print('\n'); print(DynOv_Pvalues); print('\n'); print(DynOv_Rvalues**2); print('\n'); print(DynOv_stderr); print('\n'); print(DynOv_tstat); print('\n'); print(DynOv_stderr / DynOv_logAve)
     #     # badFitmask = np.abs(DynOv_stderr / DynOv_logAve) > 1e-3
     #     # DynOv_Exponents_LR[badFitmask] = 0
+    #     if np.isclose(aIBi, -2.0):
+    #         print(vImp_Exponents_LR)
 
     #     if seperate:
-    #         ax.plot(Pnorm, DynOv_Exponents_LR, color=colorList[inda], linestyle='solid', marker='x', label='{:.1f}'.format(aIBi))
-    #         ax1.plot(Pnorm, vImp_Exponents, color=colorList[inda], linestyle='dotted', marker='+', markerfacecolor='none', label='{:.2f}'.format(aIBi))
+    #         ax.plot(Pnorm_dynov, DynOv_Exponents, color=colorList[inda], linestyle='solid', marker='x', label='{:.2f}'.format(aIBi))
+    #         ax1.plot(Pnorm, vImp_Exponents_LR, color=colorList[inda], linestyle='dotted', marker='+', markerfacecolor='none', label='{:.2f}'.format(aIBi))
     #     else:
-    #         # ax.plot(Pnorm, DynOv_Exponents, color=colorList[inda], linestyle='solid', marker='x', label='{:.1f}'.format(aIBi))
-    #         # ax.plot(Pnorm, vImp_Exponents, color=colorList[inda], linestyle='dotted', marker='+', markerfacecolor='none', label='{:.1f}'.format(aIBi))
-
-    #         ax.plot(Pnorm, DynOv_Exponents_LR, color=colorList[inda], linestyle='solid', marker='x', label='{:.1f}'.format(aIBi))
+    #         ax.plot(Pnorm_dynov, DynOv_Exponents, color=colorList[inda], linestyle='solid', marker='x', label='{:.2f}'.format(aIBi))
     #         ax.plot(Pnorm, vImp_Exponents_LR, color=colorList[inda], linestyle='dotted', marker='+', markerfacecolor='none', label='{:.2f}'.format(aIBi))
 
     # if seperate:
-    #     ax.set_xlabel(r'$\frac{P}{m_{I}c_{BEC}}$')
+    #     ax.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
     #     ax.set_ylabel(r'$\gamma$' + ' for ' + r'$|S(t)|\propto t^{-\gamma}$')
     #     ax.set_title('Long Time Power-Law Behavior of Loschmidt Echo')
     #     ax.legend(title=r'$a_{IB}^{-1}$', loc=2)
-    #     ax.set_ylim([-0.1, 0.8])
+    #     # ax.set_xlim([0, 10.0])
+    #     ax.set_ylim([-.01, 1.2])
+    #     # ax.set_xlim([0, 5.0]); ax.set_ylim([-.01, 0.1])
 
-    #     ax1.set_xlabel(r'$\frac{P}{m_{I}c_{BEC}}$')
+    #     ax1.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
     #     ax1.set_ylabel(r'$\gamma$' + ' for ' + r'$|S(t)|\propto t^{-\gamma}$')
     #     ax1.set_title('Long Time Power-Law Behavior of Average Impurity Momentum')
     #     ax1.legend(title=r'$a_{IB}^{-1}$', loc=2)
+    #     # ax1.set_xlim([0, 10.0])
 
     # else:
-    #     # ax.set_xlabel(r'$\frac{P}{m_{I}c_{BEC}}$')
     #     ax.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
     #     ax.set_ylabel(r'$\gamma$' + ' for ' + r'$|S(t)|\propto t^{-\gamma}$')
     #     ax.set_title('Long Time Power-Law Behavior of Observables')
@@ -559,10 +540,39 @@ if __name__ == "__main__":
     #     plt.gca().add_artist(alegend)
     #     mlegend = ax.legend(handles=mlegend_elements, loc=(0.12, 0.75), title='Observable')
     #     plt.gca().add_artist(mlegend)
-    #     ax.set_xlim([0, 9])
+    #     ax.set_xlim([0, 10.0])
     #     ax.set_ylim([0, 1.2])
 
     # plt.show()
+
+    # # # OLD EXPONENT FITTING CODE (EXCEPTIONS PART)
+
+    # with warnings.catch_warnings():
+    #     warnings.simplefilter("error", OptimizeWarning)
+    #     try:
+    #         Sopt, Scov = curve_fit(powerfunc, tDynOv_Vals, DynOv_Vals)
+    #         DynOv_Exponents[indP] = Sopt[0]
+    #         # DynOv_Cov[indP] = Scov[0]
+    #         if Sopt[0] < 0:
+    #             DynOv_Exponents[indP] = 0
+    #     except OptimizeWarning:
+    #         DynOv_Exponents[indP] = 0
+    #     except RuntimeError:
+    #         DynOv_Exponents[indP] = 0
+    # with warnings.catch_warnings():
+    #     warnings.simplefilter("error", OptimizeWarning)
+    #     try:
+    #         vIopt, vIcov = curve_fit(powerfunc, tvImpc_Vals, vImpc_Vals)
+    #         vImp_Exponents[indP] = vIopt[0]
+    #         # vImp_Cov[indP] = vIcov[0]
+    #         if vIopt[0] < 0:
+    #             vImp_Exponents[indP] = 0
+    #         if vImpc_Vals[-1] < 0:
+    #             vImp_Exponents[indP] = 0
+    #     except OptimizeWarning:
+    #         vImp_Exponents[indP] = 0
+    #     except RuntimeError:
+    #         vImp_Exponents[indP] = 0
 
     # # # IR Cuts S(t) (SPHERICAL)
 
@@ -735,16 +745,17 @@ if __name__ == "__main__":
     # def powerfunc(t, a, b):
     #     return b * t**(-1 * a)
 
-    # tmin = 90
-    # tmax = 100
+    # # tmin = 90; tmax = 100
+    # tmin = 900; tmax = 1000
     # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
     # rollwin = 1
 
-    # colorList = ['red', '#7e1e9c', 'green', 'orange', 'blue']
+    # colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue']
     # lineList = ['solid', 'dotted', 'dashed', '-.']
-    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.25])
+    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])
     # # aIBi_des = np.array([aIBi_des[2]])
-    # massRat_des = np.array([0.5, 1.0, 2.0])
+    # # massRat_des = np.array([0.5, 1.0, 2.0])
+    # massRat_des = np.array([1.0])
     # mdatapaths = []
 
     # for mR in massRat_des:
@@ -836,7 +847,7 @@ if __name__ == "__main__":
     # reflegend = ax1.legend(handles=[Line2D([0], [0], color='black', linestyle='solid', label=r'$<v_{I}(t_{\infty})>=c_{BEC}$')], loc=(0.65, 0.05))
     # plt.gca().add_artist(reflegend)
     # ax1.set_ylim([0, 1.2])
-    # ax1.set_xlim([0, 7])
+    # # ax1.set_xlim([0, 7])
 
     # # Pcrit_norm_gs = np.array([1.086, 1.146, 1.446])
     # # intersec_points = np.array([1.0, 0.925, 0.719])
