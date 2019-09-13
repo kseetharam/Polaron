@@ -56,7 +56,7 @@ if __name__ == "__main__":
     linDimMajor = 0.99 * (k_max * np.sqrt(2) / 2)
     linDimMinor = linDimMajor
 
-    massRat = 1
+    massRat = 1.0
     IRrat = 1
 
     # git test
@@ -526,8 +526,8 @@ if __name__ == "__main__":
     # PimpData_roll = False; PimpData_rollwin = 2
     # DynOvExp_roll = False; DynOvExp_rollwin = 2
     # DynOvExp_NegMask = False
-    # DynOvExp_Cut = True; cut = 5e-4
-    # consecDetection = True; consecSamples = 10
+    # DynOvExp_Cut = False; cut = 1e-4
+    # consecDetection = False; consecSamples = 10
 
     # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])
     # # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.0])
@@ -880,12 +880,12 @@ if __name__ == "__main__":
     # rollwin = 1
 
     # colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue']
-    # lineList = ['solid', 'dotted', 'dashed', '-.']
+    # lineList = ['solid', 'dashed', 'dotted', '-.']
     # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])
     # # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.0])
     # # aIBi_des = np.array([aIBi_des[2]])
-    # # massRat_des = np.array([0.5, 1.0, 2.0])
-    # massRat_des = np.array([1.0])
+    # massRat_des = np.array([0.5, 1.0, 2.0])
+    # # massRat_des = np.array([1.0])
     # mdatapaths = []
 
     # for mR in massRat_des:
@@ -979,7 +979,7 @@ if __name__ == "__main__":
     # reflegend = ax1.legend(handles=[Line2D([0], [0], color='black', linestyle='solid', label=r'$<v_{I}(t_{\infty})>=c_{BEC}$')], loc=(0.65, 0.05))
     # plt.gca().add_artist(reflegend)
     # ax1.set_ylim([0, 1.2])
-    # # ax1.set_xlim([0, 7])
+    # ax1.set_xlim([0, 7])
 
     # # Pcrit_norm_gs = np.array([1.086, 1.146, 1.446])
     # # intersec_points = np.array([1.0, 0.925, 0.719])
@@ -1000,14 +1000,15 @@ if __name__ == "__main__":
     # # tmin = 250; tmax = 300
     # tmin = 900; tmax = 1000
     # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
-    # # rollwin = 1
+    # rollwin = 1
 
     # colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue']
-    # lineList = ['solid', 'dotted', 'dashed', '-.']
+    # lineList = ['solid', 'dashed', 'dotted', '-.']
     # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])
     # # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.0])
     # # massRat_des = np.array([0.5, 1.0, 2])
-    # massRat_des = np.array([1.0])
+    # massRat_des = np.array([1.0, 0.5])
+    # # massRat_des = np.array([1.0])
 
     # mdatapaths = []
 
@@ -1022,6 +1023,7 @@ if __name__ == "__main__":
     # fig1, ax1 = plt.subplots()
     # # fig2, ax2 = plt.subplots()
     # # Pcrit_Vals = np.zeros(aIBi_des.size)
+    # Pcrit_da = xr.DataArray(np.full((massRat_des.size, aIBi_des.size), np.nan, dtype=float), coords=[massRat_des, aIBi_des], dims=['mRatio', 'aIBi'])
     # for inda, aIBi in enumerate(aIBi_des):
     #     for indm, mRat in enumerate(massRat_des):
     #         mds = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
@@ -1068,6 +1070,7 @@ if __name__ == "__main__":
     #                     crit_ind = indE
     #                     break
     #             DynOv_Exponents[0:crit_ind] = 0
+    #         Pcrit_da[indm, inda] = PVals[crit_ind] / (mI * nu)
     #         DynOvf_Vals = powerfunc(1e1000, DynOv_Exponents, DynOv_Constants)
     #         ax1.plot(vI0_Vals / nu, DynOvf_Vals, linestyle=lineList[indm], color=colorList[inda])
     #     # Pcrit_Vals[inda] = PVals[crit_ind]

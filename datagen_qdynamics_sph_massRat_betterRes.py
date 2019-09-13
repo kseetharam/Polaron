@@ -158,12 +158,16 @@ if __name__ == "__main__":
                 # if os.path.isdir(innerdatapath) is False:
                 #     os.mkdir(innerdatapath)
 
-    # missInds = [50, 51, 52, 53, 54, 55, 56]
-    # missList = []
-    # for mind in missInds:
-    #     missList.append(Params_List[mind])
-    #     # print(Params_List[mind])
-    # Params_List = missList
+    missInds = ([61, 62, 63, 64, 65, 66, 136, 137, 138, 139, 140, 141, 142, 143, 144, 183, 188, 189, 190, 203, 204, 205, 219, 220, 221, 222, 223, 299, 300, 301, 302, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 363, 365, 366, 373, 375, 376, 377, 378, 379, 380, 381,
+                 23, 24, 25, 26, 27, 28, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135])
+    missList = []
+    for mind in missInds:
+        missList.append(Params_List[mind])
+        [sParams, cParams, innerdatapath] = Params_List[mind]
+        [mI, mB, n0, gBB] = sParams
+        [P, aIBi] = cParams
+        print(mI, aIBi, P / (mI * nu))
+    Params_List = missList
 
     print(len(Params_List))
 
