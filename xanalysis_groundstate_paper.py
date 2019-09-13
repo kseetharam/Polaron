@@ -77,6 +77,8 @@ if __name__ == "__main__":
     elif toggleDict['IRcuts'] == 'false':
         innerdatapath = innerdatapath
 
+    print(innerdatapath)
+
     # # # Concatenate Individual Datasets (aIBi specific)
 
     # aIBi_List = [-15.0, -12.5, -10.0, -9.0, -8.0, -7.0, -6.0, -5.0, -3.5, -2.0, -1.0, -0.75, -0.5, -0.1]
