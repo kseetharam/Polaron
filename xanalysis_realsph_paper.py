@@ -1091,78 +1091,80 @@ if __name__ == "__main__":
     # ax1.set_xlim([0, np.max(vI0_Vals / nu)])
     ax1.set_xlim([0, 7])
 
-    # # Plot Quench Dynamics Phase Diagram
+    # Plot Quench Dynamics Phase Diagram
 
-    # PcritInterp = False
-    # plotGS = True
+    PcritInterp = False
+    plotGS = True
 
-    # Pcrit_interpVals_mRat1 = 0
-    # fig2, ax2 = plt.subplots()
-    # for indm, massRat in enumerate(massRat_des):
-    #     if PcritInterp is True:
-    #         Pcrit_norm = Pcrit_da.sel(mRatio=massRat).values
-    #         Pcrit_tck = interpolate.splrep(aIBi_des, Pcrit_norm, s=0, k=1)
-    #         aIBi_interpVals = np.linspace(np.min(aIBi_des), np.max(aIBi_des), 2 * aIBi_des.size)
-    #         Pcrit_interpVals = 1 * interpolate.splev(aIBi_interpVals, Pcrit_tck, der=0)
-    #     else:
-    #         aIBi_interpVals = aIBi_des
-    #         Pcrit_interpVals = Pcrit_da.sel(mRatio=massRat).values
+    Pcrit_interpVals_mRat1 = 0
+    fig2, ax2 = plt.subplots()
+    for indm, massRat in enumerate(massRat_des):
+        if PcritInterp is True:
+            Pcrit_norm = Pcrit_da.sel(mRatio=massRat).values
+            Pcrit_tck = interpolate.splrep(aIBi_des, Pcrit_norm, s=0, k=1)
+            aIBi_interpVals = np.linspace(np.min(aIBi_des), np.max(aIBi_des), 2 * aIBi_des.size)
+            Pcrit_interpVals = 1 * interpolate.splev(aIBi_interpVals, Pcrit_tck, der=0)
+        else:
+            aIBi_interpVals = aIBi_des
+            Pcrit_interpVals = Pcrit_da.sel(mRatio=massRat).values
 
-    #     if massRat == 1.0:
-    #         Pcrit_interpVals_mRat1 = Pcrit_interpVals
+        if massRat == 1.0:
+            Pcrit_interpVals_mRat1 = Pcrit_interpVals
 
-    #     ax2.plot(aIBi_interpVals, Pcrit_interpVals, color='k', linestyle=lineList[indm], label='{0}'.format(massRat))
-    #     ax2.plot(aIBi_des, Pcrit_da.sel(mRatio=massRat).values, 'kx')
+        # ax2.plot(aIBi_interpVals, Pcrit_interpVals, color='k', linestyle=lineList[indm], label='{0}'.format(massRat))
+        ax2.plot(aIBi_interpVals, Pcrit_interpVals, color='k', linestyle=lineList[indm], label='NESS')
+        ax2.plot(aIBi_des, Pcrit_da.sel(mRatio=massRat).values, 'kx')
 
-    # xmin = np.min(aIBi_interpVals)
-    # xmax = 1.01 * np.max(aIBi_interpVals)
-    # ymin = 0
-    # ymax = 1.01 * np.max(Pcrit_da.values)
-    # font = {'family': 'serif', 'color': 'black', 'size': 14}
-    # sfont = {'family': 'serif', 'color': 'black', 'size': 13}
+    xmin = np.min(aIBi_interpVals)
+    xmax = 1.01 * np.max(aIBi_interpVals)
+    ymin = 0
+    ymax = 1.01 * np.max(Pcrit_da.values)
+    font = {'family': 'serif', 'color': 'black', 'size': 14}
+    sfont = {'family': 'serif', 'color': 'black', 'size': 13}
 
-    # if massRat_des.size > 1:
-    #     ax2.legend(title=r'$\frac{m_{I}}{m_{B}}$', loc=2)
-    # ax2.set_xlabel(r'$a_{IB}^{-1}$')
-    # ax2.set_ylabel(r'$\frac{P}{m_{I}c_{BEC}}$')
-    # ax2.set_title('Quench Dynamics Phase Diagram')
-    # ax2.text(-3.0, ymin + 0.175 * (ymax - ymin), 'Polaron', fontdict=font)
-    # ax2.text(-2.9, ymin + 0.1 * (ymax - ymin), '(' + r'$S(t_{\infty})>0$' + ')', fontdict=sfont)
-    # ax2.text(-6.5, ymin + 0.6 * (ymax - ymin), 'Cherenkov', fontdict=font)
-    # ax2.text(-6.35, ymin + 0.525 * (ymax - ymin), '(' + r'$S(t_{\infty})=0$' + ')', fontdict=sfont)
-    # ax2.fill_between(aIBi_interpVals, Pcrit_interpVals_mRat1, ymax, facecolor='b', alpha=0.25)
-    # ax2.fill_between(aIBi_interpVals, ymin, Pcrit_interpVals_mRat1, facecolor='g', alpha=0.25)
-    # ax2.set_xlim([xmin, xmax])
-    # ax2.set_ylim([ymin, ymax])
+    if massRat_des.size > 1:
+        ax2.legend(title=r'$\frac{m_{I}}{m_{B}}$', loc=2)
+    ax2.set_xlabel(r'$a_{IB}^{-1}$')
+    ax2.set_ylabel(r'$\frac{P}{m_{I}c_{BEC}}$')
+    ax2.set_title('Quench Dynamics Phase Diagram')
+    ax2.text(-3.0, ymin + 0.175 * (ymax - ymin), 'Polaron', fontdict=font)
+    ax2.text(-2.9, ymin + 0.1 * (ymax - ymin), '(' + r'$S(t_{\infty})>0$' + ')', fontdict=sfont)
+    ax2.text(-6.5, ymin + 0.6 * (ymax - ymin), 'Cherenkov', fontdict=font)
+    ax2.text(-6.35, ymin + 0.525 * (ymax - ymin), '(' + r'$S(t_{\infty})=0$' + ')', fontdict=sfont)
+    ax2.fill_between(aIBi_interpVals, Pcrit_interpVals_mRat1, ymax, facecolor='b', alpha=0.25)
+    ax2.fill_between(aIBi_interpVals, ymin, Pcrit_interpVals_mRat1, facecolor='g', alpha=0.25)
+    ax2.set_xlim([xmin, xmax])
+    ax2.set_ylim([ymin, ymax])
 
-    # if plotGS is True:
-    #     gs_datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.44E+06/massRatio=1.0/imdyn_spherical'
-    #     aIBi_Vals = np.array([-10.0, -9.0, -8.0, -7.0, -5.0, -3.5, -2.0, -1.0])  # used by many plots (spherical)
-    #     Pcrit = np.zeros(aIBi_Vals.size)
-    #     for aind, aIBi in enumerate(aIBi_Vals):
-    #         qds_aIBi = xr.open_dataset(gs_datapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    #         PVals = qds_aIBi['P'].values
-    #         CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
-    #         kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    if plotGS is True:
+        gs_datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.44E+06/massRatio=1.0/imdyn_spherical'
+        aIBi_Vals = np.array([-10.0, -9.0, -8.0, -7.0, -5.0, -3.5, -2.0, -1.0])  # used by many plots (spherical)
+        Pcrit = np.zeros(aIBi_Vals.size)
+        for aind, aIBi in enumerate(aIBi_Vals):
+            qds_aIBi = xr.open_dataset(gs_datapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+            PVals = qds_aIBi['P'].values
+            CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+            kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
 
-    #         Energy_Vals_inf = np.zeros(PVals.size)
-    #         for Pind, P in enumerate(PVals):
-    #             CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
-    #             Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+            Energy_Vals_inf = np.zeros(PVals.size)
+            for Pind, P in enumerate(PVals):
+                CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
+                Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
 
-    #         Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
-    #         Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 2 * PVals.size)
-    #         Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
-    #         Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
-    #         Pcrit[aind] = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 0]
+            Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+            Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 2 * PVals.size)
+            Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+            Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+            Pcrit[aind] = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 0]
 
-    #     Pcrit_norm = Pcrit / (mI * nu)
-    #     Pcrit_tck = interpolate.splrep(aIBi_Vals, Pcrit_norm, s=0, k=3)
-    #     aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
-    #     Pcrit_interpVals = 1 * interpolate.splev(aIBi_interpVals, Pcrit_tck, der=0)
-    #     ax2.plot(aIBi_interpVals, Pcrit_interpVals, color='k', linestyle='dotted', label='Ground State')
-    #     ax2.plot(aIBi_Vals, Pcrit_norm, 'k+')
-    #     ax2.legend(title=r'$\frac{m_{I}}{m_{B}}$', loc=2)
+        Pcrit_norm = Pcrit / (mI * nu)
+        Pcrit_tck = interpolate.splrep(aIBi_Vals, Pcrit_norm, s=0, k=3)
+        aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
+        Pcrit_interpVals = 1 * interpolate.splev(aIBi_interpVals, Pcrit_tck, der=0)
+        ax2.plot(aIBi_interpVals, Pcrit_interpVals, color='k', linestyle='dotted', label='Ground State')
+        ax2.plot(aIBi_Vals, Pcrit_norm, 'k+')
+        # ax2.legend(title=r'$\frac{m_{I}}{m_{B}}$', loc=2)
+        ax2.legend(loc=2)
 
     plt.show()
 
