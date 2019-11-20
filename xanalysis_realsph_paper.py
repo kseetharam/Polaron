@@ -240,7 +240,7 @@ if __name__ == "__main__":
     tlin = 2 * np.pi / (nu * kVals[kind])
     tlin_norm = tlin / tscale
     print(klin, tlin_norm)
-    print(900/tscale,1000/tscale)
+    print(900 / tscale, 1000 / tscale)
 
     print(kVals[-1], kVals[1] - kVals[0])
     print(qds.attrs['k_mag_cutoff'] * xi)
@@ -996,10 +996,8 @@ if __name__ == "__main__":
     def powerfunc(t, a, b):
         return b * t**(-1 * a)
 
-    # tmin = 90; tmax = 100
-    # tmin = 250; tmax = 300
-    # tmin = 500; tmax = 600
-    tmin = 900; tmax = 1000
+    tmin = 90; tmax = 100
+    # tmin = 900; tmax = 1000
     tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
     rollwin = 1
 
@@ -1007,9 +1005,8 @@ if __name__ == "__main__":
     lineList = ['solid', 'dashed', 'dotted', '-.']
     aIBi_des = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])
     # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.0])
-    # massRat_des = np.array([0.5, 1.0, 2])
-    # massRat_des = np.array([1.0, 0.5])
-    massRat_des = np.array([1.0])
+    massRat_des = np.array([0.5, 1.0, 2])
+    # massRat_des = np.array([1.0])
 
     mdatapaths = []
 

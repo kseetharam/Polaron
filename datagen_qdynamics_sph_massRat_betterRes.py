@@ -59,9 +59,9 @@ if __name__ == "__main__":
     kgrid.initArray_premade('th', thetaArray)
 
     # for realdyn evolution
-    tMax = 1000
-    # dt = 0.2
-    dt = 1.0
+    # tMax = 1000; dt = 1.0
+    tMax = 100; dt = 0.2
+
     CoarseGrainRate = 1000000
 
     tgrid = np.arange(0, tMax + dt, dt)
@@ -109,13 +109,14 @@ if __name__ == "__main__":
     Params_List = []
     # mI_Vals = np.array([0.75])
     # mI_Vals = np.array([0.5, 1.0, 2, 5.0])
-    # mI_Vals = np.array([0.5, 1.0, 2])
+    mI_Vals = np.array([0.5, 1.0, 2])
     # mI_Vals = np.array([1.0])
-    mI_Vals = np.array([0.5, 2])
-    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])
+    # mI_Vals = np.array([0.5, 2])
+    # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])
+    aIBi_Vals = np.array([-3.5, -2.5, -1.75])
     # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0])
-    # P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.4, 10, endpoint=False), np.linspace(1.4, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 10, endpoint=False), np.linspace(5.0, 9.0, 20)))
-    P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.4, 10, endpoint=False), np.linspace(1.4, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 10, endpoint=False), np.linspace(5.0, 9.0, 20, endpoint=False), np.linspace(9.0, 18.0, 20)))
+    P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.4, 10, endpoint=False), np.linspace(1.4, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 10, endpoint=False), np.linspace(5.0, 9.0, 20)))
+    # P_Vals_norm = np.concatenate((np.linspace(0.1, 0.8, 5, endpoint=False), np.linspace(0.8, 1.4, 10, endpoint=False), np.linspace(1.4, 3.0, 12, endpoint=False), np.linspace(3.0, 5.0, 10, endpoint=False), np.linspace(5.0, 9.0, 20, endpoint=False), np.linspace(9.0, 18.0, 20)))
     # print(P_Vals_norm)
 
     for mI in mI_Vals:
@@ -158,16 +159,16 @@ if __name__ == "__main__":
                 # if os.path.isdir(innerdatapath) is False:
                 #     os.mkdir(innerdatapath)
 
-    missInds = ([61, 62, 63, 64, 65, 66, 136, 137, 138, 139, 140, 141, 142, 143, 144, 183, 188, 189, 190, 203, 204, 205, 219, 220, 221, 222, 223, 299, 300, 301, 302, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 363, 365, 366, 373, 375, 376, 377, 378, 379, 380, 381,
-                 23, 24, 25, 26, 27, 28, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135])
-    missList = []
-    for mind in missInds:
-        missList.append(Params_List[mind])
-        [sParams, cParams, innerdatapath] = Params_List[mind]
-        [mI, mB, n0, gBB] = sParams
-        [P, aIBi] = cParams
-        print(mI, aIBi, P / (mI * nu))
-    Params_List = missList
+    # missInds = ([61, 62, 63, 64, 65, 66, 136, 137, 138, 139, 140, 141, 142, 143, 144, 183, 188, 189, 190, 203, 204, 205, 219, 220, 221, 222, 223, 299, 300, 301, 302, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 363, 365, 366, 373, 375, 376, 377, 378, 379, 380, 381,
+    #              23, 24, 25, 26, 27, 28, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135])
+    # missList = []
+    # for mind in missInds:
+    #     missList.append(Params_List[mind])
+    #     [sParams, cParams, innerdatapath] = Params_List[mind]
+    #     [mI, mB, n0, gBB] = sParams
+    #     [P, aIBi] = cParams
+    #     print(mI, aIBi, P / (mI * nu))
+    # Params_List = missList
 
     print(len(Params_List))
 
