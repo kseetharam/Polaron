@@ -14,8 +14,8 @@ if __name__ == "__main__":
     (Lx, Ly, Lz) = (21, 21, 21)
     (dx, dy, dz) = (0.375, 0.375, 0.375)
 
-    # (Lx, Ly, Lz) = (21, 21, 21)
-    # (dx, dy, dz) = (0.25, 0.25, 0.25)
+    # (Lx, Ly, Lz) = (20, 20, 20)
+    # (dx, dy, dz) = (0.2, 0.2, 0.2)
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
     NGridPoints_desired = (1 + 2 * Lx / dx) * (1 + 2 * Lz / dz)
@@ -49,10 +49,15 @@ if __name__ == "__main__":
 
     # Basic parameters
 
-    mI = 1
+    # mI = 1
+    # mB = 1
+    # n0 = 1
+    # gBB = (4 * np.pi / mB) * 0.05
+
+    mI = 1.7381470204436713
     mB = 1
     n0 = 1
-    gBB = (4 * np.pi / mB) * 0.05
+    gBB = (4 * np.pi / mB) * 0.011
 
     # Interpolation
 
