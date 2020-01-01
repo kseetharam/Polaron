@@ -32,6 +32,7 @@ if __name__ == "__main__":
     # plt.rcParams['animation.ffmpeg_path'] = '/usr/bin/ffmpeg'
     # Writer = animation.writers['ffmpeg']
     # mpegWriter = Writer(fps=20, metadata=dict(artist='Me'), bitrate=1800)
+    matplotlib.rcParams.update({'font.size': 16})
 
     higherCutoff = False
     cutoffRat = 1.0
@@ -93,123 +94,7 @@ if __name__ == "__main__":
     else:
         animpath = animpath + '/rdyn_twophonon'
 
-    # IRrat_Vals = np.array([2, 5, 10, 100, 4e3])
-    # qdatapath_Dict = {}
-    # if toggleDict['Coupling'] == 'frohlich':
-    #     qdatapath_Dict[1.0] = innerdatapath
-    # elif toggleDict['Coupling'] == 'twophonon':
-    #     qdatapath_Dict[1.0] = innerdatapath + '_IRcuts' + '/IRratio_{:.1E}'.format(1)
-
-    # for IRrat_val in IRrat_Vals:
-    #     if toggleDict['Coupling'] == 'twophonon':
-    #         qdatapath_Dict[IRrat_val] = innerdatapath + '_IRcuts' + '/IRratio_{:.1E}'.format(IRrat_val)
-    #     elif toggleDict['Coupling'] == 'frohlich':
-    #         qdatapath_Dict[IRrat_val] = innerdatapath[0:-4] + '_IRcuts' + '/IRratio_{:.1E}'.format(IRrat_val)
-
-    # qdatapath = qdatapath_Dict[IRrat]
-
-    # # # Concatenate Individual Datasets (aIBi specific)
-
-    # print(innerdatapath)
-
-    # aIBi_List = [-10.0, -5.0, -3.5, -2.5, -2.0, -1.75, -1.5, -1.25, -1.0]
-    # # aIBi_List = [-10.0, -5.0, -2.0]
-    # for aIBi in aIBi_List:
-    #     ds_list = []
-    #     P_list = []
-    #     mI_list = []
-    #     for ind, filename in enumerate(os.listdir(innerdatapath)):
-    #         if filename[0:14] == 'quench_Dataset':
-    #             continue
-    #         if filename[0:6] == 'interp':
-    #             continue
-    #         if filename[0:2] == 'mm':
-    #             continue
-    #         if filename[0] == '.':
-    #             continue
-    #         # if float(filename[-8:-3]) != aIBi and float(filename[-9:-3]) != aIBi:
-    #         #     continue
-    #         if filename[3] == '.':
-    #             a = 0
-    #         elif filename[4] == '.':
-    #             a = 1
-    #         if float(filename[13 + a:-3]) != aIBi:
-    #             continue
-    #         print(filename)
-    #         ds = xr.open_dataset(innerdatapath + '/' + filename)
-    #         ds_list.append(ds)
-    #         P_list.append(ds.attrs['P'])
-    #         mI_list.append(ds.attrs['mI'])
-
-    #     s = sorted(zip(P_list, ds_list))
-    #     g = itertools.groupby(s, key=lambda x: x[0])
-
-    #     P_keys = []
-    #     P_ds_list = []
-    #     aIBi_ds_list = []
-    #     for key, group in g:
-    #         P_temp_list, ds_temp_list = zip(*list(group))
-    #         P_keys.append(key)  # note that key = P_temp_list[0]
-    #         P_ds_list.append(ds_temp_list[0])
-
-    #     with xr.concat(P_ds_list, pd.Index(P_keys, name='P')) as ds_tot:
-    #         # ds_tot = xr.concat(P_ds_list, pd.Index(P_keys, name='P'))
-    #         del(ds_tot.attrs['P'])
-    #         del(ds_tot.attrs['nu'])
-    #         del(ds_tot.attrs['gIB'])
-    #         ds_tot.to_netcdf(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-
-    # # # Concatenate Individual Datasets (aIBi specific, IRcuts)
-
-    # IRrat_Vals = [2, 5, 10, 100, 4e3]
-    # aIBi_List = [-10.0, -5.0, -2.0]
-    # IRrootpath = innerdatapath + '_IRcuts'
-    # for IRrat in IRrat_Vals:
-    #     IRdatapath = IRrootpath + '/IRratio_{:.1E}'.format(IRrat)
-    #     for aIBi in aIBi_List:
-    #         ds_list = []; P_list = []; mI_list = []
-    #         for ind, filename in enumerate(os.listdir(IRdatapath)):
-    #             if filename[0:14] == 'quench_Dataset':
-    #                 continue
-    #             if filename[0:6] == 'interp':
-    #                 continue
-    #             if filename[0:2] == 'mm':
-    #                 continue
-    #             if float(filename[13:-3]) != aIBi:
-    #                 continue
-    #             print(filename)
-    #             ds = xr.open_dataset(IRdatapath + '/' + filename)
-    #             ds_list.append(ds)
-    #             P_list.append(ds.attrs['P'])
-    #             mI_list.append(ds.attrs['mI'])
-
-    #         s = sorted(zip(P_list, ds_list))
-    #         g = itertools.groupby(s, key=lambda x: x[0])
-
-    #         P_keys = []; P_ds_list = []; aIBi_ds_list = []
-    #         for key, group in g:
-    #             P_temp_list, ds_temp_list = zip(*list(group))
-    #             P_keys.append(key)  # note that key = P_temp_list[0]
-    #             P_ds_list.append(ds_temp_list[0])
-
-    #         with xr.concat(P_ds_list, pd.Index(P_keys, name='P')) as ds_tot:
-    #             # ds_tot = xr.concat(P_ds_list, pd.Index(P_keys, name='P'))
-    #             del(ds_tot.attrs['P']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
-    #             ds_tot.to_netcdf(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-
-    # # # Remove Data From Data sets
-
-    # outpath = datapath + '/temp'  # make sure is folder with _noCSAmp (turn on noCSAmp in toggleDict) and there is a folder called temp in the directory to place the new datafiles in
-    # print(outpath)
-
-    # for ind, filename in enumerate(os.listdir(innerdatapath)):
-    #     if filename[0:3] == 'amp':
-    #         continue
-    #     ds = xr.open_dataset(innerdatapath + '/' + filename)
-    #     dropds = ds.drop(['Real_CSAmp', 'Imag_CSAmp', 'Phase', 'tc'])
-    #     # dropds = ds.drop(['Phase', 'tc'])
-    #     dropds.to_netcdf(outpath + '/' + filename)
-    # print('Drop Done')
+    figdatapath = '/Users/kis/Dropbox/Apps/Overleaf/Quantum Cherenkov Transition in Bose Polaron Systems/figures/figdump'
 
     # # Analysis of Total Dataset
 
@@ -261,123 +146,13 @@ if __name__ == "__main__":
     print(kVals[-1], kVals[1] - kVals[0])
     print(qds.attrs['k_mag_cutoff'] * xi)
 
-    # # # # Nph CURVES
-
-    # tau = 100
-    # tsVals = tVals[tVals < tau]
-    # qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
-
-    # # print(Pnorm)
-
-    # Pnorm_des = np.array([0.1, 0.5, 0.8, 0.9, 1.0, 1.05, 1.1, 1.15, 1.2, 1.4, 1.6, 2.5, 3.0, 5.0])
-
-    # Pinds = np.zeros(Pnorm_des.size, dtype=int)
-    # for Pn_ind, Pn in enumerate(Pnorm_des):
-    #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
-
-    # fig, ax = plt.subplots()
-    # for indP in Pinds:
-    #     P = PVals[indP]
-    #     Nph = qds_aIBi_ts.isel(P=indP)['Nph'].values
-    #     ax.plot(tsVals / tscale, Nph, label='{:.2f}'.format(P / mc))
-
-    # ax.legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=2, ncol=2)
-    # ax.set_xscale('log')
-    # ax.set_title('Total Phonon Number (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    # ax.set_ylabel(r'$N_{ph}$')
-    # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-
-    # plt.show()
-
-    # # # # S(t) AND P_Imp CURVES
-
-    # tailFit = True
-    # logScale = True
-    # PimpData_roll = False; PimpData_rollwin = 2
-
-    # # tau = 100; tfCutoff = 90; tfstart = 10
-    # tau = 1000; tfCutoff = 900; tfstart = 100
-    # # tau = 600; tfCutoff = 500; tfstart = 100
-    # # tau = 5
-    # tsVals = tVals[tVals < tau]
-    # qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
-
-    # # print(Pnorm)
-
-    # # Pnorm_des = np.array([0.1, 0.8, 5.0, 10.0])
-
-    # # Pnorm_des = np.array([0.1, 0.5, 0.8, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2, 1.4, 1.6, 2.5, 3.0, 5.0, 6.0, 7.0, 9.0])
-    # Pnorm_des = np.array([0.1, 0.5, 0.9, 1.4, 3.0, 5.0, 6.0, 7.0])
-    # # Pnorm_des = np.array([0.1, 0.8, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 12.0, 14.0, 16.0, 18.0])
-    # # Pnorm_des = np.array([0.1, 0.8, 2.0, 2.5, 2.75, 3.0, 3.25, 3.5, 3.75, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0])
-
-    # # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.6, 2.3, 3.0])
-    # # Pnorm_des = np.array([0.1, 0.5, 1.0, 1.3, 1.5, 2.1, 2.5, 3.0, 4.0, 5.0])
-
-    # Pinds = np.zeros(Pnorm_des.size, dtype=int)
-    # for Pn_ind, Pn in enumerate(Pnorm_des):
-    #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
-
-    # fig, axes = plt.subplots(nrows=2, ncols=1)
-    # for indP in Pinds:
-    #     P = PVals[indP]
-    #     DynOv = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
-    #     # PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
-    #     Pph_ds = xr.DataArray(qds_aIBi_ts.isel(P=indP)['Pph'].values, coords=[tsVals], dims=['t'])
-    #     if PimpData_roll:
-    #         Pph_ds = Pph_ds.rolling(t=PimpData_rollwin, center=True).mean().dropna('t')
-    #     vImp_Vals = (P - Pph_ds.values) / mI
-    #     tvImp_Vals = Pph_ds['t'].values
-
-    #     if tailFit is True:
-    #         tfmask = tsVals > tfCutoff
-    #         tfVals = tsVals[tfmask]
-    #         tfLin = tsVals[tsVals > tfstart]
-    #         zD = np.polyfit(np.log(tfVals), np.log(DynOv[tfmask]), deg=1)
-    #         fLinD = np.exp(zD[1]) * tfLin**(zD[0])
-    #         axes[0].plot(tfLin / tscale, fLinD, 'k--', label='')
-
-    #     axes[0].plot(tsVals / tscale, DynOv, label='{:.2f}'.format(P / mc))
-    #     # axes[1].plot(tsVals / tscale, PImp / (mI * nu), label='{:.2f}'.format(P / mc))
-    #     axes[1].plot(tvImp_Vals / tscale, vImp_Vals / nu, label='{:.2f}'.format(P / mc))
-
-    # axes[0].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=2, ncol=2)
-    # axes[0].set_title('Loschmidt Echo (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    # axes[0].set_ylabel(r'$|S(t)|$')
-    # axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c_{BEC}}$]')
-
-    # # axes[1].plot(tlin_norm * np.ones(PImp.size), np.linspace(np.min(PImp), np.max(PImp), PImp.size), 'ko')
-    # axes[1].plot(tsVals / tscale, np.ones(tsVals.size), 'k--', label='$c_{BEC}$')
-    # axes[1].legend(title=r'$\frac{P}{m_{I}c_{BEC}}$', loc=2, ncol=2)
-    # # axes[1].set_xscale('log')
-    # # axes[1].set_yscale('log')
-    # # axes[1].set_xlim([1e-1, 1e2])
-    # axes[1].set_title('Average Impurity Speed (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    # axes[1].set_ylabel(r'$\frac{<P_{I}>}{m_{I}c_{BEC}}$')
-    # axes[1].set_xlabel(r'$t$ [$\frac{\xi}{c_{BEC}}$]')
-
-    # if logScale is True:
-    #     axes[0].plot(tlin_norm * np.ones(DynOv.size), np.linspace(np.min(DynOv), np.max(DynOv), DynOv.size), 'k-')
-    #     axes[0].set_xscale('log')
-    #     axes[0].set_yscale('log')
-    #     # axes[0].set_xlim([1e-1, 1e2])
-    #     # axes[1].set_xlim([-1, tau / tscale])
-    #     axes[1].set_xscale('log')
-    #     axes[1].set_yscale('log')
-
-    # fig.tight_layout()
-    # plt.show()
-
-    # # # # S(t) AND P_Imp CURVES (WEAK AND STRONG INTERACTIONS)
+    # # # # FIG 4 - S(t) AND v_Imp CURVES (WEAK AND STRONG INTERACTIONS)
 
     # tailFit = True
     # logScale = True
     # PimpData_roll = False; PimpData_rollwin = 2
 
     # tau = 100; tfCutoff = 90; tfstart = 10
-    # # tau = 1000; tfCutoff = 900; tfstart = 100
-    # # tau = 600; tfCutoff = 500; tfstart = 100
-    # # tau = 5
     # tsVals = tVals[tVals < tau]
 
     # aIBi_weak = -10.0
@@ -387,7 +162,6 @@ if __name__ == "__main__":
     # qds_aIBi_ts_w = qds_w.sel(t=tsVals)
     # qds_aIBi_ts_s = qds_s.sel(t=tsVals)
 
-    # # Pnorm_des = np.array([0.1, 0.5, 0.9, 1.4, 3.0, 5.0, 6.0, 7.0])
     # Pnorm_des = np.array([0.1, 0.5, 0.9, 1.4, 2.2, 3.0, 5.0])
 
     # Pinds = np.zeros(Pnorm_des.size, dtype=int)
@@ -433,16 +207,12 @@ if __name__ == "__main__":
     #     axes[0, 1].plot(tsVals / tscale, DynOv_s, label='{:.2f}'.format(P / mc))
     #     axes[1, 1].plot(tvImp_Vals_s / tscale, vImp_Vals_s / nu, label='{:.2f}'.format(P / mc))
 
-    # # axes[0, 0].legend(title=r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$', loc=2, ncol=2)
-    # axes[0, 0].set_title('Loschmidt Echo (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi_weak))
-    # axes[0, 0].set_ylabel(r'$|S(t)|$')
-    # axes[0, 0].set_xlabel(r'$t$ [$\frac{\xi}{c_{BEC}}$]')
+    # axes[0, 0].set_ylabel(r'$|S(t)|$', fontsize=27)
+    # axes[0, 0].set_xlabel(r'$t$ [$\xi / c$]', fontsize=27)
 
-    # axes[1, 0].plot(tsVals / tscale, np.ones(tsVals.size), 'k--', label='$c_{BEC}$')
-    # # axes[1, 0].legend(title=r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$', loc=2, ncol=2)
-    # axes[1, 0].set_title('Average Impurity Speed (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi_weak))
-    # axes[1, 0].set_ylabel(r'$\frac{<v_{I}>}{c_{BEC}}$')
-    # axes[1, 0].set_xlabel(r'$t$ [$\frac{\xi}{c_{BEC}}$]')
+    # axes[1, 0].plot(tsVals / tscale, np.ones(tsVals.size), 'k--', label='$c$')
+    # axes[1, 0].set_ylabel(r'$\langle v_{I}\rangle / c$', fontsize=27)
+    # axes[1, 0].set_xlabel(r'$t$ [$\xi / c$]', fontsize=27)
 
     # if logScale is True:
     #     axes[0, 0].plot(tlin_norm * np.ones(DynOv_w.size), np.linspace(np.min(DynOv_w), np.max(DynOv_w), DynOv_w.size), 'k-')
@@ -451,16 +221,12 @@ if __name__ == "__main__":
     #     # axes[0, 0].set_ylim([7e-2, 1e0])
     #     # axes[1, 0].set_xscale('log'); axes[1, 0].set_yscale('log')
 
-    # # axes[0, 1].legend(title=r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$', loc=2, ncol=2)
-    # axes[0, 1].set_title('Loschmidt Echo (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi_strong))
-    # axes[0, 1].set_ylabel(r'$|S(t)|$')
-    # axes[0, 1].set_xlabel(r'$t$ [$\frac{\xi}{c_{BEC}}$]')
+    # axes[0, 1].set_ylabel(r'$|S(t)|$', fontsize=27)
+    # axes[0, 1].set_xlabel(r'$t$ [$\xi / c$]', fontsize=27)
 
-    # axes[1, 1].plot(tsVals / tscale, np.ones(tsVals.size), 'k--', label='$c_{BEC}$')
-    # # axes[1, 1].legend(title=r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$', loc=2, ncol=2)
-    # axes[1, 1].set_title('Average Impurity Speed (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi_strong))
-    # axes[1, 1].set_ylabel(r'$\frac{<v_{I}>}{c_{BEC}}$')
-    # axes[1, 1].set_xlabel(r'$t$ [$\frac{\xi}{c_{BEC}}$]')
+    # axes[1, 1].plot(tsVals / tscale, np.ones(tsVals.size), 'k--', label='$c$')
+    # axes[1, 1].set_ylabel(r'$\langle v_{I}\rangle / c$', fontsize=27)
+    # axes[1, 1].set_xlabel(r'$t$ [$\xi / c$]', fontsize=27)
 
     # if logScale is True:
     #     axes[0, 1].plot(tlin_norm * np.ones(DynOv_s.size), np.linspace(np.min(DynOv_s), np.max(DynOv_s), DynOv_s.size), 'k-')
@@ -469,334 +235,144 @@ if __name__ == "__main__":
     #     # axes[0, 1].set_ylim([7e-2, 1e0])
     #     # axes[1, 1].set_xscale('log'); axes[1, 1].set_yscale('log')
 
-    # # st = fig.suptitle(r'$\frac{\theta_{0}}{\pi}=$' + '{:.2f}, '.format(qds.attrs['th0'] / np.pi) + r'$\frac{\phi_{0}}{\pi}=$' + '{:.2f}, '.format(qds.attrs['phi0'] / np.pi) + r'$\frac{\varphi}{\pi}=$' + '{:.2f}, '.format(qds.attrs['varPhi'] / np.pi) + r'$\omega_{0}=$' + '{:.2f}, '.format(qds.attrs['w0']) + r'$\omega_{x}=$' + '{:.2f}, '.format(qds.attrs['wx']) + r'$\kappa=$' + '{:.2f}'.format(qds.attrs['kappa']))
+    # fig.text(0.115, 0.97, '(a)', fontsize=20)
+    # fig.text(0.56, 0.97, '(b)', fontsize=20)
+    # fig.text(0.115, 0.47, '(c)', fontsize=20)
+    # fig.text(0.56, 0.47, '(d)', fontsize=20)
+
     # handles, labels = axes[0, 0].get_legend_handles_labels()
-    # # handles.append(Line2D([0], [0], color='black', linestyle='dashed')); labels.append('Steady State')
-    # # st.set_y(1)
-    # fig.legend(handles, labels, title=r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$', ncol=1, loc='center right', bbox_to_anchor=(0.07, 0.5))
-    # # fig.subplots_adjust(top=0.85, wspace=0.25, hspace=0)
-    # fig.subplots_adjust(wspace=0.25, hspace=0.35)
-    # # fig.tight_layout()
-    # plt.show()
+    # fig.legend(handles, labels, title=r'$\langle v_{I}(t_{0})\rangle / c$', ncol=1, loc='center right', bbox_to_anchor=(0.09, 0.40))
+    # fig.subplots_adjust(left=0.15, bottom=0.075, top=0.925, right=0.95, wspace=0.25, hspace=0.32)
+    # fig.set_size_inches(16.9, 9)
+    # # fig.savefig(figdatapath + '/Fig4.pdf')
 
-    # # # # S(t) AND P_Imp CURVES MULTIGRID
+    # # # FIG 5 - LOSCHMIDT ECHO EXPONENTS + FINAL LOSCHMIDT ECHO + FINAL IMPURITY VELOCITY
 
-    # massRat = 1.0
-    # aIBi = -2.0
+    DynOvData_roll = False
+    DynOvData_rollwin = 2
+    PimpData_roll = False
+    PimpData_rollwin = 2
+    DynOvExp_roll = False
+    DynOvExp_rollwin = 2
+    DynOvExp_NegMask = False
+    DynOvExp_Cut = False
+    cut = 1e-4
+    consecDetection = False
+    consecSamples = 10
 
-    # Pnorm_des = np.array([0.1, 0.8, 1.2, 2.3, 2.5, 3.0, 5.0])
-    # Pinds = np.zeros(Pnorm_des.size, dtype=int)
-    # for Pn_ind, Pn in enumerate(Pnorm_des):
-    #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
+    aIBi_des = np.array([-10.0, -5.0, -3.5, -2.5, -2.0, -1.75])
 
-    # dp1 = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08/massRatio={:.1f}/redyn_spherical'.format(massRat)
-    # dp2 = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08_cutoffRat_1.50/massRatio={:.1f}/redyn_spherical'.format(massRat)
-    # dp3 = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08_resRat_0.50/massRatio={:.1f}/redyn_spherical'.format(massRat)
+    Pnorm = PVals / mc
 
-    # dpList = [dp1, dp2, dp3]
-    # qdsList = []
-    # for dp in dpList:
-    #     qdsList.append(xr.open_dataset(dp + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi)))
+    tmin = 90; tmax = 100
 
-    # lineList = ['solid', 'dotted', 'dashed']
-    # fig, ax = plt.subplots()
+    tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
 
-    # alegend_elements = []
-    # for ind_ds, ds in enumerate(qdsList):
-    #     n0 = ds.attrs['n0']
-    #     gBB = ds.attrs['gBB']
-    #     mI = ds.attrs['mI']
-    #     mB = ds.attrs['mB']
-    #     nu = np.sqrt(n0 * gBB / mB)
+    colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue']
+    lineList = ['solid', 'dotted', 'dashed']
 
-    #     tVals = qds.coords['t'].values
-    #     tau = 100
-    #     tsVals = tVals[tVals < tau]
-    #     qds_aIBi_ts = ds.sel(t=tsVals)
+    fig, axes = plt.subplots(nrows=3, ncols=1)
+    for inda, aIBi in enumerate(aIBi_des):
+        qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+        qds_aIBi_ts = qds_aIBi.sel(t=tfVals)
+        PVals = qds_aIBi['P'].values
+        Pnorm = PVals / mc
+        DynOv_Exponents = np.zeros(PVals.size)
+        DynOv_Cov = np.full(PVals.size, np.nan)
+        vImp_Exponents = np.zeros(PVals.size)
+        vImp_Cov = np.full(PVals.size, np.nan)
 
-    #     for indP in Pinds:
-    #         P = PVals[indP]
-    #         DynOv = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
-    #         PImp = P - qds_aIBi_ts.isel(P=indP)['Pph'].values
-    #         ax.plot(tsVals / tscale, PImp / (mI * nu), linestyle=lineList[ind_ds])
-    #     kVec = ds.coords['k'].values
-    #     kmax = kVec[-1]
-    #     dk = kVec[1] - kVec[0]
-    #     alegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[ind_ds], label=r'$\Lambda=$' + '{:.2f}, '.format(kmax) + r'$dk=$' + '{:.2E}'.format(dk)))
+        DynOv_Exponents_LR = np.zeros(PVals.size)
+        vImp_Exponents_LR = np.zeros(PVals.size)
 
-    # ax.plot(tsVals / tscale, np.ones(tsVals.size), 'k--')
+        DynOv_Rvalues = np.zeros(PVals.size)
+        DynOv_Pvalues = np.zeros(PVals.size)
+        DynOv_stderr = np.zeros(PVals.size)
+        DynOv_tstat = np.zeros(PVals.size)
+        DynOv_logAve = np.zeros(PVals.size)
 
-    # # ax.set_xscale('log')
-    # # ax.set_yscale('log')
-    # # ax.set_xlim([1e-1, 1e2])
-    # alegend = ax.legend(handles=alegend_elements, loc=1, title='Grid Parameters')
-    # ax.set_title('Average Impurity Speed (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    # ax.set_ylabel(r'$\frac{<P_{I}>}{m_{I}c}$')
-    # ax.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    # plt.show()
+        for indP, P in enumerate(PVals):
+            DynOv_raw = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+            DynOv_ds = xr.DataArray(DynOv_raw, coords=[tfVals], dims=['t'])
+            Pph_ds = xr.DataArray(qds_aIBi_ts.isel(P=indP)['Pph'].values, coords=[tfVals], dims=['t'])
 
-    # # # # S(t) AND P_Imp EXPONENTS
+            if DynOvData_roll:
+                DynOv_ds = DynOv_ds.rolling(t=DynOvData_rollwin, center=True).mean().dropna('t')
+            if PimpData_roll:
+                Pph_ds = Pph_ds.rolling(t=PimpData_rollwin, center=True).mean().dropna('t')
 
-    # seperate = True
-    # DynOvData_roll = False
-    # DynOvData_rollwin = 2
-    # PimpData_roll = False
-    # PimpData_rollwin = 2
-    # DynOvExp_roll = False
-    # DynOvExp_rollwin = 2
-    # DynOvExp_NegMask = False
-    # DynOvExp_Cut = False
-    # cut = 1e-4
-    # consecDetection = False
-    # consecSamples = 10
+            DynOv_Vals = DynOv_ds.values
+            tDynOv_Vals = DynOv_ds['t'].values
 
-    # # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.25, -1.0])
-    # aIBi_des = np.array([-10.0, -5.0, -3.5, -2.5, -2.0, -1.75])
+            vImpc_Vals = (P - Pph_ds.values) / mI - nu
+            tvImpc_Vals = Pph_ds['t'].values
 
-    # Pnorm = PVals / mc
+            S_slope, S_intercept, S_rvalue, S_pvalue, S_stderr = ss.linregress(np.log(tDynOv_Vals), np.log(DynOv_Vals))
+            DynOv_Exponents_LR[indP] = -1 * S_slope
+            DynOv_Rvalues[indP] = S_rvalue
+            DynOv_Pvalues[indP] = S_pvalue
+            DynOv_stderr[indP] = S_stderr
+            DynOv_tstat[indP] = S_slope / S_stderr
+            DynOv_logAve[indP] = np.average(np.log(DynOv_Vals))
 
-    # tmin = 90; tmax = 100
-    # # tmin = 900; tmax = 1000
-    # # tmin = 500; tmax = 600
+            # if (-1 * S_slope) < 0:
+            #     DynOv_Exponents_LR[indP] = 0
 
-    # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
+            if vImpc_Vals[-1] < 0:
+                vImp_Exponents_LR[indP] = 0
+            else:
+                vI_slope, vI_intercept, vI_rvalue, vI_pvalue, vI_stderr = ss.linregress(np.log(tvImpc_Vals), np.log(vImpc_Vals))
+                vImp_Exponents_LR[indP] = -1 * vI_slope
+                if (-1 * vI_slope) < 0:
+                    vImp_Exponents_LR[indP] = 0
 
-    # colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue']
-    # lineList = ['solid', 'dotted', 'dashed']
+        DynOvExponents_da = xr.DataArray(DynOv_Exponents_LR, coords=[PVals], dims=['P'])
+        if DynOvExp_roll:
+            DynOvExponents_da = DynOvExponents_da.rolling(P=DynOvExp_rollwin, center=True).mean().dropna('P')
+        if DynOvExp_NegMask:
+            ExpMask = DynOvExponents_da.values < 0
+            DynOvExponents_da[ExpMask] = 0
+        if DynOvExp_Cut:
+            ExpMask = np.abs(DynOvExponents_da.values) < cut
+            DynOvExponents_da[ExpMask] = 0
+        DynOv_Exponents = DynOvExponents_da.values
+        if consecDetection:
+            crit_ind = 0
+            for indE, exp in enumerate(DynOv_Exponents):
+                if indE > DynOv_Exponents.size - consecDetection:
+                    break
+                expSlice = DynOv_Exponents[indE:(indE + consecSamples)]
+                if np.all(expSlice > 0):
+                    crit_ind = indE
+                    break
+            DynOvExponents_da[0:crit_ind] = 0
 
-    # fig, ax = plt.subplots()
-    # if seperate:
-    #     fig1, ax1 = plt.subplots()
-    # for inda, aIBi in enumerate(aIBi_des):
-    #     qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    #     qds_aIBi_ts = qds_aIBi.sel(t=tfVals)
-    #     PVals = qds_aIBi['P'].values
-    #     Pnorm = PVals / mc
-    #     DynOv_Exponents = np.zeros(PVals.size)
-    #     DynOv_Cov = np.full(PVals.size, np.nan)
-    #     vImp_Exponents = np.zeros(PVals.size)
-    #     vImp_Cov = np.full(PVals.size, np.nan)
+        DynOv_Exponents = DynOvExponents_da.values
+        Pnorm_dynov = DynOvExponents_da['P'].values / mc
 
-    #     DynOv_Exponents_LR = np.zeros(PVals.size)
-    #     vImp_Exponents_LR = np.zeros(PVals.size)
+        axes[0].plot(Pnorm_dynov, DynOv_Exponents, color=colorList[inda], linestyle='solid', label='{:.2f}'.format(aIBi))
+        # ax1.plot(Pnorm, vImp_Exponents_LR, color=colorList[inda], linestyle='dotted', marker='+', markerfacecolor='none', label='{:.2f}'.format(aIBi))
 
-    #     DynOv_Rvalues = np.zeros(PVals.size)
-    #     DynOv_Pvalues = np.zeros(PVals.size)
-    #     DynOv_stderr = np.zeros(PVals.size)
-    #     DynOv_tstat = np.zeros(PVals.size)
-    #     DynOv_logAve = np.zeros(PVals.size)
+    axes[0].set_xlabel(r'$\langle v_{I}(t_{0})\rangle/c$')
+    axes[0].set_ylabel(r'$\gamma$' + ' for ' + r'$|S(t)|\propto t^{-\gamma}$')
+    axes[0].set_xlim([0, 7.0])
+    axes[0].set_ylim([-.01, 0.5])
 
-    #     for indP, P in enumerate(PVals):
-    #         DynOv_raw = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
-    #         DynOv_ds = xr.DataArray(DynOv_raw, coords=[tfVals], dims=['t'])
-    #         Pph_ds = xr.DataArray(qds_aIBi_ts.isel(P=indP)['Pph'].values, coords=[tfVals], dims=['t'])
+    # ax1.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
+    # ax1.set_ylabel(r'$\gamma$' + ' for ' + r'$|S(t)|\propto t^{-\gamma}$')
+    # ax1.set_title('Long Time Power-Law Behavior of Average Impurity Momentum')
+    # ax1.legend(title=r'$a_{IB}^{-1}$', loc=2)
+    # # ax1.set_xlim([0, 10.0])
 
-    #         if DynOvData_roll:
-    #             DynOv_ds = DynOv_ds.rolling(t=DynOvData_rollwin, center=True).mean().dropna('t')
-    #         if PimpData_roll:
-    #             Pph_ds = Pph_ds.rolling(t=PimpData_rollwin, center=True).mean().dropna('t')
+    fig.text(0.05, 0.97, '(a)', fontsize=20)
+    fig.text(0.05, 0.7, '(b)', fontsize=20)
+    fig.text(0.05, 0.4, '(c)', fontsize=20)
 
-    #         DynOv_Vals = DynOv_ds.values
-    #         tDynOv_Vals = DynOv_ds['t'].values
-
-    #         vImpc_Vals = (P - Pph_ds.values) / mI - nu
-    #         tvImpc_Vals = Pph_ds['t'].values
-
-    #         S_slope, S_intercept, S_rvalue, S_pvalue, S_stderr = ss.linregress(np.log(tDynOv_Vals), np.log(DynOv_Vals))
-    #         DynOv_Exponents_LR[indP] = -1 * S_slope
-    #         DynOv_Rvalues[indP] = S_rvalue
-    #         DynOv_Pvalues[indP] = S_pvalue
-    #         DynOv_stderr[indP] = S_stderr
-    #         DynOv_tstat[indP] = S_slope / S_stderr
-    #         DynOv_logAve[indP] = np.average(np.log(DynOv_Vals))
-
-    #         # if (-1 * S_slope) < 0:
-    #         #     DynOv_Exponents_LR[indP] = 0
-
-    #         if vImpc_Vals[-1] < 0:
-    #             vImp_Exponents_LR[indP] = 0
-    #         else:
-    #             vI_slope, vI_intercept, vI_rvalue, vI_pvalue, vI_stderr = ss.linregress(np.log(tvImpc_Vals), np.log(vImpc_Vals))
-    #             vImp_Exponents_LR[indP] = -1 * vI_slope
-    #             if (-1 * vI_slope) < 0:
-    #                 vImp_Exponents_LR[indP] = 0
-
-    #     DynOvExponents_da = xr.DataArray(DynOv_Exponents_LR, coords=[PVals], dims=['P'])
-    #     if DynOvExp_roll:
-    #         DynOvExponents_da = DynOvExponents_da.rolling(P=DynOvExp_rollwin, center=True).mean().dropna('P')
-    #     if DynOvExp_NegMask:
-    #         ExpMask = DynOvExponents_da.values < 0
-    #         DynOvExponents_da[ExpMask] = 0
-    #     if DynOvExp_Cut:
-    #         ExpMask = np.abs(DynOvExponents_da.values) < cut
-    #         DynOvExponents_da[ExpMask] = 0
-    #     DynOv_Exponents = DynOvExponents_da.values
-    #     if consecDetection:
-    #         crit_ind = 0
-    #         for indE, exp in enumerate(DynOv_Exponents):
-    #             if indE > DynOv_Exponents.size - consecDetection:
-    #                 break
-    #             expSlice = DynOv_Exponents[indE:(indE + consecSamples)]
-    #             if np.all(expSlice > 0):
-    #                 crit_ind = indE
-    #                 break
-    #         DynOvExponents_da[0:crit_ind] = 0
-
-    #     DynOv_Exponents = DynOvExponents_da.values
-    #     Pnorm_dynov = DynOvExponents_da['P'].values / mc
-
-    #     print(aIBi)
-    #     print(DynOv_Exponents)
-    #     # print('\n'); print(DynOv_Pvalues); print('\n'); print(DynOv_Rvalues**2); print('\n'); print(DynOv_stderr); print('\n'); print(DynOv_tstat); print('\n'); print(DynOv_stderr / DynOv_logAve)
-    #     # badFitmask = np.abs(DynOv_stderr / DynOv_logAve) > 1e-3
-    #     # DynOv_Exponents_LR[badFitmask] = 0
-
-    #     if seperate:
-    #         ax.plot(Pnorm_dynov, DynOv_Exponents, color=colorList[inda], linestyle='solid', marker='x', label='{:.2f}'.format(aIBi))
-    #         ax1.plot(Pnorm, vImp_Exponents_LR, color=colorList[inda], linestyle='dotted', marker='+', markerfacecolor='none', label='{:.2f}'.format(aIBi))
-    #     else:
-    #         ax.plot(Pnorm_dynov, DynOv_Exponents, color=colorList[inda], linestyle='solid', marker='x', label='{:.2f}'.format(aIBi))
-    #         ax.plot(Pnorm, vImp_Exponents_LR, color=colorList[inda], linestyle='dotted', marker='+', markerfacecolor='none', label='{:.2f}'.format(aIBi))
-
-    # if seperate:
-    #     ax.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
-    #     ax.set_ylabel(r'$\gamma$' + ' for ' + r'$|S(t)|\propto t^{-\gamma}$')
-    #     ax.set_title('Long Time Power-Law Behavior of Loschmidt Echo')
-    #     ax.legend(title=r'$a_{IB}^{-1}$', loc=2)
-    #     # ax.set_xlim([0, 10.0])
-    #     # ax.set_ylim([-.01, 1.2])
-    #     # ax.set_xlim([0, 5.0]); ax.set_ylim([-.01, 0.1])
-    #     ax.set_xlim([0, 7.0])
-    #     ax.set_ylim([-.01, 0.5])
-
-    #     ax1.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
-    #     ax1.set_ylabel(r'$\gamma$' + ' for ' + r'$|S(t)|\propto t^{-\gamma}$')
-    #     ax1.set_title('Long Time Power-Law Behavior of Average Impurity Momentum')
-    #     ax1.legend(title=r'$a_{IB}^{-1}$', loc=2)
-    #     # ax1.set_xlim([0, 10.0])
-
-    # else:
-    #     ax.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
-    #     ax.set_ylabel(r'$\gamma$' + ' for ' + r'$|S(t)|\propto t^{-\gamma}$')
-    #     ax.set_title('Long Time Power-Law Behavior of Observables')
-    #     alegend_elements = []
-    #     mlegend_elements = []
-    #     for inda, aIBi in enumerate(aIBi_des):
-    #         alegend_elements.append(Line2D([0], [0], color=colorList[inda], linestyle='solid', label='{0}'.format(aIBi)))
-    #     mlegend_elements.append(Line2D([0], [0], color='black', marker='x', label=r'$S(t)$'))
-    #     mlegend_elements.append(Line2D([0], [0], color='black', marker='+', label=r'$<v_{I}(t)>$'))
-    #     alegend = ax.legend(handles=alegend_elements, loc=(0.01, 0.7), title=r'$a_{IB}^{-1}$')
-    #     plt.gca().add_artist(alegend)
-    #     mlegend = ax.legend(handles=mlegend_elements, loc=(0.12, 0.75), title='Observable')
-    #     plt.gca().add_artist(mlegend)
-    #     # ax.set_xlim([0, 7.0])
-    #     ax.set_ylim([0, 1.2])
-
-    # plt.show()
-
-    # # # OLD EXPONENT FITTING CODE (EXCEPTIONS PART)
-
-    # def powerfunc(t, a, b):
-    #     return b * t**(-1 * a)
-    # with warnings.catch_warnings():
-    #     warnings.simplefilter("error", OptimizeWarning)
-    #     try:
-    #         Sopt, Scov = curve_fit(powerfunc, tDynOv_Vals, DynOv_Vals)
-    #         DynOv_Exponents[indP] = Sopt[0]
-    #         # DynOv_Cov[indP] = Scov[0]
-    #         if Sopt[0] < 0:
-    #             DynOv_Exponents[indP] = 0
-    #     except OptimizeWarning:
-    #         DynOv_Exponents[indP] = 0
-    #     except RuntimeError:
-    #         DynOv_Exponents[indP] = 0
-    # with warnings.catch_warnings():
-    #     warnings.simplefilter("error", OptimizeWarning)
-    #     try:
-    #         vIopt, vIcov = curve_fit(powerfunc, tvImpc_Vals, vImpc_Vals)
-    #         vImp_Exponents[indP] = vIopt[0]
-    #         # vImp_Cov[indP] = vIcov[0]
-    #         if vIopt[0] < 0:
-    #             vImp_Exponents[indP] = 0
-    #         if vImpc_Vals[-1] < 0:
-    #             vImp_Exponents[indP] = 0
-    #     except OptimizeWarning:
-    #         vImp_Exponents[indP] = 0
-    #     except RuntimeError:
-    #         vImp_Exponents[indP] = 0
-
-    # # # IR Cuts S(t) (SPHERICAL)
-
-    # Pdes = 2.5
-    # Pind = np.argmin(np.abs(Pnorm - Pdes))
-    # aIBi = -10
-
-    # tau = 100
-    # tsVals = tVals[tVals < tau]
-    # qds_aIBi_ts = qds_aIBi.sel(t=tsVals)
-
-    # fig2, ax2 = plt.subplots()
-    # DynOv_IRVals = np.zeros(IRrat_Vals.size)
-    # for ind, IRrat_val in enumerate(IRrat_Vals):
-    #     IRdatapath = qdatapath_Dict[IRrat_val]
-    #     qds_aIBi_ts = xr.open_dataset(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi)).sel(t=tsVals)
-    #     St = np.abs(qds_aIBi_ts.isel(P=Pind)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=Pind)['Imag_DynOv'].values).real.astype(float)
-    #     DynOv_IRVals[ind] = St[-1]
-    #     ax2.plot(tsVals / tscale, St, label='{:.1E}'.format(IRrat_val))
-
-    # qds_aIBi_orig = xr.open_dataset(qdatapath_Dict[1.0] + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi)).sel(t=tsVals)
-    # DynOv_orig = np.abs(qds_aIBi_orig.isel(P=Pind)['Real_DynOv'].values + 1j * qds_aIBi_orig.isel(P=Pind)['Imag_DynOv'].values).real.astype(float)
-
-    # ax2.plot(tsVals / tscale, DynOv_orig, label='Original')
-    # ax2.set_title('Loschmidt Echo (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.1f})'.format(Pnorm[Pind]))
-    # ax2.set_ylabel(r'$|S(t)|$')
-    # ax2.set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    # ax2.set_xscale('log')
-    # ax2.set_yscale('log')
-    # ax2.set_xlim([1e-1, 1e2])
-    # ax2.legend(title='IR Cutoff Ratio')
-
-    # fig, axes = plt.subplots(nrows=1, ncols=2)
-    # axes[0].plot(tsVals / tscale, DynOv_orig, 'k-')
-    # axes[0].set_title('Loschmidt Echo (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.1f})'.format(Pnorm[Pind]) + ', Original IR cutoff')
-    # axes[0].set_ylabel(r'$|S(t)|$')
-    # axes[0].set_xlabel(r'$t$ [$\frac{\xi}{c}$]')
-    # axes[0].set_xscale('log')
-    # axes[0].set_yscale('log')
-    # axes[0].set_xlim([1e-1, 1e2])
-
-    # axes[1].plot(IRrat_Vals, 100 * np.abs(DynOv_IRVals - DynOv_IRVals[0]) / DynOv_IRVals[0], 'g-')
-    # axes[1].set_xlabel('IR Cutoff Increase Ratio')
-    # axes[1].set_ylabel('Percentage Difference in ' + r'$|S(t_{f})|$')
-    # axes[1].set_title('Percentage Difference in Loschmidt Echo Final Value (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c_{BEC}}=$' + '{:.1f})'.format(Pnorm[Pind]))
-    # axes[1].set_xscale('log')
-    # # axes[1].set_ylim([0, 1])
-
-    # # fig.tight_layout()
-    # plt.show()
-
-    # # # # BOGOLIUBOV DISPERSION (SPHERICAL)
-
-    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds.coords['k'].values); kgrid.initArray_premade('th', qds.coords['th'].values)
-    # kVals = kgrid.getArray('k')
-    # wk_Vals = pfs.omegak(kVals, mB, n0, gBB)
-    # bdiff = 100 * np.abs(wk_Vals - nu * kVals) / kVals
-    # kind = np.abs(bdiff - 1).argmin().astype(int)
-    # tlin = 2 * np.pi / (nu * kVals[kind])
-    # print(kVals[kind], tlin / tscale)
-
-    # fig, ax = plt.subplots()
-    # # ax.plot(kVals, bdiff)
-    # ax.plot(kVals, wk_Vals, 'k-', label='')
-    # ax.plot(kVals, nu * kVals, 'b--', label=r'$c_{BEC}|k|$')
-    # ax.plot(kVals, kVals**2 / (2 * mB), 'r--', label=r'$\frac{k^{2}}{2m_{B}}$')
-    # ax.set_title('Bogoliubov Phonon Dispersion')
-    # ax.set_xlabel(r'$|k|$')
-    # ax.set_ylabel(r'$\omega_{|k|}$')
-    # ax.set_xlim([0, 2])
-    # ax.set_ylim([0, 3])
-    # ax.legend(loc=2, fontsize='x-large')
-    # plt.show()
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, title=r'$a_{IB}^{-1}$', ncol=aIBi_des.size // 2, loc='lower center', bbox_to_anchor=(0.5, 0.01))
+    fig.subplots_adjust(left=0.1, bottom=0.2, top=0.95, right=0.97, hspace=0.3)
+    # fig.set_size_inches(4, 9)
+    # fig.savefig(figdatapath + '/Fig5.pdf')
 
     # # # # # IMPURITY VELOCITY RATIO CURVES
 

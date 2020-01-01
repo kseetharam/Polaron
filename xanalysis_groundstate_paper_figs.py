@@ -72,78 +72,6 @@ if __name__ == "__main__":
 
     print(innerdatapath)
 
-    # # # Concatenate Individual Datasets (aIBi specific)
-
-    # aIBi_List = [-15.0, -12.5, -10.0, -9.0, -8.0, -7.0, -6.0, -5.0, -3.5, -2.0, -1.0, -0.75, -0.5, -0.1]
-
-    # for aIBi in aIBi_List:
-    #     ds_list = []; P_list = []; mI_list = []
-    #     for ind, filename in enumerate(os.listdir(innerdatapath)):
-    #         if filename[0:14] == 'quench_Dataset':
-    #             continue
-    #         if filename[0:6] == 'interp':
-    #             continue
-    #         if filename[0:2] == 'mm':
-    #             continue
-    #         if float(filename[13:-3]) != aIBi:
-    #             continue
-    #         print(filename)
-    #         ds = xr.open_dataset(innerdatapath + '/' + filename)
-    #         ds_list.append(ds)
-    #         P_list.append(ds.attrs['P'])
-    #         mI_list.append(ds.attrs['mI'])
-
-    #     s = sorted(zip(P_list, ds_list))
-    #     g = itertools.groupby(s, key=lambda x: x[0])
-
-    #     P_keys = []; P_ds_list = []; aIBi_ds_list = []
-    #     for key, group in g:
-    #         P_temp_list, ds_temp_list = zip(*list(group))
-    #         P_keys.append(key)  # note that key = P_temp_list[0]
-    #         P_ds_list.append(ds_temp_list[0])
-
-    #     with xr.concat(P_ds_list, pd.Index(P_keys, name='P')) as ds_tot:
-    #         # ds_tot = xr.concat(P_ds_list, pd.Index(P_keys, name='P'))
-    #         del(ds_tot.attrs['P']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
-    #         ds_tot.to_netcdf(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-
-    # # # Concatenate Individual Datasets (aIBi specific, IRcuts)
-
-    # IRrat_Vals = [1, 2, 5, 10, 50, 1e2, 5e2, 1e3, 5e3, 1e4]
-    # aIBi_List = [-10.0, -5.0, -2.0, -0.5]
-    # for IRrat in IRrat_Vals:
-    #     IRdatapath = innerdatapath + '/IRratio_{:.1E}'.format(IRrat)
-    #     for aIBi in aIBi_List:
-    #         ds_list = []; P_list = []; mI_list = []
-    #         for ind, filename in enumerate(os.listdir(IRdatapath)):
-    #             if filename[0:14] == 'quench_Dataset':
-    #                 continue
-    #             if filename[0:6] == 'interp':
-    #                 continue
-    #             if filename[0:2] == 'mm':
-    #                 continue
-    #             if float(filename[13:-3]) != aIBi:
-    #                 continue
-    #             print(filename)
-    #             ds = xr.open_dataset(IRdatapath + '/' + filename)
-    #             ds_list.append(ds)
-    #             P_list.append(ds.attrs['P'])
-    #             mI_list.append(ds.attrs['mI'])
-
-    #         s = sorted(zip(P_list, ds_list))
-    #         g = itertools.groupby(s, key=lambda x: x[0])
-
-    #         P_keys = []; P_ds_list = []; aIBi_ds_list = []
-    #         for key, group in g:
-    #             P_temp_list, ds_temp_list = zip(*list(group))
-    #             P_keys.append(key)  # note that key = P_temp_list[0]
-    #             P_ds_list.append(ds_temp_list[0])
-
-    #         with xr.concat(P_ds_list, pd.Index(P_keys, name='P')) as ds_tot:
-    #             # ds_tot = xr.concat(P_ds_list, pd.Index(P_keys, name='P'))
-    #             del(ds_tot.attrs['P']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
-    #             ds_tot.to_netcdf(IRdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-
     # # Analysis of Total Dataset
 
     aIBi = -2
@@ -165,7 +93,7 @@ if __name__ == "__main__":
 
     aIBi_Vals = np.array([-12.5, -10.0, -9.0, -8.0, -7.0, -5.0, -3.5, -2.0, -1.0, -0.75, -0.5, -0.1])  # used by many plots (spherical)
 
-    # # # FIG 1
+    # # # FIG 1 - POLARON GRAPHIC + BOGO DISPERSION + PHASE DIAGRAM + DISTRIBUTION PLOTS
 
     # # BOGOLIUBOV DISPERSION (SPHERICAL)
 
