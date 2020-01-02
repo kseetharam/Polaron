@@ -168,6 +168,7 @@ if __name__ == "__main__":
     ax.text(-2.9, ymin + 0.1 * (ymax - ymin), '(' + r'$Z>0$' + ')', fontdict=sfont)
     ax.text(-6.5, ymin + 0.6 * (ymax - ymin), 'Cherenkov', fontdict=font)
     ax.text(-6.35, ymin + 0.525 * (ymax - ymin), '(' + r'$Z=0$' + ')', fontdict=sfont)
+
     plt.show()
 
     # # # QUASIPARTICLE RESIDUE (SPHERICAL)
