@@ -399,7 +399,6 @@ if __name__ == "__main__":
     # fig.text(0.03, 0.4, '(c)', fontsize=20)
 
     # handles, labels = axes[0].get_legend_handles_labels()
-    # # fig.legend(handles, labels, title=r'$a_{IB}^{-1}$', ncol=aIBi_des.size // 2, loc='lower center', bbox_to_anchor=(0.5, 0.01))
     # fig.legend(handles, labels, title=r'$a_{IB}^{-1}$ [$\xi$]', ncol=aIBi_des.size // 2, loc='lower center', bbox_to_anchor=(0.55, 0.01))
     # fig.subplots_adjust(left=0.2, bottom=0.19, top=0.95, right=0.97, hspace=0.5)
     # fig.set_size_inches(6, 12)
@@ -587,17 +586,14 @@ if __name__ == "__main__":
 
     colorList = ['red', '#7e1e9c', 'green', 'orange', 'blue', '#60460f']
     lineList = ['solid', 'dotted', 'dashed', 'dashdot']
-    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5])
-    aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5, -1.25, -1.0])
+    aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5])
+    # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5, -1.25, -1.0])
     massRat_des = np.array([1.0])
     # massRat_des = np.array([0.5, 1.0, 2])
     mdatapaths = []
 
     for mR in massRat_des:
-        if toggleDict['Old'] is True:
-            mdatapaths.append(datapath[0:-7] + '{:.1f}'.format(mR))
-        else:
-            mdatapaths.append(datapath[0:-3] + '{:.1f}'.format(mR))
+        mdatapaths.append('/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}_resRat_{:.2f}/massRatio={:.1f}'.format(NGridPoints_cart, resRat, mR))
 
     if toggleDict['Dynamics'] != 'real' or toggleDict['Grid'] != 'spherical' or toggleDict['Coupling'] != 'twophonon':
         print('SETTING ERROR')
@@ -671,29 +667,31 @@ if __name__ == "__main__":
     alegend_elements = []
     mlegend_elements = []
     for inda, aIBi in enumerate(aIBi_des):
-        alegend_elements.append(Line2D([0], [0], color=colorList[inda], linestyle='solid', label='{0}'.format(aIBi)))
+        alegend_elements.append(Line2D([0], [0], color=colorList[inda], linestyle='solid', label='{0}'.format(aIBi / xi)))
     for indm, mR in enumerate(massRat_des):
         mlegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[indm], label='{0}'.format(mR)))
 
-    ax1.set_xlabel(r'$\frac{<v_{I}(t_{0})>}{c_{BEC}}$')
+    ax1.set_xlabel(r'$\langle v_{I}(t_{0})\rangle /c$', fontsize=24)
 
     if inversePlot is True:
-        ax1.set_title('Short-Time-Averaged Inverse Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
+        # ax1.set_title('Short-Time-Averaged Inverse Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
         if PRtype == 'continuous':
             ax1.set_ylabel(r'Average $IPR$ with $IPR = ((2\pi)^{3} \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2})^{-1}$')
         elif PRtype == 'discrete':
             if discPR_norm is True:
-                ax1.set_ylabel(r'Average $IPR$ (Normalized by $N_{tot}$ modes in system)')
+                # ax1.set_ylabel(r'Average $IPR$ (Normalized by $N_{tot}$ modes in system)')
+                ax1.set_ylabel(r'$\bar{IPR}/N_{tot}$', fontsize=24)
             else:
                 ax1.set_ylabel(r'Average $IPR$')
     else:
-        ax1.set_title('Time-Averaged Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
+        # ax1.set_title('Time-Averaged Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
         ax1.set_ylabel(r'Average $PR$ with $PR = (2\pi)^{3} \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2}$')
-    alegend = ax1.legend(handles=alegend_elements, loc=(0.03, 0.5), title=r'$a_{IB}^{-1}$')
+    alegend = ax1.legend(handles=alegend_elements, loc=(0.03, 0.5), title=r'$a_{IB}^{-1}$ [$\xi$]')
     plt.gca().add_artist(alegend)
-    mlegend = ax1.legend(handles=mlegend_elements, loc=(0.22, 0.70), ncol=2, title=r'$\frac{m_{I}}{m_{B}}$')
-    plt.gca().add_artist(mlegend)
-    ax1.set_xlim([0, np.max(vI0_Vals / nu)])
+    mlegend = ax1.legend(handles=mlegend_elements, loc=(0.22, 0.70), ncol=2, title=r'$m_{I}/m_{B}$')
+    # plt.gca().add_artist(mlegend)
+    # ax1.set_xlim([0, np.max(vI0_Vals / nu)])
+    ax1.set_xlim([0, 4])
 
     # # # INDIVIDUAL PHONON MOMENTUM DISTRIBUTION
 
