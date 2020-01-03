@@ -7,6 +7,7 @@ import matplotlib.animation as animation
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 import matplotlib.colors as colors
+from matplotlib.ticker import FormatStrFormatter
 import os
 import itertools
 import pf_dynamic_cart as pfc
@@ -568,6 +569,8 @@ if __name__ == "__main__":
 
     # NOTE: We need the massRatio_1.0_old folder (or technically any of the _old folders) and the constants determined at the beginning of the script for this to run
 
+    matplotlib.rcParams.update({'font.size': 20})
+
     inversePlot = True
 
     # PRtype = 'continuous'
@@ -584,7 +587,7 @@ if __name__ == "__main__":
     Vxyz = 1984476.915083265
     contToDisc_factor = dVk_cart / ((2 * np.pi)**3)
 
-    colorList = ['red', '#7e1e9c', 'green', 'orange', 'blue', '#60460f']
+    colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue', 'magenta']
     lineList = ['solid', 'dotted', 'dashed', 'dashdot']
     aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5])
     # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5, -1.25, -1.0])
@@ -667,7 +670,7 @@ if __name__ == "__main__":
     alegend_elements = []
     mlegend_elements = []
     for inda, aIBi in enumerate(aIBi_des):
-        alegend_elements.append(Line2D([0], [0], color=colorList[inda], linestyle='solid', label='{0}'.format(aIBi / xi)))
+        alegend_elements.append(Line2D([0], [0], color=colorList[inda], linestyle='solid', label='{:.2f}'.format(aIBi / xi)))
     for indm, mR in enumerate(massRat_des):
         mlegend_elements.append(Line2D([0], [0], color='magenta', linestyle=lineList[indm], label='{0}'.format(mR)))
 
@@ -680,18 +683,25 @@ if __name__ == "__main__":
         elif PRtype == 'discrete':
             if discPR_norm is True:
                 # ax1.set_ylabel(r'Average $IPR$ (Normalized by $N_{tot}$ modes in system)')
-                ax1.set_ylabel(r'$\bar{IPR}/N_{tot}$', fontsize=24)
+                ax1.set_ylabel(r'$\overline{IPR}/N_{tot}$', fontsize=24)
             else:
                 ax1.set_ylabel(r'Average $IPR$')
     else:
         # ax1.set_title('Time-Averaged Participation Ratio (' + r'$t\in[0, $' + '{:.2f}'.format(tau / tscale) + r'$\frac{\xi}{c}]$)')
         ax1.set_ylabel(r'Average $PR$ with $PR = (2\pi)^{3} \int d^3\vec{k} (\frac{1}{(2\pi)^3}\frac{1}{N_{ph}}|\beta_{\vec{k}}|^{2})^{2}$')
-    alegend = ax1.legend(handles=alegend_elements, loc=(0.03, 0.5), title=r'$a_{IB}^{-1}$ [$\xi$]')
+    alegend = ax1.legend(handles=alegend_elements, loc=2, title=r'$a_{IB}^{-1}$ [$\xi$]', ncol=2)
     plt.gca().add_artist(alegend)
-    mlegend = ax1.legend(handles=mlegend_elements, loc=(0.22, 0.70), ncol=2, title=r'$m_{I}/m_{B}$')
+    # mlegend = ax1.legend(handles=mlegend_elements, loc=(0.22, 0.70), ncol=2, title=r'$m_{I}/m_{B}$')
     # plt.gca().add_artist(mlegend)
     # ax1.set_xlim([0, np.max(vI0_Vals / nu)])
     ax1.set_xlim([0, 4])
+    ax1.set_ylim([0.004, 0.008])
+    ax1.yaxis.set_major_formatter(FormatStrFormatter('%.3f'))
+    ax1.yaxis.set_major_locator(plt.MaxNLocator(4))
+
+    fig1.set_size_inches(11.0, 7.5)
+    fig1.subplots_adjust(top=0.97, right=0.97)
+    fig1.savefig(figdatapath + '/Fig6.pdf')
 
     # # # INDIVIDUAL PHONON MOMENTUM DISTRIBUTION
 
