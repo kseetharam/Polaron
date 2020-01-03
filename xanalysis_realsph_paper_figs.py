@@ -696,13 +696,13 @@ if __name__ == "__main__":
     # ax1.yaxis.set_major_locator(plt.MaxNLocator(5))
     # ax1.xaxis.set_major_locator(plt.MaxNLocator(4))
 
-    # # fig1.set_size_inches(9.6, 7.2)
-    # # fig1.subplots_adjust(top=0.97, right=0.97)
     # fig1.set_size_inches(6, 3.9)
     # fig1.subplots_adjust(bottom=0.17, top=0.94, right=0.97)
     # # fig1.savefig(figdatapath + '/Fig6.pdf')
 
     # # FIG 7 - INDIVIDUAL PHONON MOMENTUM DISTRIBUTION PLOT SLICES
+
+    matplotlib.rcParams.update({'font.size': 18})
 
     Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.5, 1.8, 3.0, 3.5, 4.0, 5.0, 8.0])
     Pinds = np.zeros(Pnorm_des.size, dtype=int)
@@ -876,7 +876,7 @@ if __name__ == "__main__":
         ax.set_xlim([-1 * axislim, axislim])
         ax.set_ylim([-1 * axislim, axislim])
         ax.grid(True, linewidth=0.5)
-        ax.set_title(r'$t$ [$\frac{\xi}{c}$]: ' + '{:1.2f}'.format(tsVals[tninds[tind]] / tscale))
+        ax.set_title(r'$t$ [$\xi/c$]: ' + '{:1.2f}'.format(tsVals[tninds[tind]] / tscale))
         ax.set_xlabel(r'$k_{z}$')
         ax.set_ylabel(r'$k_{x}$')
 
@@ -890,10 +890,20 @@ if __name__ == "__main__":
         handles = (curve1, curve1m, curve2, patch_Excitation, patch_klin, patch_FGR_ph, patch_FGR_imp)
         labels = (r'$P_{ph}$', r'$P_{imp}$', r'$m_{I}c$', r'$\omega_{|k|}^{-1}(\frac{2\pi}{t})$', r'Linear Excitations', 'FGR Phase Space (ph)', 'FGR Phase Space (imp)')
 
-    fig.subplots_adjust(right=0.8, bottom=0.13, hspace=0.5)
-    cbar_ax = fig.add_axes([0.85, 0.15, 0.02, 0.7])
+    cbar_ax = fig.add_axes([0.9, 0.2, 0.02, 0.7])
     fig.colorbar(quad1, cax=cbar_ax, extend='both')
     fig.legend(handles, labels, ncol=4, loc='lower center')
-    # st = fig.suptitle('Individual Phonon Distribution (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c}=$' + '{:.2f})'.format(Pnorm[indP]))
 
-    plt.show()
+    fig.text(0.05, 0.97, '(a)', fontsize=20)
+    fig.text(0.05, 0.68, '(c)', fontsize=20)
+    fig.text(0.05, 0.38, '(e)', fontsize=20)
+    fig.text(0.47, 0.97, '(b)', fontsize=20)
+    fig.text(0.47, 0.68, '(d)', fontsize=20)
+    fig.text(0.47, 0.38, '(f)', fontsize=20)
+
+    fig.set_size_inches(12, 12)
+    fig.subplots_adjust(bottom=0.17, top=0.95, right=0.85, hspace=0.6, wspace=0.4)
+    # fig.savefig(figdatapath + '/Fig7.pdf', dpi=20)
+    fig.savefig(figdatapath + '/Fig7.jpg', quality=20)
+
+    # plt.show()
