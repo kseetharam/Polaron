@@ -891,9 +891,6 @@ if __name__ == "__main__":
     #     ax.set_xlabel(r'$k_{z}$')
     #     ax.set_ylabel(r'$k_{x}$')
 
-    # # patch_FGR_ph = Patch(facecolor='none', edgecolor='tab:gray')
-    # # patch_FGR_imp = Patch(facecolor='none', edgecolor='xkcd:military green')
-
     # curve1_LE = Line2D([0], [0], color='none', lw=0, marker='x', markerfacecolor='xkcd:steel grey', markeredgecolor='xkcd:steel grey', markersize=10)
     # curve1m_LE = Line2D([0], [0], color='none', lw=0, marker='o', markerfacecolor='xkcd:apple green', markeredgecolor='xkcd:apple green', markersize=10)
     # curve2_LE = Line2D([0], [0], color='none', lw=0, marker='*', markerfacecolor='cyan', markeredgecolor='cyan', markersize=10)
@@ -904,10 +901,10 @@ if __name__ == "__main__":
 
     # if IRpatch is True:
     #     handles = (curve1_LE, curve1m_LE, curve2_LE, patch_Excitation_LE, patch_IR, patch_klin_LE, patch_FGR_ph_LE, patch_FGR_imp_LE)
-    #     labels = (r'$P_{ph}$', r'$P_{imp}$', r'$(m_{I}c)\vec{e}_{k_{z}}$', r'$\omega_{|k|}^{-1}(\frac{2\pi}{t})$', r'Singular Region', r'Linear Excitations', 'FGR Phase Space (ph)', 'FGR Phase Space (imp)')
+    #     labels = (r'$\langle P_{ph} \rangle$', r'$\langle P_{I} \rangle$', r'$(m_{I}c)\vec{e}_{k_{z}}$', r'$\omega_{|k|}^{-1}(\frac{2\pi}{t})$', r'Singular Region', r'Linear Excitations', 'FGR Phase Space (ph)', 'FGR Phase Space (imp)')
     # else:
     #     handles = (curve1_LE, curve1m_LE, curve2_LE, patch_Excitation_LE, patch_klin_LE, patch_FGR_ph_LE, patch_FGR_imp_LE)
-    #     labels = (r'$P_{ph}$', r'$P_{imp}$', r'$(m_{I}c)\vec{e}_{k_{z}}$', r'$\omega_{|k|}^{-1}(\frac{2\pi}{t})$', r'Linear Excitations', 'FGR Phase Space (ph)', 'FGR Phase Space (imp)')
+    #     labels = (r'$\langle P_{ph} \rangle$', r'$\langle P_{I} \rangle$', r'$(m_{I}c)\vec{e}_{k_{z}}$', r'$\omega_{|k|}^{-1}(\frac{2\pi}{t})$', r'Linear Excitations', 'FGR Phase Space (ph)', 'FGR Phase Space (imp)')
 
     # cbar_ax = fig.add_axes([0.9, 0.2, 0.02, 0.7])
     # fig.colorbar(quad1, cax=cbar_ax, extend='both')
