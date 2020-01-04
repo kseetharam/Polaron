@@ -5,7 +5,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.lines import Line2D
-from matplotlib.patches import Patch
+from matplotlib.patches import Patch, Ellipse, Circle
+from matplotlib.legend_handler import HandlerPatch
 import matplotlib.colors as colors
 from matplotlib.ticker import FormatStrFormatter
 import os
@@ -700,210 +701,228 @@ if __name__ == "__main__":
     # fig1.subplots_adjust(bottom=0.17, top=0.94, right=0.97)
     # # fig1.savefig(figdatapath + '/Fig6.pdf')
 
-    # # FIG 7 - INDIVIDUAL PHONON MOMENTUM DISTRIBUTION PLOT SLICES
+    # # # FIG 7 - INDIVIDUAL PHONON MOMENTUM DISTRIBUTION PLOT SLICES
 
-    matplotlib.rcParams.update({'font.size': 18})
+    # matplotlib.rcParams.update({'font.size': 18})
 
-    Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.5, 1.8, 3.0, 3.5, 4.0, 5.0, 8.0])
-    Pinds = np.zeros(Pnorm_des.size, dtype=int)
-    for Pn_ind, Pn in enumerate(Pnorm_des):
-        Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
+    # class HandlerEllipse(HandlerPatch):
+    #     def create_artists(self, legend, orig_handle,
+    #                        xdescent, ydescent, width, height, fontsize, trans):
+    #         center = 0.5 * width - 0.5 * xdescent, 0.5 * height - 0.5 * ydescent
+    #         p = Ellipse(xy=center, width=width + xdescent,
+    #                     height=height + ydescent)
+    #         self.update_prop(p, orig_handle, legend)
+    #         p.set_transform(trans)
+    #         return [p]
 
-    print(PVals[Pinds])
+    # Pnorm_des = np.array([0.1, 0.5, 0.8, 1.3, 1.5, 1.8, 3.0, 3.5, 4.0, 5.0, 8.0])
+    # Pinds = np.zeros(Pnorm_des.size, dtype=int)
+    # for Pn_ind, Pn in enumerate(Pnorm_des):
+    #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
 
-    indP = Pinds[5]
-    P = PVals[indP]
-    print(aIBi, P)
+    # print(PVals[Pinds])
 
-    vmaxAuto = False
-    FGRBool = True; FGRlim = 1e-2
-    IRpatch = False
-    shortTime = False; tau = 5
+    # indP = Pinds[5]
+    # P = PVals[indP]
+    # print(aIBi, P)
 
-    # tau = 100
-    # tsVals = tVals[tVals < tau]
-    if Lx == 60:
-        qds_PaIBi = xr.open_dataset(distdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
-        tsVals = qds_PaIBi.coords['tc'].values
-    else:
-        # qds_PaIBi = qds_aIBi.sel(t=tsVals, P=P)
-        qds_PaIBi = qds_aIBi.sel(P=P)
-        tsVals = qds_PaIBi.coords['t'].values
+    # vmaxAuto = False
+    # FGRBool = True; FGRlim = 1e-2
+    # IRpatch = False
+    # shortTime = False; tau = 5
 
-    if shortTime is True:
-        tsVals = tsVals[tsVals <= tau]
-    kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_PaIBi.coords['k'].values); kgrid.initArray_premade('th', qds_PaIBi.coords['th'].values)
-    kVec = kgrid.getArray('k')
-    thVec = kgrid.getArray('th')
-    kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
-    dVk = kgrid.dV()
+    # # tau = 100
+    # # tsVals = tVals[tVals < tau]
+    # if Lx == 60:
+    #     qds_PaIBi = xr.open_dataset(distdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(P, aIBi))
+    #     tsVals = qds_PaIBi.coords['tc'].values
+    # else:
+    #     # qds_PaIBi = qds_aIBi.sel(t=tsVals, P=P)
+    #     qds_PaIBi = qds_aIBi.sel(P=P)
+    #     tsVals = qds_PaIBi.coords['t'].values
 
-    axislim = 1.2
-    if shortTime is True:
-        axislim = 1.01 * P
-    # kIRcut = 0.13
-    # axislim = 3
-    kIRcut = 0.1
-    if Lx == 60:
-        kIRcut = 0.01
-    if vmaxAuto is True:
-        kIRcut = -1
+    # if shortTime is True:
+    #     tsVals = tsVals[tsVals <= tau]
+    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds_PaIBi.coords['k'].values); kgrid.initArray_premade('th', qds_PaIBi.coords['th'].values)
+    # kVec = kgrid.getArray('k')
+    # thVec = kgrid.getArray('th')
+    # kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
+    # dVk = kgrid.dV()
 
-    kIRmask = kg < kIRcut
-    dVk_IR = dVk.reshape((len(kVec), len(thVec)))[kIRmask]
-    axmask = (kg >= kIRcut) * (kg <= axislim)
-    dVk_ax = dVk.reshape((len(kVec), len(thVec)))[axmask]
+    # axislim = 1.2
+    # if shortTime is True:
+    #     axislim = 1.01 * P
+    # # kIRcut = 0.13
+    # # axislim = 3
+    # kIRcut = 0.1
+    # if Lx == 60:
+    #     kIRcut = 0.01
+    # if vmaxAuto is True:
+    #     kIRcut = -1
 
-    Omegak_da = xr.DataArray(np.full((tsVals.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tsVals, kVec, thVec], dims=['t', 'k', 'th'])
-    PhDen_da = xr.DataArray(np.full((tsVals.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tsVals, kVec, thVec], dims=['t', 'k', 'th'])
-    Nph_Vals = np.zeros(tsVals.size)
-    Pph_Vals = np.zeros(tsVals.size)
-    Pimp_Vals = np.zeros(tsVals.size)
-    norm_IRpercent = np.zeros(tsVals.size)
-    norm_axpercent = np.zeros(tsVals.size)
-    vmax = 0
-    for tind, t in enumerate(tsVals):
-        if Lx == 60:
-            CSAmp_ds = (qds_PaIBi['Real_CSAmp'] + 1j * qds_PaIBi['Imag_CSAmp']).sel(tc=t)
-        else:
-            CSAmp_ds = (qds_PaIBi['Real_CSAmp'] + 1j * qds_PaIBi['Imag_CSAmp']).sel(t=t)
-        CSAmp_Vals = CSAmp_ds.values
-        Nph_Vals[tind] = qds_PaIBi['Nph'].sel(t=t).values
-        Pph_Vals[tind] = qds_PaIBi['Pph'].sel(t=t).values
-        Pimp_Vals[tind] = P - Pph_Vals[tind]
-        Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
-        PhDen_da.sel(t=t)[:] = ((1 / Nph_Vals[tind]) * np.abs(Bk_2D_vals)**2).real.astype(float)
-        norm_tot = np.dot(PhDen_da.sel(t=t).values.flatten(), dVk)
+    # kIRmask = kg < kIRcut
+    # dVk_IR = dVk.reshape((len(kVec), len(thVec)))[kIRmask]
+    # axmask = (kg >= kIRcut) * (kg <= axislim)
+    # dVk_ax = dVk.reshape((len(kVec), len(thVec)))[axmask]
 
-        PhDen_IR = PhDen_da.sel(t=t).values[kIRmask]
-        norm_IR = np.dot(PhDen_IR.flatten(), dVk_IR.flatten())
-        norm_IRpercent[tind] = 100 * np.abs(norm_IR / norm_tot)
-        # print(norm_IRpercent[tind])
+    # Omegak_da = xr.DataArray(np.full((tsVals.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tsVals, kVec, thVec], dims=['t', 'k', 'th'])
+    # PhDen_da = xr.DataArray(np.full((tsVals.size, len(kVec), len(thVec)), np.nan, dtype=float), coords=[tsVals, kVec, thVec], dims=['t', 'k', 'th'])
+    # Nph_Vals = np.zeros(tsVals.size)
+    # Pph_Vals = np.zeros(tsVals.size)
+    # Pimp_Vals = np.zeros(tsVals.size)
+    # norm_IRpercent = np.zeros(tsVals.size)
+    # norm_axpercent = np.zeros(tsVals.size)
+    # vmax = 0
+    # for tind, t in enumerate(tsVals):
+    #     if Lx == 60:
+    #         CSAmp_ds = (qds_PaIBi['Real_CSAmp'] + 1j * qds_PaIBi['Imag_CSAmp']).sel(tc=t)
+    #     else:
+    #         CSAmp_ds = (qds_PaIBi['Real_CSAmp'] + 1j * qds_PaIBi['Imag_CSAmp']).sel(t=t)
+    #     CSAmp_Vals = CSAmp_ds.values
+    #     Nph_Vals[tind] = qds_PaIBi['Nph'].sel(t=t).values
+    #     Pph_Vals[tind] = qds_PaIBi['Pph'].sel(t=t).values
+    #     Pimp_Vals[tind] = P - Pph_Vals[tind]
+    #     Bk_2D_vals = CSAmp_Vals.reshape((len(kVec), len(thVec)))
+    #     PhDen_da.sel(t=t)[:] = ((1 / Nph_Vals[tind]) * np.abs(Bk_2D_vals)**2).real.astype(float)
+    #     norm_tot = np.dot(PhDen_da.sel(t=t).values.flatten(), dVk)
 
-        PhDen_ax = PhDen_da.sel(t=t).values[axmask]
-        norm_ax = np.dot(PhDen_ax.flatten(), dVk_ax.flatten())
-        norm_axpercent[tind] = 100 * np.abs(norm_ax / norm_tot)
+    #     PhDen_IR = PhDen_da.sel(t=t).values[kIRmask]
+    #     norm_IR = np.dot(PhDen_IR.flatten(), dVk_IR.flatten())
+    #     norm_IRpercent[tind] = 100 * np.abs(norm_IR / norm_tot)
+    #     # print(norm_IRpercent[tind])
 
-        Omegak_da.sel(t=t)[:] = pfs.Omega(kgrid, Pimp_Vals[tind], mI, mB, n0, gBB).reshape((len(kVec), len(thVec))).real.astype(float)
-        # print(Omegak_da.sel(t=t))
+    #     PhDen_ax = PhDen_da.sel(t=t).values[axmask]
+    #     norm_ax = np.dot(PhDen_ax.flatten(), dVk_ax.flatten())
+    #     norm_axpercent[tind] = 100 * np.abs(norm_ax / norm_tot)
 
-        maxval = np.max(PhDen_da.sel(t=t).values[np.logical_not(kIRmask)])
-        if maxval > vmax:
-            vmax = maxval
+    #     Omegak_da.sel(t=t)[:] = pfs.Omega(kgrid, Pimp_Vals[tind], mI, mB, n0, gBB).reshape((len(kVec), len(thVec))).real.astype(float)
+    #     # print(Omegak_da.sel(t=t))
 
-    # Plot slices
+    #     maxval = np.max(PhDen_da.sel(t=t).values[np.logical_not(kIRmask)])
+    #     if maxval > vmax:
+    #         vmax = maxval
 
-    tnorm = tsVals / tscale
-    tnVals_des = np.array([0.5, 8.0, 15.0, 25.0, 40.0, 75.0])
-    tninds = np.zeros(tnVals_des.size, dtype=int)
-    for tn_ind, tn in enumerate(tnVals_des):
-        tninds[tn_ind] = np.abs(tnorm - tn).argmin().astype(int)
-    tslices = tsVals[tninds]
+    # # Plot slices
 
-    print(vmax)
-    vmin = 0
+    # tnorm = tsVals / tscale
+    # tnVals_des = np.array([0.5, 8.0, 15.0, 25.0, 40.0, 75.0])
+    # tninds = np.zeros(tnVals_des.size, dtype=int)
+    # for tn_ind, tn in enumerate(tnVals_des):
+    #     tninds[tn_ind] = np.abs(tnorm - tn).argmin().astype(int)
+    # tslices = tsVals[tninds]
 
-    if (vmaxAuto is False) and (Lx != 60):
-        vmax = 800
-    if shortTime is True:
-        vmax = 200
-    interpmul = 5
-    if Lx == 60:
-        PhDen0_interp_vals = PhDen_da.isel(t=0).values
-        kxg_interp = kg * np.sin(thg)
-        kzg_interp = kg * np.cos(thg)
-    else:
-        PhDen0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(PhDen_da.isel(t=0), 'k', 'th', interpmul)
-        kxg_interp = kg_interp * np.sin(thg_interp)
-        kzg_interp = kg_interp * np.cos(thg_interp)
+    # print(vmax)
+    # vmin = 0
 
-    vmax = 3000
+    # if (vmaxAuto is False) and (Lx != 60):
+    #     vmax = 800
+    # if shortTime is True:
+    #     vmax = 200
+    # interpmul = 5
+    # if Lx == 60:
+    #     PhDen0_interp_vals = PhDen_da.isel(t=0).values
+    #     kxg_interp = kg * np.sin(thg)
+    #     kzg_interp = kg * np.cos(thg)
+    # else:
+    #     PhDen0_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(PhDen_da.isel(t=0), 'k', 'th', interpmul)
+    #     kxg_interp = kg_interp * np.sin(thg_interp)
+    #     kzg_interp = kg_interp * np.cos(thg_interp)
 
-    fig, axes = plt.subplots(nrows=3, ncols=2)
-    for tind, t in enumerate(tslices):
-        if tind == 0:
-            ax = axes[0, 0]
-        elif tind == 1:
-            ax = axes[0, 1]
-        if tind == 2:
-            ax = axes[1, 0]
-        if tind == 3:
-            ax = axes[1, 1]
-        if tind == 4:
-            ax = axes[2, 0]
-        if tind == 5:
-            ax = axes[2, 1]
+    # vmax = 3000
 
-        PhDen_interp_vals = PhDen_da.sel(t=t).values
-        if vmaxAuto is True:
-            quad1 = ax.pcolormesh(kzg_interp, kxg_interp, PhDen_interp_vals[:-1, :-1], norm=colors.LogNorm(vmin=1e-3, vmax=vmax), cmap='inferno')
-            quad1m = ax.pcolormesh(kzg_interp, -1 * kxg_interp, PhDen_interp_vals[:-1, :-1], norm=colors.LogNorm(vmin=1e-3, vmax=vmax), cmap='inferno')
-        else:
-            quad1 = ax.pcolormesh(kzg_interp, kxg_interp, PhDen_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax, cmap='inferno')
-            quad1m = ax.pcolormesh(kzg_interp, -1 * kxg_interp, PhDen_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax, cmap='inferno')
+    # fig, axes = plt.subplots(nrows=3, ncols=2)
+    # for tind, t in enumerate(tslices):
+    #     if tind == 0:
+    #         ax = axes[0, 0]
+    #     elif tind == 1:
+    #         ax = axes[0, 1]
+    #     if tind == 2:
+    #         ax = axes[1, 0]
+    #     if tind == 3:
+    #         ax = axes[1, 1]
+    #     if tind == 4:
+    #         ax = axes[2, 0]
+    #     if tind == 5:
+    #         ax = axes[2, 1]
 
-        curve1 = ax.plot(Pph_Vals[tninds[tind]], 0, marker='x', markersize=10, zorder=11, color="xkcd:steel grey")[0]
-        curve1m = ax.plot(Pimp_Vals[tninds[tind]], 0, marker='o', markersize=10, zorder=11, color="xkcd:apple green")[0]
-        curve2 = ax.plot(mc, 0, marker='*', markersize=10, zorder=11, color="cyan")[0]
+    #     PhDen_interp_vals = PhDen_da.sel(t=t).values
+    #     if vmaxAuto is True:
+    #         quad1 = ax.pcolormesh(kzg_interp, kxg_interp, PhDen_interp_vals[:-1, :-1], norm=colors.LogNorm(vmin=1e-3, vmax=vmax), cmap='inferno')
+    #         quad1m = ax.pcolormesh(kzg_interp, -1 * kxg_interp, PhDen_interp_vals[:-1, :-1], norm=colors.LogNorm(vmin=1e-3, vmax=vmax), cmap='inferno')
+    #     else:
+    #         quad1 = ax.pcolormesh(kzg_interp, kxg_interp, PhDen_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax, cmap='inferno')
+    #         quad1m = ax.pcolormesh(kzg_interp, -1 * kxg_interp, PhDen_interp_vals[:-1, :-1], vmin=vmin, vmax=vmax, cmap='inferno')
 
-        def rfunc(k): return (pfs.omegak(k, mB, n0, gBB) - 2 * np.pi / tsVals[tninds[tind]])
-        kroot = fsolve(rfunc, 1e8); kroot = kroot[kroot >= 0]
-        patch_Excitation = plt.Circle((0, 0), kroot[0], edgecolor='red', facecolor='None', linewidth=2)
-        ax.add_patch(patch_Excitation)
-        patch_klin = plt.Circle((0, 0), klin, edgecolor='tab:cyan', facecolor='None')
-        ax.add_patch(patch_klin)
+    #     curve1 = ax.plot(Pph_Vals[tninds[tind]], 0, marker='x', markersize=10, zorder=11, color="xkcd:steel grey")[0]
+    #     curve1m = ax.plot(Pimp_Vals[tninds[tind]], 0, marker='o', markersize=10, zorder=11, color="xkcd:apple green")[0]
+    #     curve2 = ax.plot(mc, 0, marker='*', markersize=10, zorder=11, color="cyan")[0]
 
-        if IRpatch is True:
-            patch_IR = plt.Circle((0, 0), kIRcut, edgecolor='#8c564b', facecolor='#8c564b')
-            ax.add_patch(patch_IR)
-            IR_text = ax.text(0.61, 0.75, r'Weight (IR patch): ' + '{:.2f}%'.format(norm_IRpercent[tninds[tind]]), transform=ax.transAxes, fontsize='small', color='#8c564b')
-            rem_text = ax.text(0.61, 0.675, r'Weight (Rem vis): ' + '{:.2f}%'.format(norm_axpercent[tninds[tind]]), transform=ax.transAxes, fontsize='small', color='yellow')
+    #     def rfunc(k): return (pfs.omegak(k, mB, n0, gBB) - 2 * np.pi / tsVals[tninds[tind]])
+    #     kroot = fsolve(rfunc, 1e8); kroot = kroot[kroot >= 0]
+    #     patch_Excitation = plt.Circle((0, 0), kroot[0], edgecolor='red', facecolor='None', linewidth=2)
+    #     ax.add_patch(patch_Excitation)
+    #     patch_klin = plt.Circle((0, 0), klin, edgecolor='tab:cyan', facecolor='None')
+    #     ax.add_patch(patch_klin)
 
-        if FGRBool is True:
-            if Lx == 60:
-                Omegak_interp_vals = Omegak_da.sel(t=t).values
-            else:
-                Omegak_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Omegak_da.sel(t=t), 'k', 'th', interpmul)
-            FGRmask0 = np.abs(Omegak_interp_vals) < FGRlim
-            Omegak_interp_vals[FGRmask0] = 1
-            Omegak_interp_vals[np.logical_not(FGRmask0)] = 0
-            p = []
-            p.append(ax.contour(kzg_interp, kxg_interp, Omegak_interp_vals, zorder=10, colors='tab:gray'))
-            p.append(ax.contour(kzg_interp, -1 * kxg_interp, Omegak_interp_vals, zorder=10, colors='tab:gray'))
-            p.append(ax.contour(Pimp_Vals[tind] - kzg_interp, -1 * kxg_interp, Omegak_interp_vals, zorder=10, colors='xkcd:military green'))
-            p.append(ax.contour(Pimp_Vals[tind] - kzg_interp, -1 * (-1) * kxg_interp, Omegak_interp_vals, zorder=10, colors='xkcd:military green'))
+    #     if IRpatch is True:
+    #         patch_IR = plt.Circle((0, 0), kIRcut, edgecolor='#8c564b', facecolor='#8c564b')
+    #         ax.add_patch(patch_IR)
+    #         IR_text = ax.text(0.61, 0.75, r'Weight (IR patch): ' + '{:.2f}%'.format(norm_IRpercent[tninds[tind]]), transform=ax.transAxes, fontsize='small', color='#8c564b')
+    #         rem_text = ax.text(0.61, 0.675, r'Weight (Rem vis): ' + '{:.2f}%'.format(norm_axpercent[tninds[tind]]), transform=ax.transAxes, fontsize='small', color='yellow')
 
-        ax.set_xlim([-1 * axislim, axislim])
-        ax.set_ylim([-1 * axislim, axislim])
-        ax.grid(True, linewidth=0.5)
-        ax.set_title(r'$t$ [$\xi/c$]: ' + '{:1.2f}'.format(tsVals[tninds[tind]] / tscale))
-        ax.set_xlabel(r'$k_{z}$')
-        ax.set_ylabel(r'$k_{x}$')
+    #     if FGRBool is True:
+    #         if Lx == 60:
+    #             Omegak_interp_vals = Omegak_da.sel(t=t).values
+    #         else:
+    #             Omegak_interp_vals, kg_interp, thg_interp = pfc.xinterp2D(Omegak_da.sel(t=t), 'k', 'th', interpmul)
+    #         FGRmask0 = np.abs(Omegak_interp_vals) < FGRlim
+    #         Omegak_interp_vals[FGRmask0] = 1
+    #         Omegak_interp_vals[np.logical_not(FGRmask0)] = 0
+    #         p = []
+    #         p.append(ax.contour(kzg_interp, kxg_interp, Omegak_interp_vals, zorder=10, colors='tab:gray'))
+    #         p.append(ax.contour(kzg_interp, -1 * kxg_interp, Omegak_interp_vals, zorder=10, colors='tab:gray'))
+    #         p.append(ax.contour(Pimp_Vals[tind] - kzg_interp, -1 * kxg_interp, Omegak_interp_vals, zorder=10, colors='xkcd:military green'))
+    #         p.append(ax.contour(Pimp_Vals[tind] - kzg_interp, -1 * (-1) * kxg_interp, Omegak_interp_vals, zorder=10, colors='xkcd:military green'))
 
-    patch_FGR_ph = Patch(facecolor='none', edgecolor='tab:gray')
-    patch_FGR_imp = Patch(facecolor='none', edgecolor='xkcd:military green')
+    #     ax.set_xlim([-1 * axislim, axislim])
+    #     ax.set_ylim([-1 * axislim, axislim])
+    #     ax.grid(True, linewidth=0.5)
+    #     ax.set_title(r'$t$ [$\xi/c$]: ' + '{:1.2f}'.format(tsVals[tninds[tind]] / tscale))
+    #     ax.set_xlabel(r'$k_{z}$')
+    #     ax.set_ylabel(r'$k_{x}$')
 
-    if IRpatch is True:
-        handles = (curve1, curve1m, curve2, patch_Excitation, patch_IR, patch_klin, patch_FGR_ph, patch_FGR_imp)
-        labels = (r'$P_{ph}$', r'$P_{imp}$', r'$m_{I}c$', r'$\omega_{|k|}^{-1}(\frac{2\pi}{t})$', r'Singular Region', r'Linear Excitations', 'FGR Phase Space (ph)', 'FGR Phase Space (imp)')
-    else:
-        handles = (curve1, curve1m, curve2, patch_Excitation, patch_klin, patch_FGR_ph, patch_FGR_imp)
-        labels = (r'$P_{ph}$', r'$P_{imp}$', r'$m_{I}c$', r'$\omega_{|k|}^{-1}(\frac{2\pi}{t})$', r'Linear Excitations', 'FGR Phase Space (ph)', 'FGR Phase Space (imp)')
+    # # patch_FGR_ph = Patch(facecolor='none', edgecolor='tab:gray')
+    # # patch_FGR_imp = Patch(facecolor='none', edgecolor='xkcd:military green')
 
-    cbar_ax = fig.add_axes([0.9, 0.2, 0.02, 0.7])
-    fig.colorbar(quad1, cax=cbar_ax, extend='both')
-    fig.legend(handles, labels, ncol=4, loc='lower center')
+    # curve1_LE = Line2D([0], [0], color='none', lw=0, marker='x', markerfacecolor='xkcd:steel grey', markeredgecolor='xkcd:steel grey', markersize=10)
+    # curve1m_LE = Line2D([0], [0], color='none', lw=0, marker='o', markerfacecolor='xkcd:apple green', markeredgecolor='xkcd:apple green', markersize=10)
+    # curve2_LE = Line2D([0], [0], color='none', lw=0, marker='*', markerfacecolor='cyan', markeredgecolor='cyan', markersize=10)
+    # patch_Excitation_LE = Line2D([0], [0], marker='o', color='none', markerfacecolor='none', markeredgecolor='red', markersize=20, mew=2)
+    # patch_klin_LE = Line2D([0], [0], marker='o', color='none', markerfacecolor='none', markeredgecolor='tab:cyan', markersize=20, mew=2)
+    # patch_FGR_ph_LE = Ellipse(xy=(0, 0), width=0.2, height=0.1, angle=0, edgecolor='tab:gray', facecolor='none', lw=3)
+    # patch_FGR_imp_LE = Ellipse(xy=(0, 0), width=0.2, height=0.1, angle=0, edgecolor='xkcd:military green', facecolor='none', lw=3)
 
-    fig.text(0.05, 0.97, '(a)', fontsize=20)
-    fig.text(0.05, 0.68, '(c)', fontsize=20)
-    fig.text(0.05, 0.38, '(e)', fontsize=20)
-    fig.text(0.47, 0.97, '(b)', fontsize=20)
-    fig.text(0.47, 0.68, '(d)', fontsize=20)
-    fig.text(0.47, 0.38, '(f)', fontsize=20)
+    # if IRpatch is True:
+    #     handles = (curve1_LE, curve1m_LE, curve2_LE, patch_Excitation_LE, patch_IR, patch_klin_LE, patch_FGR_ph_LE, patch_FGR_imp_LE)
+    #     labels = (r'$P_{ph}$', r'$P_{imp}$', r'$(m_{I}c)\vec{e}_{k_{z}}$', r'$\omega_{|k|}^{-1}(\frac{2\pi}{t})$', r'Singular Region', r'Linear Excitations', 'FGR Phase Space (ph)', 'FGR Phase Space (imp)')
+    # else:
+    #     handles = (curve1_LE, curve1m_LE, curve2_LE, patch_Excitation_LE, patch_klin_LE, patch_FGR_ph_LE, patch_FGR_imp_LE)
+    #     labels = (r'$P_{ph}$', r'$P_{imp}$', r'$(m_{I}c)\vec{e}_{k_{z}}$', r'$\omega_{|k|}^{-1}(\frac{2\pi}{t})$', r'Linear Excitations', 'FGR Phase Space (ph)', 'FGR Phase Space (imp)')
 
-    fig.set_size_inches(12, 12)
-    fig.subplots_adjust(bottom=0.17, top=0.95, right=0.85, hspace=0.6, wspace=0.4)
-    # fig.savefig(figdatapath + '/Fig7.pdf', dpi=20)
-    fig.savefig(figdatapath + '/Fig7.jpg', quality=20)
+    # cbar_ax = fig.add_axes([0.9, 0.2, 0.02, 0.7])
+    # fig.colorbar(quad1, cax=cbar_ax, extend='both')
+    # fig.legend(handles, labels, ncol=4, loc='lower center', handler_map={Ellipse: HandlerEllipse()})
 
-    # plt.show()
+    # fig.text(0.05, 0.97, '(a)', fontsize=20)
+    # fig.text(0.05, 0.68, '(c)', fontsize=20)
+    # fig.text(0.05, 0.38, '(e)', fontsize=20)
+    # fig.text(0.47, 0.97, '(b)', fontsize=20)
+    # fig.text(0.47, 0.68, '(d)', fontsize=20)
+    # fig.text(0.47, 0.38, '(f)', fontsize=20)
+
+    # fig.set_size_inches(12, 12)
+    # fig.subplots_adjust(bottom=0.17, top=0.95, right=0.85, hspace=0.6, wspace=0.4)
+    # # fig.savefig(figdatapath + '/Fig7.pdf', dpi=20)
+    # fig.savefig(figdatapath + '/Fig7.jpg', quality=20)
+
+    plt.show()
