@@ -7,6 +7,7 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.lines import Line2D
 import matplotlib.colors as colors
 from matplotlib.animation import writers
+from matplotlib.gridspec import GridSpec
 import os
 import itertools
 import pf_dynamic_cart as pfc
@@ -26,6 +27,7 @@ if __name__ == "__main__":
     matplotlib.rcParams['font.serif'] = ['Adobe Garamond Pro']
     # matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
     mpegWriter = writers['ffmpeg'](fps=0.75, bitrate=1800)
+    matplotlib.rcParams.update({'font.size': 16})
 
     # ---- INITIALIZE GRIDS ----
 
@@ -95,23 +97,23 @@ if __name__ == "__main__":
 
     # # # FIG 1 - POLARON GRAPHIC + BOGO DISPERSION + PHASE DIAGRAM + DISTRIBUTION PLOTS
 
-    # # BOGOLIUBOV DISPERSION (SPHERICAL)
+    # BOGOLIUBOV DISPERSION (SPHERICAL)
 
     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds.coords['k'].values); kgrid.initArray_premade('th', qds.coords['th'].values)
     kVals = kgrid.getArray('k')
     wk_Vals = pfs.omegak(kVals, mB, n0, gBB)
     fig, ax = plt.subplots()
     ax.plot(kVals, wk_Vals, 'k-', label='')
-    ax.plot(kVals, nu * kVals, 'b--', label=r'$c_{BEC}|k|$')
-    ax.set_title('Bogoliubov Phonon Dispersion')
+    ax.plot(kVals, nu * kVals, 'b--', label=r'$c|k|$')
     ax.set_xlabel(r'$|k|$')
     ax.set_ylabel(r'$\omega_{|k|}$')
     ax.set_xlim([0, 2])
+    ax.xaxis.set_major_locator(plt.MaxNLocator(2))
     ax.set_ylim([0, 3])
-    ax.legend(loc=2, fontsize='x-large')
-    plt.show()
+    ax.yaxis.set_major_locator(plt.MaxNLocator(3))
+    ax.legend(loc=2, fontsize=20)
 
-    # # PHASE DIAGRAM (SPHERICAL)
+    # PHASE DIAGRAM (SPHERICAL)
 
     Pcrit = np.zeros(aIBi_Vals.size)
     for aind, aIBi in enumerate(aIBi_Vals):
@@ -144,22 +146,21 @@ if __name__ == "__main__":
     Pcrit_norm = scalefac * Pcrit_norm
     Pcrit_interpVals = scalefac * Pcrit_interpVals
 
-    xmin = np.min(aIBi_interpVals)
-    xmax = 1.01 * np.max(aIBi_interpVals)
+    xmin = np.min(aIBi_interpVals / xi)
+    xmax = 1.01 * np.max(aIBi_interpVals / xi)
     ymin = 0
     ymax = 1.01 * np.max(Pcrit_interpVals)
 
-    font = {'family': 'serif', 'color': 'black', 'size': 14}
-    sfont = {'family': 'serif', 'color': 'black', 'size': 13}
+    font = {'family': 'serif', 'color': 'black', 'size': 16}
+    sfont = {'family': 'serif', 'color': 'black', 'size': 15}
 
     fig, ax = plt.subplots()
-    ax.plot(aIBi_Vals, Pcrit_norm, 'kx')
-    ax.plot(aIBi_interpVals, Pcrit_interpVals, 'k-')
+    ax.plot(aIBi_Vals / xi, Pcrit_norm, 'kx')
+    ax.plot(aIBi_interpVals / xi, Pcrit_interpVals, 'k-')
     # f1 = interpolate.interp1d(aIBi_Vals, Pcrit_norm, kind='cubic')
     # ax.plot(aIBi_interpVals, f1(aIBi_interpVals), 'k-')
-    ax.set_title('Ground State Phase Diagram')
-    ax.set_xlabel(r'$a_{IB}^{-1}$')
-    ax.set_ylabel(r'$\frac{P}{m_{I}c_{BEC}}$')
+    ax.set_xlabel(r'$a_{IB}^{-1}$ [$\xi$]', fontsize=20)
+    ax.set_ylabel(r'$\langle v_{I}(t_{0})\rangle/c$', fontsize=20)
     ax.set_xlim([xmin, xmax])
     ax.set_ylim([ymin, ymax])
     ax.fill_between(aIBi_interpVals, Pcrit_interpVals, ymax, facecolor='b', alpha=0.25)
@@ -169,7 +170,7 @@ if __name__ == "__main__":
     ax.text(-6.5, ymin + 0.6 * (ymax - ymin), 'Cherenkov', fontdict=font)
     ax.text(-6.35, ymin + 0.525 * (ymax - ymin), '(' + r'$Z=0$' + ')', fontdict=sfont)
 
-    plt.show()
+    fig.set_size_inches(8.5, 11)
 
     # # # QUASIPARTICLE RESIDUE (SPHERICAL)
 
@@ -501,4 +502,4 @@ if __name__ == "__main__":
     # axes[1].set_title('Incoherent Part FWHM')
     # fig2.tight_layout()
 
-    # plt.show()
+    plt.show()
