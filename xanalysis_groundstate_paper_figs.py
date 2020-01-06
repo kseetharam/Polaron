@@ -7,7 +7,7 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.lines import Line2D
 import matplotlib.colors as colors
 from matplotlib.animation import writers
-from matplotlib.gridspec import GridSpec
+import matplotlib.image as mpimg
 import os
 import itertools
 import pf_dynamic_cart as pfc
@@ -21,10 +21,6 @@ if __name__ == "__main__":
 
     # # Initialization
 
-    # fm = matplotlib.font_manager.json_load(os.path.expanduser("~/.cache/matplotlib/fontlist-v310.json"))
-    # fm.findfont("serif", rebuild_if_missing=False)
-    matplotlib.rcParams['font.family'] = 'serif'
-    matplotlib.rcParams['font.serif'] = ['Adobe Garamond Pro']
     # matplotlib.rcParams.update({'font.size': 12, 'text.usetex': True})
     mpegWriter = writers['ffmpeg'](fps=0.75, bitrate=1800)
     matplotlib.rcParams.update({'font.size': 16})
@@ -74,6 +70,9 @@ if __name__ == "__main__":
 
     print(innerdatapath)
 
+    figdatapath = '/Users/kis/Dropbox/Apps/Overleaf/Quantum Cherenkov Transition in Bose Polaron Systems/figures/figdump'
+    innerdatapath_cart = innerdatapath[0:-10] + '_cart'
+
     # # Analysis of Total Dataset
 
     aIBi = -2
@@ -97,80 +96,187 @@ if __name__ == "__main__":
 
     # # # FIG 1 - POLARON GRAPHIC + BOGO DISPERSION + PHASE DIAGRAM + DISTRIBUTION PLOTS
 
-    # BOGOLIUBOV DISPERSION (SPHERICAL)
+    fig1 = plt.figure(constrained_layout=False)
+    fig1.set_size_inches(8.5, 11)
+    gs1 = fig1.add_gridspec(nrows=2, ncols=1, bottom=0.55, top=0.95, left=0.05, right=0.3, height_ratios=[1, 1])
+    gs2 = fig1.add_gridspec(nrows=1, ncols=1, bottom=0.55, top=0.95, left=0.37, right=0.98)
+    gs3 = fig1.add_gridspec(nrows=1, ncols=2, bottom=0.05, top=0.4, left=0.05, right=0.98)
 
-    kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds.coords['k'].values); kgrid.initArray_premade('th', qds.coords['th'].values)
-    kVals = kgrid.getArray('k')
-    wk_Vals = pfs.omegak(kVals, mB, n0, gBB)
-    fig, ax = plt.subplots()
-    ax.plot(kVals, wk_Vals, 'k-', label='')
-    ax.plot(kVals, nu * kVals, 'b--', label=r'$c|k|$')
-    ax.set_xlabel(r'$|k|$')
-    ax.set_ylabel(r'$\omega_{|k|}$')
-    ax.set_xlim([0, 2])
-    ax.xaxis.set_major_locator(plt.MaxNLocator(2))
-    ax.set_ylim([0, 3])
-    ax.yaxis.set_major_locator(plt.MaxNLocator(3))
-    ax.legend(loc=2, fontsize=20)
+    ax_pol = fig1.add_subplot(gs1[0], frame_on=False); ax_pol.get_xaxis().set_visible(False); ax_pol.get_yaxis().set_visible(False)
+    ax_bogo = fig1.add_subplot(gs1[1])
+    ax_PD = fig1.add_subplot(gs2[0])
+    ax_supDist = fig1.add_subplot(gs3[0])
+    ax_subDist = fig1.add_subplot(gs3[1])
 
-    # PHASE DIAGRAM (SPHERICAL)
+    fig1.text(0.02, 0.97, '(a)', fontsize=20)
+    fig1.text(0.02, 0.75, '(b)', fontsize=20)
+    fig1.text(0.35, 0.97, '(c)', fontsize=20)
+    fig1.text(0.02, 0.42, '(d)', fontsize=20)
+    fig1.text(0.50, 0.42, '(e)', fontsize=20)
 
-    Pcrit = np.zeros(aIBi_Vals.size)
-    for aind, aIBi in enumerate(aIBi_Vals):
-        qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-        CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
-        kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    # # POLARON GRAPHIC
 
-        Energy_Vals_inf = np.zeros(PVals.size)
-        for Pind, P in enumerate(PVals):
-            CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
-            Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+    # polimg = mpimg.imread('images/PolaronGraphic.png')
+    # imgplot = ax_pol.imshow(polimg)
 
-        Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
-        Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 2 * PVals.size)
-        Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
-        Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
-        # Pcrit[aind] = Pinf_Vals[np.argwhere(Einf_2ndderiv_Vals < 0)[-2][0] + 3]
-        Pcrit[aind] = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 0]  # there is a little bit of fudging with the -3 here so that aIBi=-10 gives me Pcrit/(mI*c) = 1 -> I can also just generate data for weaker interactions and see if it's better
+    # # BOGOLIUBOV DISPERSION (SPHERICAL)
 
-    Pcrit_norm = Pcrit / (mI * nu)
-    Pcrit_tck = interpolate.splrep(aIBi_Vals, Pcrit_norm, s=0, k=3)
-    aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
-    Pcrit_interpVals = 1 * interpolate.splev(aIBi_interpVals, Pcrit_tck, der=0)
+    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', qds.coords['k'].values); kgrid.initArray_premade('th', qds.coords['th'].values)
+    # kVals = kgrid.getArray('k')
+    # wk_Vals = pfs.omegak(kVals, mB, n0, gBB)
+    # ax_bogo.plot(kVals, wk_Vals, 'k-', label='')
+    # ax_bogo.plot(kVals, nu * kVals, 'b--', label=r'$c|k|$')
+    # ax_bogo.set_xlabel(r'$|k|$')
+    # ax_bogo.set_ylabel(r'$\omega_{|k|}$')
+    # ax_bogo.set_xlim([0, 2])
+    # ax_bogo.xaxis.set_major_locator(plt.MaxNLocator(2))
+    # ax_bogo.set_ylim([0, 3])
+    # ax_bogo.yaxis.set_major_locator(plt.MaxNLocator(3))
+    # ax_bogo.legend(loc=2, fontsize=20)
 
-    print(Pcrit_norm)
-    print(Pcrit_norm[1], Pcrit_norm[5], Pcrit_norm[-5])
+    # # PHASE DIAGRAM (SPHERICAL)
 
-    scalefac = 1.0
-    # scalefac = 0.95  # just to align weakly interacting case slightly to 1 (it's pretty much there, would just need higher resolution data)
-    Pcrit_norm = scalefac * Pcrit_norm
-    Pcrit_interpVals = scalefac * Pcrit_interpVals
+    # Pcrit = np.zeros(aIBi_Vals.size)
+    # for aind, aIBi in enumerate(aIBi_Vals):
+    #     qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    #     CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+    #     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
 
-    xmin = np.min(aIBi_interpVals / xi)
-    xmax = 1.01 * np.max(aIBi_interpVals / xi)
-    ymin = 0
-    ymax = 1.01 * np.max(Pcrit_interpVals)
+    #     Energy_Vals_inf = np.zeros(PVals.size)
+    #     for Pind, P in enumerate(PVals):
+    #         CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
+    #         Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
 
-    font = {'family': 'serif', 'color': 'black', 'size': 16}
-    sfont = {'family': 'serif', 'color': 'black', 'size': 15}
+    #     Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+    #     Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 2 * PVals.size)
+    #     Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+    #     Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+    #     # Pcrit[aind] = Pinf_Vals[np.argwhere(Einf_2ndderiv_Vals < 0)[-2][0] + 3]
+    #     Pcrit[aind] = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 0]  # there is a little bit of fudging with the -3 here so that aIBi=-10 gives me Pcrit/(mI*c) = 1 -> I can also just generate data for weaker interactions and see if it's better
 
-    fig, ax = plt.subplots()
-    ax.plot(aIBi_Vals / xi, Pcrit_norm, 'kx')
-    ax.plot(aIBi_interpVals / xi, Pcrit_interpVals, 'k-')
-    # f1 = interpolate.interp1d(aIBi_Vals, Pcrit_norm, kind='cubic')
-    # ax.plot(aIBi_interpVals, f1(aIBi_interpVals), 'k-')
-    ax.set_xlabel(r'$a_{IB}^{-1}$ [$\xi$]', fontsize=20)
-    ax.set_ylabel(r'$\langle v_{I}(t_{0})\rangle/c$', fontsize=20)
-    ax.set_xlim([xmin, xmax])
-    ax.set_ylim([ymin, ymax])
-    ax.fill_between(aIBi_interpVals, Pcrit_interpVals, ymax, facecolor='b', alpha=0.25)
-    ax.fill_between(aIBi_interpVals, ymin, Pcrit_interpVals, facecolor='g', alpha=0.25)
-    ax.text(-3.0, ymin + 0.175 * (ymax - ymin), 'Polaron', fontdict=font)
-    ax.text(-2.9, ymin + 0.1 * (ymax - ymin), '(' + r'$Z>0$' + ')', fontdict=sfont)
-    ax.text(-6.5, ymin + 0.6 * (ymax - ymin), 'Cherenkov', fontdict=font)
-    ax.text(-6.35, ymin + 0.525 * (ymax - ymin), '(' + r'$Z=0$' + ')', fontdict=sfont)
+    # Pcrit_norm = Pcrit / (mI * nu)
+    # Pcrit_tck = interpolate.splrep(aIBi_Vals, Pcrit_norm, s=0, k=3)
+    # aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
+    # Pcrit_interpVals = 1 * interpolate.splev(aIBi_interpVals, Pcrit_tck, der=0)
 
-    fig.set_size_inches(8.5, 11)
+    # print(Pcrit_norm)
+    # print(Pcrit_norm[1], Pcrit_norm[5], Pcrit_norm[-5])
+
+    # scalefac = 1.0
+    # # scalefac = 0.95  # just to align weakly interacting case slightly to 1 (it's pretty much there, would just need higher resolution data)
+    # Pcrit_norm = scalefac * Pcrit_norm
+    # Pcrit_interpVals = scalefac * Pcrit_interpVals
+
+    # xmin = np.min(aIBi_interpVals / xi)
+    # xmax = 1.01 * np.max(aIBi_interpVals / xi)
+    # ymin = 0
+    # ymax = 1.01 * np.max(Pcrit_interpVals)
+
+    # font = {'family': 'serif', 'color': 'black', 'size': 16}
+    # sfont = {'family': 'serif', 'color': 'black', 'size': 15}
+
+    # ax_PD.plot(aIBi_Vals / xi, Pcrit_norm, 'kx')
+    # ax_PD.plot(aIBi_interpVals / xi, Pcrit_interpVals, 'k-')
+    # # f1 = interpolate.interp1d(aIBi_Vals, Pcrit_norm, kind='cubic')
+    # # ax_PD.plot(aIBi_interpVals, f1(aIBi_interpVals), 'k-')
+    # ax_PD.set_xlabel(r'$a_{IB}^{-1}$ [$\xi$]', fontsize=20)
+    # ax_PD.set_ylabel(r'Total Momentum $P$ [$m_{I}c$]', fontsize=20)
+    # ax_PD.set_xlim([xmin, xmax])
+    # ax_PD.set_ylim([ymin, ymax])
+    # ax_PD.fill_between(aIBi_interpVals / xi, Pcrit_interpVals, ymax, facecolor='b', alpha=0.25)
+    # ax_PD.fill_between(aIBi_interpVals / xi, ymin, Pcrit_interpVals, facecolor='g', alpha=0.25)
+    # ax_PD.text(-3.0, ymin + 0.175 * (ymax - ymin), 'Polaron', fontdict=font)
+    # ax_PD.text(-2.9, ymin + 0.1 * (ymax - ymin), '(' + r'$Z>0$' + ')', fontdict=sfont)
+    # # ax_PD.text(-6.5, ymin + 0.6 * (ymax - ymin), 'Cherenkov', fontdict=font)
+    # # ax_PD.text(-6.35, ymin + 0.525 * (ymax - ymin), '(' + r'$Z=0$' + ')', fontdict=sfont)
+    # ax_PD.text(-12.8, ymin + 0.86 * (ymax - ymin), 'Cherenkov', fontdict=font)
+    # ax_PD.text(-12.65, ymin + 0.785 * (ymax - ymin), '(' + r'$Z=0$' + ')', fontdict=sfont)
+
+    # supDist_coords = [-5.0 / xi, 3.0]  # is [aIBi/xi, P/(mI*c)]
+    # subDist_coords = [-5.0 / xi, 0.5]  # is [aIBi/xi, P/(mI*c)]
+
+    # ax_PD.plot(supDist_coords[0], supDist_coords[1], linestyle='', marker='8', mec='#8f1402', mfc='#8f1402', ms=10)
+    # ax_PD.plot(subDist_coords[0], subDist_coords[1], linestyle='', marker='8', mec='#8f1402', mfc='#8f1402', ms=10)
+
+    # IMPURITY DISTRIBUTION ANIMATION WITH CHARACTERIZATION (CARTESIAN)
+
+    GaussianBroadening = True; sigma = 0.1
+
+    aIBi = -5
+    qds_aIBi = xr.open_dataset(innerdatapath_cart + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    PVals = qds_aIBi['P'].values
+
+    nPIm_FWHM_indices = []
+    nPIm_distPeak_index = np.zeros(PVals.size, dtype=int)
+    nPIm_FWHM_Vals = np.zeros(PVals.size)
+    nPIm_distPeak_Vals = np.zeros(PVals.size)
+    nPIm_deltaPeak_Vals = np.zeros(PVals.size)
+    nPIm_Tot_Vals = np.zeros(PVals.size)
+    nPIm_Vec = np.empty(PVals.size, dtype=np.object)
+    PIm_Vec = np.empty(PVals.size, dtype=np.object)
+
+    for ind, P in enumerate(PVals):
+        qds_nPIm_inf = qds_aIBi['nPI_mag'].sel(P=P).isel(t=-1).dropna('PI_mag')
+        PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
+        dPIm = PIm_Vals[1] - PIm_Vals[0]
+
+        # # Plot nPIm(t=inf)
+        # qds_nPIm_inf.plot(ax=ax, label='P: {:.1f}'.format(P))
+        nPIm_Vec[ind] = qds_nPIm_inf.values
+        PIm_Vec[ind] = PIm_Vals
+
+        # # Calculate nPIm(t=inf) normalization
+        nPIm_Tot_Vals[ind] = np.sum(qds_nPIm_inf.values * dPIm) + qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
+
+        # Calculate FWHM, distribution peak, and delta peak
+        nPIm_FWHM_Vals[ind] = pfc.FWHM(PIm_Vals, qds_nPIm_inf.values)
+        nPIm_distPeak_Vals[ind] = np.max(qds_nPIm_inf.values)
+        nPIm_deltaPeak_Vals[ind] = qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
+
+        D = qds_nPIm_inf.values - np.max(qds_nPIm_inf.values) / 2
+        indices = np.where(D > 0)[0]
+        nPIm_FWHM_indices.append((indices[0], indices[-1]))
+        nPIm_distPeak_index[ind] = np.argmax(qds_nPIm_inf.values)
+
+    Pnorm = PVals / (mI * nu)
+    Pratio_sup = 3.0; Pind_sup = np.abs(Pnorm - Pratio_sup).argmin()
+    Pratio_sub = 0.5; Pind_sub = np.abs(Pnorm - Pratio_sub).argmin()
+
+    print(Pnorm[Pind_sup], Pnorm[Pind_sub])
+    print(nPIm_deltaPeak_Vals[Pind_sup], nPIm_deltaPeak_Vals[Pind_sub])
+
+    ax_supDist.plot(PIm_Vec[Pind_sup] / nu, nPIm_Vec[Pind_sup], color='k', lw=0.5, label='Incoherent Part')
+    ax_supDist.set_xlim([-0.01, np.max(PIm_Vec[Pind_sup] / nu)])
+    ax_supDist.set_ylim([0, 1.05])
+    ax_supDist.set_ylabel(r'$n_{|\vec{P_{I}}|}$')
+    ax_supDist.set_xlabel(r'$|\vec{P_{I}}|/c$')
+    ax_supDist.fill_between(PIm_Vec[Pind_sup] / nu, np.zeros(PIm_Vals.size), nPIm_Vec[Pind_sup], facecolor='k', alpha=0.25)
+    ax_supDist.legend(loc=1)
+    if GaussianBroadening:
+        Pnorm_sup = PVals[Pind_sup] / nu
+        deltaPeak_sup = nPIm_deltaPeak_Vals[Pind_sup]
+        PIm_norm_sup = PIm_Vec[Pind_sup] / nu
+        delta_GB_sup = deltaPeak_sup * np.exp(((PIm_norm_sup - Pnorm_sup)**2) / (2 * sigma**2)) / sigma
+        ax_supDist.plot(PIm_norm_sup, delta_GB_sup, linestyle='-', color='#bf9005', linewidth=1, label='Delta Peak (Z-factor)')
+    else:
+        ax_supDist.plot((PVals[Pind_sup] / nu) * np.ones(PIm_Vals.size), np.linspace(0, nPIm_deltaPeak_Vals[Pind_sup], PIm_Vals.size), linestyle='-', color='#bf9005', linewidth=1, label='Delta Peak (Z-factor)')
+
+    ax_subDist.plot(PIm_Vec[Pind_sub] / nu, nPIm_Vec[Pind_sub], color='k', lw=0.5, label='Incoherent Part')
+    ax_subDist.set_xlim([-0.01, np.max(PIm_Vec[Pind_sub] / nu)])
+    ax_subDist.set_ylim([0, 1.05])
+    ax_subDist.set_ylabel(r'$n_{|\vec{P_{I}}|}$')
+    ax_subDist.set_xlabel(r'$|\vec{P_{I}}|/c$')
+    ax_subDist.legend(loc=1)
+    if GaussianBroadening:
+        Pnorm_sub = PVals[Pind_sub] / nu
+        deltaPeak_sub = nPIm_deltaPeak_Vals[Pind_sub]
+        PIm_norm_sub = PIm_Vec[Pind_sub] / nu
+        delta_GB_sub = deltaPeak_sub * np.exp(((PIm_norm_sub - Pnorm_sub)**2) / (2 * sigma**2)) / sigma
+        ax_subDist.plot(PIm_norm_sub, delta_GB_sub, linestyle='-', color='#bf9005', linewidth=1, label='Delta Peak (Z-factor)')
+    else:
+        ax_subDist.plot((PVals[Pind_sub] / nu) * np.ones(PIm_Vals.size), np.linspace(0, nPIm_deltaPeak_Vals[Pind_sub], PIm_Vals.size), linestyle='-', color='#bf9005', linewidth=1, label='Delta Peak (Z-factor)')
+
+    # fig1.savefig(figdatapath + '/Fig1.pdf')
 
     # # # QUASIPARTICLE RESIDUE (SPHERICAL)
 
