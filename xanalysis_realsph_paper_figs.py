@@ -150,6 +150,8 @@ if __name__ == "__main__":
 
     # # # # FIG 4 - S(t) AND v_Imp CURVES (WEAK AND STRONG INTERACTIONS)
 
+    # matplotlib.rcParams.update({'font.size': 20})
+
     # tailFit = True
     # logScale = True
     # PimpData_roll = False; PimpData_rollwin = 2
@@ -243,8 +245,8 @@ if __name__ == "__main__":
     # fig.text(0.56, 0.47, '(d)', fontsize=20)
 
     # handles, labels = axes[0, 0].get_legend_handles_labels()
-    # fig.legend(handles, labels, title=r'$\langle v_{I}(t_{0})\rangle / c$', ncol=1, loc='center right', bbox_to_anchor=(0.09, 0.40))
-    # fig.subplots_adjust(left=0.15, bottom=0.075, top=0.925, right=0.95, wspace=0.25, hspace=0.32)
+    # fig.legend(handles, labels, title=r'$\langle v_{I}(t_{0})\rangle / c$', ncol=1, loc='center right', bbox_to_anchor=(0.11, 0.38))
+    # fig.subplots_adjust(left=0.16, bottom=0.1, top=0.925, right=0.95, wspace=0.25, hspace=0.32)
     # fig.set_size_inches(16.9, 9)
     # # fig.savefig(figdatapath + '/Fig4.pdf')
 
