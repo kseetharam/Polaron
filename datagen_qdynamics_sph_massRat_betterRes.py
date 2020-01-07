@@ -131,7 +131,7 @@ if __name__ == "__main__":
                 elif toggleDict['Location'] == 'work':
                     datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
                 elif toggleDict['Location'] == 'cluster':
-                    datapath = '/n/scratchlfs/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+                    datapath = '/n/scratchlfs02/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
                 if higherCutoff is True:
                     datapath = datapath + '_cutoffRat_{:.2f}'.format(cutoffRat)
                 if betterResolution is True:

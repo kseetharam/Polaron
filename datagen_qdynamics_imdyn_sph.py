@@ -76,7 +76,7 @@ if __name__ == "__main__":
     elif toggleDict['Location'] == 'work':
         datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, mI / mB)
     elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/scratchlfs/demler_lab/kis/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, mI / mB)
+        datapath = '/n/scratchlfs02/demler_lab/kis/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, mI / mB)
 
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
