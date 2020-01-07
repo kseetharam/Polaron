@@ -290,72 +290,83 @@ if __name__ == "__main__":
     # fig1.set_size_inches(7.8, 9)
     # # fig1.savefig(figdatapath + '/Fig1.pdf')
 
-    # # # FIG 2 - ENERGY DERIVATIVES + SOUND VELOCITY + EFFECTIVE MASS
+    # # # # FIG 2 - ENERGY DERIVATIVES + SOUND VELOCITY + EFFECTIVE MASS
 
-    # # ENERGY DERIVATIVES
+    # matplotlib.rcParams.update({'font.size': 12})
+    # labelsize = 13
+    # legendsize = 12
 
-    aIBi = -5
-    qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    PVals = qds_aIBi['P'].values
+    # fig2 = plt.figure(constrained_layout=False)
+    # gs1 = fig2.add_gridspec(nrows=3, ncols=1, bottom=0.12, top=0.925, left=0.12, right=0.40, hspace=1.0)
+    # gs2 = fig2.add_gridspec(nrows=2, ncols=1, bottom=0.12, top=0.925, left=0.58, right=0.98, hspace=0.7)
 
-    CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
-    kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    # ax_GSE0 = fig2.add_subplot(gs1[0])
+    # ax_GSE1 = fig2.add_subplot(gs1[1])
+    # ax_GSE2 = fig2.add_subplot(gs1[2])
+    # ax_Vel = fig2.add_subplot(gs2[0])
+    # ax_Mass = fig2.add_subplot(gs2[1])
 
-    Energy_Vals = np.zeros((PVals.size, tVals.size))
-    for Pind, P in enumerate(PVals):
-        for tind, t in enumerate(tVals):
-            CSAmp = CSAmp_ds.sel(P=P, t=t).values
-            Energy_Vals[Pind, tind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+    # fig2.text(0.01, 0.95, '(a)', fontsize=labelsize)
+    # fig2.text(0.01, 0.65, '(b)', fontsize=labelsize)
+    # fig2.text(0.01, 0.32, '(c)', fontsize=labelsize)
+    # fig2.text(0.47, 0.95, '(d)', fontsize=labelsize)
+    # fig2.text(0.47, 0.47, '(e)', fontsize=labelsize)
 
-    Energy_Vals_inf = Energy_Vals[:, -1]
-    Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+    # # # ENERGY DERIVATIVES (SPHERICAL)
 
-    Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
-    Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
-    Einf_1stderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=1)
-    Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+    # aIBi = -5
+    # qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    # PVals = qds_aIBi['P'].values
 
-    sound_mask = np.abs(Einf_2ndderiv_Vals) <= 5e-3
-    Einf_sound = Einf_Vals[sound_mask]
-    Pinf_sound = Pinf_Vals[sound_mask]
-    [vsound, vs_const] = np.polyfit(Pinf_sound, Einf_sound, deg=1)
+    # CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
 
-    ms_mask = Pinf_Vals <= 0.5
-    Einf_1stderiv_ms = Einf_1stderiv_Vals[ms_mask]
-    Pinf_ms = Pinf_Vals[ms_mask]
-    [ms, ms_const] = np.polyfit(Pinf_ms, Einf_1stderiv_ms, deg=1)
+    # Energy_Vals = np.zeros((PVals.size, tVals.size))
+    # for Pind, P in enumerate(PVals):
+    #     for tind, t in enumerate(tVals):
+    #         CSAmp = CSAmp_ds.sel(P=P, t=t).values
+    #         Energy_Vals[Pind, tind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
 
-    fig, axes = plt.subplots(nrows=3, ncols=1)
-    axes[0].plot(Pinf_Vals, Einf_Vals, 'k-')
-    axes[0].set_title('Ground State Energy (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    axes[0].set_xlabel('P')
-    axes[0].set_ylim([1.1 * np.min(Einf_Vals), -0.5])
-    axes[0].set_xlim([0, 2.0])
+    # Energy_Vals_inf = Energy_Vals[:, -1]
+    # Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
 
-    axes[1].plot(Pinf_Vals, Einf_1stderiv_Vals, 'k-')
-    axes[1].set_title('First Derivative of Energy')
-    axes[1].set_xlabel('P')
-    axes[1].plot(Pinf_Vals, vsound * np.ones(Pinf_Vals.size), 'r--', linewidth=2.0)
-    axes[1].set_ylim([0, 1.2 * np.max(Einf_1stderiv_Vals)])
-    axes[1].set_xlim([0, 2.0])
+    # Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
+    # Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+    # Einf_1stderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=1)
+    # Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
 
-    axes[2].plot(Pinf_Vals[::2], Einf_2ndderiv_Vals[::2], 'ko')
-    axes[2].set_title('Second Derivative of Energy')
-    axes[2].set_xlabel('P')
-    axes[2].plot(Pinf_Vals, ms * np.ones(Pinf_Vals.size), 'c--', linewidth=2.0)
-    axes[2].set_ylim([0, 1.2 * np.max(Einf_2ndderiv_Vals)])
-    axes[2].set_xlim([0, 2.0])
+    # sound_mask = np.abs(Einf_2ndderiv_Vals) <= 5e-3
+    # Einf_sound = Einf_Vals[sound_mask]
+    # Pinf_sound = Pinf_Vals[sound_mask]
+    # [vsound, vs_const] = np.polyfit(Pinf_sound, Einf_sound, deg=1)
 
-    # # This plot below is for saturation/convergence of the energy with imaginary time
-    # fig3, ax3 = plt.subplots()
-    # Pind = 8
-    # ax3.plot(tVals, np.abs(Energy_Vals[Pind, :]), 'k-')
-    # ax3.set_yscale('log')
-    # ax3.set_xscale('log')
-    # ax3.set_title('Ground State Energy (' + r'$a_{IB}^{-1}=$' + '{0}, '.format(aIBi) + r'$P=$' + '{:.2f})'.format(PVals[Pind]))
-    # ax3.set_xlabel('Imaginary time')
+    # ms_mask = Pinf_Vals <= 0.5
+    # Einf_1stderiv_ms = Einf_1stderiv_Vals[ms_mask]
+    # Pinf_ms = Pinf_Vals[ms_mask]
+    # [ms, ms_const] = np.polyfit(Pinf_ms, Einf_1stderiv_ms, deg=1)
 
-    fig.tight_layout()
+    # ax_GSE0.plot(Pinf_Vals / (mI * nu), Einf_Vals, 'k-')
+    # # ax_GSE0.set_title('Ground State Energy (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    # ax_GSE0.set_xlabel(r'$P$ [$m_{I}c$]', fontsize=labelsize)
+    # ax_GSE0.set_ylabel(r'$E$', fontsize=labelsize)
+    # ax_GSE0.set_ylim([1.1 * np.min(Einf_Vals), -0.5])
+    # ax_GSE0.set_xlim([0, 2.0])
+
+    # ax_GSE1.plot(Pinf_Vals / (mI * nu), Einf_1stderiv_Vals, 'k-')
+    # # ax_GSE1.set_title('First Derivative of Energy')
+    # ax_GSE1.set_xlabel(r'$P$ [$m_{I}c$]', fontsize=labelsize)
+    # ax_GSE1.set_ylabel(r'$dE/dP$', fontsize=labelsize)
+    # ax_GSE1.plot(Pinf_Vals / (mI * nu), vsound * np.ones(Pinf_Vals.size), 'r--', linewidth=2.0)
+    # ax_GSE1.set_ylim([0, 1.2 * np.max(Einf_1stderiv_Vals)])
+    # ax_GSE1.set_xlim([0, 2.0])
+
+    # ax_GSE2.plot(Pinf_Vals[::2] / (mI * nu), Einf_2ndderiv_Vals[::2], 'ko')
+    # # ax_GSE2.set_title('Second Derivative of Energy')
+    # ax_GSE2.set_xlabel(r'$P$ [$m_{I}c$]', fontsize=labelsize)
+    # ax_GSE2.set_ylabel(r'$d^{2}E/dP^{2}$', fontsize=labelsize)
+    # ax_GSE2.plot(Pinf_Vals / (mI * nu), ms * np.ones(Pinf_Vals.size), 'c--', linewidth=2.0)
+    # ax_GSE2.set_ylim([0, 1.2 * np.max(Einf_2ndderiv_Vals)])
+    # ax_GSE2.set_xlim([0, 2.0])
 
     # # # POLARON SOUND VELOCITY (SPHERICAL)
 
@@ -391,15 +402,13 @@ if __name__ == "__main__":
 
     # print(vsound_Vals)
     # print(100 * (vsound_Vals - nu) / nu)
-    # fig, ax = plt.subplots()
-    # ax.plot(aIBi_Vals, vsound_Vals, 'rx', mew=1, ms=10, label='Post-Transition Polaron Sound Velocity (' + r'$\frac{\partial E}{\partial P}$' + ')')
-    # ax.plot(aIBi_Vals, vI_Vals, 'ko', mew=1, ms=10, markerfacecolor='none', label='Post-Transition Impurity Velocity (' + r'$\frac{P-<P_{ph}>}{m_{I}}$' + ')')
-    # ax.plot(aIBi_Vals, nu * np.ones(aIBi_Vals.size), 'g--', linewidth=3.0, label='BEC Sound Speed')
-    # ax.set_ylim([0, 1.2])
-    # ax.legend(loc=(0.25, 0.1))
-    # ax.set_title('Velocity Comparison')
-    # ax.set_xlabel(r'$a_{IB}^{-1}$')
-    # ax.set_ylabel('Velocity')
+    # ax_Vel.plot(aIBi_Vals / xi, vsound_Vals / nu, 'rx', mew=1, ms=10, label='Polaron')
+    # ax_Vel.plot(aIBi_Vals / xi, vI_Vals / nu, 'ko', mew=1, ms=10, markerfacecolor='none', label='Impurity')
+    # ax_Vel.plot(aIBi_Vals / xi, np.ones(aIBi_Vals.size), 'g--', linewidth=2.0, label='')
+    # ax_Vel.set_ylim([0.5, 1.25])
+    # ax_Vel.legend(loc=(0.25, 0.1), fontsize=legendsize)
+    # ax_Vel.set_xlabel(r'$a_{IB}^{-1}$ [$\xi$]', fontsize=labelsize)
+    # ax_Vel.set_ylabel(r'Velocity [$c$]', fontsize=labelsize)
 
     # # # POLARON EFFECTIVE MASS (SPHERICAL)
 
@@ -433,54 +442,14 @@ if __name__ == "__main__":
     # aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
     # mE_interpVals = 1 * interpolate.splev(aIBi_interpVals, mE_tck, der=0)
 
-    # fig, ax = plt.subplots()
-    # ax.plot(aIBi_Vals, massEnhancement_Vals, 'cD', mew=1, ms=10)
-    # ax.plot(aIBi_interpVals, mE_interpVals, 'c-')
-    # ax.set_title('Mass Enhancement')
-    # ax.set_xlabel(r'$a_{IB}^{-1}$')
-    # ax.set_ylabel(r'$\frac{m^{*}}{m_{I}} = \frac{1}{m_{I}}\frac{\partial^{2} E}{\partial P^{2}}$')
+    # ax_Mass.plot(aIBi_Vals / xi, massEnhancement_Vals, 'cD', mew=1, ms=5)
+    # ax_Mass.plot(aIBi_interpVals / xi, mE_interpVals, 'c-')
+    # ax_Mass.set_xlabel(r'$a_{IB}^{-1}$ [$\xi$]', fontsize=labelsize)
+    # # ax_Mass.set_ylabel(r'$\frac{m^{*}}{m_{I}} = \frac{1}{m_{I}}\frac{\partial^{2} E}{\partial P^{2}}$')
+    # ax_Mass.set_ylabel(r'Effective Mass [$m_{I}$]', fontsize=labelsize)
 
-    # # # POLARON EFFECTIVE MASS VS CRITICAL MOMENTUM (SPHERICAL)
-
-    # ms_Vals = np.zeros(aIBi_Vals.size)
-    # Pcrit = np.zeros(aIBi_Vals.size)
-    # for aind, aIBi in enumerate(aIBi_Vals):
-    #     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    #     qds_aIBi = qds.isel(t=-1)
-    #     CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
-    #     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
-    #     Energy_Vals_inf = np.zeros(PVals.size)
-    #     PI_Vals = np.zeros(PVals.size)
-    #     for Pind, P in enumerate(PVals):
-    #         CSAmp = CSAmp_ds.sel(P=P).values
-    #         Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
-    #         PI_Vals[Pind] = P - qds_aIBi.sel(P=P)['Pph'].values
-
-    #     Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
-    #     Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 2 * PVals.size)
-    #     Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
-    #     Einf_1stderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=1)
-    #     Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
-
-    #     ms_mask = Pinf_Vals < 0.3
-    #     Einf_1stderiv_ms = Einf_1stderiv_Vals[ms_mask]
-    #     Pinf_ms = Pinf_Vals[ms_mask]
-    #     [ms_Vals[aind], ms_const] = np.polyfit(Pinf_ms, Einf_1stderiv_ms, deg=1)
-
-    #     Pcrit[aind] = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 0]
-
-    # massEnhancement_Vals = (1 / ms_Vals) / mI
-    # Pcrit_norm = Pcrit / (mI * nu)
-    # print(massEnhancement_Vals)
-    # print(Pcrit_norm)
-    # print(100 * np.abs(massEnhancement_Vals - Pcrit_norm) / Pcrit_norm)
-
-    # fig, ax = plt.subplots()
-    # ax.plot(aIBi_Vals, massEnhancement_Vals, 'co', mew=1, ms=10, markerfacecolor='none', label='Mass Enhancement (' + r'$\frac{m^{*}}{m_{I}}$' + ')')
-    # ax.plot(aIBi_Vals, Pcrit_norm, 'kx', mew=1, ms=10, label='Normalized Critical Momentum (' + r'$\frac{P_{crit}}{m_{I}c_{BEC}}$' + ')')
-    # ax.legend(loc=2)
-    # ax.set_title('Mass Enhancement vs Critical Momentum')
-    # ax.set_xlabel(r'$a_{IB}^{-1}$')
+    # fig2.set_size_inches(7.8, 5.0)
+    # # fig2.savefig(figdatapath + '/Fig2.pdf')
 
     # # FIG 3 - IMPURITY DISTRIBUTION WITH CHARACTERIZATION (CARTESIAN)
 
@@ -581,4 +550,4 @@ if __name__ == "__main__":
     # fig3.set_size_inches(7.8, 3.5)
     # # fig3.savefig(figdatapath + '/Fig3.pdf')
 
-    plt.show()
+    # plt.show()
