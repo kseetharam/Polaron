@@ -143,7 +143,7 @@ if __name__ == "__main__":
     tlin = 2 * np.pi / (nu * kVals[kind])
     tlin_norm = tlin / tscale
     print(klin, tlin_norm)
-    print(900 / tscale, 1000 / tscale)
+    print(90 / tscale, 100 / tscale)
 
     print(kVals[-1], kVals[1] - kVals[0])
     print(qds.attrs['k_mag_cutoff'] * xi)
