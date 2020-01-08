@@ -585,7 +585,8 @@ if __name__ == "__main__":
     # Vxyz = 1984476.915083265
     # contToDisc_factor = dVk_cart / ((2 * np.pi)**3)
 
-    # colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue', 'magenta']
+    # colorList = ['red', '#7e1e9c', '#60460f', '#658b38']
+    # # colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue', 'magenta']
     # lineList = ['solid', 'dotted', 'dashed', 'dashdot']
     # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5])
     # # aIBi_des = np.array([-10.0, -5.0, -2.0, -1.5, -1.25, -1.0])
