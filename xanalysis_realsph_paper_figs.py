@@ -96,7 +96,8 @@ if __name__ == "__main__":
     else:
         animpath = animpath + '/rdyn_twophonon'
 
-    figdatapath = '/Users/kis/Dropbox/Apps/Overleaf/Quantum Cherenkov Transition in Bose Polaron Systems/figures/figdump'
+    # figdatapath = '/Users/kis/Dropbox/Apps/Overleaf/Quantum Cherenkov Transition in Bose Polaron Systems/figures/figdump'
+    figdatapath = '/Users/kis/Dropbox/Apps/Overleaf/Cherenkov Polaron Paper pt1/figures/figdump'
 
     # # Analysis of Total Dataset
 
@@ -148,107 +149,136 @@ if __name__ == "__main__":
     print(kVals[-1], kVals[1] - kVals[0])
     print(qds.attrs['k_mag_cutoff'] * xi)
 
-    # # # FIG 4 - S(t) AND v_Imp CURVES (WEAK AND STRONG INTERACTIONS)
+    # # # # FIG 4 - S(t) AND v_Imp CURVES (WEAK AND STRONG INTERACTIONS)
 
-    matplotlib.rcParams.update({'font.size': 20})
+    # matplotlib.rcParams.update({'font.size': 20})
 
-    tailFit = True
-    logScale = True
-    PimpData_roll = False; PimpData_rollwin = 2
+    # tailFit = True
+    # logScale = True
+    # PimpData_roll = False; PimpData_rollwin = 2
+    # longTime = True
+    # # tau = 100; tfCutoff = 90; tfstart = 10
+    # tau = 300; tfCutoff = 200; tfstart = 10
 
-    tau = 100; tfCutoff = 90; tfstart = 10
-    tsVals = tVals[tVals < tau]
+    # aIBi_weak = -10.0
+    # aIBi_strong = -2
+    # if longTime:
+    #     innerdatapath_longtime = datapath + '_longtime/redyn_spherical'
+    #     qds_w = xr.open_dataset(innerdatapath_longtime + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi_weak))
+    #     qds_s = xr.open_dataset(innerdatapath_longtime + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi_strong))
+    # else:
+    #     qds_w = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi_weak))
+    #     qds_s = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi_strong))
 
-    aIBi_weak = -10.0
-    aIBi_strong = -2
-    qds_w = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi_weak))
-    qds_s = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi_strong))
-    qds_aIBi_ts_w = qds_w.sel(t=tsVals)
-    qds_aIBi_ts_s = qds_s.sel(t=tsVals)
+    # tVals = qds_w['t'].values
+    # tsVals = tVals[tVals < tau]
 
-    Pnorm_des = np.array([0.1, 0.5, 0.9, 1.4, 2.2, 3.0, 5.0])
+    # qds_aIBi_ts_w = qds_w.sel(t=tsVals)
+    # qds_aIBi_ts_s = qds_s.sel(t=tsVals)
 
-    Pinds = np.zeros(Pnorm_des.size, dtype=int)
-    for Pn_ind, Pn in enumerate(Pnorm_des):
-        Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
+    # Pnorm_des = np.array([0.1, 0.5, 0.9, 1.4, 2.2, 3.0, 5.0])
 
-    fig, axes = plt.subplots(nrows=2, ncols=2)
-    for indP in Pinds:
-        P = PVals[indP]
-        DynOv_w = np.abs(qds_aIBi_ts_w.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts_w.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
-        Pph_ds_w = xr.DataArray(qds_aIBi_ts_w.isel(P=indP)['Pph'].values, coords=[tsVals], dims=['t'])
-        if PimpData_roll:
-            Pph_ds_w = Pph_ds_w.rolling(t=PimpData_rollwin, center=True).mean().dropna('t')
-        vImp_Vals_w = (P - Pph_ds_w.values) / mI
-        tvImp_Vals_w = Pph_ds_w['t'].values
+    # Pinds = np.zeros(Pnorm_des.size, dtype=int)
+    # for Pn_ind, Pn in enumerate(Pnorm_des):
+    #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
 
-        if tailFit is True:
-            tfmask = tsVals > tfCutoff
-            tfVals = tsVals[tfmask]
-            tfLin = tsVals[tsVals > tfstart]
-            zD = np.polyfit(np.log(tfVals), np.log(DynOv_w[tfmask]), deg=1)
-            fLinD = np.exp(zD[1]) * tfLin**(zD[0])
-            axes[0, 0].plot(tfLin / tscale, fLinD, 'k--', label='')
+    # fig, axes = plt.subplots(nrows=2, ncols=2)
+    # for indP in Pinds:
+    #     P = PVals[indP]
+    #     DynOv_w = np.abs(qds_aIBi_ts_w.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts_w.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+    #     Pph_ds_w = xr.DataArray(qds_aIBi_ts_w.isel(P=indP)['Pph'].values, coords=[tsVals], dims=['t'])
+    #     if PimpData_roll:
+    #         Pph_ds_w = Pph_ds_w.rolling(t=PimpData_rollwin, center=True).mean().dropna('t')
+    #     vImp_Vals_w = (P - Pph_ds_w.values) / mI
+    #     tvImp_Vals_w = Pph_ds_w['t'].values
 
-        axes[0, 0].plot(tsVals / tscale, DynOv_w, label='{:.2f}'.format(P / mc))
-        axes[1, 0].plot(tvImp_Vals_w / tscale, vImp_Vals_w / nu, label='{:.2f}'.format(P / mc))
+    #     if tailFit is True:
+    #         tfmask = tsVals > tfCutoff
+    #         tfVals = tsVals[tfmask]
+    #         tfLin = tsVals[tsVals > tfstart]
+    #         zD = np.polyfit(np.log(tfVals), np.log(DynOv_w[tfmask]), deg=1)
+    #         if longTime:
+    #             tfLin_plot = tVals[tVals > tfstart]
+    #         else:
+    #             tfLin_plot = tfLin
+    #         fLinD_plot = np.exp(zD[1]) * tfLin_plot**(zD[0])
+    #         axes[0, 0].plot(tfLin_plot / tscale, fLinD_plot, 'k--', label='')
 
-        DynOv_s = np.abs(qds_aIBi_ts_s.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts_s.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
-        Pph_ds_s = xr.DataArray(qds_aIBi_ts_s.isel(P=indP)['Pph'].values, coords=[tsVals], dims=['t'])
-        if PimpData_roll:
-            Pph_ds_s = Pph_ds_s.rolling(t=PimpData_rollwin, center=True).mean().dropna('t')
-        vImp_Vals_s = (P - Pph_ds_s.values) / mI
-        tvImp_Vals_s = Pph_ds_s['t'].values
+    #     if longTime:
+    #         DynOv_w_plot = np.abs(qds_w.isel(P=indP)['Real_DynOv'].values + 1j * qds_w.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+    #         axes[0, 0].plot(tVals / tscale, DynOv_w_plot, label='{:.2f}'.format(P / mc))
+    #     else:
+    #         axes[0, 0].plot(tsVals / tscale, DynOv_w, label='{:.2f}'.format(P / mc))
+    #     axes[1, 0].plot(tvImp_Vals_w / tscale, vImp_Vals_w / nu, label='{:.2f}'.format(P / mc))
 
-        if tailFit is True:
-            tfmask = tsVals > tfCutoff
-            tfVals = tsVals[tfmask]
-            tfLin = tsVals[tsVals > tfstart]
-            zD = np.polyfit(np.log(tfVals), np.log(DynOv_s[tfmask]), deg=1)
-            fLinD = np.exp(zD[1]) * tfLin**(zD[0])
-            axes[0, 1].plot(tfLin / tscale, fLinD, 'k--', label='')
+    #     DynOv_s = np.abs(qds_aIBi_ts_s.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts_s.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+    #     Pph_ds_s = xr.DataArray(qds_aIBi_ts_s.isel(P=indP)['Pph'].values, coords=[tsVals], dims=['t'])
+    #     if PimpData_roll:
+    #         Pph_ds_s = Pph_ds_s.rolling(t=PimpData_rollwin, center=True).mean().dropna('t')
+    #     vImp_Vals_s = (P - Pph_ds_s.values) / mI
+    #     tvImp_Vals_s = Pph_ds_s['t'].values
 
-        axes[0, 1].plot(tsVals / tscale, DynOv_s, label='{:.2f}'.format(P / mc))
-        axes[1, 1].plot(tvImp_Vals_s / tscale, vImp_Vals_s / nu, label='{:.2f}'.format(P / mc))
+    #     if tailFit is True:
+    #         tfmask = tsVals > tfCutoff
+    #         tfVals = tsVals[tfmask]
+    #         tfLin = tsVals[tsVals > tfstart]
+    #         zD = np.polyfit(np.log(tfVals), np.log(DynOv_s[tfmask]), deg=1)
+    #         if longTime:
+    #             tfLin_plot = tVals[tVals > tfstart]
+    #         else:
+    #             tfLin_plot = tfLin
+    #         fLinD_plot = np.exp(zD[1]) * tfLin_plot**(zD[0])
+    #         axes[0, 1].plot(tfLin_plot / tscale, fLinD_plot, 'k--', label='')
 
-    axes[0, 0].set_ylabel(r'$|S(t)|$', fontsize=27)
-    axes[0, 0].set_xlabel(r'$t$ [$\xi / c$]', fontsize=27)
+    #     if longTime:
+    #         DynOv_s_plot = np.abs(qds_s.isel(P=indP)['Real_DynOv'].values + 1j * qds_s.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+    #         axes[0, 1].plot(tVals / tscale, DynOv_s_plot, label='{:.2f}'.format(P / mc))
+    #     else:
+    #         axes[0, 1].plot(tsVals / tscale, DynOv_s, label='{:.2f}'.format(P / mc))
+    #     axes[1, 1].plot(tvImp_Vals_s / tscale, vImp_Vals_s / nu, label='{:.2f}'.format(P / mc))
 
-    axes[1, 0].plot(tsVals / tscale, np.ones(tsVals.size), 'k--', label='$c$')
-    axes[1, 0].set_ylabel(r'$\langle v_{I}\rangle / c$', fontsize=27)
-    axes[1, 0].set_xlabel(r'$t$ [$\xi / c$]', fontsize=27)
+    # axes[0, 0].set_ylabel(r'$|S(t)|$', fontsize=27)
+    # axes[0, 0].set_xlabel(r'$t$ [$\xi / c$]', fontsize=27)
 
-    if logScale is True:
-        axes[0, 0].plot(tlin_norm * np.ones(DynOv_w.size), np.linspace(np.min(DynOv_w), np.max(DynOv_w), DynOv_w.size), 'k-')
-        axes[0, 0].set_xscale('log')
-        axes[0, 0].set_yscale('log')
-        # axes[0, 0].set_ylim([7e-2, 1e0])
-        # axes[1, 0].set_xscale('log'); axes[1, 0].set_yscale('log')
+    # axes[1, 0].plot(tsVals / tscale, np.ones(tsVals.size), 'k--', label='$c$')
+    # axes[1, 0].set_ylabel(r'$\langle v_{I}\rangle / c$', fontsize=27)
+    # axes[1, 0].set_xlabel(r'$t$ [$\xi / c$]', fontsize=27)
 
-    axes[0, 1].set_ylabel(r'$|S(t)|$', fontsize=27)
-    axes[0, 1].set_xlabel(r'$t$ [$\xi / c$]', fontsize=27)
+    # if logScale is True:
+    #     axes[0, 0].plot(tlin_norm * np.ones(DynOv_w.size), np.linspace(np.min(DynOv_w), np.max(DynOv_w), DynOv_w.size), 'k-')
+    #     axes[0, 0].set_xscale('log')
+    #     axes[0, 0].set_yscale('log')
+    #     # axes[0, 0].set_ylim([7e-2, 1e0])
+    #     # axes[1, 0].set_xscale('log'); axes[1, 0].set_yscale('log')
 
-    axes[1, 1].plot(tsVals / tscale, np.ones(tsVals.size), 'k--', label='$c$')
-    axes[1, 1].set_ylabel(r'$\langle v_{I}\rangle / c$', fontsize=27)
-    axes[1, 1].set_xlabel(r'$t$ [$\xi / c$]', fontsize=27)
+    # axes[0, 1].set_ylabel(r'$|S(t)|$', fontsize=27)
+    # axes[0, 1].set_xlabel(r'$t$ [$\xi / c$]', fontsize=27)
 
-    if logScale is True:
-        axes[0, 1].plot(tlin_norm * np.ones(DynOv_s.size), np.linspace(np.min(DynOv_s), np.max(DynOv_s), DynOv_s.size), 'k-')
-        axes[0, 1].set_xscale('log')
-        axes[0, 1].set_yscale('log')
-        # axes[0, 1].set_ylim([7e-2, 1e0])
-        # axes[1, 1].set_xscale('log'); axes[1, 1].set_yscale('log')
+    # axes[1, 1].plot(tsVals / tscale, np.ones(tsVals.size), 'k--', label='$c$')
+    # axes[1, 1].set_ylabel(r'$\langle v_{I}\rangle / c$', fontsize=27)
+    # axes[1, 1].set_xlabel(r'$t$ [$\xi / c$]', fontsize=27)
 
-    fig.text(0.115, 0.97, '(a)', fontsize=20)
-    fig.text(0.56, 0.97, '(b)', fontsize=20)
-    fig.text(0.115, 0.47, '(c)', fontsize=20)
-    fig.text(0.56, 0.47, '(d)', fontsize=20)
+    # if logScale is True:
+    #     axes[0, 1].plot(tlin_norm * np.ones(DynOv_s.size), np.linspace(np.min(DynOv_s), np.max(DynOv_s), DynOv_s.size), 'k-')
+    #     axes[0, 1].set_xscale('log')
+    #     axes[0, 1].set_yscale('log')
+    #     # axes[0, 1].set_ylim([7e-2, 1e0])
+    #     # axes[1, 1].set_xscale('log'); axes[1, 1].set_yscale('log')
 
-    handles, labels = axes[0, 0].get_legend_handles_labels()
-    fig.legend(handles, labels, title=r'$\langle v_{I}(t_{0})\rangle / c$', ncol=1, loc='center right', bbox_to_anchor=(0.11, 0.38))
-    fig.subplots_adjust(left=0.16, bottom=0.1, top=0.925, right=0.95, wspace=0.25, hspace=0.32)
-    fig.set_size_inches(16.9, 9)
-    # fig.savefig(figdatapath + '/Fig4.pdf')
+    # fig.text(0.115, 0.97, '(a)', fontsize=20)
+    # fig.text(0.56, 0.97, '(b)', fontsize=20)
+    # fig.text(0.115, 0.47, '(c)', fontsize=20)
+    # fig.text(0.56, 0.47, '(d)', fontsize=20)
+
+    # handles, labels = axes[0, 0].get_legend_handles_labels()
+    # fig.legend(handles, labels, title=r'$\langle v_{I}(t_{0})\rangle / c$', ncol=1, loc='center right', bbox_to_anchor=(0.11, 0.38))
+    # fig.subplots_adjust(left=0.16, bottom=0.1, top=0.925, right=0.95, wspace=0.25, hspace=0.32)
+    # fig.set_size_inches(16.9, 9)
+    # if longTime:
+    #     filename = '/Fig4_longtime.pdf'
+    # else:
+    #     filename = '/Fig4.pdf'
+    # # fig.savefig(figdatapath + filename)
 
     # # # # FIG 5 - LOSCHMIDT ECHO EXPONENTS + FINAL LOSCHMIDT ECHO + FINAL IMPURITY VELOCITY
 
@@ -284,6 +314,7 @@ if __name__ == "__main__":
     # fig, axes = plt.subplots(nrows=3, ncols=1)
     # for inda, aIBi in enumerate(aIBi_des):
     #     qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    #     print(qds_aIBi['t'].values)
     #     qds_aIBi_ts = qds_aIBi.sel(t=tfVals)
     #     PVals = qds_aIBi['P'].values
     #     Pnorm = PVals / mc
