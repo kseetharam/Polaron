@@ -70,7 +70,8 @@ if __name__ == "__main__":
 
     print(innerdatapath)
 
-    figdatapath = '/Users/kis/Dropbox/Apps/Overleaf/Quantum Cherenkov Transition in Bose Polaron Systems/figures/figdump'
+    # figdatapath = '/Users/kis/Dropbox/Apps/Overleaf/Quantum Cherenkov Transition in Bose Polaron Systems/figures/figdump'
+    figdatapath = '/Users/kis/Dropbox/Apps/Overleaf/Cherenkov Polaron Paper pt1/figures/figdump'
     innerdatapath_cart = innerdatapath[0:-10] + '_cart'
 
     # # Analysis of Total Dataset
@@ -263,7 +264,8 @@ if __name__ == "__main__":
     #     deltaPeak_sup = nPIm_deltaPeak_Vals[Pind_sup]
     #     PIm_norm_sup = PIm_Vec[Pind_sup] / (mI * nu)
     #     delta_GB_sup = deltaPeak_sup * GPDF(PIm_norm_sup, Pnorm_sup, sigma)
-    #     ax_supDist.plot(PIm_norm_sup, delta_GB_sup, linestyle='-', color=delta_color, linewidth=1, label=r'$\delta$-Peak')
+    #     # ax_supDist.plot(PIm_norm_sup, delta_GB_sup, linestyle='-', color=delta_color, linewidth=1, label=r'$\delta$-Peak')
+    #     ax_supDist.plot(PIm_norm_sup, delta_GB_sup, linestyle='-', color=delta_color, linewidth=1, label='')
     #     ax_supDist.fill_between(PIm_norm_sup, np.zeros(PIm_norm_sup.size), delta_GB_sup, facecolor=delta_color, alpha=0.25)
     # else:
     #     ax_supDist.plot((PVals[Pind_sup] / (mI * nu)) * np.ones(PIm_Vals.size), np.linspace(0, nPIm_deltaPeak_Vals[Pind_sup], PIm_Vals.size), linestyle='-', color=delta_color, linewidth=1, label='Delta Peak (Z-factor)')
@@ -288,7 +290,7 @@ if __name__ == "__main__":
     # ax_subDist.legend(loc=1, fontsize=legendsize)
 
     # fig1.set_size_inches(7.8, 9)
-    # # fig1.savefig(figdatapath + '/Fig1.pdf')
+    # fig1.savefig(figdatapath + '/Fig1.pdf')
 
     # # # # FIG 2 - ENERGY DERIVATIVES + SOUND VELOCITY + EFFECTIVE MASS
 
@@ -367,6 +369,13 @@ if __name__ == "__main__":
     # ax_GSE2.plot(Pinf_Vals / (mI * nu), ms * np.ones(Pinf_Vals.size), 'c--', linewidth=2.0)
     # ax_GSE2.set_ylim([0, 1.2 * np.max(Einf_2ndderiv_Vals)])
     # ax_GSE2.set_xlim([0, 2.0])
+
+    # # including a Pcrit line
+    # Pcrit = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 0]
+    # # Pcrit_2 = Pinf_Vals[sound_mask][0]; print(Pcrit, Pcrit_2)
+    # ax_GSE0.axvline(x=Pcrit / (mI * nu), linestyle=':', color='#bf9005', lw=2)
+    # ax_GSE1.axvline(x=Pcrit / (mI * nu), linestyle=':', color='#bf9005', lw=2)
+    # ax_GSE2.axvline(x=Pcrit / (mI * nu), linestyle=':', color='#bf9005', lw=2)
 
     # # # POLARON SOUND VELOCITY (SPHERICAL)
 
@@ -550,4 +559,4 @@ if __name__ == "__main__":
     # fig3.set_size_inches(7.8, 3.5)
     # # fig3.savefig(figdatapath + '/Fig3.pdf')
 
-    # plt.show()
+    plt.show()
