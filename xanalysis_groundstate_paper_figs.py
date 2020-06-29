@@ -575,206 +575,206 @@ if __name__ == "__main__":
     # fig1.set_size_inches(7.8, 9)
     # fig1.savefig(figdatapath + '/Fig1.pdf')
 
-    # # # # FIG 2 - ENERGY DERIVATIVES + SOUND VELOCITY + EFFECTIVE MASS
+    # # # FIG 2 - ENERGY DERIVATIVES + SOUND VELOCITY + EFFECTIVE MASS
 
-    # matplotlib.rcParams.update({'font.size': 12})
-    # labelsize = 13
-    # legendsize = 12
+    matplotlib.rcParams.update({'font.size': 12})
+    labelsize = 13
+    legendsize = 12
 
-    # fig2 = plt.figure(constrained_layout=False)
-    # # gs1 = fig2.add_gridspec(nrows=3, ncols=1, bottom=0.12, top=0.925, left=0.12, right=0.40, hspace=1.0)
-    # # gs2 = fig2.add_gridspec(nrows=2, ncols=1, bottom=0.12, top=0.925, left=0.58, right=0.98, hspace=0.7)
-    # gs1 = fig2.add_gridspec(nrows=3, ncols=1, bottom=0.12, top=0.95, left=0.12, right=0.40, hspace=0.2)
-    # gs2 = fig2.add_gridspec(nrows=2, ncols=1, bottom=0.12, top=0.95, left=0.58, right=0.98, hspace=0.1)
+    fig2 = plt.figure(constrained_layout=False)
+    # gs1 = fig2.add_gridspec(nrows=3, ncols=1, bottom=0.12, top=0.925, left=0.12, right=0.40, hspace=1.0)
+    # gs2 = fig2.add_gridspec(nrows=2, ncols=1, bottom=0.12, top=0.925, left=0.58, right=0.98, hspace=0.7)
+    gs1 = fig2.add_gridspec(nrows=3, ncols=1, bottom=0.12, top=0.95, left=0.12, right=0.40, hspace=0.2)
+    gs2 = fig2.add_gridspec(nrows=2, ncols=1, bottom=0.12, top=0.95, left=0.58, right=0.98, hspace=0.1)
 
-    # ax_GSE0 = fig2.add_subplot(gs1[0])
-    # ax_GSE1 = fig2.add_subplot(gs1[1])
-    # ax_GSE2 = fig2.add_subplot(gs1[2])
-    # ax_Vel = fig2.add_subplot(gs2[0])
-    # ax_Mass = fig2.add_subplot(gs2[1])
-
-    # # fig2.text(0.01, 0.95, '(a)', fontsize=labelsize)
-    # # fig2.text(0.01, 0.65, '(b)', fontsize=labelsize)
-    # # fig2.text(0.01, 0.32, '(c)', fontsize=labelsize)
-    # # fig2.text(0.47, 0.95, '(d)', fontsize=labelsize)
-    # # fig2.text(0.47, 0.47, '(e)', fontsize=labelsize)
+    ax_GSE0 = fig2.add_subplot(gs1[0])
+    ax_GSE1 = fig2.add_subplot(gs1[1])
+    ax_GSE2 = fig2.add_subplot(gs1[2])
+    ax_Vel = fig2.add_subplot(gs2[0])
+    ax_Mass = fig2.add_subplot(gs2[1])
 
     # fig2.text(0.01, 0.95, '(a)', fontsize=labelsize)
     # fig2.text(0.01, 0.65, '(b)', fontsize=labelsize)
-    # fig2.text(0.01, 0.37, '(c)', fontsize=labelsize)
+    # fig2.text(0.01, 0.32, '(c)', fontsize=labelsize)
     # fig2.text(0.47, 0.95, '(d)', fontsize=labelsize)
-    # fig2.text(0.47, 0.52, '(e)', fontsize=labelsize)
+    # fig2.text(0.47, 0.47, '(e)', fontsize=labelsize)
 
-    # # # ENERGY DERIVATIVES (SPHERICAL)
+    fig2.text(0.01, 0.95, '(a)', fontsize=labelsize)
+    fig2.text(0.01, 0.65, '(b)', fontsize=labelsize)
+    fig2.text(0.01, 0.37, '(c)', fontsize=labelsize)
+    fig2.text(0.47, 0.95, '(d)', fontsize=labelsize)
+    fig2.text(0.47, 0.52, '(e)', fontsize=labelsize)
 
-    # aIBi = -5
-    # qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    # PVals = qds_aIBi['P'].values
-    # print(aIBi / xi)
+    # # ENERGY DERIVATIVES (SPHERICAL)
 
-    # CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
-    # kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    aIBi = -5
+    qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    PVals = qds_aIBi['P'].values
+    print(aIBi / xi)
 
-    # Energy_Vals = np.zeros((PVals.size, tVals.size))
-    # for Pind, P in enumerate(PVals):
-    #     for tind, t in enumerate(tVals):
-    #         CSAmp = CSAmp_ds.sel(P=P, t=t).values
-    #         Energy_Vals[Pind, tind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+    CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+    kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
 
-    # Energy_Vals_inf = Energy_Vals[:, -1]
-    # Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+    Energy_Vals = np.zeros((PVals.size, tVals.size))
+    for Pind, P in enumerate(PVals):
+        for tind, t in enumerate(tVals):
+            CSAmp = CSAmp_ds.sel(P=P, t=t).values
+            Energy_Vals[Pind, tind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
 
-    # Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
-    # Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
-    # Einf_1stderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=1)
-    # Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+    Energy_Vals_inf = Energy_Vals[:, -1]
+    Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
 
-    # sound_mask = np.abs(Einf_2ndderiv_Vals) <= 5e-3
-    # Einf_sound = Einf_Vals[sound_mask]
-    # Pinf_sound = Pinf_Vals[sound_mask]
-    # [vsound, vs_const] = np.polyfit(Pinf_sound, Einf_sound, deg=1)
+    Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
+    Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+    Einf_1stderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=1)
+    Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
 
-    # ms_mask = Pinf_Vals <= 0.5
-    # Einf_1stderiv_ms = Einf_1stderiv_Vals[ms_mask]
-    # Pinf_ms = Pinf_Vals[ms_mask]
-    # [ms, ms_const] = np.polyfit(Pinf_ms, Einf_1stderiv_ms, deg=1)
+    sound_mask = np.abs(Einf_2ndderiv_Vals) <= 5e-3
+    Einf_sound = Einf_Vals[sound_mask]
+    Pinf_sound = Pinf_Vals[sound_mask]
+    [vsound, vs_const] = np.polyfit(Pinf_sound, Einf_sound, deg=1)
 
-    # Ecrit = Einf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals))]
+    ms_mask = Pinf_Vals <= 0.5
+    Einf_1stderiv_ms = Einf_1stderiv_Vals[ms_mask]
+    Pinf_ms = Pinf_Vals[ms_mask]
+    [ms, ms_const] = np.polyfit(Pinf_ms, Einf_1stderiv_ms, deg=1)
+
+    Ecrit = Einf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals))]
     # ax_GSE0.plot(Pinf_Vals / (mI * nu), Einf_Vals / np.abs(Ecrit), 'k-', lw=1.5)
-    # ax_GSE0.plot(Pinf_Vals[::2] / (mI * nu), Einf_Vals[::2] / np.abs(Ecrit), 'kx', ms=6)
-    # # ax_GSE0.set_title('Ground State Energy (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
-    # # ax_GSE0.set_xlabel(r'$P$ [$m_{I}c$]', fontsize=labelsize)
-    # ax_GSE0.set_ylabel(r'$E$', fontsize=labelsize)
-    # ax_GSE0.set_ylim([1.1 * np.min(Einf_Vals / np.abs(Ecrit)), -0.5 / np.abs(Ecrit)])
-    # ax_GSE0.set_xlim([0, 2.0])
+    ax_GSE0.plot(Pinf_Vals[::2] / (mI * nu), Einf_Vals[::2] / np.abs(Ecrit), 'ko', ms=6)
+    # ax_GSE0.set_title('Ground State Energy (' + r'$a_{IB}^{-1}=$' + '{0})'.format(aIBi))
+    # ax_GSE0.set_xlabel(r'$P$ [$m_{I}c$]', fontsize=labelsize)
+    ax_GSE0.set_ylabel(r'$E$', fontsize=labelsize)
+    ax_GSE0.set_ylim([1.1 * np.min(Einf_Vals / np.abs(Ecrit)), -0.5 / np.abs(Ecrit)])
+    ax_GSE0.set_xlim([0, 2.0])
 
-    # ax_GSE1.plot(Pinf_Vals / (mI * nu), Einf_1stderiv_Vals, 'k-', lw=1.5)
-    # ax_GSE1.plot(Pinf_Vals[::2] / (mI * nu), Einf_1stderiv_Vals[::2], 'kx', ms=6)
-    # # ax_GSE1.set_title('First Derivative of Energy')
-    # # ax_GSE1.set_xlabel(r'$P$ [$m_{I}c$]', fontsize=labelsize)
-    # ax_GSE1.set_ylabel(r'$dE/dP$', fontsize=labelsize)
-    # ax_GSE1.plot(Pinf_Vals / (mI * nu), vsound * np.ones(Pinf_Vals.size), 'r--', linewidth=2.0)
-    # ax_GSE1.set_ylim([0, 1.2 * np.max(Einf_1stderiv_Vals)])
-    # ax_GSE1.set_xlim([0, 2.0])
+    # ax_GSE1.plot(Pinf_Vals / (mI * nu), Einf_1stderiv_Vals / np.abs(Ecrit), 'k-', lw=1.5)
+    ax_GSE1.plot(Pinf_Vals[::2] / (mI * nu), Einf_1stderiv_Vals[::2] / np.abs(Ecrit), 'ko', ms=6)
+    # ax_GSE1.set_title('First Derivative of Energy')
+    # ax_GSE1.set_xlabel(r'$P$ [$m_{I}c$]', fontsize=labelsize)
+    ax_GSE1.set_ylabel(r'$dE/dP$', fontsize=labelsize)
+    ax_GSE1.plot(Pinf_Vals / (mI * nu), vsound * np.ones(Pinf_Vals.size) / np.abs(Ecrit), 'r--', linewidth=2.0)
+    ax_GSE1.set_ylim([0, 1.2 * np.max(Einf_1stderiv_Vals / np.abs(Ecrit))])
+    ax_GSE1.set_xlim([0, 2.0])
 
-    # # ax_GSE2.plot(Pinf_Vals / (mI * nu), Einf_2ndderiv_Vals, 'k-', lw=1.5)
-    # ax_GSE2.plot(Pinf_Vals[::2] / (mI * nu), Einf_2ndderiv_Vals[::2], 'kx', ms=6)
-    # # ax_GSE2.set_title('Second Derivative of Energy')
-    # ax_GSE2.set_xlabel(r'$P$ [$m_{I}c$]', fontsize=labelsize)
-    # ax_GSE2.set_ylabel(r'$d^{2}E/dP^{2}$', fontsize=labelsize)
-    # ax_GSE2.plot(Pinf_Vals / (mI * nu), ms * np.ones(Pinf_Vals.size), 'c--', linewidth=2.0)
-    # ax_GSE2.set_ylim([-.07, 1.2 * np.max(Einf_2ndderiv_Vals)])
-    # ax_GSE2.set_xlim([0, 2.0])
+    # ax_GSE2.plot(Pinf_Vals / (mI * nu), Einf_2ndderiv_Vals / np.abs(Ecrit), 'k-', lw=1.5)
+    ax_GSE2.plot(Pinf_Vals[::2] / (mI * nu), Einf_2ndderiv_Vals[::2] / np.abs(Ecrit), 'ko', ms=6)
+    # ax_GSE2.set_title('Second Derivative of Energy')
+    ax_GSE2.set_xlabel(r'$P$ [$m_{I}c$]', fontsize=labelsize)
+    ax_GSE2.set_ylabel(r'$d^{2}E/dP^{2}$', fontsize=labelsize)
+    ax_GSE2.plot(Pinf_Vals / (mI * nu), ms * np.ones(Pinf_Vals.size) / np.abs(Ecrit), 'c--', linewidth=2.0)
+    ax_GSE2.set_ylim([-.07, 1.2 * np.max(Einf_2ndderiv_Vals / np.abs(Ecrit))])
+    ax_GSE2.set_xlim([0, 2.0])
 
-    # # including a Pcrit line
-    # Pcrit = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 0]
-    # # Pcrit_2 = Pinf_Vals[sound_mask][0]; print(Pcrit, Pcrit_2)
-    # goldColor = '#bf9005'
-    # ax_GSE0.axvline(x=Pcrit / (mI * nu), linestyle=':', color='g', lw=2)
-    # ax_GSE1.axvline(x=Pcrit / (mI * nu), linestyle=':', color='g', lw=2)
-    # ax_GSE2.axvline(x=Pcrit / (mI * nu), linestyle=':', color='g', lw=2)
+    # including a Pcrit line
+    Pcrit = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 0]
+    # Pcrit_2 = Pinf_Vals[sound_mask][0]; print(Pcrit, Pcrit_2)
+    goldColor = '#bf9005'
+    ax_GSE0.axvline(x=Pcrit / (mI * nu), linestyle=':', color='g', lw=2)
+    ax_GSE1.axvline(x=Pcrit / (mI * nu), linestyle=':', color='g', lw=2)
+    ax_GSE2.axvline(x=Pcrit / (mI * nu), linestyle=':', color='g', lw=2)
 
-    # # # POLARON SOUND VELOCITY (SPHERICAL)
+    # # POLARON SOUND VELOCITY (SPHERICAL)
 
-    # # Check to see if linear part of polaron (total system) energy spectrum has slope equal to sound velocity
+    # Check to see if linear part of polaron (total system) energy spectrum has slope equal to sound velocity
 
-    # vsound_Vals = np.zeros(aIBi_Vals.size)
-    # vI_Vals = np.zeros(aIBi_Vals.size)
-    # for aind, aIBi in enumerate(aIBi_Vals):
-    #     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    #     qds_aIBi = qds.isel(t=-1)
-    #     CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
-    #     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
-    #     Energy_Vals_inf = np.zeros(PVals.size)
-    #     PI_Vals = np.zeros(PVals.size)
-    #     for Pind, P in enumerate(PVals):
-    #         CSAmp = CSAmp_ds.sel(P=P).values
-    #         Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
-    #         PI_Vals[Pind] = P - qds_aIBi.sel(P=P)['Pph'].values
+    vsound_Vals = np.zeros(aIBi_Vals.size)
+    vI_Vals = np.zeros(aIBi_Vals.size)
+    for aind, aIBi in enumerate(aIBi_Vals):
+        qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+        qds_aIBi = qds.isel(t=-1)
+        CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+        kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+        Energy_Vals_inf = np.zeros(PVals.size)
+        PI_Vals = np.zeros(PVals.size)
+        for Pind, P in enumerate(PVals):
+            CSAmp = CSAmp_ds.sel(P=P).values
+            Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+            PI_Vals[Pind] = P - qds_aIBi.sel(P=P)['Pph'].values
 
-    #     Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
-    #     Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 2 * PVals.size)
-    #     Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
-    #     Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+        Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+        Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 2 * PVals.size)
+        Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+        Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
 
-    #     sound_mask = np.abs(Einf_2ndderiv_Vals) <= 5e-3
-    #     Einf_sound = Einf_Vals[sound_mask]
-    #     Pinf_sound = Pinf_Vals[sound_mask]
-    #     [vsound_Vals[aind], vs_const] = np.polyfit(Pinf_sound, Einf_sound, deg=1)
+        sound_mask = np.abs(Einf_2ndderiv_Vals) <= 5e-3
+        Einf_sound = Einf_Vals[sound_mask]
+        Pinf_sound = Pinf_Vals[sound_mask]
+        [vsound_Vals[aind], vs_const] = np.polyfit(Pinf_sound, Einf_sound, deg=1)
 
-    #     vI_inf_tck = interpolate.splrep(PVals, PI_Vals / mI, s=0)
-    #     vI_inf_Vals = 1 * interpolate.splev(Pinf_Vals, vI_inf_tck, der=0)
-    #     vI_Vals[aind] = np.polyfit(Pinf_sound, vI_inf_Vals[sound_mask], deg=0)
+        vI_inf_tck = interpolate.splrep(PVals, PI_Vals / mI, s=0)
+        vI_inf_Vals = 1 * interpolate.splev(Pinf_Vals, vI_inf_tck, der=0)
+        vI_Vals[aind] = np.polyfit(Pinf_sound, vI_inf_Vals[sound_mask], deg=0)
 
-    # print(vsound_Vals)
-    # print(100 * (vsound_Vals - nu) / nu)
-    # ax_Vel.plot(aIBi_Vals / xi, vsound_Vals / nu, 'rx', mew=1, ms=10, label='Polaron')
-    # ax_Vel.plot(aIBi_Vals / xi, vI_Vals / nu, 'ko', mew=1, ms=10, markerfacecolor='none', label='Impurity')
-    # ax_Vel.plot(aIBi_Vals / xi, np.ones(aIBi_Vals.size), color='grey', linestyle='dashdot', linewidth=2.0, label='$c$')
-    # ax_Vel.set_ylim([0.5, 1.25])
-    # # ax_Vel.set_ylim([0.8, 1.25])
-    # ax_Vel.legend(loc=(0.25, 0.1), fontsize=legendsize)
-    # # ax_Vel.set_xlabel(r'$a_{IB}^{-1}$ [$\xi$]', fontsize=labelsize)
-    # ax_Vel.set_ylabel(r'Velocity [$c$]', fontsize=labelsize)
+    print(vsound_Vals)
+    print(100 * (vsound_Vals - nu) / nu)
+    ax_Vel.plot(aIBi_Vals / xi, vsound_Vals / nu, 'rx', mew=1, ms=10, label='Polaron')
+    ax_Vel.plot(aIBi_Vals / xi, vI_Vals / nu, 'ko', mew=1, ms=10, markerfacecolor='none', label='Impurity')
+    ax_Vel.plot(aIBi_Vals / xi, np.ones(aIBi_Vals.size), color='grey', linestyle='dashdot', linewidth=2.0, label='$c$')
+    ax_Vel.set_ylim([0.5, 1.25])
+    # ax_Vel.set_ylim([0.8, 1.25])
+    ax_Vel.legend(loc=(0.25, 0.1), fontsize=legendsize)
+    # ax_Vel.set_xlabel(r'$a_{IB}^{-1}$ [$\xi$]', fontsize=labelsize)
+    ax_Vel.set_ylabel(r'Velocity [$c$]', fontsize=labelsize)
 
-    # # # POLARON EFFECTIVE MASS (SPHERICAL)
+    # # POLARON EFFECTIVE MASS (SPHERICAL)
 
-    # ms_Vals = np.zeros(aIBi_Vals.size)
-    # for aind, aIBi in enumerate(aIBi_Vals):
-    #     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    #     qds_aIBi = qds.isel(t=-1)
-    #     CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
-    #     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
-    #     Energy_Vals_inf = np.zeros(PVals.size)
-    #     PI_Vals = np.zeros(PVals.size)
-    #     for Pind, P in enumerate(PVals):
-    #         CSAmp = CSAmp_ds.sel(P=P).values
-    #         Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
-    #         PI_Vals[Pind] = P - qds_aIBi.sel(P=P)['Pph'].values
+    ms_Vals = np.zeros(aIBi_Vals.size)
+    for aind, aIBi in enumerate(aIBi_Vals):
+        qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+        qds_aIBi = qds.isel(t=-1)
+        CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+        kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+        Energy_Vals_inf = np.zeros(PVals.size)
+        PI_Vals = np.zeros(PVals.size)
+        for Pind, P in enumerate(PVals):
+            CSAmp = CSAmp_ds.sel(P=P).values
+            Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+            PI_Vals[Pind] = P - qds_aIBi.sel(P=P)['Pph'].values
 
-    #     Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
-    #     Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 2 * PVals.size)
-    #     Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
-    #     Einf_1stderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=1)
-    #     Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+        Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+        Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 2 * PVals.size)
+        Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+        Einf_1stderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=1)
+        Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
 
-    #     ms_mask = Pinf_Vals < 0.3
-    #     Einf_1stderiv_ms = Einf_1stderiv_Vals[ms_mask]
-    #     Pinf_ms = Pinf_Vals[ms_mask]
-    #     [ms_Vals[aind], ms_const] = np.polyfit(Pinf_ms, Einf_1stderiv_ms, deg=1)
+        ms_mask = Pinf_Vals < 0.3
+        Einf_1stderiv_ms = Einf_1stderiv_Vals[ms_mask]
+        Pinf_ms = Pinf_Vals[ms_mask]
+        [ms_Vals[aind], ms_const] = np.polyfit(Pinf_ms, Einf_1stderiv_ms, deg=1)
 
-    # massEnhancement_Vals = (1 / ms_Vals) / mI
+    massEnhancement_Vals = (1 / ms_Vals) / mI
 
-    # mE_tck = interpolate.splrep(aIBi_Vals, massEnhancement_Vals, s=0)
-    # aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
-    # mE_interpVals = 1 * interpolate.splev(aIBi_interpVals, mE_tck, der=0)
+    mE_tck = interpolate.splrep(aIBi_Vals, massEnhancement_Vals, s=0)
+    aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
+    mE_interpVals = 1 * interpolate.splev(aIBi_interpVals, mE_tck, der=0)
 
-    # ax_Mass.plot(aIBi_Vals / xi, massEnhancement_Vals, 'cD', mew=1, ms=5)
-    # ax_Mass.plot(aIBi_interpVals / xi, mE_interpVals, 'c-')
-    # ax_Mass.set_xlabel(r'$a_{IB}^{-1}$ [$\xi$]', fontsize=labelsize)
-    # # ax_Mass.set_ylabel(r'$\frac{m^{*}}{m_{I}} = \frac{1}{m_{I}}\frac{\partial^{2} E}{\partial P^{2}}$')
-    # ax_Mass.set_ylabel(r'Effective Mass [$m_{I}$]', fontsize=labelsize)
+    ax_Mass.plot(aIBi_Vals / xi, massEnhancement_Vals, 'cD', mew=1, ms=5)
+    ax_Mass.plot(aIBi_interpVals / xi, mE_interpVals, 'c-')
+    ax_Mass.set_xlabel(r'$a_{IB}^{-1}$ [$\xi$]', fontsize=labelsize)
+    # ax_Mass.set_ylabel(r'$\frac{m^{*}}{m_{I}} = \frac{1}{m_{I}}\frac{\partial^{2} E}{\partial P^{2}}$')
+    ax_Mass.set_ylabel(r'Effective Mass [$m_{I}$]', fontsize=labelsize)
 
-    # ax_GSE0.xaxis.set_ticklabels([])
-    # ax_GSE1.xaxis.set_ticklabels([])
-    # ax_Vel.xaxis.set_ticklabels([])
-    # ax_GSE0.set_xticks([0.0, 1.0, 2.0])
-    # ax_GSE1.set_xticks([0.0, 1.0, 2.0])
-    # ax_GSE2.set_xticks([0.0, 1.0, 2.0])
-    # ax_GSE0.tick_params(direction='in')
-    # ax_GSE1.tick_params(direction='in')
-    # ax_GSE2.tick_params(direction='in')
-    # ax_Vel.tick_params(direction='in')
-    # ax_Mass.tick_params(direction='in')
-    # vel_coords = [2, vsound]
-    # effM_coords = [2, ms]
-    # con_vel = ConnectionPatch(xyA=(vel_coords[0], vel_coords[1]), xyB=(-14, 1.0), coordsA="data", coordsB="data", axesA=ax_GSE1, axesB=ax_Vel, color='r', linestyle='dotted', lw=0.5)
-    # con_effM = ConnectionPatch(xyA=(effM_coords[0], effM_coords[1]), xyB=(-14, 1.9), coordsA="data", coordsB="data", axesA=ax_GSE2, axesB=ax_Mass, color='c', linestyle='dotted', lw=0.5)
-    # ax_GSE1.add_artist(con_vel)
-    # ax_GSE2.add_artist(con_effM)
+    ax_GSE0.xaxis.set_ticklabels([])
+    ax_GSE1.xaxis.set_ticklabels([])
+    ax_Vel.xaxis.set_ticklabels([])
+    ax_GSE0.set_xticks([0.0, 1.0, 2.0])
+    ax_GSE1.set_xticks([0.0, 1.0, 2.0])
+    ax_GSE2.set_xticks([0.0, 1.0, 2.0])
+    ax_GSE0.tick_params(direction='in')
+    ax_GSE1.tick_params(direction='in')
+    ax_GSE2.tick_params(direction='in')
+    ax_Vel.tick_params(direction='in')
+    ax_Mass.tick_params(direction='in')
+    vel_coords = [2, vsound / np.abs(Ecrit)]
+    effM_coords = [2, ms / np.abs(Ecrit)]
+    con_vel = ConnectionPatch(xyA=(vel_coords[0], vel_coords[1]), xyB=(-14, 1.0), coordsA="data", coordsB="data", axesA=ax_GSE1, axesB=ax_Vel, color='r', linestyle='dashed', lw=0.5)
+    con_effM = ConnectionPatch(xyA=(effM_coords[0], effM_coords[1]), xyB=(-14, 1.9), coordsA="data", coordsB="data", axesA=ax_GSE2, axesB=ax_Mass, color='c', linestyle='dashed', lw=0.5)
+    ax_GSE1.add_artist(con_vel)
+    ax_GSE2.add_artist(con_effM)
 
-    # fig2.set_size_inches(7.8, 5.0)
-    # fig2.savefig(figdatapath + '/Fig2.pdf')
+    fig2.set_size_inches(7.8, 5.0)
+    fig2.savefig(figdatapath + '/Fig2.pdf')
 
     # # FIG 3 - IMPURITY DISTRIBUTION WITH CHARACTERIZATION (CARTESIAN)
 
