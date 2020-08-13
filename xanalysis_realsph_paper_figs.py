@@ -149,6 +149,7 @@ if __name__ == "__main__":
 
     print(kVals[-1], kVals[1] - kVals[0])
     print(qds.attrs['k_mag_cutoff'] * xi)
+    print('Np: {0}'.format(qds.coords['k'].values.size * qds.coords['th'].values.size))
 
     # # # # FIG 4 - S(t) AND v_Imp CURVES (WEAK AND STRONG INTERACTIONS)
 
