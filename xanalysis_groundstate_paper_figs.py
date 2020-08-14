@@ -511,8 +511,8 @@ if __name__ == "__main__":
     legendsize = 12
 
     fig2 = plt.figure(constrained_layout=False)
-    gs1 = fig2.add_gridspec(nrows=2, ncols=1, bottom=0.27, top=0.95, left=0.12, right=0.48, hspace=0.1)
-    gs2 = fig2.add_gridspec(nrows=2, ncols=1, bottom=0.27, top=0.95, left=0.61, right=0.98, hspace=0.1)
+    gs1 = fig2.add_gridspec(nrows=2, ncols=1, bottom=0.23, top=0.95, left=0.12, right=0.48, hspace=0.1)
+    gs2 = fig2.add_gridspec(nrows=2, ncols=1, bottom=0.23, top=0.95, left=0.61, right=0.98, hspace=0.1)
 
     ax_gsZ = fig2.add_subplot(gs1[0])
     ax_gsVel = fig2.add_subplot(gs1[1])
@@ -520,9 +520,9 @@ if __name__ == "__main__":
     ax_dynVel = fig2.add_subplot(gs2[1])
 
     fig2.text(0.02, 0.95, '(a)', fontsize=labelsize)
-    fig2.text(0.02, 0.58, '(b)', fontsize=labelsize)
+    fig2.text(0.02, 0.55, '(b)', fontsize=labelsize)
     fig2.text(0.52, 0.95, '(c)', fontsize=labelsize)
-    fig2.text(0.52, 0.58, '(d)', fontsize=labelsize)
+    fig2.text(0.52, 0.55, '(d)', fontsize=labelsize)
 
     colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue', 'magenta']
     lineList = ['solid', 'dashed', 'dotted', '-.']
@@ -558,14 +558,15 @@ if __name__ == "__main__":
         Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
         Einf_1stderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=1)
         Einf_1stderiv_Vals_subsamp = 1 * interpolate.splev(PVals, Einf_tck, der=1)
-        ax_gsZ.plot(PVals / (mI * nu), ZVals, color=colorList[aind], linestyle='solid', marker='D', ms=4)
+        xmask = (PVals / (mI * nu)) <= 4
+        ax_gsZ.plot(PVals[xmask] / (mI * nu), ZVals[xmask], color=colorList[aind], linestyle='solid', marker='D', ms=4)
         # ax_gsVel.plot(Pinf_Vals / (mI * nu), Einf_1stderiv_Vals / nu, color=colorList[aind], linestyle='solid', marker='D', ms=4)
-        ax_gsVel.plot(PVals / (mI * nu), Einf_1stderiv_Vals_subsamp / nu, color=colorList[aind], linestyle='solid', marker='D', ms=4)
+        ax_gsVel.plot(PVals[xmask] / (mI * nu), Einf_1stderiv_Vals_subsamp[xmask] / nu, color=colorList[aind], linestyle='solid', marker='D', ms=4)
 
     ax_gsVel.plot(Pinf_Vals / (mI * nu), np.ones(Pinf_Vals.size), 'k:')
-    ax_gsVel.set_xlabel(r'$P/(m_{I}c)$', fontsize=18)
-    ax_gsVel.set_ylabel(r'$v_{\rm pol}/c$', fontsize=18)
-    ax_gsZ.set_ylabel(r'$Z$', fontsize=18)
+    ax_gsVel.set_xlabel(r'$P/(m_{I}c)$', fontsize=14)
+    ax_gsVel.set_ylabel(r'$v_{\rm pol}/c$', fontsize=14)
+    ax_gsZ.set_ylabel(r'$Z$', fontsize=14)
 
     # DYN S(t) AND VELOCITY
 
@@ -698,18 +699,15 @@ if __name__ == "__main__":
         if flattenAboveC:
             vIf_Vals[vIf_Vals > nu] = nu
 
-        ax_dynS.plot(vI0_Vals / nu, DynOvf_Vals, color=colorList[inda], linestyle='solid', marker='D', ms=4)
-        ax_dynVel.plot(vI0_Vals / nu, vIf_Vals / nu, label='{:.2f}'.format(aIBi * xi), color=colorList[inda], linestyle='solid', marker='D', ms=4)
+        xmask = (vI0_Vals / nu) <= 4
+        ax_dynS.plot(vI0_Vals[xmask] / nu, DynOvf_Vals[xmask], color=colorList[inda], linestyle='solid', marker='D', ms=4)
+        ax_dynVel.plot(vI0_Vals[xmask] / nu, vIf_Vals[xmask] / nu, label='{:.2f}'.format(aIBi * xi), color=colorList[inda], linestyle='solid', marker='D', ms=4)
 
-    ax_dynS.set_ylabel(r'$S(t_{\infty})$', fontsize=18)
-    ax_dynS.set_xlim([0, 4])
-    ax_dynS.set_ylim([-.05, 1.1])
+    ax_dynS.set_ylabel(r'$S(t_{\infty})$', fontsize=14)
 
     ax_dynVel.plot(vI0_Vals / nu, np.ones(vI0_Vals.size), 'k:')
-    ax_dynVel.set_xlabel(r'$v_{\rm imp}(t_{0})/c$', fontsize=18)
-    ax_dynVel.set_ylabel(r'$v_{\rm imp}(t_{\infty})/c$', fontsize=18)
-    ax_dynVel.set_xlim([0, 4])
-    ax_dynVel.set_ylim([-.03, 1.1])
+    ax_dynVel.set_xlabel(r'$v_{\rm imp}(t_{0})/c$', fontsize=14)
+    ax_dynVel.set_ylabel(r'$v_{\rm imp}(t_{\infty})/c$', fontsize=14)
 
     ax_dynS.xaxis.set_ticklabels([])
 
@@ -719,8 +717,8 @@ if __name__ == "__main__":
     # GENERAL
 
     handles, labels = ax_dynVel.get_legend_handles_labels()
-    plt.rcParams['legend.title_fontsize'] = 18
-    fig2.legend(handles, labels, title=r'$a_{\rm IB}^{-1}/\xi^{-1}$', ncol=aIBi_Vals.size, loc='lower center', bbox_to_anchor=(0.55, 0.001), fontsize=15)
+    plt.rcParams['legend.title_fontsize'] = 14
+    fig2.legend(handles, labels, title=r'$a_{\rm IB}^{-1}/\xi^{-1}$', ncol=aIBi_Vals.size, loc='lower center', bbox_to_anchor=(0.55, 0.001), fontsize=13)
 
     ax_gsZ.xaxis.set_ticklabels([])
     ax_dynS.xaxis.set_ticklabels([])
@@ -730,10 +728,10 @@ if __name__ == "__main__":
     ax_dynS.tick_params(direction='in', right=True, top=True)
     ax_dynVel.tick_params(direction='in', right=True, top=True)
 
-    ax_gsZ.set_xlim([0, 4.0]); ax_gsZ.set_ylim([0, 1.1])
-    ax_dynS.set_xlim([0, 4.0]); ax_dynS.set_ylim([0, 1.1])
-    ax_gsVel.set_xlim([0, 4.0]); ax_gsVel.set_ylim([0, 1.2])
-    ax_dynVel.set_xlim([0, 4.0]); ax_dynVel.set_ylim([0, 1.2])
+    ax_gsZ.set_xlim([0, 4.14]); ax_gsZ.set_ylim([-0.05, 1.1])
+    ax_gsVel.set_xlim([0, 4.14]); ax_gsVel.set_ylim([-0.05, 1.2])
+    ax_dynS.set_xlim([-0.05, 4.14]); ax_dynS.set_ylim([-0.05, 1.1])
+    ax_dynVel.set_xlim([-0.05, 4.14]); ax_dynVel.set_ylim([-0.05, 1.2])
 
     fig2.set_size_inches(7.8, 6.0)
     fig2.savefig(figdatapath + '/Fig2_PRL.pdf')
