@@ -151,6 +151,93 @@ if __name__ == "__main__":
     print(qds.attrs['k_mag_cutoff'] * xi)
     print('Np: {0}'.format(qds.coords['k'].values.size * qds.coords['th'].values.size))
 
+    # # FIG 3 - S(t) CURVES - PRL
+
+    colorList = ['r', 'g', 'b']
+
+    matplotlib.rcParams.update({'font.size': 12})
+
+    tailFit = True
+    logScale = True
+    PimpData_roll = False; PimpData_rollwin = 2
+    longTime = True
+    # tau = 100; tfCutoff = 90; tfstart = 10
+    tau = 300; tfCutoff = 200; tfstart = 10
+
+    aIBi_weak = -10.0
+    print(aIBi_weak * xi)
+
+    if longTime:
+        innerdatapath_longtime = datapath + '_longtime/redyn_spherical'
+        qds_w = xr.open_dataset(innerdatapath_longtime + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi_weak))
+    else:
+        qds_w = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi_weak))
+
+    tVals = qds_w['t'].values
+    tsVals = tVals[tVals < tau]
+
+    qds_aIBi_ts_w = qds_w.sel(t=tsVals)
+
+    Pnorm_des = np.array([0.5, 2.2])
+
+    Pinds = np.zeros(Pnorm_des.size, dtype=int)
+    for Pn_ind, Pn in enumerate(Pnorm_des):
+        Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
+
+    fig, ax = plt.subplots()
+    for ip, indP in enumerate(Pinds):
+        P = PVals[indP]
+        DynOv_w = np.abs(qds_aIBi_ts_w.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts_w.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+        Pph_ds_w = xr.DataArray(qds_aIBi_ts_w.isel(P=indP)['Pph'].values, coords=[tsVals], dims=['t'])
+        if PimpData_roll:
+            Pph_ds_w = Pph_ds_w.rolling(t=PimpData_rollwin, center=True).mean().dropna('t')
+        vImp_Vals_w = (P - Pph_ds_w.values) / mI
+        tvImp_Vals_w = Pph_ds_w['t'].values
+
+        if tailFit is True:
+            tfmask = tsVals > tfCutoff
+            tfVals = tsVals[tfmask]
+            tfLin = tsVals[tsVals > tfstart]
+            zD = np.polyfit(np.log(tfVals), np.log(DynOv_w[tfmask]), deg=1)
+            if longTime:
+                tfLin_plot = tVals[tVals > tfstart]
+            else:
+                tfLin_plot = tfLin
+            fLinD_plot = np.exp(zD[1]) * tfLin_plot**(zD[0])
+            ax.plot(tfLin_plot / tscale, fLinD_plot, 'k--', label='')
+
+        if longTime:
+            DynOv_w_plot = np.abs(qds_w.isel(P=indP)['Real_DynOv'].values + 1j * qds_w.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+            ax.plot(tVals / tscale, DynOv_w_plot, label='{:.2f}'.format(P / mc), lw=3, color=colorList[ip])
+        else:
+            ax.plot(tsVals / tscale, DynOv_w, label='{:.2f}'.format(P / mc))
+
+    ax.set_ylabel(r'$|S(t)|$', fontsize=18)
+    ax.set_xlabel(r'$t/(\xi c^{-1})$', fontsize=18)
+
+    if logScale is True:
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+
+    ax.tick_params(which='both', direction='in', right=True, top=True)
+    ax.tick_params(which='major', length=6, width=1)
+    ax.tick_params(which='minor', length=3, width=1)
+    ax.tick_params(axis='x', which='major', pad=10)
+    ax.tick_params(axis='both', which='major', labelsize=17)
+    ax.tick_params(axis='both', which='minor', labelsize=17)
+
+    # ax.legend(title=r'$v_{\rm imp}(t_{0}) / c$')
+
+    handles, labels = ax.get_legend_handles_labels()
+    # fig.legend(handles, labels, title=r'$\langle v_{\rm imp}(t_{0})\rangle / c$', ncol=1, loc='center right', bbox_to_anchor=(0.11, 0.38)))
+    fig.subplots_adjust(left=0.2, bottom=0.175, top=0.98, right=0.98)
+
+    fig.legend(handles, labels, title=r'$v_{\rm imp}(t_{0}) / c$', loc=3, bbox_to_anchor=(0.25, 0.25), fontsize=18, title_fontsize=18)
+
+    fig.set_size_inches(6, 3.9)
+    filename = '/Fig3_PRL.pdf'
+    fig.savefig(figdatapath + filename)
+
     # # # # FIG 4 - S(t) AND v_Imp CURVES (WEAK AND STRONG INTERACTIONS)
 
     # colorList = ['b', 'orange', 'g', 'r']
