@@ -23,6 +23,7 @@ import scipy.stats as ss
 from timeit import default_timer as timer
 from copy import copy
 from matplotlib.ticker import NullFormatter
+import colors as col
 
 if __name__ == "__main__":
 
@@ -153,7 +154,11 @@ if __name__ == "__main__":
 
     # # FIG 3 - S(t) CURVES - PRL
 
-    colorList = ['r', 'g', 'b']
+    red = col.red.ashexstring()
+    green = col.green.ashexstring()
+    blue = col.blue.ashexstring()
+
+    colorList = [red, green, blue]
 
     matplotlib.rcParams.update({'font.size': 12})
 

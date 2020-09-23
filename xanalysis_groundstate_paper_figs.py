@@ -86,6 +86,7 @@ if __name__ == "__main__":
     green = col.green.ashexstring()
     cyan = col.cyan.ashexstring()
     blue = col.blue.ashexstring()
+    violet = col.violet.ashexstring()
 
     aIBi = -2
     # qds = xr.open_dataset(innerdatapath + '/quench_Dataset.nc')
@@ -533,7 +534,8 @@ if __name__ == "__main__":
     fig2.text(0.52, 0.95, '(c)', fontsize=labelsize)
     fig2.text(0.52, 0.55, '(d)', fontsize=labelsize)
 
-    colorList = ['red', 'green', 'blue']
+    # colorList = ['red', 'green', 'blue']
+    colorList = [red, green, blue]
     # colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue', 'magenta']
     lineList = ['solid', 'dashed', 'dotted', '-.']
 
