@@ -3,6 +3,8 @@ import xarray as xr
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+from matplotlib.animation import FuncAnimation
+from matplotlib.animation import writers
 import pf_dynamic_cart as pfc
 import pf_dynamic_sph as pfs
 import Grid
@@ -11,6 +13,8 @@ from timeit import default_timer as timer
 
 
 if __name__ == "__main__":
+
+    mpegWriter = writers['ffmpeg'](fps=1, bitrate=1800)
 
     # ---- INITIALIZE GRIDS ----
 
@@ -26,7 +30,7 @@ if __name__ == "__main__":
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
-    massRat = 5.0
+    massRat = 1.0
     IRrat = 1
 
     print(NGridPoints_cart)
@@ -37,10 +41,14 @@ if __name__ == "__main__":
 
     toggleDict = {'Dynamics': 'real'}
 
+    # cmap = 'gist_heat'
+    cmap = 'inferno'
+    my_cmap = matplotlib.cm.get_cmap(cmap)
+
     # ---- SET OUTPUT DATA FOLDER ----
 
     datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    animpath = '/Users/Dropbox/VariationalResearch/DataAnalysis/figs'
+    animpath = '/Users/kis/Dropbox/VariationalResearch/DataAnalysis/figs/rdyn_twophonon/hostGasDensity'
     if higherCutoff is True:
         datapath = datapath + '_cutoffRat_{:.2f}'.format(cutoffRat)
     if betterResolution is True:
@@ -49,11 +57,9 @@ if __name__ == "__main__":
 
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
-        animpath = animpath + '/rdyn'
         cartdatapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}/redyn_cart'.format(1.44e6, 1)
     elif toggleDict['Dynamics'] == 'imaginary':
         innerdatapath = datapath + '/imdyn'
-        animpath = animpath + '/idyn'
         cartdatapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}/imdyn_cart'.format(1.44e6, 1)
 
     innerdatapath = innerdatapath + '_spherical'
@@ -62,9 +68,9 @@ if __name__ == "__main__":
     interpdatapath = innerdatapath + '/interp'
 
     aIBi = -10
-    Pnorm_des = 3.0
-    # Pnorm_des = 0.5
-    tind = 1
+    # Pnorm_des = 3.0
+    Pnorm_des = 0.5
+    tind = 5
 
     linDimList = [(2, 2), (10, 10)]
     linDimMajor, linDimMinor = linDimList[1]
@@ -83,7 +89,8 @@ if __name__ == "__main__":
     tVals = qds_orig['t'].values
     t = tVals[tind]
 
-    print('P (orig): {:.2f}'.format(P))
+    print('P/mc: {:.2f}'.format(P / mc))
+    print(massRat, aIBi)
     print(t / tscale)
 
     # All Plotting:
@@ -189,113 +196,61 @@ if __name__ == "__main__":
     ax5.set_ylabel(r'$n_{|\vec{P_{I}}|}$')
     ax5.set_xlabel(r'$|\vec{P_{I}}|$')
 
-    # POSITION DISTRIBUTIONS
+    # BARE ATOM POSITION DISTRIBUTIONS
 
     # Interpolate 2D slice of position distribution
 
     na_xz_slice = interp_ds['na_xz_slice'].values
     na_xy_slice = interp_ds['na_xy_slice'].values
 
-    # # Individual Phonon Position Distribution (Interp)
-    # fig3, ax3 = plt.subplots()
-    # quad3 = ax3.pcolormesh(zLg_xz_slice, xLg_xz_slice, np_xz_slice, norm=colors.LogNorm(vmin=np.abs(np.min(np_xz_slice)), vmax=np.max(np_xz_slice)), cmap='inferno')
-    # poslinDim3 = 2300
-    # ax3.set_xlim([-1 * poslinDim3, poslinDim3])
-    # ax3.set_ylim([-1 * poslinDim3, poslinDim3])
-    # # ax3.set_xlim([-800, 800])
-    # # ax3.set_ylim([-50, 50])
-    # ax3.set_xlabel('z (Impurity Propagation Direction)')
-    # ax3.set_ylabel('x')
-    # ax3.set_title('Individual Phonon Position Distribution (Interp)')
-    # fig3.colorbar(quad3, ax=ax3, extend='both')
-
-    # Bare Atom Position Distribution (Interp)
     fig4, ax4 = plt.subplots()
     # quad4 = ax4.pcolormesh(zLg_xz_slice, xLg_xz_slice, na_xz_slice, norm=colors.LogNorm(vmin=np.abs(np.min(na_xz_slice)), vmax=np.max(na_xz_slice)), cmap='inferno')
-    quad4 = ax4.pcolormesh(zLg_xz_slice, xLg_xz_slice, na_xz_slice, norm=colors.LogNorm(vmin=1e-15, vmax=np.max(na_xz_slice)), cmap='inferno')
+    quad4 = ax4.pcolormesh(zLg_xz_slice, xLg_xz_slice, na_xz_slice, norm=colors.LogNorm(vmin=1e-10, vmax=np.max(na_xz_slice)), cmap=cmap)
     # poslinDim4 = 1300
     # ax4.set_xlim([-1 * poslinDim4, poslinDim4])
     # ax4.set_ylim([-1 * poslinDim4, poslinDim4])
     ax4.set_xlabel('z (Impurity Propagation Direction)')
     ax4.set_ylabel('x')
-    ax4.set_title('Individual Atom Position Distribution (Interp)')
+    ax4.set_title('Host Gas Density (real space, lab frame)')
     fig4.colorbar(quad4, ax=ax4, extend='both')
 
     # Bare Atom Position Distribution (Interp)
     fig6, ax6 = plt.subplots()
     # quad6 = ax6.pcolormesh(yLg_xy_slice, xLg_xy_slice, na_xy_slice, norm=colors.LogNorm(vmin=np.abs(np.min(na_xy_slice)), vmax=np.max(na_xy_slice)), cmap='inferno')
-    quad6 = ax6.pcolormesh(yLg_xy_slice, xLg_xy_slice, na_xy_slice, norm=colors.LogNorm(vmin=1e-15, vmax=np.max(na_xy_slice)), cmap='inferno')
+    quad6 = ax6.pcolormesh(yLg_xy_slice, xLg_xy_slice, na_xy_slice, norm=colors.LogNorm(vmin=1e-10, vmax=np.max(na_xy_slice)), cmap=cmap)
     # poslinDim6 = 1300
     # ax6.set_xlim([-1 * poslinDim6, poslinDim6])
     # ax6.set_ylim([-1 * poslinDim6, poslinDim6])
-    ax6.set_xlabel('z (Impurity Propagation Direction)')
+    ax6.set_xlabel('y')
     ax6.set_ylabel('x')
-    ax6.set_title('Individual Atom Position Distribution (Interp)')
+    ax6.set_title('Host Gas Density (real space, lab frame)')
     fig6.colorbar(quad6, ax=ax6, extend='both')
-
-    # # # SINGULARITY TEST - NOTE: proper way is to do interpolation starting from same kmin as original grid but then only take values in the new grid that with k_new >= dk_old - quick and dirty way which gets same result is to just start the new grid at 1.01*dk (not at 1*dk since that still has error)
-
-    # print(dk)
-    # kpow = 2
-    # func_Vals = kg**(-kpow)
-    # func_da = xr.DataArray(func_Vals, coords=[kVec, thVec], dims=['k', 'th'])
-    # orig_sum = np.sum(func_Vals * kg**2 * np.sin(thg) * dk * dth * (2 * np.pi)**(-2))
-
-    # # kmin_interp = np.min(kVec)
-    # kmin_interp = 1.01 * dk
-    # k_interp = np.linspace(kmin_interp, np.max(kVec), interpmul * kVec.size)
-    # th_interp = np.linspace(np.min(thVec), np.max(thVec), interpmul * thVec.size)
-
-    # kg_interp, thg_interp = np.meshgrid(k_interp, th_interp, indexing='ij')
-    # func_interp = interpolate.griddata((kg.flatten(), thg.flatten()), func_da.values.flatten(), (kg_interp, thg_interp), method='linear')
-
-    # dk_interp = kg_interp[1, 0] - kg_interp[0, 0]
-    # dth_interp = thg_interp[0, 1] - thg_interp[0, 0]
-    # griddata_sum = np.sum(func_interp * kg_interp**2 * np.sin(thg_interp) * dk_interp * dth_interp * (2 * np.pi)**(-2))
-
-    # # rbfi = interpolate.Rbf(kg.flatten(), thg.flatten(), func_da.values.flatten(), function='gaussian')
-    # # func_Rbf = rbfi(kg_interp, thg_interp)
-    # # rbf_sum = np.sum(func_Rbf * kg_interp**2 * np.sin(thg_interp) * dk_interp * dth_interp * (2 * np.pi)**(-2))
-
-    # # f_spline = interpolate.interp2d(x=kVec, y=thVec, z=np.transpose(func_da.values), kind='linear')
-    # # func_spline = np.transpose(f_spline(k_interp, th_interp))
-    # # spline_sum = np.sum(func_spline * kg_interp**2 * np.sin(thg_interp) * dk_interp * dth_interp * (2 * np.pi)**(-2))
-
-    # exact_sum = 2 * (2 * np.pi)**(-2) * (3 - kpow)**(-1) * np.max(kVec)**(3 - kpow)  # exact answer if func = k^(-kpow) with kpow < 3
-    # print(exact_sum)
-    # print(orig_sum)
-    # print(griddata_sum)
-    # # print(rbf_sum)
-    # # print(spline_sum)
-
-    # kmin_val = dk
-    # kg_mask = kg >= kmin_val
-    # kg_interp_mask = kg_interp >= kmin_val
-    # func_Vals_minmask = func_Vals[kg_mask]
-    # func_interp_minmask = func_interp[kg_interp_mask]
-    # orig_sum_min = np.sum(func_Vals_minmask * kg[kg_mask]**2 * np.sin(thg[kg_mask]) * dk * dth * (2 * np.pi)**(-2))
-    # griddata_sum_min = np.sum(func_interp_minmask * kg_interp[kg_interp_mask]**2 * np.sin(thg_interp[kg_interp_mask]) * dk_interp * dth_interp * (2 * np.pi)**(-2))
-    # print(orig_sum_min, griddata_sum_min)
-
-    # fig1, ax1 = plt.subplots()
-    # interp_vals = func_interp
-    # kxg_interp = kg_interp * np.sin(thg_interp)
-    # kzg_interp = kg_interp * np.cos(thg_interp)
-    # quad1 = ax1.pcolormesh(kzg, kxg, func_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(func_Vals)), cmap='inferno')
-    # quad1m = ax1.pcolormesh(kzg, -1 * kxg, func_Vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(func_Vals)), cmap='inferno')
-    # fig1.colorbar(quad1, ax=ax1, extend='both')
-    # fig, ax = plt.subplots()
-    # quad = ax.pcolormesh(kzg_interp, kxg_interp, interp_vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(func_Vals)), cmap='inferno')
-    # quadm = ax.pcolormesh(kzg_interp, -1 * kxg_interp, interp_vals, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(func_Vals)), cmap='inferno')
-    # fig.colorbar(quad, ax=ax, extend='both')
-
-    # ax1.set_xlim([-0.5, 0.5])
-    # ax1.set_ylim([-0.5, 0.5])
-    # ax.set_xlim([-0.5, 0.5])
-    # ax.set_ylim([-0.5, 0.5])
 
     # plt.show()
 
-    # END TEST
+    # BARE ATOM POSITION ANIMATION
+
+    vmin = 1e-10; vmax = 1e-1
+
+    na_xz_array = np.empty(tVals.size, dtype=np.object)
+    for tind, t in enumerate(tVals):
+        interp_ds = xr.open_dataset(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_t_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, t, linDimMajor, linDimMinor))
+        na_xz_array[tind] = interp_ds['na_xz_slice'].values
+
+    fig_a1, ax_a1 = plt.subplots()
+    quad_a1 = ax_a1.pcolormesh(zLg_xz_slice, xLg_xz_slice, na_xz_array[0][:-1, :-1], norm=colors.LogNorm(vmin=vmin, vmax=vmax), cmap=cmap)
+    ax_a1.set_xlabel('z (Impurity Propagation Direction)')
+    ax_a1.set_ylabel('x')
+    ax_a1.set_title('Host Gas Density (real space, lab frame)')
+    fig_a1.colorbar(quad_a1, ax=ax_a1, extend='both')
+
+    def animate_Den(i):
+        if i >= tVals.size:
+            return
+        quad_a1.set_array(na_xz_array[i][:-1, :-1].ravel())
+
+    anim_Den = FuncAnimation(fig_a1, animate_Den, interval=1000, frames=range(tVals.size), repeat=True)
+    anim_Den_filename = '/HostGasDensity_mRat_{:.1f}_P_{:.2f}_aIBi_{:.2f}.mp4'.format(massRat, P, aIBi)
+    anim_Den.save(animpath + anim_Den_filename, writer=mpegWriter)
 
     plt.show()

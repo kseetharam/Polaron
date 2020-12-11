@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     # ---- SET OUTPUT DATA FOLDER ----
 
-    mRat = 5
+    mRat = 1
 
     datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
 
@@ -59,8 +59,8 @@ if __name__ == "__main__":
 
     aIBi = -10
 
-    Pnorm_des = 3.0
-    # Pnorm_des = 0.5
+    # Pnorm_des = 3.0
+    Pnorm_des = 0.5
 
     # Pnorm_des = 1.0
     # Pnorm_des = 0.1
@@ -77,28 +77,31 @@ if __name__ == "__main__":
     print(P, P / mc)
 
     tVals = qds['t'].values
-    tind = 1
-    t = tVals[tind]
+    print(tVals)
+    # tind = 5
+    # t = tVals[tind]
 
-    # # FULL RECONSTRUCTION OF 3D CARTESIAN BETA_K FROM 2D SPHERICAL BETA_K (doing actual interpolation in 2D spherical instead of 3D nonlinear cartesian)
+    for tind, t in enumerate(tVals):
+        print(tind, t)
+        # # FULL RECONSTRUCTION OF 3D CARTESIAN BETA_K FROM 2D SPHERICAL BETA_K (doing actual interpolation in 2D spherical instead of 3D nonlinear cartesian)
 
-    CSAmp_ds = (qds['Real_CSAmp'] + 1j * qds['Imag_CSAmp']).sel(P=P).isel(t=tind); CSAmp_ds.attrs = qds.attrs; CSAmp_ds.attrs['Nph'] = qds['Nph'].sel(P=P).isel(t=tind).values
+        CSAmp_ds = (qds['Real_CSAmp'] + 1j * qds['Imag_CSAmp']).sel(P=P).isel(t=tind); CSAmp_ds.attrs = qds.attrs; CSAmp_ds.attrs['Nph'] = qds['Nph'].sel(P=P).isel(t=tind).values
 
-    # Generate data
+        # Generate data
 
-    # dkxL = 1e-2; dkyL = 1e-2; dkzL = 1e-2
-    # linDimList = [(2, 2)]
+        # dkxL = 1e-2; dkyL = 1e-2; dkzL = 1e-2
+        # linDimList = [(2, 2)]
 
-    dkxL = 5e-2; dkyL = 5e-2; dkzL = 5e-2
-    linDimList = [(10, 10)]
+        dkxL = 5e-2; dkyL = 5e-2; dkzL = 5e-2
+        linDimList = [(10, 10)]
 
-    for ldtup in linDimList:
-        tupstart = timer()
-        linDimMajor, linDimMinor = ldtup
-        print('lDM: {0}, lDm: {1}'.format(linDimMajor, linDimMinor))
-        interp_ds = pfs.reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL)
-        interp_ds.to_netcdf(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_t_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, t, linDimMajor, linDimMinor))
-        tupend = timer()
-        print('Total Time: {0}'.format(tupend - tupstart))
-        time.sleep(2)
-        print('\n')
+        for ldtup in linDimList:
+            tupstart = timer()
+            linDimMajor, linDimMinor = ldtup
+            print('lDM: {0}, lDm: {1}'.format(linDimMajor, linDimMinor))
+            interp_ds = pfs.reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL)
+            interp_ds.to_netcdf(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_t_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, t, linDimMajor, linDimMinor))
+            tupend = timer()
+            print('Total Time: {0}'.format(tupend - tupstart))
+            time.sleep(2)
+            print('\n')
