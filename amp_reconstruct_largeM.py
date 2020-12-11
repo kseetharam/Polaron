@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     # ---- SET OUTPUT DATA FOLDER ----
 
-    mRat = 1
+    mRat = 1.0
 
     datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
 
@@ -57,10 +57,12 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -10
+    aIBi = -2
 
-    # Pnorm_des = 3.0
-    Pnorm_des = 0.5
+    Pnorm_des = 3.0
+    # Pnorm_des = 2.5
+    # Pnorm_des = 2.0
+    # Pnorm_des = 0.5
 
     # Pnorm_des = 1.0
     # Pnorm_des = 0.1
@@ -74,12 +76,19 @@ if __name__ == "__main__":
     Pnorm = PVals / mc
     Pind = np.abs(Pnorm - Pnorm_des).argmin().astype(int)
     P = PVals[Pind]
-    print(P, P / mc)
+    print(P, P / mc, mRat)
 
     tVals = qds['t'].values
-    print(tVals)
+    # print(tVals)
     # tind = 5
     # t = tVals[tind]
+
+    # import matplotlib.pyplot as plt
+    # vImp_Vals = (P - qds.sel(P=P)['Pph'].values) / mc
+    # fig, ax = plt.subplots()
+    # ax.plot(tVals, vImp_Vals, 'b-')
+    # ax.plot(tVals, np.ones(tVals.size), 'k--')
+    # plt.show()
 
     for tind, t in enumerate(tVals):
         print(tind, t)

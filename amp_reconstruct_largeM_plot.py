@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
-    massRat = 1.0
+    massRat = 0.5
     IRrat = 1
 
     print(NGridPoints_cart)
