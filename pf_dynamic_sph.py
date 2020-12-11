@@ -409,7 +409,8 @@ def reconstructDistributions(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkz
 def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     import pf_dynamic_cart as pfc
     # Set up
-    P = CSAmp_ds.attrs['P']
+    # P = CSAmp_ds.attrs['P']
+    P = CSAmp_ds.coords['P'].values
     aIBi = CSAmp_ds.attrs['aIBi']
     n0 = CSAmp_ds.attrs['n0']; gBB = CSAmp_ds.attrs['gBB']; mI = CSAmp_ds.attrs['mI']; mB = CSAmp_ds.attrs['mB']
 
@@ -419,6 +420,7 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     print('P: {0}'.format(P))
     print('dk: {0}'.format(kVec[1] - kVec[0]))
     Bk_2D_vals = CSAmp_ds.values
+
     Nph = CSAmp_ds.attrs['Nph']
     kg, thg = np.meshgrid(kVec, thVec, indexing='ij')
     # Normalization of the original data array - this checks out
@@ -549,16 +551,47 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     PR_bare_cont_da = xr.DataArray(PR_bare_cont)
     PR_bare_discrete_da = xr.DataArray(PR_bare_discrete)
 
+    # Position distribution
+    # Calculate real space distribution of atoms in the BEC
+    ptime1 = timer()
+    BkLg_3D = interpolate.griddata((kg.flatten(), thg.flatten()), Bk_2D_vals.flatten(), (kg_3Di, thg_3Di), method='linear')
+    BkLg_3D[np.isnan(BkLg_3D)] = 0
+
+    uk2 = 0.5 * (1 + (pfc.epsilon(kxLg_3D, kyLg_3D, kzLg_3D, mB) + gBB * n0) / pfc.omegak(kxLg_3D, kyLg_3D, kzLg_3D, mB, n0, gBB))
+    vk2 = uk2 - 1
+    uk = np.sqrt(uk2); vk = np.sqrt(vk2)
+    uB_kxkykz = np.fft.ifftshift(uk * BkLg_3D)
+    uB_xyz = np.fft.fftshift(np.fft.ifftn(uB_kxkykz) / dVxyz)
+    vB_kxkykz = np.fft.ifftshift(vk * BkLg_3D)
+    vB_xyz = np.fft.fftshift(np.fft.ifftn(vB_kxkykz) / dVxyz)
+
+    # na_xyz = np.sum(vk2 * dkxL * dkyL * dkzL) + np.abs(uB_xyz - np.conjugate(vB_xyz))**2
+    na_xyz_prenorm = (np.abs(uB_xyz - np.conjugate(vB_xyz))**2).real.astype(float)
+    na_xyz = na_xyz_prenorm / np.sum(na_xyz_prenorm * dVxyz)
+    print(np.sum(vk2 * dkxL * dkyL * dkzL), np.max(np.abs(uB_xyz - np.conjugate(vB_xyz))**2))
+    na_xz_slice_da = xr.DataArray(na_xyz[:, Ny // 2, :], coords=[xL, zL], dims=['x', 'z'])
+    na_xy_slice_da = xr.DataArray(na_xyz[:, :, Nz // 2], coords=[xL, yL], dims=['x', 'y'])
+    na_yz_slice_da = xr.DataArray(na_xyz[Nx // 2, :, :], coords=[yL, zL], dims=['y', 'z'])
+    posDistTime = timer() - ptime1
+    print('Position Distribution Time Overhead: {0}'.format(posDistTime))
+
+    # # data_dict = ({'PhDen_xz': PhDen_xz_slice_da, 'PhDen_xy': PhDen_xy_slice_da, 'PhDen_yz': PhDen_yz_slice_da,
+    # #               'nPB_xz_slice': nPB_xz_slice_da, 'nPB_xy_slice': nPB_xy_slice_da, 'nPB_yz_slice': nPB_yz_slice_da, 'nPB_mag': nPBm_da,
+    # #               'nPI_xz_slice': nPI_xz_slice_da, 'nPI_xy_slice': nPI_xy_slice_da, 'nPI_yz_slice': nPI_yz_slice_da, 'nPI_mag': nPIm_da})
+    # # coords_dict = {'kx': kxL, 'ky': kyL, 'kz': kzL, 'x': xL, 'y': yL, 'z': zL, 'PB_x': PB_x, 'PB_y': PB_y, 'PB_z': PB_z, 'PI_x': PI_x, 'PI_y': PI_y, 'PI_z': PI_z, 'PB_mag': PBm, 'PI_mag': PIm}
+    # # attrs_dict = {'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'mom_deltapeak': nPB_deltaK0, 'Nph_frac': Nph_red / Nph, 'Nph_interp': Nph_interp, 'Nph_orig': Nph, 'PR_bare_cont': PR_bare_cont, 'PR_bare_discrete': PR_bare_discrete, 'Npoints3D': Npoints3D, 'Vxyz': Vxyz}
+
     # data_dict = ({'PhDen_xz': PhDen_xz_slice_da, 'PhDen_xy': PhDen_xy_slice_da, 'PhDen_yz': PhDen_yz_slice_da,
     #               'nPB_xz_slice': nPB_xz_slice_da, 'nPB_xy_slice': nPB_xy_slice_da, 'nPB_yz_slice': nPB_yz_slice_da, 'nPB_mag': nPBm_da,
-    #               'nPI_xz_slice': nPI_xz_slice_da, 'nPI_xy_slice': nPI_xy_slice_da, 'nPI_yz_slice': nPI_yz_slice_da, 'nPI_mag': nPIm_da})
-    # coords_dict = {'kx': kxL, 'ky': kyL, 'kz': kzL, 'x': xL, 'y': yL, 'z': zL, 'PB_x': PB_x, 'PB_y': PB_y, 'PB_z': PB_z, 'PI_x': PI_x, 'PI_y': PI_y, 'PI_z': PI_z, 'PB_mag': PBm, 'PI_mag': PIm}
-    # attrs_dict = {'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'mom_deltapeak': nPB_deltaK0, 'Nph_frac': Nph_red / Nph, 'Nph_interp': Nph_interp, 'Nph_orig': Nph, 'PR_bare_cont': PR_bare_cont, 'PR_bare_discrete': PR_bare_discrete, 'Npoints3D': Npoints3D, 'Vxyz': Vxyz}
+    #               'nPI_xz_slice': nPI_xz_slice_da, 'nPI_xy_slice': nPI_xy_slice_da, 'nPI_yz_slice': nPI_yz_slice_da, 'nPI_mag': nPIm_da,
+    #               'mom_deltapeak': mom_deltapeak_da, 'Nph_frac': Nph_frac_da, 'Nph_interp': Nph_interp_da, 'Nph_orig': Nph_orig_da, 'PR_bare_cont': PR_bare_cont_da, 'PR_bare_discrete': PR_bare_discrete_da})
 
     data_dict = ({'PhDen_xz': PhDen_xz_slice_da, 'PhDen_xy': PhDen_xy_slice_da, 'PhDen_yz': PhDen_yz_slice_da,
                   'nPB_xz_slice': nPB_xz_slice_da, 'nPB_xy_slice': nPB_xy_slice_da, 'nPB_yz_slice': nPB_yz_slice_da, 'nPB_mag': nPBm_da,
                   'nPI_xz_slice': nPI_xz_slice_da, 'nPI_xy_slice': nPI_xy_slice_da, 'nPI_yz_slice': nPI_yz_slice_da, 'nPI_mag': nPIm_da,
+                  'na_xz_slice': na_xz_slice_da, 'na_xy_slice': na_xy_slice_da, 'na_yz_slice': na_yz_slice_da,
                   'mom_deltapeak': mom_deltapeak_da, 'Nph_frac': Nph_frac_da, 'Nph_interp': Nph_interp_da, 'Nph_orig': Nph_orig_da, 'PR_bare_cont': PR_bare_cont_da, 'PR_bare_discrete': PR_bare_discrete_da})
+
     coords_dict = {'kx': kxL, 'ky': kyL, 'kz': kzL, 'x': xL, 'y': yL, 'z': zL, 'PB_x': PB_x, 'PB_y': PB_y, 'PB_z': PB_z, 'PI_x': PI_x, 'PI_y': PI_y, 'PI_z': PI_z, 'PB_mag': PBm, 'PI_mag': PIm}
     attrs_dict = {'P': P, 'aIBi': aIBi, 'mI': mI, 'mB': mB, 'n0': n0, 'gBB': gBB, 'Npoints3D': Npoints3D, 'Vxyz': Vxyz}
     interp_ds = xr.Dataset(data_dict, coords=coords_dict, attrs=attrs_dict)
