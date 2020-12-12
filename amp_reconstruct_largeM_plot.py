@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
-    massRat = 0.5
+    massRat = 1.0
     IRrat = 1
 
     print(NGridPoints_cart)
@@ -67,10 +67,17 @@ if __name__ == "__main__":
     # # Analysis of Total Dataset
     interpdatapath = innerdatapath + '/interp'
 
-    aIBi = -10
+    aIBi = -2
+    # Pnorm_des = 4.0
     # Pnorm_des = 3.0
-    Pnorm_des = 0.5
-    tind = 5
+    # Pnorm_des = 2.0
+    # Pnorm_des = 1.5
+    # Pnorm_des = 1.25
+    # Pnorm_des = 1.1
+    # Pnorm_des = 0.5
+    Pnorm_des = 0.1
+
+    tind = -1
 
     linDimList = [(2, 2), (10, 10)]
     linDimMajor, linDimMinor = linDimList[1]
@@ -90,6 +97,7 @@ if __name__ == "__main__":
     t = tVals[tind]
 
     print('P/mc: {:.2f}'.format(P / mc))
+    print(P)
     print(massRat, aIBi)
     print(t / tscale)
 
@@ -250,7 +258,7 @@ if __name__ == "__main__":
         quad_a1.set_array(na_xz_array[i][:-1, :-1].ravel())
 
     anim_Den = FuncAnimation(fig_a1, animate_Den, interval=1000, frames=range(tVals.size), repeat=True)
-    anim_Den_filename = '/HostGasDensity_mRat_{:.1f}_P_{:.2f}_aIBi_{:.2f}.mp4'.format(massRat, P, aIBi)
+    anim_Den_filename = '/HostGasDensity_mRat_{:.1f}_Pnorm_{:.2f}_aIBi_{:.2f}.mp4'.format(massRat, P / mc, aIBi)
     anim_Den.save(animpath + anim_Den_filename, writer=mpegWriter)
 
     plt.show()

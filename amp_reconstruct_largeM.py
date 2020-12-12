@@ -59,13 +59,14 @@ if __name__ == "__main__":
 
     aIBi = -2
 
-    Pnorm_des = 3.0
+    # Pnorm_des = 4.0
+    # Pnorm_des = 3.0
     # Pnorm_des = 2.5
     # Pnorm_des = 2.0
+    # Pnorm_des = 1.5
+    # Pnorm_des = 1.1
     # Pnorm_des = 0.5
-
-    # Pnorm_des = 1.0
-    # Pnorm_des = 0.1
+    Pnorm_des = 0.1
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     n0 = qds.attrs['n0']; gBB = qds.attrs['gBB']; mI = qds.attrs['mI']; mB = qds.attrs['mB']
@@ -76,7 +77,7 @@ if __name__ == "__main__":
     Pnorm = PVals / mc
     Pind = np.abs(Pnorm - Pnorm_des).argmin().astype(int)
     P = PVals[Pind]
-    print(P, P / mc, mRat)
+    print(P, P / mc, mRat, aIBi)
 
     tVals = qds['t'].values
     # print(tVals)
