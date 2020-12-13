@@ -530,7 +530,7 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     Npoints3D = pk.size
     Vxyz = (xL[-1] - xL[0]) * (yL[-1] - yL[0]) * (zL[-1] - zL[0])
 
-    # Create DataSet for 3D Betak and position distribution slices
+    # Create DataSet for 3D Betak slices
     Nx = len(kxL); Ny = len(kyL); Nz = len(kzL)
     PhDen_xz_slice_da = xr.DataArray(PhDenLg_3D[:, Ny // 2, :], coords=[kxL, kzL], dims=['kx', 'kz'])
     PhDen_xy_slice_da = xr.DataArray(PhDenLg_3D[:, :, Nz // 2], coords=[kxL, kyL], dims=['kx', 'ky'])

@@ -12,32 +12,29 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (60, 60, 60)
-    (dx, dy, dz) = (0.25, 0.25, 0.25)
-    higherCutoff = False; cutoffRat = 1.0
-    betterResolution = True; resRat = 0.5
-
-    # (Lx, Ly, Lz) = (21, 21, 21)
-    # (dx, dy, dz) = (0.375, 0.375, 0.375)
+    # (Lx, Ly, Lz) = (60, 60, 60)
+    # (dx, dy, dz) = (0.25, 0.25, 0.25)
     # higherCutoff = False; cutoffRat = 1.0
-    # betterResolution = False; resRat = 1.0
+    # betterResolution = True; resRat = 0.5
+
+    (Lx, Ly, Lz) = (21, 21, 21)
+    (dx, dy, dz) = (0.375, 0.375, 0.375)
+    higherCutoff = False; cutoffRat = 1.0
+    betterResolution = False; resRat = 1.0
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
+    NGridPoints_cart = 3.75e8
+
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Old': True}
+    toggleDict = {'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Old': False}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
-    mRat = 1
+    mRat = 10
 
-    if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/scratchlfs/demler_lab/kis/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
     if higherCutoff is True:
         datapath = datapath + '_cutoffRat_{:.2f}'.format(cutoffRat)
     if betterResolution is True:
@@ -69,9 +66,9 @@ if __name__ == "__main__":
 
     aIBi = -10
 
-    Pnorm_des = 2.64
-    # Pnorm_des = 1.0
-    # Pnorm_des = 0.1
+    # Pnorm_des = 2.64
+    Pnorm_des = 1.0
+    # Pnorm_des = 0.5
 
     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     n0 = qds.attrs['n0']; gBB = qds.attrs['gBB']; mI = qds.attrs['mI']; mB = qds.attrs['mB']
@@ -82,7 +79,7 @@ if __name__ == "__main__":
     Pnorm = PVals / mc
     Pind = np.abs(Pnorm - Pnorm_des).argmin().astype(int)
     P = PVals[Pind]
-    print(P)
+    print(P, P / mc)
 
     # # FULL RECONSTRUCTION OF 3D CARTESIAN BETA_K FROM 2D SPHERICAL BETA_K (doing actual interpolation in 2D spherical instead of 3D nonlinear cartesian)
 
@@ -96,8 +93,17 @@ if __name__ == "__main__":
     # dkxL = 1e-2; dkyL = 1e-2; dkzL = 1e-2
     # linDimList = [(2, 2)]
 
-    dkxL = 5e-2; dkyL = 5e-2; dkzL = 5e-2
-    linDimList = [(10, 10)]
+    # dkxL = 5e-3; dkyL = 5e-3; dkzL = 5e-3
+    # linDimList = [(2, 2)]
+
+    dkxL = 6e-3; dkyL = 6e-3; dkzL = 6e-3
+    linDimList = [(2.05, 2.05)]
+
+    # dkxL = 7.5e-3; dkyL = 7.5e-3; dkzL = 7.5e-3
+    # linDimList = [(3, 3)]
+
+    # dkxL = 5e-2; dkyL = 5e-2; dkzL = 5e-2
+    # linDimList = [(10, 10)]
 
     for ldtup in linDimList:
         tupstart = timer()

@@ -37,21 +37,16 @@ if __name__ == "__main__":
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
+    NGridPoints_cart = 3.75e8
+
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Longtime': 'false', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
+    toggleDict = {'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Longtime': 'false', 'ReducedInterp': 'false', 'kGrid_ext': 'false'}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
-    if toggleDict['Location'] == 'home':
-        datapath = '/home/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, 1)
-        animpath = '/home/kis/Dropbox/VariationalResearch/DataAnalysis/figs'
-    elif toggleDict['Location'] == 'work':
-        datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, 1)
-        animpath = '/media/kis/Storage/Dropbox/VariationalResearch/DataAnalysis/figs'
-    elif toggleDict['Location'] == 'cluster':
-        datapath = '/n/regal/demler_lab/kis/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, 1)
-        animpath = ''
+    datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}'.format(NGridPoints_cart, 10)
+    animpath = '/media/kis/Storage/Dropbox/VariationalResearch/DataAnalysis/figs'
 
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
@@ -108,39 +103,39 @@ if __name__ == "__main__":
     # del(ds_tot.attrs['P']); del(ds_tot.attrs['aIBi']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
     # ds_tot.to_netcdf(innerdatapath + '/quench_Dataset_cart.nc')
 
-    # # # Concatenate Individual Datasets (aIBi specific)
+    # # Concatenate Individual Datasets (aIBi specific)
 
-    # aIBi_List = [-10.0, -5.0, -2.0, -1.0, -0.75, -0.5]
-    # for aIBi in aIBi_List:
-    #     ds_list = []; P_list = []; mI_list = []
-    #     for ind, filename in enumerate(os.listdir(innerdatapath)):
-    #         if filename[0:14] == 'quench_Dataset':
-    #             continue
-    #         if filename[0:6] == 'interp':
-    #             continue
-    #         if filename[0:2] == 'mm':
-    #             continue
-    #         if float(filename[13:-3]) != aIBi:
-    #             continue
-    #         print(filename)
-    #         ds = xr.open_dataset(innerdatapath + '/' + filename)
-    #         ds_list.append(ds)
-    #         P_list.append(ds.attrs['P'])
-    #         mI_list.append(ds.attrs['mI'])
+    aIBi_List = [-10.0]
+    for aIBi in aIBi_List:
+        ds_list = []; P_list = []; mI_list = []
+        for ind, filename in enumerate(os.listdir(innerdatapath)):
+            if filename[0:14] == 'quench_Dataset':
+                continue
+            if filename[0:6] == 'interp':
+                continue
+            if filename[0:2] == 'mm':
+                continue
+            # if float(filename[14:-3]) != aIBi:
+            #     continue
+            print(filename)
+            ds = xr.open_dataset(innerdatapath + '/' + filename)
+            ds_list.append(ds)
+            P_list.append(ds.attrs['P'])
+            mI_list.append(ds.attrs['mI'])
 
-    #     s = sorted(zip(P_list, ds_list))
-    #     g = itertools.groupby(s, key=lambda x: x[0])
+        s = sorted(zip(P_list, ds_list))
+        g = itertools.groupby(s, key=lambda x: x[0])
 
-    #     P_keys = []; P_ds_list = []; aIBi_ds_list = []
-    #     for key, group in g:
-    #         P_temp_list, ds_temp_list = zip(*list(group))
-    #         P_keys.append(key)  # note that key = P_temp_list[0]
-    #         P_ds_list.append(ds_temp_list[0])
+        P_keys = []; P_ds_list = []; aIBi_ds_list = []
+        for key, group in g:
+            P_temp_list, ds_temp_list = zip(*list(group))
+            P_keys.append(key)  # note that key = P_temp_list[0]
+            P_ds_list.append(ds_temp_list[0])
 
-    #     with xr.concat(P_ds_list, pd.Index(P_keys, name='P')) as ds_tot:
-    #         # ds_tot = xr.concat(P_ds_list, pd.Index(P_keys, name='P'))
-    #         del(ds_tot.attrs['P']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
-    #         ds_tot.to_netcdf(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+        with xr.concat(P_ds_list, pd.Index(P_keys, name='P')) as ds_tot:
+            # ds_tot = xr.concat(P_ds_list, pd.Index(P_keys, name='P'))
+            del(ds_tot.attrs['P']); del(ds_tot.attrs['nu']); del(ds_tot.attrs['gIB'])
+            ds_tot.to_netcdf(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
 
     # # Analysis of Total Dataset
     interpdatapath = innerdatapath + '/interp'
@@ -316,57 +311,57 @@ if __name__ == "__main__":
     # ax2.set_xlabel(r'$a_{IB}^{-1}$')
     # ax2.set_ylabel(r'$\frac{P_{crit}}{m_{I}c_{BEC}}$')
 
-    # # PHASE DIAGRAM (SPHERICAL)
+    # # # PHASE DIAGRAM (SPHERICAL)
 
-    aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0, -0.75, -0.5])
-    Pcrit = np.zeros(aIBi_Vals.size)
-    for aind, aIBi in enumerate(aIBi_Vals):
-        qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-        CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
-        kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    # aIBi_Vals = np.array([-10.0, -5.0, -2.0, -1.0, -0.75, -0.5])
+    # Pcrit = np.zeros(aIBi_Vals.size)
+    # for aind, aIBi in enumerate(aIBi_Vals):
+    #     qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    #     CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+    #     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
 
-        Energy_Vals_inf = np.zeros(PVals.size)
-        for Pind, P in enumerate(PVals):
-            CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
-            Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+    #     Energy_Vals_inf = np.zeros(PVals.size)
+    #     for Pind, P in enumerate(PVals):
+    #         CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
+    #         Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
 
-        Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
-        Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
-        Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
-        Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
-        # Pcrit[aind] = Pinf_Vals[np.argwhere(Einf_2ndderiv_Vals < 0)[-2][0] + 3]
-        Pcrit[aind] = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 0]  # there is a little bit of fudging with the -3 here so that aIBi=-10 gives me Pcrit/(mI*c) = 1 -> I can also just generate data for weaker interactions and see if it's better
+    #     Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+    #     Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 5 * PVals.size)
+    #     Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+    #     Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+    #     # Pcrit[aind] = Pinf_Vals[np.argwhere(Einf_2ndderiv_Vals < 0)[-2][0] + 3]
+    #     Pcrit[aind] = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 0]  # there is a little bit of fudging with the -3 here so that aIBi=-10 gives me Pcrit/(mI*c) = 1 -> I can also just generate data for weaker interactions and see if it's better
 
-    Pcrit_norm = Pcrit / (mI * nu)
-    Pcrit_tck = interpolate.splrep(aIBi_Vals, Pcrit_norm, s=0, k=2)
-    aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
-    Pcrit_interpVals = 1 * interpolate.splev(aIBi_interpVals, Pcrit_tck, der=0)
+    # Pcrit_norm = Pcrit / (mI * nu)
+    # Pcrit_tck = interpolate.splrep(aIBi_Vals, Pcrit_norm, s=0, k=2)
+    # aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
+    # Pcrit_interpVals = 1 * interpolate.splev(aIBi_interpVals, Pcrit_tck, der=0)
 
-    xmin = np.min(aIBi_interpVals)
-    xmax = 1.01 * np.max(aIBi_interpVals)
-    ymin = 0.5
-    ymax = 1.01 * np.max(Pcrit_interpVals)
+    # xmin = np.min(aIBi_interpVals)
+    # xmax = 1.01 * np.max(aIBi_interpVals)
+    # ymin = 0.5
+    # ymax = 1.01 * np.max(Pcrit_interpVals)
 
-    font = {'family': 'serif', 'color': 'black', 'size': 14}
-    sfont = {'family': 'serif', 'color': 'black', 'size': 13}
+    # font = {'family': 'serif', 'color': 'black', 'size': 14}
+    # sfont = {'family': 'serif', 'color': 'black', 'size': 13}
 
-    fig, ax = plt.subplots()
-    ax.plot(aIBi_Vals, Pcrit_norm, 'kx')
-    ax.plot(aIBi_interpVals, Pcrit_interpVals, 'k-')
-    # f1 = interpolate.interp1d(aIBi_Vals, Pcrit_norm, kind='cubic')
-    # ax.plot(aIBi_interpVals, f1(aIBi_interpVals), 'k-')
-    ax.set_title('Ground State Phase Diagram')
-    ax.set_xlabel(r'$a_{IB}^{-1}$')
-    ax.set_ylabel(r'$\frac{P}{m_{I}c_{BEC}}$')
-    ax.set_xlim([xmin, xmax])
-    ax.set_ylim([ymin, ymax])
-    ax.fill_between(aIBi_interpVals, Pcrit_interpVals, ymax, facecolor='b', alpha=0.25)
-    ax.fill_between(aIBi_interpVals, ymin, Pcrit_interpVals, facecolor='g', alpha=0.25)
-    ax.text(-4, ymin + 0.175 * (ymax - ymin), 'Polaron', fontdict=font)
-    ax.text(-8, ymin + 0.7 * (ymax - ymin), 'Cherenkov', fontdict=font)
-    ax.text(-3.85, ymin + 0.075 * (ymax - ymin), '(' + r'$Z>0$' + ')', fontdict=sfont)
-    ax.text(-7.7, ymin + 0.6 * (ymax - ymin), '(' + r'$Z=0$' + ')', fontdict=sfont)
-    plt.show()
+    # fig, ax = plt.subplots()
+    # ax.plot(aIBi_Vals, Pcrit_norm, 'kx')
+    # ax.plot(aIBi_interpVals, Pcrit_interpVals, 'k-')
+    # # f1 = interpolate.interp1d(aIBi_Vals, Pcrit_norm, kind='cubic')
+    # # ax.plot(aIBi_interpVals, f1(aIBi_interpVals), 'k-')
+    # ax.set_title('Ground State Phase Diagram')
+    # ax.set_xlabel(r'$a_{IB}^{-1}$')
+    # ax.set_ylabel(r'$\frac{P}{m_{I}c_{BEC}}$')
+    # ax.set_xlim([xmin, xmax])
+    # ax.set_ylim([ymin, ymax])
+    # ax.fill_between(aIBi_interpVals, Pcrit_interpVals, ymax, facecolor='b', alpha=0.25)
+    # ax.fill_between(aIBi_interpVals, ymin, Pcrit_interpVals, facecolor='g', alpha=0.25)
+    # ax.text(-4, ymin + 0.175 * (ymax - ymin), 'Polaron', fontdict=font)
+    # ax.text(-8, ymin + 0.7 * (ymax - ymin), 'Cherenkov', fontdict=font)
+    # ax.text(-3.85, ymin + 0.075 * (ymax - ymin), '(' + r'$Z>0$' + ')', fontdict=sfont)
+    # ax.text(-7.7, ymin + 0.6 * (ymax - ymin), '(' + r'$Z=0$' + ')', fontdict=sfont)
+    # plt.show()
 
     # # # POLARON SOUND VELOCITY (SPHERICAL)
 

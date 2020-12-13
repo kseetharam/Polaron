@@ -14,15 +14,15 @@ if __name__ == "__main__":
 
     # ---- INITIALIZE GRIDS ----
 
-    (Lx, Ly, Lz) = (60, 60, 60)
-    (dx, dy, dz) = (0.25, 0.25, 0.25)
-    higherCutoff = False; cutoffRat = 1.5
-    betterResolution = True; resRat = 0.5
-
-    # (Lx, Ly, Lz) = (21, 21, 21)
-    # (dx, dy, dz) = (0.375, 0.375, 0.375)
+    # (Lx, Ly, Lz) = (60, 60, 60)
+    # (dx, dy, dz) = (0.25, 0.25, 0.25)
     # higherCutoff = False; cutoffRat = 1.5
-    # betterResolution = False; resRat = 0.5
+    # betterResolution = True; resRat = 0.5
+
+    (Lx, Ly, Lz) = (21, 21, 21)
+    (dx, dy, dz) = (0.375, 0.375, 0.375)
+    higherCutoff = False; cutoffRat = 1.5
+    betterResolution = False; resRat = 0.5
 
     NGridPoints_cart = (1 + 2 * Lx / dx) * (1 + 2 * Ly / dy) * (1 + 2 * Lz / dz)
 
@@ -31,11 +31,11 @@ if __name__ == "__main__":
 
     # Toggle parameters
 
-    toggleDict = {'Location': 'work', 'Dynamics': 'real', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Old': True}
+    toggleDict = {'Dynamics': 'imaginary', 'Interaction': 'on', 'Grid': 'spherical', 'Coupling': 'twophonon', 'Old': False}
 
     # ---- SET OUTPUT DATA FOLDER ----
 
-    datapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
+    datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
     animpath = '/media/kis/Storage/Dropbox/VariationalResearch/DataAnalysis/figs'
     if higherCutoff is True:
         datapath = datapath + '_cutoffRat_{:.2f}'.format(cutoffRat)
@@ -49,11 +49,11 @@ if __name__ == "__main__":
     if toggleDict['Dynamics'] == 'real':
         innerdatapath = datapath + '/redyn'
         animpath = animpath + '/rdyn'
-        cartdatapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}/redyn_cart'.format(1.44e6, 1)
+        cartdatapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}/redyn_cart'.format(1.44e6, 1)
     elif toggleDict['Dynamics'] == 'imaginary':
         innerdatapath = datapath + '/imdyn'
         animpath = animpath + '/idyn'
-        cartdatapath = '/media/kis/Storage/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}/imdyn_cart'.format(1.44e6, 1)
+        cartdatapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}/massRatio={:.1f}/imdyn_cart'.format(1.44e6, 1)
 
     innerdatapath = innerdatapath + '_spherical'
 
@@ -65,12 +65,12 @@ if __name__ == "__main__":
     # Pnorm_des = 1.0
 
     aIBi = -10
-    Pnorm_des = 2.64
+    Pnorm_des = 2.0
     # Pnorm_des = 1.0
     # Pnorm_des = 0.1
 
     linDimList = [(2, 2), (10, 10)]
-    linDimMajor, linDimMinor = linDimList[1]
+    linDimMajor, linDimMinor = linDimList[0]
 
     qds_orig = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     n0 = qds_orig.attrs['n0']; gBB = qds_orig.attrs['gBB']; mI = qds_orig.attrs['mI']; mB = qds_orig.attrs['mB']
@@ -128,7 +128,7 @@ if __name__ == "__main__":
     ax1.set_title('Individual Phonon Momentum Distribution (Sph Orig)', size='smaller')
     fig1.colorbar(quad1, ax=ax1, extend='both')
 
-    # GROUND STATE PLOTS
+    # # GROUND STATE PLOTS
     # fig1, ax1 = plt.subplots()
     # vmax = 17000
     # axislim = 1.2
@@ -153,9 +153,9 @@ if __name__ == "__main__":
     # ax1.set_ylabel('kx')
     # ax1.set_title('Individual Phonon Distribution (' + r'$aIB^{-1}=$' + '{0}, '.format(aIBi) + r'$\frac{P}{m_{I}c}=$' + '{:.2f})'.format(Pnorm[Pind]))
     # fig1.colorbar(quad1, ax=ax1, extend='both')
-    # filepath = '/media/kis/Storage/Dropbox/VariationalResearch/DataAnalysis/figs/rdyn_twophonon/distributionAnims/GroundStatePlots'
-    # filename = '/aIBi_{:.2f}_P_{:.2f}'.format(aIBi, P) + '_indPhononDist_2D_GS'
-    # plt.savefig(filepath + filename + '.png')
+    # # filepath = '/media/kis/Storage/Dropbox/VariationalResearch/DataAnalysis/figs/rdyn_twophonon/distributionAnims/GroundStatePlots'
+    # # filename = '/aIBi_{:.2f}_P_{:.2f}'.format(aIBi, P) + '_indPhononDist_2D_GS'
+    # # plt.savefig(filepath + filename + '.png')
 
     # fig, ax = plt.subplots()
     # quad = ax.pcolormesh(kzg_smooth, kxg_smooth, PhDen_orig_smooth, norm=colors.LogNorm(vmin=1e-3, vmax=np.max(PhDen_orig_Vals)), cmap='inferno')
@@ -254,7 +254,7 @@ if __name__ == "__main__":
     ax6.set_ylabel(r'$n_{|\vec{P_{I}}|}$')
     ax6.set_xlabel(r'$|\vec{P_{I}}|$')
 
-    print(qds_orig.sel(P=P).isel(t=-1)['Nph'].values, interp_ds.attrs['Nph_interp'], qds_orig_cart.sel(P=P_cart)['NB'].values)
+    # print(qds_orig.sel(P=P).isel(t=-1)['Nph'].values, interp_ds.attrs['Nph_interp'], qds_orig_cart.sel(P=P_cart)['NB'].values)
     # print(qds_orig.sel(P=P).isel(t=-1)['Nph'].values, qds_orig_cart.sel(P=P_cart)['NB'].values)
 
     # # # POSITION DISTRIBUTIONS
