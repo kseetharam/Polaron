@@ -67,15 +67,16 @@ if __name__ == "__main__":
     # # Analysis of Total Dataset
     interpdatapath = innerdatapath + '/interp'
 
-    aIBi = -2
+    aIBi = -10
     # Pnorm_des = 4.0
     # Pnorm_des = 3.0
     # Pnorm_des = 2.0
     # Pnorm_des = 1.5
     # Pnorm_des = 1.25
     # Pnorm_des = 1.1
+    Pnorm_des = 0.8
     # Pnorm_des = 0.5
-    Pnorm_des = 0.1
+    # Pnorm_des = 0.1
 
     tind = -1
 
