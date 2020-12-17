@@ -73,14 +73,13 @@ if __name__ == "__main__":
     n0 = qds.attrs['n0']; gBB = qds.attrs['gBB']; mI = qds.attrs['mI']; mB = qds.attrs['mB']
     nu = np.sqrt(n0 * gBB / mB)
     mc = mI * nu
-
     PVals = qds['P'].values
     Pnorm = PVals / mc
     Pind = np.abs(Pnorm - Pnorm_des).argmin().astype(int)
     P = PVals[Pind]
-    print(P, P / mc, mRat, aIBi)
-
     tVals = qds['t'].values
+
+    print(P, P / mc, mRat, aIBi)
     # print(tVals)
     # tind = 5
     # t = tVals[tind]

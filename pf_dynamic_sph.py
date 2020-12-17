@@ -572,6 +572,11 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
     na_xz_slice_da = xr.DataArray(na_xyz[:, Ny // 2, :], coords=[xL, zL], dims=['x', 'z'])
     na_xy_slice_da = xr.DataArray(na_xyz[:, :, Nz // 2], coords=[xL, yL], dims=['x', 'y'])
     na_yz_slice_da = xr.DataArray(na_xyz[Nx // 2, :, :], coords=[yL, zL], dims=['y', 'z'])
+
+    na_xz_int_da = xr.DataArray(np.sum(na_xyz, axis=1) * dyL, coords=[xL, zL], dims=['x', 'z'])
+    na_xy_int_da = xr.DataArray(np.sum(na_xyz, axis=2) * dzL, coords=[xL, yL], dims=['x', 'y'])
+    na_yz_int_da = xr.DataArray(np.sum(na_xyz, axis=0) * dxL, coords=[yL, zL], dims=['y', 'z'])
+
     posDistTime = timer() - ptime1
     print('Position Distribution Time Overhead: {0}'.format(posDistTime))
 
@@ -590,6 +595,7 @@ def reconstructMomDists(CSAmp_ds, linDimMajor, linDimMinor, dkxL, dkyL, dkzL):
                   'nPB_xz_slice': nPB_xz_slice_da, 'nPB_xy_slice': nPB_xy_slice_da, 'nPB_yz_slice': nPB_yz_slice_da, 'nPB_mag': nPBm_da,
                   'nPI_xz_slice': nPI_xz_slice_da, 'nPI_xy_slice': nPI_xy_slice_da, 'nPI_yz_slice': nPI_yz_slice_da, 'nPI_mag': nPIm_da,
                   'na_xz_slice': na_xz_slice_da, 'na_xy_slice': na_xy_slice_da, 'na_yz_slice': na_yz_slice_da,
+                  'na_xz_int': na_xz_int_da, 'na_xy_int': na_xy_int_da, 'na_yz_int': na_yz_int_da,
                   'mom_deltapeak': mom_deltapeak_da, 'Nph_frac': Nph_frac_da, 'Nph_interp': Nph_interp_da, 'Nph_orig': Nph_orig_da, 'PR_bare_cont': PR_bare_cont_da, 'PR_bare_discrete': PR_bare_discrete_da})
 
     coords_dict = {'kx': kxL, 'ky': kyL, 'kz': kzL, 'x': xL, 'y': yL, 'z': zL, 'PB_x': PB_x, 'PB_y': PB_y, 'PB_z': PB_z, 'PI_x': PI_x, 'PI_y': PI_y, 'PI_z': PI_z, 'PB_mag': PBm, 'PI_mag': PIm}
