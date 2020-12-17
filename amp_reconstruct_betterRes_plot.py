@@ -42,8 +42,13 @@ if __name__ == "__main__":
 
     toggleDict = {'Dynamics': 'real'}
 
-    # cmap = 'gist_heat'
-    cmap = 'inferno'
+    # import solarized
+    # Sol = solarized.Solarized()
+    # cmap = Sol.cmap(type='linear')
+
+    # cmap = 'gist_gray'
+    cmap = 'afmhot'
+    # cmap = 'inferno'
     my_cmap = matplotlib.cm.get_cmap(cmap)
     avmin = 2e-5; avmax = 1e-1
 
@@ -200,29 +205,29 @@ if __name__ == "__main__":
 
     # BARE ATOM POSITION DISTRIBUTIONS
 
-    # Slices
+    # # Slices
 
-    na_xz_slice = interp_ds['na_xz_slice'].values
-    na_xy_slice = interp_ds['na_xy_slice'].values
-    print(np.max(na_xz_slice))
+    # na_xz_slice = interp_ds['na_xz_slice'].values
+    # na_xy_slice = interp_ds['na_xy_slice'].values
+    # print(np.max(na_xz_slice))
 
-    fig4, ax4 = plt.subplots()
-    # quad4 = ax4.pcolormesh(zLg_xz / xi, xLg_xz / xi, na_xz_slice, norm=colors.LogNorm(vmin=np.abs(np.min(na_xz_slice)), vmax=np.max(na_xz_slice)), cmap='inferno')
-    quad4 = ax4.pcolormesh(zLg_xz / xi, xLg_xz / xi, na_xz_slice, norm=colors.LogNorm(vmin=1e-10, vmax=np.max(na_xz_slice)), cmap=cmap)
-    # quad4 = ax4.pcolormesh(zLg_xz / xi, xLg_xz / xi, na_xz_slice, norm=colors.LogNorm(vmin=avmin, vmax=avmax), cmap=cmap)
-    ax4.set_xlabel(r'$z/\xi$', fontsize=labelsize)
-    ax4.set_ylabel(r'$x/\xi$', fontsize=labelsize)
-    # ax4.set_title('Host Gas Density')
-    fig4.colorbar(quad4, ax=ax4, extend='both')
+    # fig4, ax4 = plt.subplots()
+    # # quad4 = ax4.pcolormesh(zLg_xz / xi, xLg_xz / xi, na_xz_slice, norm=colors.LogNorm(vmin=np.abs(np.min(na_xz_slice)), vmax=np.max(na_xz_slice)), cmap='inferno')
+    # quad4 = ax4.pcolormesh(zLg_xz / xi, xLg_xz / xi, na_xz_slice, norm=colors.LogNorm(vmin=1e-10, vmax=np.max(na_xz_slice)), cmap=cmap)
+    # # quad4 = ax4.pcolormesh(zLg_xz / xi, xLg_xz / xi, na_xz_slice, norm=colors.LogNorm(vmin=avmin, vmax=avmax), cmap=cmap)
+    # ax4.set_xlabel(r'$z/\xi$', fontsize=labelsize)
+    # ax4.set_ylabel(r'$x/\xi$', fontsize=labelsize)
+    # # ax4.set_title('Host Gas Density')
+    # fig4.colorbar(quad4, ax=ax4, extend='both')
 
-    fig6, ax6 = plt.subplots()
-    # quad6 = ax6.pcolormesh(yLg_xy / xi, xLg_xy / xi, na_xy_slice, norm=colors.LogNorm(vmin=np.abs(np.min(na_xy_slice)), vmax=np.max(na_xy_slice)), cmap='inferno')
-    quad6 = ax6.pcolormesh(yLg_xy / xi, xLg_xy / xi, na_xy_slice, norm=colors.LogNorm(vmin=1e-10, vmax=np.max(na_xy_slice)), cmap=cmap)
-    # quad6 = ax6.pcolormesh(yLg_xy / xi, xLg_xy / xi, na_xy_slice, norm=colors.LogNorm(vmin=avmin, vmax=avmax), cmap=cmap)
-    ax6.set_xlabel(r'$y/\xi$', fontsize=labelsize)
-    ax6.set_ylabel(r'$x/\xi$', fontsize=labelsize)
-    # ax6.set_title('Host Gas Density')
-    fig6.colorbar(quad6, ax=ax6, extend='both')
+    # fig6, ax6 = plt.subplots()
+    # # quad6 = ax6.pcolormesh(yLg_xy / xi, xLg_xy / xi, na_xy_slice, norm=colors.LogNorm(vmin=np.abs(np.min(na_xy_slice)), vmax=np.max(na_xy_slice)), cmap='inferno')
+    # quad6 = ax6.pcolormesh(yLg_xy / xi, xLg_xy / xi, na_xy_slice, norm=colors.LogNorm(vmin=1e-10, vmax=np.max(na_xy_slice)), cmap=cmap)
+    # # quad6 = ax6.pcolormesh(yLg_xy / xi, xLg_xy / xi, na_xy_slice, norm=colors.LogNorm(vmin=avmin, vmax=avmax), cmap=cmap)
+    # ax6.set_xlabel(r'$y/\xi$', fontsize=labelsize)
+    # ax6.set_ylabel(r'$x/\xi$', fontsize=labelsize)
+    # # ax6.set_title('Host Gas Density')
+    # fig6.colorbar(quad6, ax=ax6, extend='both')
 
     # Integration
 
@@ -241,38 +246,50 @@ if __name__ == "__main__":
     # ax7.set_title('Host Gas Density (real space, lab frame)')
     fig7.colorbar(quad7, ax=ax7, extend='both')
 
-    fig8, ax8 = plt.subplots()
-    # quad8 = ax8.pcolormesh(yLg_xy / xi, xLg_xy / xi, na_xy_int_norm, norm=colors.LogNorm(vmin=np.abs(np.min(na_xy_int_norm)), vmax=np.max(na_xy_int_norm)), cmap='inferno')
-    # quad8 = ax8.pcolormesh(yLg_xy / xi, xLg_xy / xi, na_xy_int_norm, norm=colors.LogNorm(vmin=5e-5, vmax=np.max(na_xy_int_norm)), cmap='inferno')
-    quad8 = ax8.pcolormesh(yLg_xy / xi, xLg_xy / xi, na_xy_int_norm, norm=colors.LogNorm(vmin=avmin, vmax=avmax), cmap=cmap)
-    ax8.set_xlabel(r'$y/\xi$', fontsize=labelsize)
-    ax8.set_ylabel(r'$x/\xi$', fontsize=labelsize)
-    # ax8.set_title('Host Gas Density (real space, lab frame)')
-    fig8.colorbar(quad8, ax=ax8, extend='both')
+    # fig8, ax8 = plt.subplots()
+    # # quad8 = ax8.pcolormesh(yLg_xy / xi, xLg_xy / xi, na_xy_int_norm, norm=colors.LogNorm(vmin=np.abs(np.min(na_xy_int_norm)), vmax=np.max(na_xy_int_norm)), cmap='inferno')
+    # # quad8 = ax8.pcolormesh(yLg_xy / xi, xLg_xy / xi, na_xy_int_norm, norm=colors.LogNorm(vmin=5e-5, vmax=np.max(na_xy_int_norm)), cmap='inferno')
+    # quad8 = ax8.pcolormesh(yLg_xy / xi, xLg_xy / xi, na_xy_int_norm, norm=colors.LogNorm(vmin=avmin, vmax=avmax), cmap=cmap)
+    # ax8.set_xlabel(r'$y/\xi$', fontsize=labelsize)
+    # ax8.set_ylabel(r'$x/\xi$', fontsize=labelsize)
+    # # ax8.set_title('Host Gas Density (real space, lab frame)')
+    # fig8.colorbar(quad8, ax=ax8, extend='both')
+
+    fig9, ax9 = plt.subplots()
+    ax9.plot(zL / xi, np.sum(na_xz_int_norm, axis=0) * dx)
+    ax9.set_xlim([-30, 30])
+    ax9.set_xlabel(r'$z/\xi$', fontsize=labelsize)
+    ax9.set_title('Integrated density (impurity propagation direction)')
+
+    fig10, ax10 = plt.subplots()
+    ax10.plot(zL / xi, np.sum(na_xz_int_norm, axis=1) * dx)
+    ax10.set_xlim([-30, 30])
+    ax10.set_xlabel(r'$z/\xi$', fontsize=labelsize)
+    ax10.set_title('Integrated density (transverse direction)')
 
     # # BARE ATOM POSITION ANIMATION
 
-    # na_xz_array = np.empty(tVals.size, dtype=np.object)
+    # na_xz_intnorm_array = np.empty(tVals.size, dtype=np.object)
     # for tind, t in enumerate(tVals):
     #     interp_ds = xr.open_dataset(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_t_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, t, linDimMajor, linDimMinor))
-    #     na_xz_array[tind] = interp_ds['na_xz_slice'].values
+    #     na_xz_int = interp_ds['na_xz_int'].values; na_xz_int_norm = na_xz_int / (np.sum(na_xz_int) * dx * dz)
+    #     na_xz_intnorm_array[tind] = na_xz_int_norm
 
     # fig_a1, ax_a1 = plt.subplots()
-    # quad_a1 = ax_a1.pcolormesh(zLg_xz, xLg_xz_slice, na_xz_array[0][:-1, :-1], norm=colors.LogNorm(vmin=avmin, vmax=avmax), cmap=cmap)
+    # quad_a1 = ax_a1.pcolormesh(zLg_xz / xi, xLg_xz / xi, na_xz_intnorm_array[0][:-1, :-1], norm=colors.LogNorm(vmin=avmin, vmax=avmax), cmap=cmap)
     # t_text = ax_a1.text(0.8, 0.9, r'$t/(\xi c^{-1})$' + ': {:.1f}'.format(tVals[0] / tscale), transform=ax_a1.transAxes, color='r')
-    # ax_a1.set_xlabel('z (Impurity Propagation Direction)')
-    # ax_a1.set_ylabel('x')
-    # ax_a1.set_title('Host Gas Density (real space, lab frame)')
+    # ax_a1.set_xlabel(r'$z/\xi$', fontsize=labelsize)
+    # ax_a1.set_ylabel(r'$x/\xi$', fontsize=labelsize)
     # fig_a1.colorbar(quad_a1, ax=ax_a1, extend='both')
 
     # def animate_Den(i):
     #     if i >= tVals.size:
     #         return
-    #     quad_a1.set_array(na_xz_array[i][:-1, :-1].ravel())
+    #     quad_a1.set_array(na_xz_intnorm_array[i][:-1, :-1].ravel())
     #     t_text.set_text(r'$t/(\xi c^{-1})$' + ': {:.1f}'.format(tVals[i] / tscale))
 
     # anim_Den = FuncAnimation(fig_a1, animate_Den, interval=1000, frames=range(tVals.size), repeat=True)
-    # anim_Den_filename = '/HostGasDensity_mRat_{:.1f}_Pnorm_{:.2f}_aIBi_{:.2f}.mp4'.format(massRat, P / mc, aIBi)
+    # anim_Den_filename = '/integratedDensity_xz_mRat_{:.1f}_Pnorm_{:.2f}_aIBi_{:.2f}.mp4'.format(massRat, P / mc, aIBi)
     # anim_Den.save(animpath + anim_Den_filename, writer=mpegWriter)
 
     plt.show()
