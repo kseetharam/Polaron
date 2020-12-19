@@ -222,473 +222,279 @@ if __name__ == "__main__":
 
     # fig1.savefig(figdatapath + '/FigSchematic.pdf')
 
-    # # # # FIG 1 - PHASE DIAGRAM + DISTRIBUTION PLOTS - PRL
+    # # # FIG 1 - PHASE DIAGRAM + DISTRIBUTION PLOTS - PRL
 
-    # matplotlib.rcParams['axes.linewidth'] = 0.5 * axl
-    # matplotlib.rcParams.update({'font.size': 12})
-    # labelsize = 13
-    # legendsize = 12
-
-    # fig1 = plt.figure(constrained_layout=False)
-    # gs1 = fig1.add_gridspec(nrows=1, ncols=1, bottom=0.13, top=0.94, left=0.08, right=0.55)
-    # gs2 = fig1.add_gridspec(nrows=2, ncols=1, bottom=0.13, top=0.94, left=0.67, right=0.99, height_ratios=[1, 1], hspace=0.2)
-
-    # ax_PD = fig1.add_subplot(gs1[0])
-    # ax_supDist = fig1.add_subplot(gs2[0])
-    # ax_subDist = fig1.add_subplot(gs2[1])
-
-    # fig1.text(0.01, 0.95, '(a)', fontsize=labelsize)
-    # fig1.text(0.575, 0.95, '(b)', fontsize=labelsize)
-    # fig1.text(0.575, 0.52, '(c)', fontsize=labelsize)
-    # fig1.set_size_inches(7.8, 4.5)
-
-    # # PHASE DIAGRAM (SPHERICAL)
-
-    # Pcrit = np.zeros(aIBi_Vals.size)
-    # ms_Vals = np.zeros(aIBi_Vals.size)
-    # for aind, aIBi in enumerate(aIBi_Vals):
-    #     qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    #     CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
-    #     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
-
-    #     Energy_Vals_inf = np.zeros(PVals.size)
-    #     for Pind, P in enumerate(PVals):
-    #         CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
-    #         Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
-
-    #     Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
-    #     Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 2 * PVals.size)
-    #     Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
-    #     Einf_1stderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=1)
-    #     Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
-    #     # Pcrit[aind] = Pinf_Vals[np.argwhere(Einf_2ndderiv_Vals < 0)[-2][0] + 3]
-    #     Pcrit[aind] = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 0]  # there is a little bit of fudging with the -3 here so that aIBi=-10 gives me Pcrit/(mI*c) = 1 -> I can also just generate data for weaker interactions and see if it's better
-
-    #     ms_mask = Pinf_Vals < 0.3
-    #     Einf_1stderiv_ms = Einf_1stderiv_Vals[ms_mask]
-    #     Pinf_ms = Pinf_Vals[ms_mask]
-    #     [ms_Vals[aind], ms_const] = np.polyfit(Pinf_ms, Einf_1stderiv_ms, deg=1)
-
-    # Pcrit_norm = Pcrit / (mI * nu)
-    # Pcrit_tck = interpolate.splrep(aIBi_Vals, Pcrit_norm, s=0, k=3)
-    # aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
-    # Pcrit_interpVals = 1 * interpolate.splev(aIBi_interpVals, Pcrit_tck, der=0)
-
-    # print(Pcrit_norm)
-    # print(Pcrit_norm[1], Pcrit_norm[5], Pcrit_norm[-5])
-
-    # massEnhancement_Vals = (1 / ms_Vals) / mI
-    # mE_tck = interpolate.splrep(aIBi_Vals, massEnhancement_Vals, s=0)
-    # aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
-    # mE_interpVals = 1 * interpolate.splev(aIBi_interpVals, mE_tck, der=0)
-
-    # # scalefac = 1.0
-    # scalefac = 0.95  # just to align weakly interacting case slightly to 1 (it's pretty much there, would just need higher resolution data)
-    # Pcrit_norm = scalefac * Pcrit_norm
-    # Pcrit_interpVals = scalefac * Pcrit_interpVals
-
-    # # xmin = np.min(aIBi_interpVals / xi); xmax = 1.01 * np.max(aIBi_interpVals / xi)
-    # # ymin = 0; ymax = 1.01 * np.max(Pcrit_interpVals)
-
-    # xmin = -11.45; xmax = 0.25
-    # ymin = -0.1; ymax = 4.0
-
-    # font = {'family': 'serif', 'color': 'black', 'size': legendsize}
-    # sfont = {'family': 'serif', 'color': 'black', 'size': legendsize - 1}
-
-    # ax_PD.plot(aIBi_Vals * xi, Pcrit_norm, marker='s', linestyle='None', mec='k', mfc='None', ms=5)
-    # ax_PD.plot(aIBi_interpVals * xi, Pcrit_interpVals, 'k-')
-    # # f1 = interpolate.interp1d(aIBi_Vals, Pcrit_norm, kind='cubic')
-    # # ax_PD.plot(aIBi_interpVals, f1(aIBi_interpVals), 'k-')
-    # ax_PD.set_xlabel(r'$a_{\rm IB}^{-1}/\xi^{-1}$', fontsize=labelsize)
-    # ax_PD.set_ylabel(r'Total Momentum $P/(m_{I}c)$', fontsize=labelsize)
-    # ax_PD.set_xlim([xmin, xmax]); ax_PD.set_ylim([ymin, ymax])
-    # ax_PD.fill_between(aIBi_interpVals * xi, Pcrit_interpVals, ymax - 0.1, facecolor=base2, alpha=0.75)
-    # ax_PD.fill_between(aIBi_interpVals * xi, ymin + 0.1, Pcrit_interpVals, facecolor=base02, alpha=0.3)
-    # # ax_PD.text(-3.2, ymin + 0.155 * (ymax - ymin), 'Polaron', fontdict=font)
-    # # ax_PD.text(-3.1, ymin + 0.08 * (ymax - ymin), '(' + r'$Z>0$' + ')', fontdict=sfont)
-
-    # ax_PD.text(-10.5, ymin + 0.155 * (ymax - ymin), 'Subsonic', fontdict=font)
-    # # ax_PD.text(-10.5, ymin + 0.155 * (ymax - ymin), 'Polaron', fontdict=font)
-    # ax_PD.text(-10.2, ymin + 0.08 * (ymax - ymin), r'$Z>0$', fontdict=sfont)
-    # ax_PD.text(-10.5, ymin + 0.86 * (ymax - ymin), 'Cherenkov', fontdict=font)
-    # ax_PD.text(-10.2, ymin + 0.785 * (ymax - ymin), r'$Z=0$', fontdict=sfont)
-
-    # # ax_PD.text(-5.7, ymin + 0.5 * (ymax - ymin), 'Dynamical', fontdict=font, color=red)
-    # # ax_PD.text(-5.6, ymin + 0.44 * (ymax - ymin), 'Transition', fontdict=font, color=red)
-
-    # # # POLARON EFFECTIVE MASS (SPHERICAL)
-
-    # # ax_PD.plot(aIBi_Vals * xi, massEnhancement_Vals, color='#ba9e88', marker='D', linestyle='None', markerfacecolor='None', mew=1, ms=5)
-    # ax_PD.plot(aIBi_interpVals * xi, mE_interpVals, color='k', linestyle='dashed')
-
-    # # CONNECTING LINES TO DISTRIBUTION FUNCTIONS
-
-    # supDist_coords = [-5.0 * xi, 3.0]  # is [aIBi/xi, P/(mI*c)]
-    # subDist_coords = [-5.0 * xi, 0.5]  # is [aIBi/xi, P/(mI*c)]
-
-    # ax_PD.plot(supDist_coords[0], supDist_coords[1], linestyle='', marker='8', mec='k', mfc='k', ms=10)
-    # ax_PD.plot(subDist_coords[0], subDist_coords[1], linestyle='', marker='8', mec='k', mfc='k', ms=10)
-
-    # con_sup = ConnectionPatch(xyA=(supDist_coords[0], supDist_coords[1]), xyB=(0, 0.49), coordsA="data", coordsB="data", axesA=ax_PD, axesB=ax_supDist, color='k', linestyle='dotted', lw=0.5)
-    # con_sub = ConnectionPatch(xyA=(subDist_coords[0], subDist_coords[1]), xyB=(0, 0.34), coordsA="data", coordsB="data", axesA=ax_PD, axesB=ax_subDist, color='k', linestyle='dotted', lw=0.5)
-    # ax_PD.add_artist(con_sup)
-    # ax_PD.add_artist(con_sub)
-
-    # # IMPURITY DISTRIBUTION (CARTESIAN)
-
-    # # GaussianBroadening = True; sigma = 0.0168
-    # GaussianBroadening = True; sigma = 0.02
-    # incoh_color = green
-    # delta_color = base02
-
-    # def GPDF(xVals, mean, stdev):
-    #     return (1 / (stdev * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((xVals - mean) / stdev)**2)
-    #     # return (1 / (1 * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((xVals - mean) / stdev)**2)
-
-    # aIBi = -5
-    # qds_aIBi = xr.open_dataset(innerdatapath_cart + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    # PVals = qds_aIBi['P'].values
-
-    # nPIm_FWHM_indices = []
-    # nPIm_distPeak_index = np.zeros(PVals.size, dtype=int)
-    # nPIm_FWHM_Vals = np.zeros(PVals.size)
-    # nPIm_distPeak_Vals = np.zeros(PVals.size)
-    # nPIm_deltaPeak_Vals = np.zeros(PVals.size)
-    # nPIm_Tot_Vals = np.zeros(PVals.size)
-    # nPIm_Vec = np.empty(PVals.size, dtype=np.object)
-    # PIm_Vec = np.empty(PVals.size, dtype=np.object)
-
-    # for ind, P in enumerate(PVals):
-    #     qds_nPIm_inf = qds_aIBi['nPI_mag'].sel(P=P).isel(t=-1).dropna('PI_mag')
-    #     PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
-    #     dPIm = PIm_Vals[1] - PIm_Vals[0]
-
-    #     nPIm_Vec[ind] = qds_nPIm_inf.values
-    #     PIm_Vec[ind] = PIm_Vals
-
-    #     # # Calculate nPIm(t=inf) normalization
-    #     nPIm_Tot_Vals[ind] = np.sum(qds_nPIm_inf.values * dPIm) + qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
-
-    #     # Calculate FWHM, distribution peak, and delta peak
-    #     nPIm_FWHM_Vals[ind] = pfc.FWHM(PIm_Vals, qds_nPIm_inf.values)
-    #     nPIm_distPeak_Vals[ind] = np.max(qds_nPIm_inf.values)
-    #     nPIm_deltaPeak_Vals[ind] = qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
-
-    #     D = qds_nPIm_inf.values - np.max(qds_nPIm_inf.values) / 2
-    #     indices = np.where(D > 0)[0]
-    #     nPIm_FWHM_indices.append((indices[0], indices[-1]))
-    #     nPIm_distPeak_index[ind] = np.argmax(qds_nPIm_inf.values)
-
-    # Pnorm = PVals / (mI * nu)
-    # Pratio_sup = 3.0; Pind_sup = np.abs(Pnorm - Pratio_sup).argmin()
-    # Pratio_sub = 0.5; Pind_sub = np.abs(Pnorm - Pratio_sub).argmin()
-
-    # print(Pnorm[Pind_sup], Pnorm[Pind_sub])
-    # print(nPIm_deltaPeak_Vals[Pind_sup], nPIm_deltaPeak_Vals[Pind_sub])
-
-    # ax_supDist.plot(PIm_Vec[Pind_sup] / (mI * nu), nPIm_Vec[Pind_sup], color=incoh_color, lw=1.0, label='Incoherent Part')
-    # ax_supDist.set_xlim([-0.01, 5])
-    # ax_supDist.set_ylim([0, 1.05])
-    # ax_supDist.set_ylabel(r'$n_{|\mathbf{P}_{\rm imp}|}$', fontsize=labelsize)
-    # # ax_supDist.set_xlabel(r'$|\vec{P_{I}}|/(m_{I}c)$', fontsize=labelsize)
-    # ax_supDist.fill_between(PIm_Vec[Pind_sup] / (mI * nu), np.zeros(PIm_Vals.size), nPIm_Vec[Pind_sup], facecolor=incoh_color, alpha=0.25)
-    # if GaussianBroadening:
-    #     Pnorm_sup = PVals[Pind_sup] / (mI * nu)
-    #     deltaPeak_sup = nPIm_deltaPeak_Vals[Pind_sup]
-    #     PIm_norm_sup = PIm_Vec[Pind_sup] / (mI * nu)
-    #     delta_GB_sup = deltaPeak_sup * GPDF(PIm_norm_sup, Pnorm_sup, sigma)
-    #     # ax_supDist.plot(PIm_norm_sup, delta_GB_sup, linestyle='-', color=delta_color, linewidth=1, label=r'$\delta$-Peak')
-    #     ax_supDist.plot(PIm_norm_sup, delta_GB_sup, linestyle='-', color=delta_color, linewidth=1.0, label='')
-    #     ax_supDist.fill_between(PIm_norm_sup, np.zeros(PIm_norm_sup.size), delta_GB_sup, facecolor=delta_color, alpha=0.25)
-    # else:
-    #     ax_supDist.plot((PVals[Pind_sup] / (mI * nu)) * np.ones(PIm_Vals.size), np.linspace(0, nPIm_deltaPeak_Vals[Pind_sup], PIm_Vals.size), linestyle='-', color=delta_color, linewidth=1.5, label='Delta Peak (Z-factor)')
-    # ax_supDist.legend(loc=1, fontsize=legendsize, frameon=False)
-
-    # ax_subDist.plot(PIm_Vec[Pind_sub] / (mI * nu), nPIm_Vec[Pind_sub], color=incoh_color, lw=1.0, label='Incoherent Part')
-    # # ax_subDist.set_xlim([-0.01, np.max(PIm_Vec[Pind_sub] / (mI*nu))])
-    # ax_subDist.set_xlim([-0.01, 5])
-    # ax_subDist.set_ylim([0, 1.05])
-    # ax_subDist.set_ylabel(r'$n_{|\mathbf{P}_{\rm imp}|}$', fontsize=labelsize)
-    # ax_subDist.set_xlabel(r'$|\mathbf{P}_{\rm imp}|/(m_{I}c)$', fontsize=labelsize)
-    # ax_subDist.fill_between(PIm_Vec[Pind_sub] / (mI * nu), np.zeros(PIm_Vals.size), nPIm_Vec[Pind_sub], facecolor=incoh_color, alpha=0.25)
-    # if GaussianBroadening:
-    #     Pnorm_sub = PVals[Pind_sub] / (mI * nu)
-    #     deltaPeak_sub = nPIm_deltaPeak_Vals[Pind_sub]
-    #     PIm_norm_sub = PIm_Vec[Pind_sub] / (mI * nu)
-    #     delta_GB_sub = deltaPeak_sub * GPDF(PIm_norm_sub, Pnorm_sub, sigma)
-    #     print(np.trapz(delta_GB_sub, PIm_norm_sub))
-    #     # ax_subDist.plot(PIm_norm_sub, delta_GB_sub, linestyle='-', color=delta_color, linewidth=1.0, label=r'$\delta$-Peak')
-    #     # ax_subDist.fill_between(PIm_norm_sub, np.zeros(PIm_norm_sub.size), delta_GB_sub, facecolor=delta_color, alpha=0.25)
-    #     ax_subDist.axvline(x=Pnorm_sub - 0.05, linestyle='-', color=delta_color, lw=1)
-    #     ax_subDist.axvline(x=Pnorm_sub + 0.05, linestyle='-', color=delta_color, lw=1)
-
-    # else:
-    #     ax_subDist.plot((PVals[Pind_sub] / (mI * nu)) * np.ones(PIm_Vals.size), np.linspace(0, nPIm_deltaPeak_Vals[Pind_sub], PIm_Vals.size), linestyle='-', color=delta_color, linewidth=1, label='Delta Peak (Z-factor)')
-    # ax_subDist.legend(loc=1, fontsize=legendsize, frameon=False)
-
-    # print(deltaPeak_sub, deltaPeak_sup)
-
-    # ax_PD.tick_params(direction='in', right=True, top=True)
-    # ax_subDist.tick_params(direction='in', right=True, top=True)
-    # ax_supDist.tick_params(direction='in', right=True, top=True)
-    # ax_supDist.xaxis.set_ticklabels([])
-
-    # # # # DPT
-
-    # qds = xr.open_dataset('/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08_resRat_0.50/massRatio=1.0_noCSAmp/redyn_spherical' + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    # tVals = qds['t'].values
-
-    # DynOvExp_NegMask = False
-    # DynOvExp_Cut = False
-    # cut = 1e-4
-    # consecDetection = True
-    # consecSamples = 10
-
-    # def powerfunc(t, a, b):
-    #     return b * t**(-1 * a)
-
-    # tmin = 90
-    # tmax = 100
-    # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
-    # rollwin = 1
-
-    # colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue', 'magenta']
-    # lineList = ['solid', 'dashed', 'dotted', '-.']
-    # aIBi_des = np.array([-10.0, -5.0, -3.5, -2.5, -2.0, -1.75])
-    # massRat_des = np.array([1.0])
-
-    # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08_resRat_0.50/massRatio=1.0_noCSAmp'
-
-    # Pcrit_da = xr.DataArray(np.full(aIBi_des.size, np.nan, dtype=float), coords=[aIBi_des], dims=['aIBi'])
-    # for inda, aIBi in enumerate(aIBi_des):
-    #     mds = xr.open_dataset(datapath + '/redyn_spherical/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    #     Plen = mds.coords['P'].values.size
-    #     Pstart_ind = 0
-    #     PVals = mds.coords['P'].values[Pstart_ind:Plen]
-    #     n0 = mds.attrs['n0']
-    #     gBB = mds.attrs['gBB']
-    #     mI = mds.attrs['mI']
-    #     mB = mds.attrs['mB']
-    #     nu = np.sqrt(n0 * gBB / mB)
-
-    #     vI0_Vals = (PVals - mds.isel(t=0, P=np.arange(Pstart_ind, Plen))['Pph'].values) / mI
-
-    #     mds_ts = mds.sel(t=tfVals)
-    #     DynOv_Exponents = np.zeros(PVals.size)
-    #     DynOv_Constants = np.zeros(PVals.size)
-
-    #     for indP, P in enumerate(PVals):
-    #         DynOv_raw = np.abs(mds_ts.isel(P=indP)['Real_DynOv'].values + 1j * mds_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
-    #         DynOv_ds = xr.DataArray(DynOv_raw, coords=[tfVals], dims=['t'])
-    #         # DynOv_ds = DynOv_ds.rolling(t=rollwin, center=True).mean().dropna('t')
-    #         DynOv_Vals = DynOv_ds.values
-    #         tDynOvc_Vals = DynOv_ds['t'].values
-
-    #         S_slope, S_intercept, S_rvalue, S_pvalue, S_stderr = ss.linregress(np.log(tDynOvc_Vals), np.log(DynOv_Vals))
-    #         DynOv_Exponents[indP] = -1 * S_slope
-    #         DynOv_Constants[indP] = np.exp(S_intercept)
-
-    #     if DynOvExp_NegMask:
-    #         DynOv_Exponents[DynOv_Exponents < 0] = 0
-
-    #     if DynOvExp_Cut:
-    #         DynOv_Exponents[np.abs(DynOv_Exponents) < cut] = 0
-
-    #     if consecDetection:
-    #         crit_ind = 0
-    #         for indE, exp in enumerate(DynOv_Exponents):
-    #             if indE > DynOv_Exponents.size - consecDetection:
-    #                 break
-    #             expSlice = DynOv_Exponents[indE:(indE + consecSamples)]
-    #             if np.all(expSlice > 0):
-    #                 crit_ind = indE
-    #                 break
-    #         DynOv_Exponents[0:crit_ind] = 0
-    #     Pcrit_da[inda] = PVals[crit_ind] / (mI * nu)
-    #     DynOvf_Vals = powerfunc(1e1000, DynOv_Exponents, DynOv_Constants)
-
-    # ax_PD.plot(aIBi_des * xi, Pcrit_da.values, linestyle='None', marker='D', mec=red, mfc=red, mew=2, ms=5)
-
-    # fig1.savefig(figdatapath + '/Fig1.pdf')
-
-    # matplotlib.rcParams['axes.linewidth'] = axl
-
-    # # # FIG 2 - PRL
-
+    matplotlib.rcParams['axes.linewidth'] = 0.5 * axl
     matplotlib.rcParams.update({'font.size': 12})
     labelsize = 13
     legendsize = 12
 
-    fig2 = plt.figure(constrained_layout=False)
-    gs1 = fig2.add_gridspec(nrows=2, ncols=1, bottom=0.23, top=0.95, left=0.12, right=0.48, hspace=0.1)
-    gs2 = fig2.add_gridspec(nrows=2, ncols=1, bottom=0.23, top=0.95, left=0.61, right=0.98, hspace=0.1)
+    fig1 = plt.figure(constrained_layout=False)
+    gs1 = fig1.add_gridspec(nrows=1, ncols=1, bottom=0.13, top=0.94, left=0.08, right=0.55)
+    gs2 = fig1.add_gridspec(nrows=2, ncols=1, bottom=0.13, top=0.94, left=0.67, right=0.99, height_ratios=[1, 1], hspace=0.2)
 
-    ax_gsZ = fig2.add_subplot(gs1[1])
-    ax_gsVel = fig2.add_subplot(gs1[0])
-    ax_dynS = fig2.add_subplot(gs2[1])
-    ax_dynVel = fig2.add_subplot(gs2[0])
+    ax_PD = fig1.add_subplot(gs1[0])
+    ax_supDist = fig1.add_subplot(gs2[0])
+    ax_subDist = fig1.add_subplot(gs2[1])
 
-    fig2.text(0.02, 0.95, '(a)', fontsize=labelsize)
-    fig2.text(0.02, 0.55, '(b)', fontsize=labelsize)
-    fig2.text(0.52, 0.95, '(c)', fontsize=labelsize)
-    fig2.text(0.52, 0.55, '(d)', fontsize=labelsize)
+    fig1.text(0.01, 0.95, '(a)', fontsize=labelsize)
+    fig1.text(0.575, 0.95, '(b)', fontsize=labelsize)
+    fig1.text(0.575, 0.52, '(c)', fontsize=labelsize)
+    fig1.set_size_inches(7.8, 4.5)
 
-    # colorList = ['red', 'green', 'blue']
-    colorList = [red, green, blue]
-    # colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue', 'magenta']
-    lineList = ['solid', 'dashed', 'dotted', '-.']
+    # PHASE DIAGRAM (SPHERICAL)
 
-    dyndatapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08_resRat_0.50/massRatio=1.0_noCSAmp/redyn_spherical'
-
-    # ax_GSE1.set_ylim([0, 1.2 * np.max(Einf_1stderiv_Vals / np.abs(Ecrit))])
-
-    # aIBi_des = np.array([-10.0, -5.0, -3.5, -2.0, -1.0])
-    # aIBi_Vals = np.array([-10.0, -5.0, -3.5, -2.0])  # used by many plots (spherical)
-    aIBi_Vals = np.array([-10.0, -3.5, -2.0])  # used by many plots (spherical)
-
-    # # POLARON SOUND VELOCITY (SPHERICAL)
-
-    # Check to see if linear part of polaron (total system) energy spectrum has slope equal to sound velocity
-
-    vsound_Vals = np.zeros(aIBi_Vals.size)
-    vI_Vals = np.zeros(aIBi_Vals.size)
+    Pcrit = np.zeros(aIBi_Vals.size)
+    ms_Vals = np.zeros(aIBi_Vals.size)
     for aind, aIBi in enumerate(aIBi_Vals):
-        qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-        qds_aIBi = qds.isel(t=-1)
-        ZVals = np.exp(-1 * qds_aIBi['Nph'].values)
+        qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
         CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
         kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+
         Energy_Vals_inf = np.zeros(PVals.size)
-        PI_Vals = np.zeros(PVals.size)
         for Pind, P in enumerate(PVals):
-            CSAmp = CSAmp_ds.sel(P=P).values
+            CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
             Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
-            PI_Vals[Pind] = P - qds_aIBi.sel(P=P)['Pph'].values
 
         Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
         Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 2 * PVals.size)
         Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
         Einf_1stderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=1)
-        Einf_1stderiv_Vals_subsamp = 1 * interpolate.splev(PVals, Einf_tck, der=1)
-        xmask = (PVals / (mI * nu)) <= 4
-        ax_gsZ.plot(PVals[xmask] / (mI * nu), ZVals[xmask], color=colorList[aind], linestyle='solid', marker='D', ms=4)
-        # ax_gsVel.plot(Pinf_Vals / (mI * nu), Einf_1stderiv_Vals / nu, color=colorList[aind], linestyle='solid', marker='D', ms=4)
-        ax_gsVel.plot(PVals[xmask] / (mI * nu), Einf_1stderiv_Vals_subsamp[xmask] / nu, color=colorList[aind], linestyle='solid', marker='D', ms=4)
+        Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+        # Pcrit[aind] = Pinf_Vals[np.argwhere(Einf_2ndderiv_Vals < 0)[-2][0] + 3]
+        Pcrit[aind] = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 0]  # there is a little bit of fudging with the -3 here so that aIBi=-10 gives me Pcrit/(mI*c) = 1 -> I can also just generate data for weaker interactions and see if it's better
 
-    ax_gsVel.plot(Pinf_Vals / (mI * nu), np.ones(Pinf_Vals.size), 'k:')
-    ax_gsZ.set_xlabel(r'$P/(m_{I}c)$', fontsize=13)
-    ax_gsVel.set_ylabel(r'$v_{\rm pol}/c$', fontsize=13)
-    ax_gsZ.set_ylabel(r'$Z$', fontsize=13)
+        ms_mask = Pinf_Vals < 0.3
+        Einf_1stderiv_ms = Einf_1stderiv_Vals[ms_mask]
+        Pinf_ms = Pinf_Vals[ms_mask]
+        [ms_Vals[aind], ms_const] = np.polyfit(Pinf_ms, Einf_1stderiv_ms, deg=1)
 
-    # DYN S(t) AND VELOCITY
+    Pcrit_norm = Pcrit / (mI * nu)
+    Pcrit_tck = interpolate.splrep(aIBi_Vals, Pcrit_norm, s=0, k=3)
+    aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
+    Pcrit_interpVals = 1 * interpolate.splev(aIBi_interpVals, Pcrit_tck, der=0)
+
+    print(Pcrit_norm)
+    print(Pcrit_norm[1], Pcrit_norm[5], Pcrit_norm[-5])
+
+    massEnhancement_Vals = (1 / ms_Vals) / mI
+    mE_tck = interpolate.splrep(aIBi_Vals, massEnhancement_Vals, s=0)
+    aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
+    mE_interpVals = 1 * interpolate.splev(aIBi_interpVals, mE_tck, der=0)
+
+    # scalefac = 1.0
+    scalefac = 0.95  # just to align weakly interacting case slightly to 1 (it's pretty much there, would just need higher resolution data)
+    Pcrit_norm = scalefac * Pcrit_norm
+    Pcrit_interpVals = scalefac * Pcrit_interpVals
+
+    # xmin = np.min(aIBi_interpVals / xi); xmax = 1.01 * np.max(aIBi_interpVals / xi)
+    # ymin = 0; ymax = 1.01 * np.max(Pcrit_interpVals)
+
+    xmin = -11.45; xmax = 0.25
+    ymin = -0.1; ymax = 4.0
+
+    font = {'family': 'serif', 'color': 'black', 'size': legendsize}
+    sfont = {'family': 'serif', 'color': 'black', 'size': legendsize - 1}
+
+    ax_PD.plot(aIBi_Vals * xi, Pcrit_norm, marker='s', linestyle='None', mec='k', mfc='None', ms=5)
+    ax_PD.plot(aIBi_interpVals * xi, Pcrit_interpVals, 'k-')
+    # f1 = interpolate.interp1d(aIBi_Vals, Pcrit_norm, kind='cubic')
+    # ax_PD.plot(aIBi_interpVals, f1(aIBi_interpVals), 'k-')
+    ax_PD.set_xlabel(r'$a_{\rm IB}^{-1}/\xi^{-1}$', fontsize=labelsize)
+    ax_PD.set_ylabel(r'Total Momentum $P/(m_{I}c)$', fontsize=labelsize)
+    ax_PD.set_xlim([xmin, xmax]); ax_PD.set_ylim([ymin, ymax])
+    ax_PD.fill_between(aIBi_interpVals * xi, Pcrit_interpVals, ymax - 0.1, facecolor=base2, alpha=0.75)
+    ax_PD.fill_between(aIBi_interpVals * xi, ymin + 0.1, Pcrit_interpVals, facecolor=base02, alpha=0.3)
+    # ax_PD.text(-3.2, ymin + 0.155 * (ymax - ymin), 'Polaron', fontdict=font)
+    # ax_PD.text(-3.1, ymin + 0.08 * (ymax - ymin), '(' + r'$Z>0$' + ')', fontdict=sfont)
+
+    ax_PD.text(-10.5, ymin + 0.155 * (ymax - ymin), 'Subsonic', fontdict=font)
+    # ax_PD.text(-10.5, ymin + 0.155 * (ymax - ymin), 'Polaron', fontdict=font)
+    ax_PD.text(-10.2, ymin + 0.08 * (ymax - ymin), r'$Z>0$', fontdict=sfont)
+    ax_PD.text(-10.5, ymin + 0.86 * (ymax - ymin), 'Cherenkov', fontdict=font)
+    ax_PD.text(-10.2, ymin + 0.785 * (ymax - ymin), r'$Z=0$', fontdict=sfont)
+
+    # ax_PD.text(-5.7, ymin + 0.5 * (ymax - ymin), 'Dynamical', fontdict=font, color=red)
+    # ax_PD.text(-5.6, ymin + 0.44 * (ymax - ymin), 'Transition', fontdict=font, color=red)
+
+    # # POLARON EFFECTIVE MASS (SPHERICAL)
+
+    # ax_PD.plot(aIBi_Vals * xi, massEnhancement_Vals, color='#ba9e88', marker='D', linestyle='None', markerfacecolor='None', mew=1, ms=5)
+    ax_PD.plot(aIBi_interpVals * xi, mE_interpVals, color='k', linestyle='dashed')
+
+    # CONNECTING LINES TO DISTRIBUTION FUNCTIONS
+
+    supDist_coords = [-5.0 * xi, 3.0]  # is [aIBi/xi, P/(mI*c)]
+    subDist_coords = [-5.0 * xi, 0.5]  # is [aIBi/xi, P/(mI*c)]
+
+    ax_PD.plot(supDist_coords[0], supDist_coords[1], linestyle='', marker='8', mec='k', mfc='k', ms=10)
+    ax_PD.plot(subDist_coords[0], subDist_coords[1], linestyle='', marker='8', mec='k', mfc='k', ms=10)
+
+    con_sup = ConnectionPatch(xyA=(supDist_coords[0], supDist_coords[1]), xyB=(0, 0.49), coordsA="data", coordsB="data", axesA=ax_PD, axesB=ax_supDist, color='k', linestyle='dotted', lw=0.5)
+    con_sub = ConnectionPatch(xyA=(subDist_coords[0], subDist_coords[1]), xyB=(0, 0.34), coordsA="data", coordsB="data", axesA=ax_PD, axesB=ax_subDist, color='k', linestyle='dotted', lw=0.5)
+    ax_PD.add_artist(con_sup)
+    ax_PD.add_artist(con_sub)
+
+    # IMPURITY DISTRIBUTION (CARTESIAN)
+
+    # GaussianBroadening = True; sigma = 0.0168
+    GaussianBroadening = True; sigma = 0.02
+    incoh_color = green
+    delta_color = base02
+
+    def GPDF(xVals, mean, stdev):
+        return (1 / (stdev * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((xVals - mean) / stdev)**2)
+        # return (1 / (1 * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((xVals - mean) / stdev)**2)
+
+    aIBi = -5
+    qds_aIBi = xr.open_dataset(innerdatapath_cart + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    PVals = qds_aIBi['P'].values
+
+    nPIm_FWHM_indices = []
+    nPIm_distPeak_index = np.zeros(PVals.size, dtype=int)
+    nPIm_FWHM_Vals = np.zeros(PVals.size)
+    nPIm_distPeak_Vals = np.zeros(PVals.size)
+    nPIm_deltaPeak_Vals = np.zeros(PVals.size)
+    nPIm_Tot_Vals = np.zeros(PVals.size)
+    nPIm_Vec = np.empty(PVals.size, dtype=np.object)
+    PIm_Vec = np.empty(PVals.size, dtype=np.object)
+
+    for ind, P in enumerate(PVals):
+        qds_nPIm_inf = qds_aIBi['nPI_mag'].sel(P=P).isel(t=-1).dropna('PI_mag')
+        PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
+        dPIm = PIm_Vals[1] - PIm_Vals[0]
+
+        nPIm_Vec[ind] = qds_nPIm_inf.values
+        PIm_Vec[ind] = PIm_Vals
+
+        # # Calculate nPIm(t=inf) normalization
+        nPIm_Tot_Vals[ind] = np.sum(qds_nPIm_inf.values * dPIm) + qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
+
+        # Calculate FWHM, distribution peak, and delta peak
+        nPIm_FWHM_Vals[ind] = pfc.FWHM(PIm_Vals, qds_nPIm_inf.values)
+        nPIm_distPeak_Vals[ind] = np.max(qds_nPIm_inf.values)
+        nPIm_deltaPeak_Vals[ind] = qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
+
+        D = qds_nPIm_inf.values - np.max(qds_nPIm_inf.values) / 2
+        indices = np.where(D > 0)[0]
+        nPIm_FWHM_indices.append((indices[0], indices[-1]))
+        nPIm_distPeak_index[ind] = np.argmax(qds_nPIm_inf.values)
+
+    Pnorm = PVals / (mI * nu)
+    Pratio_sup = 3.0; Pind_sup = np.abs(Pnorm - Pratio_sup).argmin()
+    Pratio_sub = 0.5; Pind_sub = np.abs(Pnorm - Pratio_sub).argmin()
+
+    print(Pnorm[Pind_sup], Pnorm[Pind_sub])
+    print(nPIm_deltaPeak_Vals[Pind_sup], nPIm_deltaPeak_Vals[Pind_sub])
+
+    ax_supDist.plot(PIm_Vec[Pind_sup] / (mI * nu), nPIm_Vec[Pind_sup], color=incoh_color, lw=1.0, label='Incoherent Part')
+    ax_supDist.set_xlim([-0.01, 5])
+    ax_supDist.set_ylim([0, 1.05])
+    ax_supDist.set_ylabel(r'$n_{|\mathbf{P}_{\rm imp}|}$', fontsize=labelsize)
+    # ax_supDist.set_xlabel(r'$|\vec{P_{I}}|/(m_{I}c)$', fontsize=labelsize)
+    ax_supDist.fill_between(PIm_Vec[Pind_sup] / (mI * nu), np.zeros(PIm_Vals.size), nPIm_Vec[Pind_sup], facecolor=incoh_color, alpha=0.25)
+    if GaussianBroadening:
+        Pnorm_sup = PVals[Pind_sup] / (mI * nu)
+        deltaPeak_sup = nPIm_deltaPeak_Vals[Pind_sup]
+        PIm_norm_sup = PIm_Vec[Pind_sup] / (mI * nu)
+        delta_GB_sup = deltaPeak_sup * GPDF(PIm_norm_sup, Pnorm_sup, sigma)
+        # ax_supDist.plot(PIm_norm_sup, delta_GB_sup, linestyle='-', color=delta_color, linewidth=1, label=r'$\delta$-Peak')
+        ax_supDist.plot(PIm_norm_sup, delta_GB_sup, linestyle='-', color=delta_color, linewidth=1.0, label='')
+        ax_supDist.fill_between(PIm_norm_sup, np.zeros(PIm_norm_sup.size), delta_GB_sup, facecolor=delta_color, alpha=0.25)
+    else:
+        ax_supDist.plot((PVals[Pind_sup] / (mI * nu)) * np.ones(PIm_Vals.size), np.linspace(0, nPIm_deltaPeak_Vals[Pind_sup], PIm_Vals.size), linestyle='-', color=delta_color, linewidth=1.5, label='Delta Peak (Z-factor)')
+    ax_supDist.legend(loc=1, fontsize=legendsize, frameon=False)
+
+    ax_subDist.plot(PIm_Vec[Pind_sub] / (mI * nu), nPIm_Vec[Pind_sub], color=incoh_color, lw=1.0, label='Incoherent Part')
+    # ax_subDist.set_xlim([-0.01, np.max(PIm_Vec[Pind_sub] / (mI*nu))])
+    ax_subDist.set_xlim([-0.01, 5])
+    ax_subDist.set_ylim([0, 1.05])
+    ax_subDist.set_ylabel(r'$n_{|\mathbf{P}_{\rm imp}|}$', fontsize=labelsize)
+    ax_subDist.set_xlabel(r'$|\mathbf{P}_{\rm imp}|/(m_{I}c)$', fontsize=labelsize)
+    ax_subDist.fill_between(PIm_Vec[Pind_sub] / (mI * nu), np.zeros(PIm_Vals.size), nPIm_Vec[Pind_sub], facecolor=incoh_color, alpha=0.25)
+    if GaussianBroadening:
+        Pnorm_sub = PVals[Pind_sub] / (mI * nu)
+        deltaPeak_sub = nPIm_deltaPeak_Vals[Pind_sub]
+        PIm_norm_sub = PIm_Vec[Pind_sub] / (mI * nu)
+        delta_GB_sub = deltaPeak_sub * GPDF(PIm_norm_sub, Pnorm_sub, sigma)
+        print(np.trapz(delta_GB_sub, PIm_norm_sub))
+        # ax_subDist.plot(PIm_norm_sub, delta_GB_sub, linestyle='-', color=delta_color, linewidth=1.0, label=r'$\delta$-Peak')
+        # ax_subDist.fill_between(PIm_norm_sub, np.zeros(PIm_norm_sub.size), delta_GB_sub, facecolor=delta_color, alpha=0.25)
+        ax_subDist.axvline(x=Pnorm_sub - 0.05, linestyle='-', color=delta_color, lw=1)
+        ax_subDist.axvline(x=Pnorm_sub + 0.05, linestyle='-', color=delta_color, lw=1)
+
+    else:
+        ax_subDist.plot((PVals[Pind_sub] / (mI * nu)) * np.ones(PIm_Vals.size), np.linspace(0, nPIm_deltaPeak_Vals[Pind_sub], PIm_Vals.size), linestyle='-', color=delta_color, linewidth=1, label='Delta Peak (Z-factor)')
+    ax_subDist.legend(loc=1, fontsize=legendsize, frameon=False)
+
+    print(deltaPeak_sub, deltaPeak_sup)
+
+    ax_PD.tick_params(direction='in', right=True, top=True)
+    ax_subDist.tick_params(direction='in', right=True, top=True)
+    ax_supDist.tick_params(direction='in', right=True, top=True)
+    ax_supDist.xaxis.set_ticklabels([])
+
+    # # # DPT
 
     qds = xr.open_dataset('/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08_resRat_0.50/massRatio=1.0_noCSAmp/redyn_spherical' + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     tVals = qds['t'].values
 
-    mc = mI * nu
-    DynOvData_roll = False
-    DynOvData_rollwin = 2
-    PimpData_roll = False
-    PimpData_rollwin = 2
-    DynOvExp_roll = False
-    DynOvExp_rollwin = 2
     DynOvExp_NegMask = False
     DynOvExp_Cut = False
     cut = 1e-4
     consecDetection = True
     consecSamples = 10
-    flattenAboveC = True
-
-    # aIBi_des = np.array([-10.0, -5.0, -3.5, -2.5, -2.0, -1.75])
-
-    Pnorm = PVals / mc
-
-    tmin = 90; tmax = 100
-
-    tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
 
     def powerfunc(t, a, b):
         return b * t**(-1 * a)
 
-    Pcrit_da = xr.DataArray(np.full(aIBi_Vals.size, np.nan, dtype=float), coords=[aIBi_Vals], dims=['aIBi'])
+    tmin = 90
+    tmax = 100
+    tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
+    rollwin = 1
 
-    for inda, aIBi in enumerate(aIBi_Vals):
-        qds_aIBi = xr.open_dataset(dyndatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-        # print(qds_aIBi['t'].values)
-        qds_aIBi_ts = qds_aIBi.sel(t=tfVals)
-        PVals = qds_aIBi['P'].values
-        Pnorm = PVals / mc
-        DynOv_Exponents = np.zeros(PVals.size)
-        DynOv_Cov = np.full(PVals.size, np.nan)
-        vImp_Exponents = np.zeros(PVals.size)
-        vImp_Cov = np.full(PVals.size, np.nan)
+    colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue', 'magenta']
+    lineList = ['solid', 'dashed', 'dotted', '-.']
+    aIBi_des = np.array([-10.0, -5.0, -3.5, -2.5, -2.0, -1.75])
+    massRat_des = np.array([1.0])
 
-        Plen = PVals.size
+    datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08_resRat_0.50/massRatio=1.0_noCSAmp'
+
+    Pcrit_da = xr.DataArray(np.full(aIBi_des.size, np.nan, dtype=float), coords=[aIBi_des], dims=['aIBi'])
+    for inda, aIBi in enumerate(aIBi_des):
+        mds = xr.open_dataset(datapath + '/redyn_spherical/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+        Plen = mds.coords['P'].values.size
         Pstart_ind = 0
-        vI0_Vals = (PVals - qds_aIBi.isel(t=0, P=np.arange(Pstart_ind, Plen))['Pph'].values) / mI
+        PVals = mds.coords['P'].values[Pstart_ind:Plen]
+        n0 = mds.attrs['n0']
+        gBB = mds.attrs['gBB']
+        mI = mds.attrs['mI']
+        mB = mds.attrs['mB']
+        nu = np.sqrt(n0 * gBB / mB)
 
+        vI0_Vals = (PVals - mds.isel(t=0, P=np.arange(Pstart_ind, Plen))['Pph'].values) / mI
+
+        mds_ts = mds.sel(t=tfVals)
         DynOv_Exponents = np.zeros(PVals.size)
         DynOv_Constants = np.zeros(PVals.size)
 
-        vImp_Exponents = np.zeros(PVals.size)
-        vImp_Constants = np.zeros(PVals.size)
-
-        DynOv_Rvalues = np.zeros(PVals.size)
-        DynOv_Pvalues = np.zeros(PVals.size)
-        DynOv_stderr = np.zeros(PVals.size)
-        DynOv_tstat = np.zeros(PVals.size)
-        DynOv_logAve = np.zeros(PVals.size)
-
         for indP, P in enumerate(PVals):
-            DynOv_raw = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+            DynOv_raw = np.abs(mds_ts.isel(P=indP)['Real_DynOv'].values + 1j * mds_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
             DynOv_ds = xr.DataArray(DynOv_raw, coords=[tfVals], dims=['t'])
-            Pph_ds = xr.DataArray(qds_aIBi_ts.isel(P=indP)['Pph'].values, coords=[tfVals], dims=['t'])
-
-            if DynOvData_roll:
-                DynOv_ds = DynOv_ds.rolling(t=DynOvData_rollwin, center=True).mean().dropna('t')
-            if PimpData_roll:
-                Pph_ds = Pph_ds.rolling(t=PimpData_rollwin, center=True).mean().dropna('t')
-
+            # DynOv_ds = DynOv_ds.rolling(t=rollwin, center=True).mean().dropna('t')
             DynOv_Vals = DynOv_ds.values
-            tDynOv_Vals = DynOv_ds['t'].values
+            tDynOvc_Vals = DynOv_ds['t'].values
 
-            vImpc_Vals = (P - Pph_ds.values) / mI - nu
-            tvImpc_Vals = Pph_ds['t'].values
-
-            S_slope, S_intercept, S_rvalue, S_pvalue, S_stderr = ss.linregress(np.log(tDynOv_Vals), np.log(DynOv_Vals))
+            S_slope, S_intercept, S_rvalue, S_pvalue, S_stderr = ss.linregress(np.log(tDynOvc_Vals), np.log(DynOv_Vals))
             DynOv_Exponents[indP] = -1 * S_slope
             DynOv_Constants[indP] = np.exp(S_intercept)
 
-            DynOv_Rvalues[indP] = S_rvalue
-            DynOv_Pvalues[indP] = S_pvalue
-            DynOv_stderr[indP] = S_stderr
-            DynOv_tstat[indP] = S_slope / S_stderr
-            DynOv_logAve[indP] = np.average(np.log(DynOv_Vals))
-
-            # if (-1 * S_slope) < 0:
-            #     DynOv_Exponents[indP] = 0
-
-            if vImpc_Vals[-1] < 0:
-                vImp_Exponents[indP] = 0
-                vImp_Constants[indP] = vImpc_Vals[-1]
-            else:
-                vI_slope, vI_intercept, vI_rvalue, vI_pvalue, vI_stderr = ss.linregress(np.log(tvImpc_Vals), np.log(vImpc_Vals))
-                vImp_Exponents[indP] = -1 * vI_slope
-                vImp_Constants[indP] = np.exp(vI_intercept)
-                if (-1 * vI_slope) < 0:
-                    vImp_Exponents[indP] = 0
-
-        DynOvExponents_da = xr.DataArray(DynOv_Exponents, coords=[PVals], dims=['P'])
-        if DynOvExp_roll:
-            DynOvExponents_da = DynOvExponents_da.rolling(P=DynOvExp_rollwin, center=True).mean().dropna('P')
         if DynOvExp_NegMask:
-            ExpMask = DynOvExponents_da.values < 0
-            DynOvExponents_da[ExpMask] = 0
+            DynOv_Exponents[DynOv_Exponents < 0] = 0
+
         if DynOvExp_Cut:
-            ExpMask = np.abs(DynOvExponents_da.values) < cut
-            DynOvExponents_da[ExpMask] = 0
-        DynOv_Exponents = DynOvExponents_da.values
+            DynOv_Exponents[np.abs(DynOv_Exponents) < cut] = 0
+
         if consecDetection:
             crit_ind = 0
             for indE, exp in enumerate(DynOv_Exponents):
@@ -698,52 +504,249 @@ if __name__ == "__main__":
                 if np.all(expSlice > 0):
                     crit_ind = indE
                     break
-            DynOvExponents_da[0:crit_ind] = 0
-
-        DynOv_Exponents = DynOvExponents_da.values
-        Pnorm_dynov = DynOvExponents_da['P'].values / mc
-        DynOvf_Vals = powerfunc(1e1000, DynOv_Exponents, DynOv_Constants)
+            DynOv_Exponents[0:crit_ind] = 0
         Pcrit_da[inda] = PVals[crit_ind] / (mI * nu)
+        DynOvf_Vals = powerfunc(1e1000, DynOv_Exponents, DynOv_Constants)
 
-        vIf_Vals = nu + powerfunc(1e1000, vImp_Exponents, vImp_Constants)
-        if flattenAboveC:
-            vIf_Vals[vIf_Vals > nu] = nu
+    ax_PD.plot(aIBi_des * xi, Pcrit_da.values, linestyle='None', marker='D', mec=red, mfc=red, mew=2, ms=5)
 
-        xmask = (vI0_Vals / nu) <= 4
-        ax_dynS.plot(vI0_Vals[xmask] / nu, DynOvf_Vals[xmask], color=colorList[inda], linestyle='solid', marker='D', ms=4)
-        ax_dynVel.plot(vI0_Vals[xmask] / nu, vIf_Vals[xmask] / nu, label='{:.2f}'.format(aIBi * xi), color=colorList[inda], linestyle='solid', marker='D', ms=4)
+    print(aIBi_des)
+    print(Pcrit_da.values)
 
-    ax_dynS.set_ylabel(r'$S(t_{\infty})$', fontsize=13)
+    fig1.savefig(figdatapath + '/Fig1.pdf')
 
-    ax_dynVel.plot(vI0_Vals / nu, np.ones(vI0_Vals.size), 'k:')
-    ax_dynS.set_xlabel(r'$v_{\rm imp}(t_{0})/c$', fontsize=13)
-    ax_dynVel.set_ylabel(r'$v_{\rm imp}(t_{\infty})/c$', fontsize=13)
+    matplotlib.rcParams['axes.linewidth'] = axl
 
-    ax_dynS.tick_params(which='both', direction='in', right=True, top=True)
-    ax_dynVel.tick_params(which='both', direction='in', right=True, top=True)
+    # # # # FIG 2 - PRL
 
-    # GENERAL
+    # matplotlib.rcParams.update({'font.size': 12})
+    # labelsize = 13
+    # legendsize = 12
 
-    handles, labels = ax_dynVel.get_legend_handles_labels()
-    plt.rcParams['legend.title_fontsize'] = 13
+    # fig2 = plt.figure(constrained_layout=False)
+    # gs1 = fig2.add_gridspec(nrows=2, ncols=1, bottom=0.23, top=0.95, left=0.12, right=0.48, hspace=0.1)
+    # gs2 = fig2.add_gridspec(nrows=2, ncols=1, bottom=0.23, top=0.95, left=0.61, right=0.98, hspace=0.1)
+
+    # ax_gsZ = fig2.add_subplot(gs1[1])
+    # ax_gsVel = fig2.add_subplot(gs1[0])
+    # ax_dynS = fig2.add_subplot(gs2[1])
+    # ax_dynVel = fig2.add_subplot(gs2[0])
+
+    # fig2.text(0.02, 0.95, '(a)', fontsize=labelsize)
+    # fig2.text(0.02, 0.55, '(b)', fontsize=labelsize)
+    # fig2.text(0.52, 0.95, '(c)', fontsize=labelsize)
+    # fig2.text(0.52, 0.55, '(d)', fontsize=labelsize)
+
+    # # colorList = ['red', 'green', 'blue']
+    # colorList = [red, green, blue]
+    # # colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue', 'magenta']
+    # lineList = ['solid', 'dashed', 'dotted', '-.']
+
+    # dyndatapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08_resRat_0.50/massRatio=1.0_noCSAmp/redyn_spherical'
+
+    # # ax_GSE1.set_ylim([0, 1.2 * np.max(Einf_1stderiv_Vals / np.abs(Ecrit))])
+
+    # # aIBi_des = np.array([-10.0, -5.0, -3.5, -2.0, -1.0])
+    # # aIBi_Vals = np.array([-10.0, -5.0, -3.5, -2.0])  # used by many plots (spherical)
+    # aIBi_Vals = np.array([-10.0, -3.5, -2.0])  # used by many plots (spherical)
+
+    # # # POLARON SOUND VELOCITY (SPHERICAL)
+
+    # # Check to see if linear part of polaron (total system) energy spectrum has slope equal to sound velocity
+
+    # vsound_Vals = np.zeros(aIBi_Vals.size)
+    # vI_Vals = np.zeros(aIBi_Vals.size)
+    # for aind, aIBi in enumerate(aIBi_Vals):
+    #     qds = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    #     qds_aIBi = qds.isel(t=-1)
+    #     ZVals = np.exp(-1 * qds_aIBi['Nph'].values)
+    #     CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+    #     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    #     Energy_Vals_inf = np.zeros(PVals.size)
+    #     PI_Vals = np.zeros(PVals.size)
+    #     for Pind, P in enumerate(PVals):
+    #         CSAmp = CSAmp_ds.sel(P=P).values
+    #         Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+    #         PI_Vals[Pind] = P - qds_aIBi.sel(P=P)['Pph'].values
+
+    #     Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+    #     Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 2 * PVals.size)
+    #     Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+    #     Einf_1stderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=1)
+    #     Einf_1stderiv_Vals_subsamp = 1 * interpolate.splev(PVals, Einf_tck, der=1)
+    #     xmask = (PVals / (mI * nu)) <= 4
+    #     ax_gsZ.plot(PVals[xmask] / (mI * nu), ZVals[xmask], color=colorList[aind], linestyle='solid', marker='D', ms=4)
+    #     # ax_gsVel.plot(Pinf_Vals / (mI * nu), Einf_1stderiv_Vals / nu, color=colorList[aind], linestyle='solid', marker='D', ms=4)
+    #     ax_gsVel.plot(PVals[xmask] / (mI * nu), Einf_1stderiv_Vals_subsamp[xmask] / nu, color=colorList[aind], linestyle='solid', marker='D', ms=4)
+
+    # ax_gsVel.plot(Pinf_Vals / (mI * nu), np.ones(Pinf_Vals.size), 'k:')
+    # ax_gsZ.set_xlabel(r'$P/(m_{I}c)$', fontsize=13)
+    # ax_gsVel.set_ylabel(r'$v_{\rm pol}/c$', fontsize=13)
+    # ax_gsZ.set_ylabel(r'$Z$', fontsize=13)
+
+    # # DYN S(t) AND VELOCITY
+
+    # qds = xr.open_dataset('/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08_resRat_0.50/massRatio=1.0_noCSAmp/redyn_spherical' + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    # tVals = qds['t'].values
+
+    # mc = mI * nu
+    # DynOvData_roll = False
+    # DynOvData_rollwin = 2
+    # PimpData_roll = False
+    # PimpData_rollwin = 2
+    # DynOvExp_roll = False
+    # DynOvExp_rollwin = 2
+    # DynOvExp_NegMask = False
+    # DynOvExp_Cut = False
+    # cut = 1e-4
+    # consecDetection = True
+    # consecSamples = 10
+    # flattenAboveC = True
+
+    # # aIBi_des = np.array([-10.0, -5.0, -3.5, -2.5, -2.0, -1.75])
+
+    # Pnorm = PVals / mc
+
+    # tmin = 90; tmax = 100
+
+    # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
+
+    # def powerfunc(t, a, b):
+    #     return b * t**(-1 * a)
+
+    # Pcrit_da = xr.DataArray(np.full(aIBi_Vals.size, np.nan, dtype=float), coords=[aIBi_Vals], dims=['aIBi'])
+
+    # for inda, aIBi in enumerate(aIBi_Vals):
+    #     qds_aIBi = xr.open_dataset(dyndatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    #     # print(qds_aIBi['t'].values)
+    #     qds_aIBi_ts = qds_aIBi.sel(t=tfVals)
+    #     PVals = qds_aIBi['P'].values
+    #     Pnorm = PVals / mc
+    #     DynOv_Exponents = np.zeros(PVals.size)
+    #     DynOv_Cov = np.full(PVals.size, np.nan)
+    #     vImp_Exponents = np.zeros(PVals.size)
+    #     vImp_Cov = np.full(PVals.size, np.nan)
+
+    #     Plen = PVals.size
+    #     Pstart_ind = 0
+    #     vI0_Vals = (PVals - qds_aIBi.isel(t=0, P=np.arange(Pstart_ind, Plen))['Pph'].values) / mI
+
+    #     DynOv_Exponents = np.zeros(PVals.size)
+    #     DynOv_Constants = np.zeros(PVals.size)
+
+    #     vImp_Exponents = np.zeros(PVals.size)
+    #     vImp_Constants = np.zeros(PVals.size)
+
+    #     DynOv_Rvalues = np.zeros(PVals.size)
+    #     DynOv_Pvalues = np.zeros(PVals.size)
+    #     DynOv_stderr = np.zeros(PVals.size)
+    #     DynOv_tstat = np.zeros(PVals.size)
+    #     DynOv_logAve = np.zeros(PVals.size)
+
+    #     for indP, P in enumerate(PVals):
+    #         DynOv_raw = np.abs(qds_aIBi_ts.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+    #         DynOv_ds = xr.DataArray(DynOv_raw, coords=[tfVals], dims=['t'])
+    #         Pph_ds = xr.DataArray(qds_aIBi_ts.isel(P=indP)['Pph'].values, coords=[tfVals], dims=['t'])
+
+    #         if DynOvData_roll:
+    #             DynOv_ds = DynOv_ds.rolling(t=DynOvData_rollwin, center=True).mean().dropna('t')
+    #         if PimpData_roll:
+    #             Pph_ds = Pph_ds.rolling(t=PimpData_rollwin, center=True).mean().dropna('t')
+
+    #         DynOv_Vals = DynOv_ds.values
+    #         tDynOv_Vals = DynOv_ds['t'].values
+
+    #         vImpc_Vals = (P - Pph_ds.values) / mI - nu
+    #         tvImpc_Vals = Pph_ds['t'].values
+
+    #         S_slope, S_intercept, S_rvalue, S_pvalue, S_stderr = ss.linregress(np.log(tDynOv_Vals), np.log(DynOv_Vals))
+    #         DynOv_Exponents[indP] = -1 * S_slope
+    #         DynOv_Constants[indP] = np.exp(S_intercept)
+
+    #         DynOv_Rvalues[indP] = S_rvalue
+    #         DynOv_Pvalues[indP] = S_pvalue
+    #         DynOv_stderr[indP] = S_stderr
+    #         DynOv_tstat[indP] = S_slope / S_stderr
+    #         DynOv_logAve[indP] = np.average(np.log(DynOv_Vals))
+
+    #         # if (-1 * S_slope) < 0:
+    #         #     DynOv_Exponents[indP] = 0
+
+    #         if vImpc_Vals[-1] < 0:
+    #             vImp_Exponents[indP] = 0
+    #             vImp_Constants[indP] = vImpc_Vals[-1]
+    #         else:
+    #             vI_slope, vI_intercept, vI_rvalue, vI_pvalue, vI_stderr = ss.linregress(np.log(tvImpc_Vals), np.log(vImpc_Vals))
+    #             vImp_Exponents[indP] = -1 * vI_slope
+    #             vImp_Constants[indP] = np.exp(vI_intercept)
+    #             if (-1 * vI_slope) < 0:
+    #                 vImp_Exponents[indP] = 0
+
+    #     DynOvExponents_da = xr.DataArray(DynOv_Exponents, coords=[PVals], dims=['P'])
+    #     if DynOvExp_roll:
+    #         DynOvExponents_da = DynOvExponents_da.rolling(P=DynOvExp_rollwin, center=True).mean().dropna('P')
+    #     if DynOvExp_NegMask:
+    #         ExpMask = DynOvExponents_da.values < 0
+    #         DynOvExponents_da[ExpMask] = 0
+    #     if DynOvExp_Cut:
+    #         ExpMask = np.abs(DynOvExponents_da.values) < cut
+    #         DynOvExponents_da[ExpMask] = 0
+    #     DynOv_Exponents = DynOvExponents_da.values
+    #     if consecDetection:
+    #         crit_ind = 0
+    #         for indE, exp in enumerate(DynOv_Exponents):
+    #             if indE > DynOv_Exponents.size - consecDetection:
+    #                 break
+    #             expSlice = DynOv_Exponents[indE:(indE + consecSamples)]
+    #             if np.all(expSlice > 0):
+    #                 crit_ind = indE
+    #                 break
+    #         DynOvExponents_da[0:crit_ind] = 0
+
+    #     DynOv_Exponents = DynOvExponents_da.values
+    #     Pnorm_dynov = DynOvExponents_da['P'].values / mc
+    #     DynOvf_Vals = powerfunc(1e1000, DynOv_Exponents, DynOv_Constants)
+    #     Pcrit_da[inda] = PVals[crit_ind] / (mI * nu)
+
+    #     vIf_Vals = nu + powerfunc(1e1000, vImp_Exponents, vImp_Constants)
+    #     if flattenAboveC:
+    #         vIf_Vals[vIf_Vals > nu] = nu
+
+    #     xmask = (vI0_Vals / nu) <= 4
+    #     ax_dynS.plot(vI0_Vals[xmask] / nu, DynOvf_Vals[xmask], color=colorList[inda], linestyle='solid', marker='D', ms=4)
+    #     ax_dynVel.plot(vI0_Vals[xmask] / nu, vIf_Vals[xmask] / nu, label='{:.2f}'.format(aIBi * xi), color=colorList[inda], linestyle='solid', marker='D', ms=4)
+
+    # ax_dynS.set_ylabel(r'$S(t_{\infty})$', fontsize=13)
+
+    # ax_dynVel.plot(vI0_Vals / nu, np.ones(vI0_Vals.size), 'k:')
+    # ax_dynS.set_xlabel(r'$v_{\rm imp}(t_{0})/c$', fontsize=13)
+    # ax_dynVel.set_ylabel(r'$v_{\rm imp}(t_{\infty})/c$', fontsize=13)
+
+    # ax_dynS.tick_params(which='both', direction='in', right=True, top=True)
+    # ax_dynVel.tick_params(which='both', direction='in', right=True, top=True)
+
+    # # GENERAL
+
+    # handles, labels = ax_dynVel.get_legend_handles_labels()
+    # plt.rcParams['legend.title_fontsize'] = 13
+    # # fig2.legend(handles, labels, title=r'$a_{\rm IB}^{-1}/\xi^{-1}$', ncol=aIBi_Vals.size, loc='lower center', bbox_to_anchor=(0.55, 0.001), fontsize=12)
     # fig2.legend(handles, labels, title=r'$a_{\rm IB}^{-1}/\xi^{-1}$', ncol=aIBi_Vals.size, loc='lower center', bbox_to_anchor=(0.55, 0.001), fontsize=12)
-    fig2.legend(handles, labels, title=r'$a_{\rm IB}^{-1}/\xi^{-1}$', ncol=aIBi_Vals.size, loc='lower center', bbox_to_anchor=(0.55, 0.001), fontsize=12)
 
-    ax_gsVel.xaxis.set_ticklabels([])
-    ax_dynVel.xaxis.set_ticklabels([])
-    # ax_gsVel.set_xticks([0.0, 1.0, 2.0])
-    ax_gsZ.tick_params(direction='in', right=True, top=True)
-    ax_gsVel.tick_params(direction='in', right=True, top=True)
-    ax_dynS.tick_params(direction='in', right=True, top=True)
-    ax_dynVel.tick_params(direction='in', right=True, top=True)
+    # ax_gsVel.xaxis.set_ticklabels([])
+    # ax_dynVel.xaxis.set_ticklabels([])
+    # # ax_gsVel.set_xticks([0.0, 1.0, 2.0])
+    # ax_gsZ.tick_params(direction='in', right=True, top=True)
+    # ax_gsVel.tick_params(direction='in', right=True, top=True)
+    # ax_dynS.tick_params(direction='in', right=True, top=True)
+    # ax_dynVel.tick_params(direction='in', right=True, top=True)
 
-    ax_gsZ.set_xlim([0, 4.14]); ax_gsZ.set_ylim([-0.05, 1.1])
-    ax_gsVel.set_xlim([0, 4.14]); ax_gsVel.set_ylim([-0.05, 1.2])
-    ax_dynS.set_xlim([-0.05, 4.14]); ax_dynS.set_ylim([-0.05, 1.1])
-    ax_dynVel.set_xlim([-0.05, 4.14]); ax_dynVel.set_ylim([-0.05, 1.2])
+    # ax_gsZ.set_xlim([0, 4.14]); ax_gsZ.set_ylim([-0.05, 1.1])
+    # ax_gsVel.set_xlim([0, 4.14]); ax_gsVel.set_ylim([-0.05, 1.2])
+    # ax_dynS.set_xlim([-0.05, 4.14]); ax_dynS.set_ylim([-0.05, 1.1])
+    # ax_dynVel.set_xlim([-0.05, 4.14]); ax_dynVel.set_ylim([-0.05, 1.2])
 
-    fig2.set_size_inches(7.8, 5.2)
-    fig2.savefig(figdatapath + '/Fig2_PRL.pdf')
+    # fig2.set_size_inches(7.8, 5.2)
+    # fig2.savefig(figdatapath + '/Fig2_PRL.pdf')
 
     # # # # FIG 1 (OLD) - POLARON GRAPHIC + BOGO DISPERSION + PHASE DIAGRAM + DISTRIBUTION PLOTS
 

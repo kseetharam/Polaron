@@ -14,7 +14,7 @@ from timeit import default_timer as timer
 
 if __name__ == "__main__":
 
-    mpegWriter = writers['ffmpeg'](fps=1, bitrate=1800)
+    mpegWriter = writers['ffmpeg'](fps=2, bitrate=1800)
     matplotlib.rcParams.update({'font.size': 12})
     labelsize = 13
     legendsize = 12
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     cmap = 'afmhot'
     # cmap = 'inferno'
     my_cmap = matplotlib.cm.get_cmap(cmap)
-    avmin = 2e-5; avmax = 1e-1
+    avmin = 1e-5; avmax = 1e-1
 
     # ---- SET OUTPUT DATA FOLDER ----
 
@@ -74,9 +74,15 @@ if __name__ == "__main__":
     # # Analysis of Total Dataset
     interpdatapath = innerdatapath + '/interp'
 
-    aIBi = -10
-    Pnorm_des = 3.0
+    aIBi = -2
+    Pnorm_des = 4.0
+    # Pnorm_des = 3.0
+    # Pnorm_des = 2.067
+    # Pnorm_des = 1.8
     # Pnorm_des = 1.4
+    # Pnorm_des = 1.1
+    # Pnorm_des = 0.8
+    # Pnorm_des = 0.52
 
     linDimList = [(2, 2), (10, 10)]
     linDimMajor, linDimMinor = linDimList[1]
@@ -93,7 +99,7 @@ if __name__ == "__main__":
     Pnorm = P / mc
     tVals = qds_orig['tc'].values
     t = tVals[-1]
-    # t = 0.4
+    # print(tVals)
 
     print('P/mc: {:.2f}'.format(P / mc))
     print(P)
@@ -203,6 +209,23 @@ if __name__ == "__main__":
     # ax5.set_ylabel(r'$n_{|\vec{P_{I}}|}$')
     # ax5.set_xlabel(r'$|\vec{P_{I}}|$')
 
+    # # Slices
+
+    nPI_xz_slice = interp_ds['nPI_xz_slice'].values
+    PIx = interp_ds['PI_x'].values
+    PIy = interp_ds['PI_y'].values
+    PIz = interp_ds['PI_z'].values
+    PIxg, PIzg = np.meshgrid(PIx, PIz, indexing='ij')
+
+    fig4, ax4 = plt.subplots()
+    quad4 = ax4.pcolormesh(PIzg / mc, PIxg / mc, nPI_xz_slice, norm=colors.LogNorm(vmin=1e-4, vmax=np.max(nPI_xz_slice)), cmap=cmap)
+    ax4.set_xlabel(r'$PI_{z}/mc$', fontsize=labelsize)
+    ax4.set_ylabel(r'$PI_{x}/mc$', fontsize=labelsize)
+    ax4.set_xlim([-5, 5])
+    ax4.set_ylim([-5, 5])
+    ax4.plot(np.ones(PIx.size), PIx / mc, 'k--')
+    fig4.colorbar(quad4, ax=ax4, extend='both')
+
     # BARE ATOM POSITION DISTRIBUTIONS
 
     # # Slices
@@ -243,53 +266,56 @@ if __name__ == "__main__":
     quad7 = ax7.pcolormesh(zLg_xz / xi, xLg_xz / xi, na_xz_int_norm, norm=colors.LogNorm(vmin=avmin, vmax=avmax), cmap=cmap)
     ax7.set_xlabel(r'$z/\xi$', fontsize=labelsize)
     ax7.set_ylabel(r'$x/\xi$', fontsize=labelsize)
-    # ax7.set_title('Host Gas Density (real space, lab frame)')
+    ax7.text(0.67, 0.9, r'$t/(\xi c^{-1})$' + ': {:.1f}'.format(t / tscale), transform=ax7.transAxes, color='w')
     fig7.colorbar(quad7, ax=ax7, extend='both')
 
-    # fig8, ax8 = plt.subplots()
-    # # quad8 = ax8.pcolormesh(yLg_xy / xi, xLg_xy / xi, na_xy_int_norm, norm=colors.LogNorm(vmin=np.abs(np.min(na_xy_int_norm)), vmax=np.max(na_xy_int_norm)), cmap='inferno')
-    # # quad8 = ax8.pcolormesh(yLg_xy / xi, xLg_xy / xi, na_xy_int_norm, norm=colors.LogNorm(vmin=5e-5, vmax=np.max(na_xy_int_norm)), cmap='inferno')
-    # quad8 = ax8.pcolormesh(yLg_xy / xi, xLg_xy / xi, na_xy_int_norm, norm=colors.LogNorm(vmin=avmin, vmax=avmax), cmap=cmap)
-    # ax8.set_xlabel(r'$y/\xi$', fontsize=labelsize)
-    # ax8.set_ylabel(r'$x/\xi$', fontsize=labelsize)
-    # # ax8.set_title('Host Gas Density (real space, lab frame)')
-    # fig8.colorbar(quad8, ax=ax8, extend='both')
+    fig8, ax8 = plt.subplots()
+    # quad8 = ax8.pcolormesh(yLg_xy / xi, xLg_xy / xi, na_xy_int_norm, norm=colors.LogNorm(vmin=np.abs(np.min(na_xy_int_norm)), vmax=np.max(na_xy_int_norm)), cmap='inferno')
+    # quad8 = ax8.pcolormesh(yLg_xy / xi, xLg_xy / xi, na_xy_int_norm, norm=colors.LogNorm(vmin=5e-5, vmax=np.max(na_xy_int_norm)), cmap='inferno')
+    quad8 = ax8.pcolormesh(yLg_xy / xi, xLg_xy / xi, na_xy_int_norm, norm=colors.LogNorm(vmin=avmin, vmax=avmax), cmap=cmap)
+    ax8.text(0.67, 0.9, r'$t/(\xi c^{-1})$' + ': {:.1f}'.format(t / tscale), transform=ax8.transAxes, color='w')
+    ax8.set_xlabel(r'$y/\xi$', fontsize=labelsize)
+    ax8.set_ylabel(r'$x/\xi$', fontsize=labelsize)
+    fig8.colorbar(quad8, ax=ax8, extend='both')
 
-    fig9, ax9 = plt.subplots()
-    ax9.plot(zL / xi, np.sum(na_xz_int_norm, axis=0) * dx)
-    ax9.set_xlim([-30, 30])
-    ax9.set_xlabel(r'$z/\xi$', fontsize=labelsize)
-    ax9.set_title('Integrated density (impurity propagation direction)')
+    # fig9, ax9 = plt.subplots()
+    # ax9.plot(zL / xi, np.sum(na_xz_int_norm, axis=0) * dx)
+    # ax9.set_xlim([-30, 30])
+    # ax9.set_xlabel(r'$z/\xi$', fontsize=labelsize)
+    # ax9.set_title('Integrated density (impurity propagation direction)')
 
-    fig10, ax10 = plt.subplots()
-    ax10.plot(zL / xi, np.sum(na_xz_int_norm, axis=1) * dx)
-    ax10.set_xlim([-30, 30])
-    ax10.set_xlabel(r'$z/\xi$', fontsize=labelsize)
-    ax10.set_title('Integrated density (transverse direction)')
+    # fig10, ax10 = plt.subplots()
+    # ax10.plot(zL / xi, np.sum(na_xz_int_norm, axis=1) * dx)
+    # ax10.set_xlim([-30, 30])
+    # ax10.set_xlabel(r'$z/\xi$', fontsize=labelsize)
+    # ax10.set_title('Integrated density (transverse direction)')
 
     # # BARE ATOM POSITION ANIMATION
 
-    # na_xz_intnorm_array = np.empty(tVals.size, dtype=np.object)
-    # for tind, t in enumerate(tVals):
-    #     interp_ds = xr.open_dataset(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_t_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, t, linDimMajor, linDimMinor))
-    #     na_xz_int = interp_ds['na_xz_int'].values; na_xz_int_norm = na_xz_int / (np.sum(na_xz_int) * dx * dz)
-    #     na_xz_intnorm_array[tind] = na_xz_int_norm
+    tVals_anim = np.array([0, 1, 5, 9, 13, 17, 21, 25, 29, 33, 37, 41, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81, 85, 89, 93, 97])
+    tVals = tVals_anim
 
-    # fig_a1, ax_a1 = plt.subplots()
-    # quad_a1 = ax_a1.pcolormesh(zLg_xz / xi, xLg_xz / xi, na_xz_intnorm_array[0][:-1, :-1], norm=colors.LogNorm(vmin=avmin, vmax=avmax), cmap=cmap)
-    # t_text = ax_a1.text(0.8, 0.9, r'$t/(\xi c^{-1})$' + ': {:.1f}'.format(tVals[0] / tscale), transform=ax_a1.transAxes, color='r')
-    # ax_a1.set_xlabel(r'$z/\xi$', fontsize=labelsize)
-    # ax_a1.set_ylabel(r'$x/\xi$', fontsize=labelsize)
-    # fig_a1.colorbar(quad_a1, ax=ax_a1, extend='both')
+    na_xz_intnorm_array = np.empty(tVals.size, dtype=np.object)
+    for tind, t in enumerate(tVals):
+        interp_ds = xr.open_dataset(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_t_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, t, linDimMajor, linDimMinor))
+        na_xz_int = interp_ds['na_xz_int'].values; na_xz_int_norm = na_xz_int / (np.sum(na_xz_int) * dx * dz)
+        na_xz_intnorm_array[tind] = na_xz_int_norm
 
-    # def animate_Den(i):
-    #     if i >= tVals.size:
-    #         return
-    #     quad_a1.set_array(na_xz_intnorm_array[i][:-1, :-1].ravel())
-    #     t_text.set_text(r'$t/(\xi c^{-1})$' + ': {:.1f}'.format(tVals[i] / tscale))
+    fig_a1, ax_a1 = plt.subplots()
+    quad_a1 = ax_a1.pcolormesh(zLg_xz / xi, xLg_xz / xi, na_xz_intnorm_array[0][:-1, :-1], norm=colors.LogNorm(vmin=avmin, vmax=avmax), cmap=cmap)
+    t_text = ax_a1.text(0.67, 0.9, r'$t/(\xi c^{-1})$' + ': {:.1f}'.format(tVals[0] / tscale), transform=ax_a1.transAxes, color='w')
+    ax_a1.set_xlabel(r'$z/\xi$', fontsize=labelsize)
+    ax_a1.set_ylabel(r'$x/\xi$', fontsize=labelsize)
+    fig_a1.colorbar(quad_a1, ax=ax_a1, extend='both')
 
-    # anim_Den = FuncAnimation(fig_a1, animate_Den, interval=1000, frames=range(tVals.size), repeat=True)
-    # anim_Den_filename = '/integratedDensity_xz_mRat_{:.1f}_Pnorm_{:.2f}_aIBi_{:.2f}.mp4'.format(massRat, P / mc, aIBi)
-    # anim_Den.save(animpath + anim_Den_filename, writer=mpegWriter)
+    def animate_Den(i):
+        if i >= tVals.size:
+            return
+        quad_a1.set_array(na_xz_intnorm_array[i][:-1, :-1].ravel())
+        t_text.set_text(r'$t/(\xi c^{-1})$' + ': {:.1f}'.format(tVals[i] / tscale))
+
+    anim_Den = FuncAnimation(fig_a1, animate_Den, interval=1000, frames=range(tVals.size), repeat=True)
+    anim_Den_filename = '/integratedDensity_xz_mRat_{:.1f}_Pnorm_{:.2f}_aIBi_{:.2f}.mp4'.format(massRat, P / mc, aIBi)
+    anim_Den.save(animpath + anim_Den_filename, writer=mpegWriter)
 
     plt.show()

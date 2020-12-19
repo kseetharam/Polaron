@@ -55,15 +55,16 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -10
+    aIBi = -2
 
-    Pnorm_des = 3.0
-
+    Pnorm_des = 4.0
+    # Pnorm_des = 3.0
+    # Pnorm_des = 2.067
+    # Pnorm_des = 1.8
     # Pnorm_des = 1.4
     # Pnorm_des = 1.1
     # Pnorm_des = 0.8
-    # Pnorm_des = 0.5
-    # Pnorm_des = 0.1
+    # Pnorm_des = 0.52
 
     qds = xr.open_dataset(innerdatapath + '/P_{:.3f}_aIBi_{:.2f}.nc'.format(Pnorm_des * 0.7926654595212022, aIBi))
     n0 = qds.attrs['n0']; gBB = qds.attrs['gBB']; mI = qds.attrs['mI']; mB = qds.attrs['mB']
@@ -73,8 +74,8 @@ if __name__ == "__main__":
     qds_P = qds
     qds_P.coords['P'] = np.array(P)
     tVals = qds['tc'].values
-    print(tVals.size)
-    # tVals = tVals[np.array([20, -1])]
+    # print(tVals.size)
+    # tVals = tVals[np.array([-1])]
 
     print(P, P / mc, mRat, aIBi)
     # print(tVals)
