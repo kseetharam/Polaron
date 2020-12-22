@@ -55,7 +55,7 @@ if __name__ == "__main__":
     # ---- SET OUTPUT DATA FOLDER ----
 
     datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_{:.2E}'.format(NGridPoints_cart)
-    animpath = '/Users/kis/Dropbox/VariationalResearch/DataAnalysis/figs/rdyn_twophonon/hostGasDensity'
+    animpath = '/Users/kis/Dropbox/VariationalResearch/DataAnalysis/figs/rdyn_twophonon/hostGasDensity/NGridPoints_1.11E+08_resRat_0.50'
     if higherCutoff is True:
         datapath = datapath + '_cutoffRat_{:.2f}'.format(cutoffRat)
     if betterResolution is True:
@@ -74,13 +74,16 @@ if __name__ == "__main__":
     # # Analysis of Total Dataset
     interpdatapath = innerdatapath + '/interp'
 
-    aIBi = -2
-    Pnorm_des = 4.0
+    aIBi = -5
+    # Pnorm_des = 4.0
     # Pnorm_des = 3.0
     # Pnorm_des = 2.067
     # Pnorm_des = 1.8
     # Pnorm_des = 1.4
+    Pnorm_des = 1.28
+    # Pnorm_des = 1.22
     # Pnorm_des = 1.1
+    # Pnorm_des = 1.04
     # Pnorm_des = 0.8
     # Pnorm_des = 0.52
 
@@ -101,6 +104,7 @@ if __name__ == "__main__":
     t = tVals[-1]
     # print(tVals)
 
+    print(xi)
     print('P/mc: {:.2f}'.format(P / mc))
     print(P)
     print(massRat, aIBi)
@@ -167,6 +171,11 @@ if __name__ == "__main__":
     xLg_xy, yLg_xy = np.meshgrid(xL, yL, indexing='ij')
     PhDenLg_xz_slice = interp_ds['PhDen_xz'].values
 
+    PIx = interp_ds['PI_x'].values
+    PIy = interp_ds['PI_y'].values
+    PIz = interp_ds['PI_z'].values
+    PIxg, PIzg = np.meshgrid(PIx, PIz, indexing='ij')
+
     nPI_mag = interp_ds['nPI_mag'].values
     # mom_deltapeak = interp_ds.attrs['mom_deltapeak']
     mom_deltapeak = interp_ds['mom_deltapeak'].values
@@ -209,22 +218,17 @@ if __name__ == "__main__":
     # ax5.set_ylabel(r'$n_{|\vec{P_{I}}|}$')
     # ax5.set_xlabel(r'$|\vec{P_{I}}|$')
 
-    # # Slices
+    # # # Slices
 
-    nPI_xz_slice = interp_ds['nPI_xz_slice'].values
-    PIx = interp_ds['PI_x'].values
-    PIy = interp_ds['PI_y'].values
-    PIz = interp_ds['PI_z'].values
-    PIxg, PIzg = np.meshgrid(PIx, PIz, indexing='ij')
-
-    fig4, ax4 = plt.subplots()
-    quad4 = ax4.pcolormesh(PIzg / mc, PIxg / mc, nPI_xz_slice, norm=colors.LogNorm(vmin=1e-4, vmax=np.max(nPI_xz_slice)), cmap=cmap)
-    ax4.set_xlabel(r'$PI_{z}/mc$', fontsize=labelsize)
-    ax4.set_ylabel(r'$PI_{x}/mc$', fontsize=labelsize)
-    ax4.set_xlim([-5, 5])
-    ax4.set_ylim([-5, 5])
-    ax4.plot(np.ones(PIx.size), PIx / mc, 'k--')
-    fig4.colorbar(quad4, ax=ax4, extend='both')
+    # nPI_xz_slice = interp_ds['nPI_xz_slice'].values
+    # fig4, ax4 = plt.subplots()
+    # quad4 = ax4.pcolormesh(PIzg / mc, PIxg / mc, nPI_xz_slice, norm=colors.LogNorm(vmin=1e-3, vmax=5e-1), cmap=cmap)
+    # ax4.set_xlabel(r'$PI_{z}/mc$', fontsize=labelsize)
+    # ax4.set_ylabel(r'$PI_{x}/mc$', fontsize=labelsize)
+    # ax4.set_xlim([-5, 5])
+    # ax4.set_ylim([-5, 5])
+    # ax4.plot(np.ones(PIx.size), PIx / mc, 'k--')
+    # fig4.colorbar(quad4, ax=ax4, extend='both')
 
     # BARE ATOM POSITION DISTRIBUTIONS
 
@@ -309,13 +313,72 @@ if __name__ == "__main__":
     fig_a1.colorbar(quad_a1, ax=ax_a1, extend='both')
 
     def animate_Den(i):
-        if i >= tVals.size:
-            return
         quad_a1.set_array(na_xz_intnorm_array[i][:-1, :-1].ravel())
         t_text.set_text(r'$t/(\xi c^{-1})$' + ': {:.1f}'.format(tVals[i] / tscale))
 
     anim_Den = FuncAnimation(fig_a1, animate_Den, interval=1000, frames=range(tVals.size), repeat=True)
     anim_Den_filename = '/integratedDensity_xz_mRat_{:.1f}_Pnorm_{:.2f}_aIBi_{:.2f}.mp4'.format(massRat, P / mc, aIBi)
+    anim_Den.save(animpath + anim_Den_filename, writer=mpegWriter)
+
+    # # MOMENTUM DISTRIVUTION ANIMATION
+
+    tVals_anim = np.array([0, 1, 5, 9, 13, 17, 21, 25, 29, 33, 37, 41, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81, 85, 89, 93, 97])
+    tVals = tVals_anim
+
+    na_xz_intnorm_array = np.empty(tVals.size, dtype=np.object)
+    for tind, t in enumerate(tVals):
+        interp_ds = xr.open_dataset(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_t_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, t, linDimMajor, linDimMinor))
+        na_xz_int = interp_ds['nPI_xz_slice'].values
+        na_xz_intnorm_array[tind] = na_xz_int
+
+    fig_a1, ax_a1 = plt.subplots()
+    quad_a1 = ax_a1.pcolormesh(PIzg / mc, PIxg / mc, na_xz_intnorm_array[0][:-1, :-1], norm=colors.LogNorm(vmin=1e-3, vmax=1e0), cmap=cmap)
+    t_text = ax_a1.text(0.67, 0.9, r'$t/(\xi c^{-1})$' + ': {:.1f}'.format(tVals[0] / tscale), transform=ax_a1.transAxes, color='w')
+    ax_a1.set_xlabel(r'$Pz/mc$', fontsize=labelsize)
+    ax_a1.set_ylabel(r'$Px/\xi$', fontsize=labelsize)
+    fig_a1.colorbar(quad_a1, ax=ax_a1, extend='both')
+    ax_a1.plot(np.ones(PIx.size), PIx / mc, 'k--')
+    ax_a1.set_xlim([-5, 5])
+    ax_a1.set_ylim([-5, 5])
+
+    def animate_Den(i):
+        quad_a1.set_array(na_xz_intnorm_array[i][:-1, :-1].ravel())
+        t_text.set_text(r'$t/(\xi c^{-1})$' + ': {:.1f}'.format(tVals[i] / tscale))
+
+    anim_Den = FuncAnimation(fig_a1, animate_Den, interval=1000, frames=range(tVals.size), repeat=True)
+    anim_Den_filename = '/impurityMomentum_xz_mRat_{:.1f}_Pnorm_{:.2f}_aIBi_{:.2f}.mp4'.format(massRat, P / mc, aIBi)
+    anim_Den.save(animpath + anim_Den_filename, writer=mpegWriter)
+
+    # # # MOMENTUM DISTRIBUTION SLICE ANIMATION
+
+    tVals_anim = np.array([0, 1, 5, 9, 13, 17, 21, 25, 29, 33, 37, 41, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81, 85, 89, 93, 97])
+    tVals = tVals_anim
+
+    nPI_z_array = np.empty(tVals.size, dtype=np.object)
+    maxVal = 1e-10
+    for tind, t in enumerate(tVals):
+        interp_ds = xr.open_dataset(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_t_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(P, aIBi, t, linDimMajor, linDimMinor))
+        nPI_z_array[tind] = interp_ds['nPI_xz_slice'].sel(PI_x=0, method='nearest').values
+        if np.max(nPI_z_array[tind]) > maxVal:
+            maxVal = np.max(nPI_z_array[tind])
+
+    fig_a1, ax_a1 = plt.subplots()
+    line_a1 = ax_a1.plot(PIz / mc, nPI_z_array[0])[0]
+    t_text = ax_a1.text(0.67, 0.9, r'$t/(\xi c^{-1})$' + ': {:.1f}'.format(tVals[0] / tscale), transform=ax_a1.transAxes, color='r')
+    ax_a1.set_xlabel(r'$P_{\mathrm{imp},z}/mc$', fontsize=labelsize)
+    # ax_a1.plot(np.ones(PIz.size), mc, 'k--')
+    ax_a1.vlines(mc, 0, maxVal, color='k', linestyle='--')
+    # ax_a1.set_xlim([-5, 5])
+    # ax_a1.set_ylim([-5, 5])
+
+    def animate_Den(i):
+        if i > tVals.size:
+            return
+        line_a1.set_ydata(nPI_z_array[i])
+        t_text.set_text(r'$t/(\xi c^{-1})$' + ': {:.1f}'.format(tVals[i] / tscale))
+
+    anim_Den = FuncAnimation(fig_a1, animate_Den, interval=1000, frames=range(tVals.size), repeat=True)
+    anim_Den_filename = '/impurityMomentum_z_slice_mRat_{:.1f}_Pnorm_{:.2f}_aIBi_{:.2f}.mp4'.format(massRat, P / mc, aIBi)
     anim_Den.save(animpath + anim_Den_filename, writer=mpegWriter)
 
     plt.show()

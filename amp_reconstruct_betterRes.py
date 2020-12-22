@@ -55,14 +55,21 @@ if __name__ == "__main__":
 
     # # Analysis of Total Dataset
 
-    aIBi = -2
+    aIBi = -5
 
-    Pnorm_des = 4.0
+    # Pnorm_des = 4.0
     # Pnorm_des = 3.0
     # Pnorm_des = 2.067
     # Pnorm_des = 1.8
     # Pnorm_des = 1.4
+
+    # Pnorm_des = 1.34
+    Pnorm_des = 1.28
+    # Pnorm_des = 1.04
+
+    # Pnorm_des = 1.22
     # Pnorm_des = 1.1
+
     # Pnorm_des = 0.8
     # Pnorm_des = 0.52
 
@@ -83,10 +90,11 @@ if __name__ == "__main__":
     # t = tVals[tind]
 
     # import matplotlib.pyplot as plt
-    # vImp_Vals = (P - qds.sel(P=P)['Pph'].values) / mc
+    # tVals_full = qds['t'].values
+    # vImp_Vals = (P - qds['Pph'].values) / mc
     # fig, ax = plt.subplots()
-    # ax.plot(tVals, vImp_Vals, 'b-')
-    # ax.plot(tVals, np.ones(tVals.size), 'k--')
+    # ax.plot(tVals_full, vImp_Vals, 'b-')
+    # ax.plot(tVals_full, np.ones(tVals_full.size), 'k--')
     # plt.show()
 
     for tind, t in enumerate(tVals):
