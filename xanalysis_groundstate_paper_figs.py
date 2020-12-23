@@ -222,364 +222,362 @@ if __name__ == "__main__":
 
     # fig1.savefig(figdatapath + '/FigSchematic.pdf')
 
-    # # # FIG 1 - PHASE DIAGRAM + DISTRIBUTION PLOTS - LETTER
+    # # # # FIG 1 - PHASE DIAGRAM + DISTRIBUTION PLOTS - LETTER
 
-    matplotlib.rcParams['axes.linewidth'] = 0.5 * axl
-    matplotlib.rcParams.update({'font.size': 12})
-    labelsize = 13
-    legendsize = 12
+    # matplotlib.rcParams['axes.linewidth'] = 0.5 * axl
+    # matplotlib.rcParams.update({'font.size': 12})
+    # labelsize = 13
+    # legendsize = 12
 
-    fig1 = plt.figure(constrained_layout=False)
-    gs1 = fig1.add_gridspec(nrows=1, ncols=1, bottom=0.13, top=0.94, left=0.08, right=0.55)
-    # gs2 = fig1.add_gridspec(nrows=2, ncols=1, bottom=0.13, top=0.94, left=0.67, right=0.99, height_ratios=[1, 1], hspace=0.2)  # for ground state impurity distributions
-    gs2 = fig1.add_gridspec(nrows=2, ncols=1, bottom=0.13, top=0.94, left=0.63, right=0.915, height_ratios=[1, 1], hspace=0.2)  # for dynamical real space density distributions
-    gs3 = fig1.add_gridspec(nrows=1, ncols=1, bottom=0.13, top=0.94, left=0.93, right=0.945); ax_colorbar = fig1.add_subplot(gs3[0])  # for dynamical real space density distributions
+    # fig1 = plt.figure(constrained_layout=False)
+    # gs1 = fig1.add_gridspec(nrows=1, ncols=1, bottom=0.13, top=0.94, left=0.08, right=0.55)
+    # # gs2 = fig1.add_gridspec(nrows=2, ncols=1, bottom=0.13, top=0.94, left=0.67, right=0.99, height_ratios=[1, 1], hspace=0.2)  # for ground state impurity distributions
+    # gs2 = fig1.add_gridspec(nrows=2, ncols=1, bottom=0.13, top=0.94, left=0.63, right=0.915, height_ratios=[1, 1], hspace=0.2)  # for dynamical real space density distributions
+    # gs3 = fig1.add_gridspec(nrows=1, ncols=1, bottom=0.13, top=0.94, left=0.93, right=0.945); ax_colorbar = fig1.add_subplot(gs3[0])  # for dynamical real space density distributions
 
-    ax_PD = fig1.add_subplot(gs1[0])
-    ax_supDist = fig1.add_subplot(gs2[0])
-    ax_subDist = fig1.add_subplot(gs2[1])
+    # ax_PD = fig1.add_subplot(gs1[0])
+    # ax_supDist = fig1.add_subplot(gs2[0])
+    # ax_subDist = fig1.add_subplot(gs2[1])
 
-    fig1.text(0.01, 0.95, '(a)', fontsize=labelsize)
-    fig1.text(0.575, 0.95, '(b)', fontsize=labelsize)
-    fig1.text(0.575, 0.52, '(c)', fontsize=labelsize)
-    fig1.set_size_inches(7.8, 4.5)
+    # fig1.text(0.01, 0.95, '(a)', fontsize=labelsize)
+    # fig1.text(0.575, 0.95, '(b)', fontsize=labelsize)
+    # fig1.text(0.575, 0.52, '(c)', fontsize=labelsize)
+    # fig1.set_size_inches(7.8, 4.5)
 
-    # PHASE DIAGRAM (SPHERICAL)
+    # # PHASE DIAGRAM (SPHERICAL)
 
-    Pcrit = np.zeros(aIBi_Vals.size)
-    ms_Vals = np.zeros(aIBi_Vals.size)
-    for aind, aIBi in enumerate(aIBi_Vals):
-        qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-        CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
-        kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
+    # Pcrit = np.zeros(aIBi_Vals.size)
+    # ms_Vals = np.zeros(aIBi_Vals.size)
+    # for aind, aIBi in enumerate(aIBi_Vals):
+    #     qds_aIBi = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    #     CSAmp_ds = qds_aIBi['Real_CSAmp'] + 1j * qds_aIBi['Imag_CSAmp']
+    #     kgrid = Grid.Grid("SPHERICAL_2D"); kgrid.initArray_premade('k', CSAmp_ds.coords['k'].values); kgrid.initArray_premade('th', CSAmp_ds.coords['th'].values)
 
-        Energy_Vals_inf = np.zeros(PVals.size)
-        for Pind, P in enumerate(PVals):
-            CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
-            Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
+    #     Energy_Vals_inf = np.zeros(PVals.size)
+    #     for Pind, P in enumerate(PVals):
+    #         CSAmp = CSAmp_ds.sel(P=P).isel(t=-1).values
+    #         Energy_Vals_inf[Pind] = pfs.Energy(CSAmp, kgrid, P, aIBi, mI, mB, n0, gBB)
 
-        Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
-        Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 2 * PVals.size)
-        Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
-        Einf_1stderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=1)
-        Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
-        # Pcrit[aind] = Pinf_Vals[np.argwhere(Einf_2ndderiv_Vals < 0)[-2][0] + 3]
-        Pcrit[aind] = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 0]  # there is a little bit of fudging with the -3 here so that aIBi=-10 gives me Pcrit/(mI*c) = 1 -> I can also just generate data for weaker interactions and see if it's better
+    #     Einf_tck = interpolate.splrep(PVals, Energy_Vals_inf, s=0)
+    #     Pinf_Vals = np.linspace(np.min(PVals), np.max(PVals), 2 * PVals.size)
+    #     Einf_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=0)
+    #     Einf_1stderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=1)
+    #     Einf_2ndderiv_Vals = 1 * interpolate.splev(Pinf_Vals, Einf_tck, der=2)
+    #     # Pcrit[aind] = Pinf_Vals[np.argwhere(Einf_2ndderiv_Vals < 0)[-2][0] + 3]
+    #     Pcrit[aind] = Pinf_Vals[np.argmin(np.gradient(Einf_2ndderiv_Vals)) - 0]  # there is a little bit of fudging with the -3 here so that aIBi=-10 gives me Pcrit/(mI*c) = 1 -> I can also just generate data for weaker interactions and see if it's better
 
-        ms_mask = Pinf_Vals < 0.3
-        Einf_1stderiv_ms = Einf_1stderiv_Vals[ms_mask]
-        Pinf_ms = Pinf_Vals[ms_mask]
-        [ms_Vals[aind], ms_const] = np.polyfit(Pinf_ms, Einf_1stderiv_ms, deg=1)
+    #     ms_mask = Pinf_Vals < 0.3
+    #     Einf_1stderiv_ms = Einf_1stderiv_Vals[ms_mask]
+    #     Pinf_ms = Pinf_Vals[ms_mask]
+    #     [ms_Vals[aind], ms_const] = np.polyfit(Pinf_ms, Einf_1stderiv_ms, deg=1)
 
-    Pcrit_norm = Pcrit / (mI * nu)
-    Pcrit_tck = interpolate.splrep(aIBi_Vals, Pcrit_norm, s=0, k=3)
-    aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
-    Pcrit_interpVals = 1 * interpolate.splev(aIBi_interpVals, Pcrit_tck, der=0)
+    # Pcrit_norm = Pcrit / (mI * nu)
+    # Pcrit_tck = interpolate.splrep(aIBi_Vals, Pcrit_norm, s=0, k=3)
+    # aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
+    # Pcrit_interpVals = 1 * interpolate.splev(aIBi_interpVals, Pcrit_tck, der=0)
 
-    print(Pcrit_norm)
-    print(Pcrit_norm[1], Pcrit_norm[5], Pcrit_norm[-5])
+    # print(Pcrit_norm)
+    # print(Pcrit_norm[1], Pcrit_norm[5], Pcrit_norm[-5])
 
-    massEnhancement_Vals = (1 / ms_Vals) / mI
-    mE_tck = interpolate.splrep(aIBi_Vals, massEnhancement_Vals, s=0)
-    aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
-    mE_interpVals = 1 * interpolate.splev(aIBi_interpVals, mE_tck, der=0)
+    # massEnhancement_Vals = (1 / ms_Vals) / mI
+    # mE_tck = interpolate.splrep(aIBi_Vals, massEnhancement_Vals, s=0)
+    # aIBi_interpVals = np.linspace(np.min(aIBi_Vals), np.max(aIBi_Vals), 5 * aIBi_Vals.size)
+    # mE_interpVals = 1 * interpolate.splev(aIBi_interpVals, mE_tck, der=0)
 
-    # scalefac = 1.0
-    scalefac = 0.95  # just to align weakly interacting case slightly to 1 (it's pretty much there, would just need higher resolution data)
-    Pcrit_norm = scalefac * Pcrit_norm
-    Pcrit_interpVals = scalefac * Pcrit_interpVals
+    # # scalefac = 1.0
+    # scalefac = 0.95  # just to align weakly interacting case slightly to 1 (it's pretty much there, would just need higher resolution data)
+    # Pcrit_norm = scalefac * Pcrit_norm
+    # Pcrit_interpVals = scalefac * Pcrit_interpVals
 
-    # xmin = np.min(aIBi_interpVals / xi); xmax = 1.01 * np.max(aIBi_interpVals / xi)
-    # ymin = 0; ymax = 1.01 * np.max(Pcrit_interpVals)
+    # # xmin = np.min(aIBi_interpVals / xi); xmax = 1.01 * np.max(aIBi_interpVals / xi)
+    # # ymin = 0; ymax = 1.01 * np.max(Pcrit_interpVals)
 
-    xmin = -11.45; xmax = 0.25
-    ymin = -0.1; ymax = 4.0
+    # xmin = -11.45; xmax = 0.25
+    # ymin = -0.1; ymax = 4.0
 
-    font = {'family': 'serif', 'color': 'black', 'size': legendsize}
-    sfont = {'family': 'serif', 'color': 'black', 'size': legendsize - 1}
+    # font = {'family': 'serif', 'color': 'black', 'size': legendsize}
+    # sfont = {'family': 'serif', 'color': 'black', 'size': legendsize - 1}
 
-    ax_PD.plot(aIBi_Vals * xi, Pcrit_norm, marker='s', linestyle='None', mec='k', mfc='None', ms=5)
-    ax_PD.plot(aIBi_interpVals * xi, Pcrit_interpVals, 'k-')
-    # f1 = interpolate.interp1d(aIBi_Vals, Pcrit_norm, kind='cubic')
-    # ax_PD.plot(aIBi_interpVals, f1(aIBi_interpVals), 'k-')
-    ax_PD.set_xlabel(r'$a_{\rm IB}^{-1}/\xi^{-1}$', fontsize=labelsize)
-    ax_PD.set_ylabel(r'Total Momentum $P/(m_{I}c)$', fontsize=labelsize)
-    ax_PD.set_xlim([xmin, xmax]); ax_PD.set_ylim([ymin, ymax])
-    ax_PD.fill_between(aIBi_interpVals * xi, Pcrit_interpVals, ymax - 0.1, facecolor=base2, alpha=0.75)
-    ax_PD.fill_between(aIBi_interpVals * xi, ymin + 0.1, Pcrit_interpVals, facecolor=base02, alpha=0.3)
-    # ax_PD.text(-3.2, ymin + 0.155 * (ymax - ymin), 'Polaron', fontdict=font)
-    # ax_PD.text(-3.1, ymin + 0.08 * (ymax - ymin), '(' + r'$Z>0$' + ')', fontdict=sfont)
+    # ax_PD.plot(aIBi_Vals * xi, Pcrit_norm, marker='s', linestyle='None', mec='k', mfc='None', ms=5)
+    # ax_PD.plot(aIBi_interpVals * xi, Pcrit_interpVals, 'k-')
+    # # f1 = interpolate.interp1d(aIBi_Vals, Pcrit_norm, kind='cubic')
+    # # ax_PD.plot(aIBi_interpVals, f1(aIBi_interpVals), 'k-')
+    # ax_PD.set_xlabel(r'$a_{\rm IB}^{-1}/\xi^{-1}$', fontsize=labelsize)
+    # ax_PD.set_ylabel(r'Total Momentum $P/(m_{I}c)$', fontsize=labelsize)
+    # ax_PD.set_xlim([xmin, xmax]); ax_PD.set_ylim([ymin, ymax])
+    # ax_PD.fill_between(aIBi_interpVals * xi, Pcrit_interpVals, ymax - 0.1, facecolor=base2, alpha=0.75)
+    # ax_PD.fill_between(aIBi_interpVals * xi, ymin + 0.1, Pcrit_interpVals, facecolor=base02, alpha=0.3)
+    # # ax_PD.text(-3.2, ymin + 0.155 * (ymax - ymin), 'Polaron', fontdict=font)
+    # # ax_PD.text(-3.1, ymin + 0.08 * (ymax - ymin), '(' + r'$Z>0$' + ')', fontdict=sfont)
 
-    ax_PD.text(-10.5, ymin + 0.155 * (ymax - ymin), 'Subsonic', fontdict=font)
-    # ax_PD.text(-10.5, ymin + 0.155 * (ymax - ymin), 'Polaron', fontdict=font)
-    ax_PD.text(-10.2, ymin + 0.08 * (ymax - ymin), r'$Z>0$', fontdict=sfont)
-    ax_PD.text(-10.5, ymin + 0.86 * (ymax - ymin), 'Cherenkov', fontdict=font)
-    ax_PD.text(-10.2, ymin + 0.785 * (ymax - ymin), r'$Z=0$', fontdict=sfont)
+    # ax_PD.text(-10.5, ymin + 0.155 * (ymax - ymin), 'Subsonic', fontdict=font)
+    # # ax_PD.text(-10.5, ymin + 0.155 * (ymax - ymin), 'Polaron', fontdict=font)
+    # ax_PD.text(-10.2, ymin + 0.08 * (ymax - ymin), r'$Z>0$', fontdict=sfont)
+    # ax_PD.text(-10.5, ymin + 0.86 * (ymax - ymin), 'Cherenkov', fontdict=font)
+    # ax_PD.text(-10.2, ymin + 0.785 * (ymax - ymin), r'$Z=0$', fontdict=sfont)
 
-    # ax_PD.text(-5.7, ymin + 0.5 * (ymax - ymin), 'Dynamical', fontdict=font, color=red)
-    # ax_PD.text(-5.6, ymin + 0.44 * (ymax - ymin), 'Transition', fontdict=font, color=red)
+    # # ax_PD.text(-5.7, ymin + 0.5 * (ymax - ymin), 'Dynamical', fontdict=font, color=red)
+    # # ax_PD.text(-5.6, ymin + 0.44 * (ymax - ymin), 'Transition', fontdict=font, color=red)
 
-    # # POLARON EFFECTIVE MASS (SPHERICAL)
+    # # # POLARON EFFECTIVE MASS (SPHERICAL)
 
-    # ax_PD.plot(aIBi_Vals * xi, massEnhancement_Vals, color='#ba9e88', marker='D', linestyle='None', markerfacecolor='None', mew=1, ms=5)
-    ax_PD.plot(aIBi_interpVals * xi, mE_interpVals, color='k', linestyle='dashed')
+    # # ax_PD.plot(aIBi_Vals * xi, massEnhancement_Vals, color='#ba9e88', marker='D', linestyle='None', markerfacecolor='None', mew=1, ms=5)
+    # ax_PD.plot(aIBi_interpVals * xi, mE_interpVals, color='k', linestyle='dashed')
 
-    # CONNECTING LINES TO DISTRIBUTION FUNCTIONS
+    # # CONNECTING LINES TO DISTRIBUTION FUNCTIONS
 
-    supDist_coords = [-5.0 * xi, 3.0]  # is [aIBi/xi, P/(mI*c)]
-    subDist_coords = [-5.0 * xi, 0.5]  # is [aIBi/xi, P/(mI*c)]
+    # supDist_coords = [-5.0 * xi, 3.0]  # is [aIBi/xi, P/(mI*c)]
+    # subDist_coords = [-5.0 * xi, 0.5]  # is [aIBi/xi, P/(mI*c)]
 
-    ax_PD.plot(supDist_coords[0], supDist_coords[1], linestyle='', marker='8', mec='k', mfc='k', ms=10)
-    ax_PD.plot(subDist_coords[0], subDist_coords[1], linestyle='', marker='8', mec='k', mfc='k', ms=10)
+    # ax_PD.plot(supDist_coords[0], supDist_coords[1], linestyle='', marker='8', mec='k', mfc='k', ms=10)
+    # ax_PD.plot(subDist_coords[0], subDist_coords[1], linestyle='', marker='8', mec='k', mfc='k', ms=10)
 
-    # # For ground state impurity distributions
-    # con_sup = ConnectionPatch(xyA=(supDist_coords[0], supDist_coords[1]), xyB=(0, 0.49), coordsA="data", coordsB="data", axesA=ax_PD, axesB=ax_supDist, color='k', linestyle='dotted', lw=0.5)
-    # con_sub = ConnectionPatch(xyA=(subDist_coords[0], subDist_coords[1]), xyB=(0, 0.34), coordsA="data", coordsB="data", axesA=ax_PD, axesB=ax_subDist, color='k', linestyle='dotted', lw=0.5)
+    # # # For ground state impurity distributions
+    # # con_sup = ConnectionPatch(xyA=(supDist_coords[0], supDist_coords[1]), xyB=(0, 0.49), coordsA="data", coordsB="data", axesA=ax_PD, axesB=ax_supDist, color='k', linestyle='dotted', lw=0.5)
+    # # con_sub = ConnectionPatch(xyA=(subDist_coords[0], subDist_coords[1]), xyB=(0, 0.34), coordsA="data", coordsB="data", axesA=ax_PD, axesB=ax_subDist, color='k', linestyle='dotted', lw=0.5)
 
-    # For dynamical real space density distributions
-    con_sup = ConnectionPatch(xyA=(supDist_coords[0], supDist_coords[1]), xyB=(0, -7), coordsA="data", coordsB="data", axesA=ax_PD, axesB=ax_supDist, color='k', linestyle='dotted', lw=0.5)
-    con_sub = ConnectionPatch(xyA=(subDist_coords[0], subDist_coords[1]), xyB=(0, -25), coordsA="data", coordsB="data", axesA=ax_PD, axesB=ax_subDist, color='k', linestyle='dotted', lw=0.5)
+    # # For dynamical real space density distributions
+    # con_sup = ConnectionPatch(xyA=(supDist_coords[0], supDist_coords[1]), xyB=(0, -7), coordsA="data", coordsB="data", axesA=ax_PD, axesB=ax_supDist, color='k', linestyle='dotted', lw=0.5)
+    # con_sub = ConnectionPatch(xyA=(subDist_coords[0], subDist_coords[1]), xyB=(0, -25), coordsA="data", coordsB="data", axesA=ax_PD, axesB=ax_subDist, color='k', linestyle='dotted', lw=0.5)
 
-    ax_PD.add_artist(con_sup)
-    ax_PD.add_artist(con_sub)
+    # ax_PD.add_artist(con_sup)
+    # ax_PD.add_artist(con_sub)
 
-    # # GROUND STATE IMPURITY DISTRIBUTION (CARTESIAN)
+    # # # GROUND STATE IMPURITY DISTRIBUTION (CARTESIAN)
 
-    # # GaussianBroadening = True; sigma = 0.0168
-    # GaussianBroadening = True; sigma = 0.02
-    # incoh_color = green
-    # delta_color = base02
+    # # # GaussianBroadening = True; sigma = 0.0168
+    # # GaussianBroadening = True; sigma = 0.02
+    # # incoh_color = green
+    # # delta_color = base02
 
-    # def GPDF(xVals, mean, stdev):
-    #     return (1 / (stdev * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((xVals - mean) / stdev)**2)
-    #     # return (1 / (1 * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((xVals - mean) / stdev)**2)
+    # # def GPDF(xVals, mean, stdev):
+    # #     return (1 / (stdev * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((xVals - mean) / stdev)**2)
+    # #     # return (1 / (1 * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((xVals - mean) / stdev)**2)
+
+    # # aIBi = -5
+    # # qds_aIBi = xr.open_dataset(innerdatapath_cart + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    # # PVals = qds_aIBi['P'].values
+
+    # # nPIm_FWHM_indices = []
+    # # nPIm_distPeak_index = np.zeros(PVals.size, dtype=int)
+    # # nPIm_FWHM_Vals = np.zeros(PVals.size)
+    # # nPIm_distPeak_Vals = np.zeros(PVals.size)
+    # # nPIm_deltaPeak_Vals = np.zeros(PVals.size)
+    # # nPIm_Tot_Vals = np.zeros(PVals.size)
+    # # nPIm_Vec = np.empty(PVals.size, dtype=np.object)
+    # # PIm_Vec = np.empty(PVals.size, dtype=np.object)
+
+    # # for ind, P in enumerate(PVals):
+    # #     qds_nPIm_inf = qds_aIBi['nPI_mag'].sel(P=P).isel(t=-1).dropna('PI_mag')
+    # #     PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
+    # #     dPIm = PIm_Vals[1] - PIm_Vals[0]
+
+    # #     nPIm_Vec[ind] = qds_nPIm_inf.values
+    # #     PIm_Vec[ind] = PIm_Vals
+
+    # #     # # Calculate nPIm(t=inf) normalization
+    # #     nPIm_Tot_Vals[ind] = np.sum(qds_nPIm_inf.values * dPIm) + qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
+
+    # #     # Calculate FWHM, distribution peak, and delta peak
+    # #     nPIm_FWHM_Vals[ind] = pfc.FWHM(PIm_Vals, qds_nPIm_inf.values)
+    # #     nPIm_distPeak_Vals[ind] = np.max(qds_nPIm_inf.values)
+    # #     nPIm_deltaPeak_Vals[ind] = qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
+
+    # #     D = qds_nPIm_inf.values - np.max(qds_nPIm_inf.values) / 2
+    # #     indices = np.where(D > 0)[0]
+    # #     nPIm_FWHM_indices.append((indices[0], indices[-1]))
+    # #     nPIm_distPeak_index[ind] = np.argmax(qds_nPIm_inf.values)
+
+    # # Pnorm = PVals / (mI * nu)
+    # # Pratio_sup = 3.0; Pind_sup = np.abs(Pnorm - Pratio_sup).argmin()
+    # # Pratio_sub = 0.5; Pind_sub = np.abs(Pnorm - Pratio_sub).argmin()
+
+    # # print(Pnorm[Pind_sup], Pnorm[Pind_sub])
+    # # print(nPIm_deltaPeak_Vals[Pind_sup], nPIm_deltaPeak_Vals[Pind_sub])
+
+    # # ax_supDist.plot(PIm_Vec[Pind_sup] / (mI * nu), nPIm_Vec[Pind_sup], color=incoh_color, lw=1.0, label='Incoherent Part')
+    # # ax_supDist.set_xlim([-0.01, 5])
+    # # ax_supDist.set_ylim([0, 1.05])
+    # # ax_supDist.set_ylabel(r'$n_{|\mathbf{P}_{\rm imp}|}$', fontsize=labelsize)
+    # # # ax_supDist.set_xlabel(r'$|\vec{P_{I}}|/(m_{I}c)$', fontsize=labelsize)
+    # # ax_supDist.fill_between(PIm_Vec[Pind_sup] / (mI * nu), np.zeros(PIm_Vals.size), nPIm_Vec[Pind_sup], facecolor=incoh_color, alpha=0.25)
+    # # if GaussianBroadening:
+    # #     Pnorm_sup = PVals[Pind_sup] / (mI * nu)
+    # #     deltaPeak_sup = nPIm_deltaPeak_Vals[Pind_sup]
+    # #     PIm_norm_sup = PIm_Vec[Pind_sup] / (mI * nu)
+    # #     delta_GB_sup = deltaPeak_sup * GPDF(PIm_norm_sup, Pnorm_sup, sigma)
+    # #     # ax_supDist.plot(PIm_norm_sup, delta_GB_sup, linestyle='-', color=delta_color, linewidth=1, label=r'$\delta$-Peak')
+    # #     ax_supDist.plot(PIm_norm_sup, delta_GB_sup, linestyle='-', color=delta_color, linewidth=1.0, label='')
+    # #     ax_supDist.fill_between(PIm_norm_sup, np.zeros(PIm_norm_sup.size), delta_GB_sup, facecolor=delta_color, alpha=0.25)
+    # # else:
+    # #     ax_supDist.plot((PVals[Pind_sup] / (mI * nu)) * np.ones(PIm_Vals.size), np.linspace(0, nPIm_deltaPeak_Vals[Pind_sup], PIm_Vals.size), linestyle='-', color=delta_color, linewidth=1.5, label='Delta Peak (Z-factor)')
+    # # ax_supDist.legend(loc=1, fontsize=legendsize, frameon=False)
+
+    # # ax_subDist.plot(PIm_Vec[Pind_sub] / (mI * nu), nPIm_Vec[Pind_sub], color=incoh_color, lw=1.0, label='Incoherent Part')
+    # # # ax_subDist.set_xlim([-0.01, np.max(PIm_Vec[Pind_sub] / (mI*nu))])
+    # # ax_subDist.set_xlim([-0.01, 5])
+    # # ax_subDist.set_ylim([0, 1.05])
+    # # ax_subDist.set_ylabel(r'$n_{|\mathbf{P}_{\rm imp}|}$', fontsize=labelsize)
+    # # ax_subDist.set_xlabel(r'$|\mathbf{P}_{\rm imp}|/(m_{I}c)$', fontsize=labelsize)
+    # # ax_subDist.fill_between(PIm_Vec[Pind_sub] / (mI * nu), np.zeros(PIm_Vals.size), nPIm_Vec[Pind_sub], facecolor=incoh_color, alpha=0.25)
+    # # if GaussianBroadening:
+    # #     Pnorm_sub = PVals[Pind_sub] / (mI * nu)
+    # #     deltaPeak_sub = nPIm_deltaPeak_Vals[Pind_sub]
+    # #     PIm_norm_sub = PIm_Vec[Pind_sub] / (mI * nu)
+    # #     delta_GB_sub = deltaPeak_sub * GPDF(PIm_norm_sub, Pnorm_sub, sigma)
+    # #     print(np.trapz(delta_GB_sub, PIm_norm_sub))
+    # #     # ax_subDist.plot(PIm_norm_sub, delta_GB_sub, linestyle='-', color=delta_color, linewidth=1.0, label=r'$\delta$-Peak')
+    # #     # ax_subDist.fill_between(PIm_norm_sub, np.zeros(PIm_norm_sub.size), delta_GB_sub, facecolor=delta_color, alpha=0.25)
+    # #     ax_subDist.axvline(x=Pnorm_sub - 0.05, linestyle='-', color=delta_color, lw=1)
+    # #     ax_subDist.axvline(x=Pnorm_sub + 0.05, linestyle='-', color=delta_color, lw=1)
+
+    # # else:
+    # #     ax_subDist.plot((PVals[Pind_sub] / (mI * nu)) * np.ones(PIm_Vals.size), np.linspace(0, nPIm_deltaPeak_Vals[Pind_sub], PIm_Vals.size), linestyle='-', color=delta_color, linewidth=1, label='Delta Peak (Z-factor)')
+    # # ax_subDist.legend(loc=1, fontsize=legendsize, frameon=False)
+
+    # # print(deltaPeak_sub, deltaPeak_sup)
+
+    # # ax_PD.tick_params(direction='in', right=True, top=True)
+    # # ax_subDist.tick_params(direction='in', right=True, top=True)
+    # # ax_supDist.tick_params(direction='in', right=True, top=True)
+    # # ax_supDist.xaxis.set_ticklabels([])
+
+    # # GAS DENSITY REAL SPACE DISTRIBUTION (CARTESIAN INTERPOLATION)
+
+    # interpdatapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08_resRat_0.50/massRatio=1.0/redyn_spherical/interp'
+
+    # cmap = 'afmhot'
+    # avmin = 1e-5; avmax = 1e-1
 
     # aIBi = -5
-    # qds_aIBi = xr.open_dataset(innerdatapath_cart + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    # PVals = qds_aIBi['P'].values
+    # Pratio_sup = 3.0
+    # Pratio_sub = 0.52
+    # tratio = 39.99
 
-    # nPIm_FWHM_indices = []
-    # nPIm_distPeak_index = np.zeros(PVals.size, dtype=int)
-    # nPIm_FWHM_Vals = np.zeros(PVals.size)
-    # nPIm_distPeak_Vals = np.zeros(PVals.size)
-    # nPIm_deltaPeak_Vals = np.zeros(PVals.size)
-    # nPIm_Tot_Vals = np.zeros(PVals.size)
-    # nPIm_Vec = np.empty(PVals.size, dtype=np.object)
-    # PIm_Vec = np.empty(PVals.size, dtype=np.object)
+    # nu = 0.7926654595212022
+    # xi = 0.8920620580763856
+    # tscale = xi / nu
+    # linDimMajor, linDimMinor = (10, 10)
 
-    # for ind, P in enumerate(PVals):
-    #     qds_nPIm_inf = qds_aIBi['nPI_mag'].sel(P=P).isel(t=-1).dropna('PI_mag')
-    #     PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
-    #     dPIm = PIm_Vals[1] - PIm_Vals[0]
+    # interp_ds_sup = xr.open_dataset(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_t_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(Pratio_sup * nu, aIBi, tratio * tscale, linDimMajor, linDimMinor))
+    # interp_ds_sub = xr.open_dataset(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_t_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(Pratio_sub * nu, aIBi, tratio * tscale, linDimMajor, linDimMinor))
 
-    #     nPIm_Vec[ind] = qds_nPIm_inf.values
-    #     PIm_Vec[ind] = PIm_Vals
+    # n0 = interp_ds_sup.attrs['n0']; gBB = interp_ds_sup.attrs['gBB']; mI = interp_ds_sup.attrs['mI']; mB = interp_ds_sup.attrs['mB']
+    # nu = np.sqrt(n0 * gBB / mB)
+    # mc = mI * nu
+    # aBB = (mB / (4 * np.pi)) * gBB
+    # xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
+    # tscale = xi / nu
 
-    #     # # Calculate nPIm(t=inf) normalization
-    #     nPIm_Tot_Vals[ind] = np.sum(qds_nPIm_inf.values * dPIm) + qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
+    # P_sup = interp_ds_sup.attrs['P']; Pratio_sup = P_sup / mc
+    # P_sub = interp_ds_sub.attrs['P']; Pratio_sub = P_sub / mc
 
-    #     # Calculate FWHM, distribution peak, and delta peak
-    #     nPIm_FWHM_Vals[ind] = pfc.FWHM(PIm_Vals, qds_nPIm_inf.values)
-    #     nPIm_distPeak_Vals[ind] = np.max(qds_nPIm_inf.values)
-    #     nPIm_deltaPeak_Vals[ind] = qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
+    # xL = interp_ds_sup['x'].values; yL = interp_ds_sup['y'].values; zL = interp_ds_sup['z'].values
+    # xLg, zLg = np.meshgrid(xL, zL, indexing='ij')
+    # dx = xL[1] - xL[0]; dy = yL[1] - yL[0]; dz = zL[1] - zL[0]
 
-    #     D = qds_nPIm_inf.values - np.max(qds_nPIm_inf.values) / 2
-    #     indices = np.where(D > 0)[0]
-    #     nPIm_FWHM_indices.append((indices[0], indices[-1]))
-    #     nPIm_distPeak_index[ind] = np.argmax(qds_nPIm_inf.values)
+    # na_xz_int_sup = interp_ds_sup['na_xz_int'].values; na_xz_int_norm_sup = na_xz_int_sup / (np.sum(na_xz_int_sup) * dx * dz)
+    # na_xz_int_sub = interp_ds_sub['na_xz_int'].values; na_xz_int_norm_sub = na_xz_int_sub / (np.sum(na_xz_int_sub) * dx * dz)
 
-    # Pnorm = PVals / (mI * nu)
-    # Pratio_sup = 3.0; Pind_sup = np.abs(Pnorm - Pratio_sup).argmin()
-    # Pratio_sub = 0.5; Pind_sub = np.abs(Pnorm - Pratio_sub).argmin()
+    # quad_sup = ax_supDist.pcolormesh(zLg / xi, xLg / xi, na_xz_int_norm_sup, norm=colors.LogNorm(vmin=avmin, vmax=avmax), cmap=cmap, rasterized=True)
+    # # ax_supDist.text(0.57, 0.85, r'$t/(\xi c^{-1})$' + ': {:.1f}'.format(tratio), transform=ax_supDist.transAxes, color='w', fontsize=legendsize - 1)
+    # ax_supDist.set_ylabel(r'$x/\xi$', labelpad=-10, fontsize=labelsize)
 
-    # print(Pnorm[Pind_sup], Pnorm[Pind_sub])
-    # print(nPIm_deltaPeak_Vals[Pind_sup], nPIm_deltaPeak_Vals[Pind_sub])
+    # quad_sub = ax_subDist.pcolormesh(zLg / xi, xLg / xi, na_xz_int_norm_sub, norm=colors.LogNorm(vmin=avmin, vmax=avmax), cmap=cmap, rasterized=True)
+    # # ax_subDist.text(0.57, 0.85, r'$t/(\xi c^{-1})$' + ': {:.1f}'.format(tratio), transform=ax_subDist.transAxes, color='w', fontsize=legendsize - 1)
+    # ax_subDist.set_xlabel(r'$z/\xi$', fontsize=labelsize)
+    # ax_subDist.set_ylabel(r'$x/\xi$', labelpad=-10, fontsize=labelsize)
 
-    # ax_supDist.plot(PIm_Vec[Pind_sup] / (mI * nu), nPIm_Vec[Pind_sup], color=incoh_color, lw=1.0, label='Incoherent Part')
-    # ax_supDist.set_xlim([-0.01, 5])
-    # ax_supDist.set_ylim([0, 1.05])
-    # ax_supDist.set_ylabel(r'$n_{|\mathbf{P}_{\rm imp}|}$', fontsize=labelsize)
-    # # ax_supDist.set_xlabel(r'$|\vec{P_{I}}|/(m_{I}c)$', fontsize=labelsize)
-    # ax_supDist.fill_between(PIm_Vec[Pind_sup] / (mI * nu), np.zeros(PIm_Vals.size), nPIm_Vec[Pind_sup], facecolor=incoh_color, alpha=0.25)
-    # if GaussianBroadening:
-    #     Pnorm_sup = PVals[Pind_sup] / (mI * nu)
-    #     deltaPeak_sup = nPIm_deltaPeak_Vals[Pind_sup]
-    #     PIm_norm_sup = PIm_Vec[Pind_sup] / (mI * nu)
-    #     delta_GB_sup = deltaPeak_sup * GPDF(PIm_norm_sup, Pnorm_sup, sigma)
-    #     # ax_supDist.plot(PIm_norm_sup, delta_GB_sup, linestyle='-', color=delta_color, linewidth=1, label=r'$\delta$-Peak')
-    #     ax_supDist.plot(PIm_norm_sup, delta_GB_sup, linestyle='-', color=delta_color, linewidth=1.0, label='')
-    #     ax_supDist.fill_between(PIm_norm_sup, np.zeros(PIm_norm_sup.size), delta_GB_sup, facecolor=delta_color, alpha=0.25)
-    # else:
-    #     ax_supDist.plot((PVals[Pind_sup] / (mI * nu)) * np.ones(PIm_Vals.size), np.linspace(0, nPIm_deltaPeak_Vals[Pind_sup], PIm_Vals.size), linestyle='-', color=delta_color, linewidth=1.5, label='Delta Peak (Z-factor)')
-    # ax_supDist.legend(loc=1, fontsize=legendsize, frameon=False)
-
-    # ax_subDist.plot(PIm_Vec[Pind_sub] / (mI * nu), nPIm_Vec[Pind_sub], color=incoh_color, lw=1.0, label='Incoherent Part')
-    # # ax_subDist.set_xlim([-0.01, np.max(PIm_Vec[Pind_sub] / (mI*nu))])
-    # ax_subDist.set_xlim([-0.01, 5])
-    # ax_subDist.set_ylim([0, 1.05])
-    # ax_subDist.set_ylabel(r'$n_{|\mathbf{P}_{\rm imp}|}$', fontsize=labelsize)
-    # ax_subDist.set_xlabel(r'$|\mathbf{P}_{\rm imp}|/(m_{I}c)$', fontsize=labelsize)
-    # ax_subDist.fill_between(PIm_Vec[Pind_sub] / (mI * nu), np.zeros(PIm_Vals.size), nPIm_Vec[Pind_sub], facecolor=incoh_color, alpha=0.25)
-    # if GaussianBroadening:
-    #     Pnorm_sub = PVals[Pind_sub] / (mI * nu)
-    #     deltaPeak_sub = nPIm_deltaPeak_Vals[Pind_sub]
-    #     PIm_norm_sub = PIm_Vec[Pind_sub] / (mI * nu)
-    #     delta_GB_sub = deltaPeak_sub * GPDF(PIm_norm_sub, Pnorm_sub, sigma)
-    #     print(np.trapz(delta_GB_sub, PIm_norm_sub))
-    #     # ax_subDist.plot(PIm_norm_sub, delta_GB_sub, linestyle='-', color=delta_color, linewidth=1.0, label=r'$\delta$-Peak')
-    #     # ax_subDist.fill_between(PIm_norm_sub, np.zeros(PIm_norm_sub.size), delta_GB_sub, facecolor=delta_color, alpha=0.25)
-    #     ax_subDist.axvline(x=Pnorm_sub - 0.05, linestyle='-', color=delta_color, lw=1)
-    #     ax_subDist.axvline(x=Pnorm_sub + 0.05, linestyle='-', color=delta_color, lw=1)
-
-    # else:
-    #     ax_subDist.plot((PVals[Pind_sub] / (mI * nu)) * np.ones(PIm_Vals.size), np.linspace(0, nPIm_deltaPeak_Vals[Pind_sub], PIm_Vals.size), linestyle='-', color=delta_color, linewidth=1, label='Delta Peak (Z-factor)')
-    # ax_subDist.legend(loc=1, fontsize=legendsize, frameon=False)
-
-    # print(deltaPeak_sub, deltaPeak_sup)
+    # fig1.colorbar(quad_sup, cax=ax_colorbar, extend='both')
 
     # ax_PD.tick_params(direction='in', right=True, top=True)
     # ax_subDist.tick_params(direction='in', right=True, top=True)
     # ax_supDist.tick_params(direction='in', right=True, top=True)
     # ax_supDist.xaxis.set_ticklabels([])
 
-    # GAS DENSITY REAL SPACE DISTRIBUTION (CARTESIAN INTERPOLATION)
+    # # # # DPT
 
-    interpdatapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08_resRat_0.50/massRatio=1.0/redyn_spherical/interp'
+    # qds = xr.open_dataset('/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08_resRat_0.50/massRatio=1.0_noCSAmp/redyn_spherical' + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    # tVals = qds['t'].values
 
-    cmap = 'afmhot'
-    avmin = 1e-5; avmax = 1e-1
+    # DynOvExp_NegMask = False
+    # DynOvExp_Cut = False
+    # cut = 1e-4
+    # consecDetection = True
+    # consecSamples = 10
 
-    aIBi = -5
-    Pratio_sup = 3.0
-    Pratio_sub = 0.52
-    tratio = 39.99
+    # def powerfunc(t, a, b):
+    #     return b * t**(-1 * a)
 
-    nu = 0.7926654595212022
-    xi = 0.8920620580763856
-    tscale = xi / nu
-    linDimMajor, linDimMinor = (10, 10)
+    # tmin = 90
+    # tmax = 100
+    # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
+    # rollwin = 1
 
-    interp_ds_sup = xr.open_dataset(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_t_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(Pratio_sup * nu, aIBi, tratio * tscale, linDimMajor, linDimMinor))
-    interp_ds_sub = xr.open_dataset(interpdatapath + '/InterpDat_P_{:.2f}_aIBi_{:.2f}_t_{:.2f}_lDM_{:.2f}_lDm_{:.2f}.nc'.format(Pratio_sub * nu, aIBi, tratio * tscale, linDimMajor, linDimMinor))
+    # colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue', 'magenta']
+    # lineList = ['solid', 'dashed', 'dotted', '-.']
+    # aIBi_des = np.array([-10.0, -5.0, -3.5, -2.5, -2.0, -1.75])
+    # massRat_des = np.array([1.0])
 
-    n0 = interp_ds_sup.attrs['n0']; gBB = interp_ds_sup.attrs['gBB']; mI = interp_ds_sup.attrs['mI']; mB = interp_ds_sup.attrs['mB']
-    nu = np.sqrt(n0 * gBB / mB)
-    mc = mI * nu
-    aBB = (mB / (4 * np.pi)) * gBB
-    xi = (8 * np.pi * n0 * aBB)**(-1 / 2)
-    tscale = xi / nu
+    # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08_resRat_0.50/massRatio=1.0_noCSAmp'
 
-    P_sup = interp_ds_sup.attrs['P']; Pratio_sup = P_sup / mc
-    P_sub = interp_ds_sub.attrs['P']; Pratio_sub = P_sub / mc
+    # Pcrit_da = xr.DataArray(np.full(aIBi_des.size, np.nan, dtype=float), coords=[aIBi_des], dims=['aIBi'])
+    # for inda, aIBi in enumerate(aIBi_des):
+    #     mds = xr.open_dataset(datapath + '/redyn_spherical/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    #     Plen = mds.coords['P'].values.size
+    #     Pstart_ind = 0
+    #     PVals = mds.coords['P'].values[Pstart_ind:Plen]
+    #     n0 = mds.attrs['n0']
+    #     gBB = mds.attrs['gBB']
+    #     mI = mds.attrs['mI']
+    #     mB = mds.attrs['mB']
+    #     nu = np.sqrt(n0 * gBB / mB)
 
-    xL = interp_ds_sup['x'].values; yL = interp_ds_sup['y'].values; zL = interp_ds_sup['z'].values
-    xLg, zLg = np.meshgrid(xL, zL, indexing='ij')
-    dx = xL[1] - xL[0]; dy = yL[1] - yL[0]; dz = zL[1] - zL[0]
+    #     vI0_Vals = (PVals - mds.isel(t=0, P=np.arange(Pstart_ind, Plen))['Pph'].values) / mI
 
-    na_xz_int_sup = interp_ds_sup['na_xz_int'].values; na_xz_int_norm_sup = na_xz_int_sup / (np.sum(na_xz_int_sup) * dx * dz)
-    na_xz_int_sub = interp_ds_sub['na_xz_int'].values; na_xz_int_norm_sub = na_xz_int_sub / (np.sum(na_xz_int_sub) * dx * dz)
+    #     mds_ts = mds.sel(t=tfVals)
+    #     DynOv_Exponents = np.zeros(PVals.size)
+    #     DynOv_Constants = np.zeros(PVals.size)
 
-    quad_sup = ax_supDist.pcolormesh(zLg / xi, xLg / xi, na_xz_int_norm_sup, norm=colors.LogNorm(vmin=avmin, vmax=avmax), cmap=cmap, rasterized=True)
-    # ax_supDist.text(0.57, 0.85, r'$t/(\xi c^{-1})$' + ': {:.1f}'.format(tratio), transform=ax_supDist.transAxes, color='w', fontsize=legendsize - 1)
-    ax_supDist.set_ylabel(r'$x/\xi$', labelpad=-10, fontsize=labelsize)
+    #     for indP, P in enumerate(PVals):
+    #         DynOv_raw = np.abs(mds_ts.isel(P=indP)['Real_DynOv'].values + 1j * mds_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+    #         DynOv_ds = xr.DataArray(DynOv_raw, coords=[tfVals], dims=['t'])
+    #         # DynOv_ds = DynOv_ds.rolling(t=rollwin, center=True).mean().dropna('t')
+    #         DynOv_Vals = DynOv_ds.values
+    #         tDynOvc_Vals = DynOv_ds['t'].values
 
-    quad_sub = ax_subDist.pcolormesh(zLg / xi, xLg / xi, na_xz_int_norm_sub, norm=colors.LogNorm(vmin=avmin, vmax=avmax), cmap=cmap, rasterized=True)
-    # ax_subDist.text(0.57, 0.85, r'$t/(\xi c^{-1})$' + ': {:.1f}'.format(tratio), transform=ax_subDist.transAxes, color='w', fontsize=legendsize - 1)
-    ax_subDist.set_xlabel(r'$z/\xi$', fontsize=labelsize)
-    ax_subDist.set_ylabel(r'$x/\xi$', labelpad=-10, fontsize=labelsize)
+    #         S_slope, S_intercept, S_rvalue, S_pvalue, S_stderr = ss.linregress(np.log(tDynOvc_Vals), np.log(DynOv_Vals))
+    #         DynOv_Exponents[indP] = -1 * S_slope
+    #         DynOv_Constants[indP] = np.exp(S_intercept)
 
-    fig1.colorbar(quad_sup, cax=ax_colorbar, extend='both')
+    #     if DynOvExp_NegMask:
+    #         DynOv_Exponents[DynOv_Exponents < 0] = 0
 
-    ax_PD.tick_params(direction='in', right=True, top=True)
-    ax_subDist.tick_params(direction='in', right=True, top=True)
-    ax_supDist.tick_params(direction='in', right=True, top=True)
-    ax_supDist.xaxis.set_ticklabels([])
+    #     if DynOvExp_Cut:
+    #         DynOv_Exponents[np.abs(DynOv_Exponents) < cut] = 0
 
-    # # # DPT
+    #     if consecDetection:
+    #         crit_ind = 0
+    #         for indE, exp in enumerate(DynOv_Exponents):
+    #             if indE > DynOv_Exponents.size - consecDetection:
+    #                 break
+    #             expSlice = DynOv_Exponents[indE:(indE + consecSamples)]
+    #             if np.all(expSlice > 0):
+    #                 crit_ind = indE
+    #                 break
+    #         DynOv_Exponents[0:crit_ind] = 0
+    #     Pcrit_da[inda] = PVals[crit_ind] / (mI * nu)
+    #     DynOvf_Vals = powerfunc(1e1000, DynOv_Exponents, DynOv_Constants)
 
-    qds = xr.open_dataset('/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08_resRat_0.50/massRatio=1.0_noCSAmp/redyn_spherical' + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-    tVals = qds['t'].values
+    # ax_PD.plot(aIBi_des * xi, Pcrit_da.values, linestyle='None', marker='D', mec=red, mfc=red, mew=2, ms=5)
 
-    DynOvExp_NegMask = False
-    DynOvExp_Cut = False
-    cut = 1e-4
-    consecDetection = True
-    consecSamples = 10
+    # print(aIBi_des)
+    # print(Pcrit_da.values)
 
-    def powerfunc(t, a, b):
-        return b * t**(-1 * a)
+    # fig1.savefig(figdatapath + '/Fig1_Letter.pdf')
+    # # fig1.savefig(figdatapath + '/Fig1_Letter.jpg', quality=100)
 
-    tmin = 90
-    tmax = 100
-    tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
-    rollwin = 1
-
-    colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue', 'magenta']
-    lineList = ['solid', 'dashed', 'dotted', '-.']
-    aIBi_des = np.array([-10.0, -5.0, -3.5, -2.5, -2.0, -1.75])
-    massRat_des = np.array([1.0])
-
-    datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08_resRat_0.50/massRatio=1.0_noCSAmp'
-
-    Pcrit_da = xr.DataArray(np.full(aIBi_des.size, np.nan, dtype=float), coords=[aIBi_des], dims=['aIBi'])
-    for inda, aIBi in enumerate(aIBi_des):
-        mds = xr.open_dataset(datapath + '/redyn_spherical/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
-        Plen = mds.coords['P'].values.size
-        Pstart_ind = 0
-        PVals = mds.coords['P'].values[Pstart_ind:Plen]
-        n0 = mds.attrs['n0']
-        gBB = mds.attrs['gBB']
-        mI = mds.attrs['mI']
-        mB = mds.attrs['mB']
-        nu = np.sqrt(n0 * gBB / mB)
-
-        vI0_Vals = (PVals - mds.isel(t=0, P=np.arange(Pstart_ind, Plen))['Pph'].values) / mI
-
-        mds_ts = mds.sel(t=tfVals)
-        DynOv_Exponents = np.zeros(PVals.size)
-        DynOv_Constants = np.zeros(PVals.size)
-
-        for indP, P in enumerate(PVals):
-            DynOv_raw = np.abs(mds_ts.isel(P=indP)['Real_DynOv'].values + 1j * mds_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
-            DynOv_ds = xr.DataArray(DynOv_raw, coords=[tfVals], dims=['t'])
-            # DynOv_ds = DynOv_ds.rolling(t=rollwin, center=True).mean().dropna('t')
-            DynOv_Vals = DynOv_ds.values
-            tDynOvc_Vals = DynOv_ds['t'].values
-
-            S_slope, S_intercept, S_rvalue, S_pvalue, S_stderr = ss.linregress(np.log(tDynOvc_Vals), np.log(DynOv_Vals))
-            DynOv_Exponents[indP] = -1 * S_slope
-            DynOv_Constants[indP] = np.exp(S_intercept)
-
-        if DynOvExp_NegMask:
-            DynOv_Exponents[DynOv_Exponents < 0] = 0
-
-        if DynOvExp_Cut:
-            DynOv_Exponents[np.abs(DynOv_Exponents) < cut] = 0
-
-        if consecDetection:
-            crit_ind = 0
-            for indE, exp in enumerate(DynOv_Exponents):
-                if indE > DynOv_Exponents.size - consecDetection:
-                    break
-                expSlice = DynOv_Exponents[indE:(indE + consecSamples)]
-                if np.all(expSlice > 0):
-                    crit_ind = indE
-                    break
-            DynOv_Exponents[0:crit_ind] = 0
-        Pcrit_da[inda] = PVals[crit_ind] / (mI * nu)
-        DynOvf_Vals = powerfunc(1e1000, DynOv_Exponents, DynOv_Constants)
-
-    ax_PD.plot(aIBi_des * xi, Pcrit_da.values, linestyle='None', marker='D', mec=red, mfc=red, mew=2, ms=5)
-
-    print(aIBi_des)
-    print(Pcrit_da.values)
-
-    fig1.savefig(figdatapath + '/Fig1_Letter.pdf')
-    # fig1.savefig(figdatapath + '/Fig1_Letter.jpg', quality=100)
-
-    matplotlib.rcParams['axes.linewidth'] = axl
-
-    # plt.show()
+    # matplotlib.rcParams['axes.linewidth'] = axl
 
     # # # # FIG 2 - LETTER
 
@@ -811,6 +809,150 @@ if __name__ == "__main__":
 
     # fig2.set_size_inches(7.8, 5.2)
     # fig2.savefig(figdatapath + '/Fig2_Letter.pdf')
+
+    # # # # # #############################################################################################################################
+    # # # # # FIG SM1 - LETTER
+    # # # # #############################################################################################################################
+
+    matplotlib.rcParams.update({'font.size': 12})
+    labelsize = 13
+    legendsize = 12
+
+    figSM1 = plt.figure(constrained_layout=False)
+
+    gs1 = figSM1.add_gridspec(nrows=1, ncols=1, bottom=0.18, top=0.93, left=0.08, right=0.31)
+    gs2 = figSM1.add_gridspec(nrows=1, ncols=1, bottom=0.18, top=0.93, left=0.37, right=0.60)
+    gs3 = figSM1.add_gridspec(nrows=1, ncols=1, bottom=0.18, top=0.93, left=0.70, right=0.94)
+    ax_subDist = figSM1.add_subplot(gs1[0])
+    ax_supDist = figSM1.add_subplot(gs2[0])
+    ax_distChar = figSM1.add_subplot(gs3[0])
+    # figSM1.set_size_inches(7.8, 3.5)
+    figSM1.set_size_inches(7.8, 2.5)
+    figSM1.text(0.005, 0.93, '(a)', fontsize=labelsize)
+    figSM1.text(0.325, 0.93, '(b)', fontsize=labelsize)
+    figSM1.text(0.62, 0.93, '(c)', fontsize=labelsize)
+
+    # GROUND STATE IMPURITY DISTRIBUTION (CARTESIAN)
+
+    # GaussianBroadening = True; sigma = 0.0168
+    GaussianBroadening = True; sigma = 0.02
+    incoh_color = green
+    delta_color = base02
+
+    def GPDF(xVals, mean, stdev):
+        return (1 / (stdev * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((xVals - mean) / stdev)**2)
+        # return (1 / (1 * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((xVals - mean) / stdev)**2)
+
+    aIBi = -5
+    qds_aIBi = xr.open_dataset(innerdatapath_cart + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    PVals = qds_aIBi['P'].values
+
+    nPIm_FWHM_indices = []
+    nPIm_distPeak_index = np.zeros(PVals.size, dtype=int)
+    nPIm_FWHM_Vals = np.zeros(PVals.size)
+    nPIm_distPeak_Vals = np.zeros(PVals.size)
+    nPIm_deltaPeak_Vals = np.zeros(PVals.size)
+    nPIm_Tot_Vals = np.zeros(PVals.size)
+    nPIm_Vec = np.empty(PVals.size, dtype=np.object)
+    PIm_Vec = np.empty(PVals.size, dtype=np.object)
+
+    for ind, P in enumerate(PVals):
+        qds_nPIm_inf = qds_aIBi['nPI_mag'].sel(P=P).isel(t=-1).dropna('PI_mag')
+        PIm_Vals = qds_nPIm_inf.coords['PI_mag'].values
+        dPIm = PIm_Vals[1] - PIm_Vals[0]
+
+        nPIm_Vec[ind] = qds_nPIm_inf.values
+        PIm_Vec[ind] = PIm_Vals
+
+        # # Calculate nPIm(t=inf) normalization
+        nPIm_Tot_Vals[ind] = np.sum(qds_nPIm_inf.values * dPIm) + qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
+
+        # Calculate FWHM, distribution peak, and delta peak
+        nPIm_FWHM_Vals[ind] = pfc.FWHM(PIm_Vals, qds_nPIm_inf.values)
+        nPIm_distPeak_Vals[ind] = np.max(qds_nPIm_inf.values)
+        nPIm_deltaPeak_Vals[ind] = qds_aIBi.sel(P=P).isel(t=-1)['mom_deltapeak'].values
+
+        D = qds_nPIm_inf.values - np.max(qds_nPIm_inf.values) / 2
+        indices = np.where(D > 0)[0]
+        nPIm_FWHM_indices.append((indices[0], indices[-1]))
+        nPIm_distPeak_index[ind] = np.argmax(qds_nPIm_inf.values)
+
+    Pnorm = PVals / (mI * nu)
+    Pratio_sup = 3.0; Pind_sup = np.abs(Pnorm - Pratio_sup).argmin()
+    Pratio_sub = 0.5; Pind_sub = np.abs(Pnorm - Pratio_sub).argmin()
+
+    print(Pnorm[Pind_sup], Pnorm[Pind_sub])
+    print(nPIm_deltaPeak_Vals[Pind_sup], nPIm_deltaPeak_Vals[Pind_sub])
+
+    ax_supDist.plot(PIm_Vec[Pind_sup] / (mI * nu), nPIm_Vec[Pind_sup], color=incoh_color, lw=1.0, label='Incoherent Part')
+    ax_supDist.set_xlim([-0.01, 5])
+    ax_supDist.set_ylim([0, 1.05])
+    # ax_supDist.set_ylabel(r'$n_{|\mathbf{P}_{\rm imp}|}$', fontsize=labelsize)
+    ax_supDist.set_xlabel(r'$|\mathbf{P}_{\rm imp}|/(m_{I}c)$', fontsize=labelsize)
+    ax_supDist.fill_between(PIm_Vec[Pind_sup] / (mI * nu), np.zeros(PIm_Vals.size), nPIm_Vec[Pind_sup], facecolor=incoh_color, alpha=0.25)
+    if GaussianBroadening:
+        Pnorm_sup = PVals[Pind_sup] / (mI * nu)
+        deltaPeak_sup = nPIm_deltaPeak_Vals[Pind_sup]
+        PIm_norm_sup = PIm_Vec[Pind_sup] / (mI * nu)
+        delta_GB_sup = deltaPeak_sup * GPDF(PIm_norm_sup, Pnorm_sup, sigma)
+        # ax_supDist.plot(PIm_norm_sup, delta_GB_sup, linestyle='-', color=delta_color, linewidth=1, label=r'$\delta$-Peak')
+        ax_supDist.plot(PIm_norm_sup, delta_GB_sup, linestyle='-', color=delta_color, linewidth=1.0, label='')
+        ax_supDist.fill_between(PIm_norm_sup, np.zeros(PIm_norm_sup.size), delta_GB_sup, facecolor=delta_color, alpha=0.25)
+    else:
+        ax_supDist.plot((PVals[Pind_sup] / (mI * nu)) * np.ones(PIm_Vals.size), np.linspace(0, nPIm_deltaPeak_Vals[Pind_sup], PIm_Vals.size), linestyle='-', color=delta_color, linewidth=1.5, label='Delta Peak (Z-factor)')
+    ax_supDist.legend(loc=1, fontsize=legendsize - 3, frameon=False)
+
+    ax_subDist.plot(PIm_Vec[Pind_sub] / (mI * nu), nPIm_Vec[Pind_sub], color=incoh_color, lw=1.0, label='Incoherent Part')
+    # ax_subDist.set_xlim([-0.01, np.max(PIm_Vec[Pind_sub] / (mI*nu))])
+    ax_subDist.set_xlim([-0.01, 5])
+    ax_subDist.set_ylim([0, 1.05])
+    ax_subDist.set_ylabel(r'$n_{|\mathbf{P}_{\rm imp}|}$', fontsize=labelsize)
+    ax_subDist.set_xlabel(r'$|\mathbf{P}_{\rm imp}|/(m_{I}c)$', fontsize=labelsize)
+    ax_subDist.fill_between(PIm_Vec[Pind_sub] / (mI * nu), np.zeros(PIm_Vals.size), nPIm_Vec[Pind_sub], facecolor=incoh_color, alpha=0.25)
+
+    if GaussianBroadening:
+        Pnorm_sub = PVals[Pind_sub] / (mI * nu)
+        deltaPeak_sub = nPIm_deltaPeak_Vals[Pind_sub]
+        PIm_norm_sub = PIm_Vec[Pind_sub] / (mI * nu)
+        delta_GB_sub = deltaPeak_sub * GPDF(PIm_norm_sub, Pnorm_sub, sigma)
+        print(np.trapz(delta_GB_sub, PIm_norm_sub))
+        ax_subDist.plot(PIm_norm_sub, delta_GB_sub, linestyle='-', color=delta_color, linewidth=1.0, label=r'$\delta$-Peak')
+        ax_subDist.fill_between(PIm_norm_sub, np.zeros(PIm_norm_sub.size), delta_GB_sub, facecolor=delta_color, alpha=0.25)
+        # ax_subDist.axvline(x=Pnorm_sub - 0.05, linestyle='-', color=delta_color, lw=1)
+        # ax_subDist.axvline(x=Pnorm_sub + 0.05, linestyle='-', color=delta_color, lw=1)
+
+    else:
+        ax_subDist.plot((PVals[Pind_sub] / (mI * nu)) * np.ones(PIm_Vals.size), np.linspace(0, nPIm_deltaPeak_Vals[Pind_sub], PIm_Vals.size), linestyle='-', color=delta_color, linewidth=1, label='Delta Peak (Z-factor)')
+    ax_subDist.legend(loc=1, fontsize=legendsize - 3, frameon=False)
+
+    print(deltaPeak_sub, deltaPeak_sup)
+
+    ax_subDist.set_yticks([0.0, 0.5, 1.0])
+    ax_supDist.set_yticks([0.0, 0.5, 1.0])
+
+    ax_subDist.tick_params(direction='in', right=True, top=True)
+    ax_supDist.tick_params(direction='in', right=True, top=True)
+    ax_supDist.yaxis.set_ticklabels([])
+
+    ax_distChar2 = ax_distChar.twinx()
+    ax_distChar.tick_params(axis='y', labelcolor=delta_color, direction='in')
+    ax_distChar2.tick_params(axis='y', labelcolor=incoh_color, direction='in')
+    ax_distChar.tick_params(direction='in', top=True)
+
+    ax_distChar.plot(PVals / (mI * nu), nPIm_deltaPeak_Vals, linestyle='-', color=delta_color, alpha=0.75)
+    ax_distChar2.plot(PVals / (mI * nu), nPIm_FWHM_Vals, linestyle='-', color=incoh_color)
+
+    ax_distChar.set_xlim([-0.01, 5])
+    ax_distChar.set_xlabel(r'$|\mathbf{P}_{\rm imp}|/(m_{I}c)$', fontsize=labelsize)
+    ax_distChar.set_ylim([-0.05, 1.05])
+    ax_distChar.set_yticks([0.0, 0.5, 1.0])
+    ax_distChar2.set_ylim([-0.05, 2.05])
+    ax_distChar2.set_yticks([0.0, 1.0, 2.0])
+
+    ax_distChar.set_ylabel(r'$\delta$-Peak Magnitude', fontsize=labelsize, color=delta_color, alpha=0.75)
+    ax_distChar2.set_ylabel('Incoherent Part FWHM', rotation=270, labelpad=17, fontsize=labelsize, color=incoh_color)
+
+    figSM1.savefig(figdatapath + '/FigSM1_Letter.pdf')
 
     # # # # FIG 1 (OLD) - POLARON GRAPHIC + BOGO DISPERSION + PHASE DIAGRAM + DISTRIBUTION PLOTS
 
