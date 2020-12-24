@@ -57,9 +57,9 @@ if __name__ == "__main__":
 
     aIBi = -5
 
-    # Pnorm_des = 4.0
+    Pnorm_des = 4.0
     # Pnorm_des = 3.0
-    Pnorm_des = 2.067
+    # Pnorm_des = 2.067
     # Pnorm_des = 1.8
     # Pnorm_des = 1.4
 

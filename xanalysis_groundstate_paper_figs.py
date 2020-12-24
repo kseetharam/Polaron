@@ -846,6 +846,7 @@ if __name__ == "__main__":
     aIBi = -5
     qds_aIBi = xr.open_dataset(innerdatapath_cart + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
     PVals = qds_aIBi['P'].values
+    print('Interaction: {0}'.format(aIBi * xi))
 
     nPIm_FWHM_indices = []
     nPIm_distPeak_index = np.zeros(PVals.size, dtype=int)
@@ -943,7 +944,7 @@ if __name__ == "__main__":
     ax_distChar2.plot(PVals / (mI * nu), nPIm_FWHM_Vals, linestyle='-', color=incoh_color)
 
     ax_distChar.set_xlim([-0.01, 5])
-    ax_distChar.set_xlabel(r'$|\mathbf{P}_{\rm imp}|/(m_{I}c)$', fontsize=labelsize)
+    ax_distChar.set_xlabel(r'$P/(m_{I}c)$', fontsize=labelsize)
     ax_distChar.set_ylim([-0.05, 1.05])
     ax_distChar.set_yticks([0.0, 0.5, 1.0])
     ax_distChar2.set_ylim([-0.05, 2.05])

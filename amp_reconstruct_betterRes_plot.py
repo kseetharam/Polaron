@@ -75,9 +75,9 @@ if __name__ == "__main__":
     interpdatapath = innerdatapath + '/interp'
 
     aIBi = -5
-    # Pnorm_des = 4.0
+    Pnorm_des = 4.0
     # Pnorm_des = 3.0
-    Pnorm_des = 2.067
+    # Pnorm_des = 2.067
     # Pnorm_des = 1.8
     # Pnorm_des = 1.4
     # Pnorm_des = 1.34
