@@ -967,8 +967,8 @@ if __name__ == "__main__":
 
     # gs1 = figSM2.add_gridspec(nrows=1, ncols=1, bottom=0.16, top=0.93, left=0.1, right=0.45)
     # gs2 = figSM2.add_gridspec(nrows=1, ncols=1, bottom=0.16, top=0.93, left=0.6, right=0.98)
-    # ax_supDist = figSM2.add_subplot(gs1[0])
-    # ax_subDist = figSM2.add_subplot(gs2[0])
+    # ax_supDist = figSM2.add_subplot(gs2[0])
+    # ax_subDist = figSM2.add_subplot(gs1[0])
     # figSM2.set_size_inches(7.8, 3.5)
     # figSM2.text(0.01, 0.94, '(a)', fontsize=labelsize)
     # figSM2.text(0.5, 0.94, '(b)', fontsize=labelsize)
