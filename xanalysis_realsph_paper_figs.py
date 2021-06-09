@@ -152,96 +152,222 @@ if __name__ == "__main__":
     print(qds.attrs['k_mag_cutoff'] * xi)
     print('Np: {0}'.format(qds.coords['k'].values.size * qds.coords['th'].values.size))
 
-    # # FIG 3 - S(t) CURVES - PRL
+    # # # # # # #############################################################################################################################
+    # # # # # # FIG 3 - S(t) CURVES - PRL
+    # # # # # #############################################################################################################################
 
-    red = col.red.ashexstring()
-    green = col.green.ashexstring()
-    blue = col.blue.ashexstring()
+    # red = col.red.ashexstring()
+    # green = col.green.ashexstring()
+    # blue = col.blue.ashexstring()
 
-    colorList = [red, green, blue]
+    # colorList = [red, green, blue]
 
-    matplotlib.rcParams.update({'font.size': 12})
+    # matplotlib.rcParams.update({'font.size': 12})
 
-    tailFit = True
-    logScale = True
-    PimpData_roll = False; PimpData_rollwin = 2
-    longTime = True
-    # tau = 100; tfCutoff = 90; tfstart = 10
-    tau = 300; tfCutoff = 200; tfstart = 10
+    # tailFit = True
+    # logScale = True
+    # PimpData_roll = False; PimpData_rollwin = 2
+    # longTime = True
+    # # tau = 100; tfCutoff = 90; tfstart = 10
+    # tau = 300; tfCutoff = 200; tfstart = 10
 
-    aIBi_weak = -10.0
-    print(aIBi_weak * xi)
+    # aIBi_weak = -10.0
+    # print(aIBi_weak * xi)
 
-    if longTime:
-        innerdatapath_longtime = datapath + '_longtime/redyn_spherical'
-        qds_w = xr.open_dataset(innerdatapath_longtime + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi_weak))
-    else:
-        qds_w = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi_weak))
+    # if longTime:
+    #     innerdatapath_longtime = datapath + '_longtime/redyn_spherical'
+    #     qds_w = xr.open_dataset(innerdatapath_longtime + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi_weak))
+    # else:
+    #     qds_w = xr.open_dataset(innerdatapath + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi_weak))
 
-    tVals = qds_w['t'].values
-    tsVals = tVals[tVals < tau]
+    # tVals = qds_w['t'].values
+    # tsVals = tVals[tVals < tau]
 
-    qds_aIBi_ts_w = qds_w.sel(t=tsVals)
+    # qds_aIBi_ts_w = qds_w.sel(t=tsVals)
 
-    Pnorm_des = np.array([0.5, 2.2])
+    # Pnorm_des = np.array([0.5, 2.2])
 
-    Pinds = np.zeros(Pnorm_des.size, dtype=int)
-    for Pn_ind, Pn in enumerate(Pnorm_des):
-        Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
+    # Pinds = np.zeros(Pnorm_des.size, dtype=int)
+    # for Pn_ind, Pn in enumerate(Pnorm_des):
+    #     Pinds[Pn_ind] = np.abs(Pnorm - Pn).argmin().astype(int)
 
-    fig, ax = plt.subplots()
-    for ip, indP in enumerate(Pinds):
-        P = PVals[indP]
-        DynOv_w = np.abs(qds_aIBi_ts_w.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts_w.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
-        Pph_ds_w = xr.DataArray(qds_aIBi_ts_w.isel(P=indP)['Pph'].values, coords=[tsVals], dims=['t'])
-        if PimpData_roll:
-            Pph_ds_w = Pph_ds_w.rolling(t=PimpData_rollwin, center=True).mean().dropna('t')
-        vImp_Vals_w = (P - Pph_ds_w.values) / mI
-        tvImp_Vals_w = Pph_ds_w['t'].values
+    # fig, ax = plt.subplots()
+    # for ip, indP in enumerate(Pinds):
+    #     P = PVals[indP]
+    #     DynOv_w = np.abs(qds_aIBi_ts_w.isel(P=indP)['Real_DynOv'].values + 1j * qds_aIBi_ts_w.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+    #     Pph_ds_w = xr.DataArray(qds_aIBi_ts_w.isel(P=indP)['Pph'].values, coords=[tsVals], dims=['t'])
+    #     if PimpData_roll:
+    #         Pph_ds_w = Pph_ds_w.rolling(t=PimpData_rollwin, center=True).mean().dropna('t')
+    #     vImp_Vals_w = (P - Pph_ds_w.values) / mI
+    #     tvImp_Vals_w = Pph_ds_w['t'].values
 
-        if tailFit is True:
-            tfmask = tsVals > tfCutoff
-            tfVals = tsVals[tfmask]
-            tfLin = tsVals[tsVals > tfstart]
-            zD = np.polyfit(np.log(tfVals), np.log(DynOv_w[tfmask]), deg=1)
-            if longTime:
-                tfLin_plot = tVals[tVals > tfstart]
-            else:
-                tfLin_plot = tfLin
-            fLinD_plot = np.exp(zD[1]) * tfLin_plot**(zD[0])
-            ax.plot(tfLin_plot / tscale, fLinD_plot, 'k--', label='')
+    #     if tailFit is True:
+    #         tfmask = tsVals > tfCutoff
+    #         tfVals = tsVals[tfmask]
+    #         tfLin = tsVals[tsVals > tfstart]
+    #         zD = np.polyfit(np.log(tfVals), np.log(DynOv_w[tfmask]), deg=1)
+    #         if longTime:
+    #             tfLin_plot = tVals[tVals > tfstart]
+    #         else:
+    #             tfLin_plot = tfLin
+    #         fLinD_plot = np.exp(zD[1]) * tfLin_plot**(zD[0])
+    #         ax.plot(tfLin_plot / tscale, fLinD_plot, 'k--', label='')
 
-        if longTime:
-            DynOv_w_plot = np.abs(qds_w.isel(P=indP)['Real_DynOv'].values + 1j * qds_w.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
-            ax.plot(tVals / tscale, DynOv_w_plot, label='{:.2f}'.format(P / mc), lw=3, color=colorList[ip])
-        else:
-            ax.plot(tsVals / tscale, DynOv_w, label='{:.2f}'.format(P / mc))
+    #     if longTime:
+    #         DynOv_w_plot = np.abs(qds_w.isel(P=indP)['Real_DynOv'].values + 1j * qds_w.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+    #         ax.plot(tVals / tscale, DynOv_w_plot, label='{:.2f}'.format(P / mc), lw=3, color=colorList[ip])
+    #     else:
+    #         ax.plot(tsVals / tscale, DynOv_w, label='{:.2f}'.format(P / mc))
 
-    ax.set_ylabel(r'$|S(t)|$', fontsize=18)
-    ax.set_xlabel(r'$t/(\xi c^{-1})$', fontsize=18)
+    # ax.set_ylabel(r'$|S(t)|$', fontsize=18)
+    # ax.set_xlabel(r'$t/(\xi c^{-1})$', fontsize=18)
 
-    if logScale is True:
-        ax.set_xscale('log')
-        ax.set_yscale('log')
+    # if logScale is True:
+    #     ax.set_xscale('log')
+    #     ax.set_yscale('log')
 
-    ax.tick_params(which='both', direction='in', right=True, top=True)
-    ax.tick_params(which='major', length=6, width=1)
-    ax.tick_params(which='minor', length=3, width=1)
-    ax.tick_params(axis='x', which='major', pad=10)
-    ax.tick_params(axis='both', which='major', labelsize=17)
-    ax.tick_params(axis='both', which='minor', labelsize=17)
+    # ax.tick_params(which='both', direction='in', right=True, top=True)
+    # ax.tick_params(which='major', length=6, width=1)
+    # ax.tick_params(which='minor', length=3, width=1)
+    # ax.tick_params(axis='x', which='major', pad=10)
+    # ax.tick_params(axis='both', which='major', labelsize=17)
+    # ax.tick_params(axis='both', which='minor', labelsize=17)
 
-    # ax.legend(title=r'$v_{\rm imp}(t_{0}) / c$')
+    # # ax.legend(title=r'$v_{\rm imp}(t_{0}) / c$')
 
-    handles, labels = ax.get_legend_handles_labels()
-    # fig.legend(handles, labels, title=r'$\langle v_{\rm imp}(t_{0})\rangle / c$', ncol=1, loc='center right', bbox_to_anchor=(0.11, 0.38)))
-    fig.subplots_adjust(left=0.2, bottom=0.175, top=0.98, right=0.98)
+    # handles, labels = ax.get_legend_handles_labels()
+    # # fig.legend(handles, labels, title=r'$\langle v_{\rm imp}(t_{0})\rangle / c$', ncol=1, loc='center right', bbox_to_anchor=(0.11, 0.38)))
+    # fig.subplots_adjust(left=0.2, bottom=0.175, top=0.98, right=0.98)
 
-    fig.legend(handles, labels, title=r'$v_{\rm imp}(t_{0}) / c$', loc=3, bbox_to_anchor=(0.25, 0.25), fontsize=18, title_fontsize=18)
+    # fig.legend(handles, labels, title=r'$v_{\rm imp}(t_{0}) / c$', loc=3, bbox_to_anchor=(0.25, 0.25), fontsize=18, title_fontsize=18)
 
-    fig.set_size_inches(6, 3.9)
-    filename = '/Fig3_PRL.pdf'
-    fig.savefig(figdatapath + filename)
+    # fig.set_size_inches(6, 3.9)
+    # filename = '/Fig3_PRL.pdf'
+    # fig.savefig(figdatapath + filename)
+
+    # # # # # # # #############################################################################################################################
+    # # # # # # # FIG SM3 - LETTER
+    # # # # # # #############################################################################################################################
+
+    # axl = matplotlib.rcParams['axes.linewidth']
+    # matplotlib.rcParams['axes.linewidth'] = 0.5 * axl
+    # matplotlib.rcParams.update({'font.size': 12})
+    # labelsize = 13
+    # legendsize = 12
+
+    # red = col.red.ashexstring()
+    # green = col.green.ashexstring()
+    # blue = col.blue.ashexstring()
+    # colorList = [green, red, blue]
+    # matplotlib.rcParams.update({'font.size': 12})
+
+    # # fig, ax = plt.subplots()
+    # fig = plt.figure(constrained_layout=False)
+    # gs = fig.add_gridspec(nrows=1, ncols=1, bottom=0.1, top=0.93, left=0.1, right=0.95)
+    # ax = fig.add_subplot(gs[0])
+
+    # qds = xr.open_dataset('/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08_resRat_0.50/massRatio=1.0_noCSAmp/redyn_spherical' + '/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    # tVals = qds['t'].values
+
+    # DynOvExp_NegMask = False
+    # DynOvExp_Cut = False
+    # cut = 1e-4
+    # consecDetection = True
+    # consecSamples = 10
+
+    # def powerfunc(t, a, b):
+    #     return b * t**(-1 * a)
+
+    # tmin = 90
+    # tmax = 100
+    # tfVals = tVals[(tVals <= tmax) * (tVals >= tmin)]
+    # rollwin = 1
+
+    # aIBi_des = np.array([-10.0, -5.0, -3.5, -2.5, -2.0, -1.75])
+    # massRat_des = np.array([1.0])
+
+    # datapath = '/Users/kis/Dropbox/VariationalResearch/HarvardOdyssey/genPol_data/NGridPoints_1.11E+08_resRat_0.50/massRatio=1.0_noCSAmp'
+
+    # massRat_des = np.array([0.5, 1.0, 2.0])
+
+    # mdatapaths = []
+
+    # for mR in massRat_des:
+    #     if toggleDict['noCSAmp'] is True:
+    #         mdatapaths.append(datapath[0:-11] + '{:.1f}_noCSAmp'.format(mR))
+    #     else:
+    #         mdatapaths.append(datapath[0:-3] + '{:.1f}_noCSAmp'.format(mR))
+    # if toggleDict['Dynamics'] != 'real' or toggleDict['Grid'] != 'spherical' or toggleDict['Coupling'] != 'twophonon':
+    #     print('SETTING ERROR')
+
+    # Pcrit_da = xr.DataArray(np.full((massRat_des.size, aIBi_des.size), np.nan, dtype=float), coords=[massRat_des, aIBi_des], dims=['mRatio', 'aIBi'])
+    # for inda, aIBi in enumerate(aIBi_des):
+    #     for indm, mRat in enumerate(massRat_des):
+    #         mds = xr.open_dataset(mdatapaths[indm] + '/redyn_spherical/quench_Dataset_aIBi_{:.2f}.nc'.format(aIBi))
+    #         Plen = mds.coords['P'].values.size
+    #         Pstart_ind = 0
+    #         PVals = mds.coords['P'].values[Pstart_ind:Plen]
+    #         n0 = mds.attrs['n0']
+    #         gBB = mds.attrs['gBB']
+    #         mI = mds.attrs['mI']
+    #         mB = mds.attrs['mB']
+    #         nu = np.sqrt(n0 * gBB / mB)
+
+    #         vI0_Vals = (PVals - mds.isel(t=0, P=np.arange(Pstart_ind, Plen))['Pph'].values) / mI
+
+    #         mds_ts = mds.sel(t=tfVals)
+    #         DynOv_Exponents = np.zeros(PVals.size)
+    #         DynOv_Constants = np.zeros(PVals.size)
+
+    #         for indP, P in enumerate(PVals):
+    #             DynOv_raw = np.abs(mds_ts.isel(P=indP)['Real_DynOv'].values + 1j * mds_ts.isel(P=indP)['Imag_DynOv'].values).real.astype(float)
+    #             DynOv_ds = xr.DataArray(DynOv_raw, coords=[tfVals], dims=['t'])
+    #             # DynOv_ds = DynOv_ds.rolling(t=rollwin, center=True).mean().dropna('t')
+    #             DynOv_Vals = DynOv_ds.values
+    #             tDynOvc_Vals = DynOv_ds['t'].values
+
+    #             S_slope, S_intercept, S_rvalue, S_pvalue, S_stderr = ss.linregress(np.log(tDynOvc_Vals), np.log(DynOv_Vals))
+    #             DynOv_Exponents[indP] = -1 * S_slope
+    #             DynOv_Constants[indP] = np.exp(S_intercept)
+
+    #         if DynOvExp_NegMask:
+    #             DynOv_Exponents[DynOv_Exponents < 0] = 0
+
+    #         if DynOvExp_Cut:
+    #             DynOv_Exponents[np.abs(DynOv_Exponents) < cut] = 0
+
+    #         if consecDetection:
+    #             crit_ind = 0
+    #             for indE, exp in enumerate(DynOv_Exponents):
+    #                 if indE > DynOv_Exponents.size - consecDetection:
+    #                     break
+    #                 expSlice = DynOv_Exponents[indE:(indE + consecSamples)]
+    #                 if np.all(expSlice > 0):
+    #                     crit_ind = indE
+    #                     break
+    #             DynOv_Exponents[0:crit_ind] = 0
+    #         Pcrit_da[indm, inda] = PVals[crit_ind] / (mI * nu)
+    #         DynOvf_Vals = powerfunc(1e1000, DynOv_Exponents, DynOv_Constants)
+
+    # for indm, mRat in enumerate(massRat_des):
+    #     ax.plot(aIBi_des * xi, Pcrit_da.sel(mRatio=mRat).values, linestyle='None', marker='D', mec=colorList[indm], mfc=colorList[indm], mew=2, ms=5, label='{0}'.format(mRat))
+
+    # xmin = -10.1; xmax = -0.9
+    # ymin = -0.1; ymax = 4.1
+    # ax.tick_params(direction='in', right=True, top=True)
+    # ax.set_xlabel(r'$a_{\rm IB}^{-1}/\xi^{-1}$', fontsize=labelsize)
+    # ax.set_ylabel(r'Total Momentum $P/(m_{I}c)$', fontsize=labelsize)
+    # ax.set_xlim([xmin, xmax]); ax.set_ylim([ymin, ymax])
+
+    # ax.legend(title=r'$m_{I}/m_{B}$', loc=2)
+    # fig.set_size_inches(6, 4.5)
+    # # fig.set_size_inches(6, 3.9)
+    # filename = '/FigSM3_PRL.pdf'
+    # fig.savefig(figdatapath + filename)
+
+    # # # # # # #############################################################################################################################
+    # # # # # # OLD FIGS
+    # # # # # #############################################################################################################################
 
     # # # # FIG 4 - S(t) AND v_Imp CURVES (WEAK AND STRONG INTERACTIONS)
 
@@ -596,7 +722,7 @@ if __name__ == "__main__":
     # colorList = ['red', '#7e1e9c', 'green', 'orange', '#60460f', 'blue', 'magenta']
     # lineList = ['solid', 'dashed', 'dotted', '-.']
     # aIBi_des = np.array([-10.0, -5.0, -3.5, -2.5, -2.0, -1.75])
-    # massRat_des = np.array([1.0])
+    # massRat_des = np.array([0.5, 1.0, 2.0])
 
     # mdatapaths = []
 
@@ -678,7 +804,8 @@ if __name__ == "__main__":
 
     #     # ax2.plot(aIBi_interpVals /xi, Pcrit_interpVals, color='k', linestyle=lineList[indm], label='{0}'.format(massRat))
     #     # ax2.plot(aIBi_interpVals / xi, Pcrit_interpVals, color='k', linestyle=lineList[indm], label='NESS')
-    #     ax2.plot(aIBi_des / xi, Pcrit_da.sel(mRatio=massRat).values, 'kx', mew=2, ms=12, label='NESS')
+    #     # ax2.plot(aIBi_des / xi, Pcrit_da.sel(mRatio=massRat).values, 'kx', mew=2, ms=12, label='NESS')
+    #     ax2.plot(aIBi_des / xi, Pcrit_da.sel(mRatio=massRat).values, color=colorList[indm], linestyle='', marker='d', mew=2, ms=12, label='{0}'.format(massRat))
 
     # xmin = np.min(aIBi_interpVals / xi)
     # xmax = 1.01 * np.max(aIBi_interpVals / xi)
@@ -732,7 +859,7 @@ if __name__ == "__main__":
 
     # fig2.set_size_inches(6, 4.5)
     # fig2.subplots_adjust(bottom=0.17, top=0.97, left=0.15, right=0.97)
-    # # fig2.savefig(figdatapath + '/FigDPT.pdf')
+    # fig2.savefig(figdatapath + '/FigDPT_mRat.pdf')
 
     # # # # FIG 6 - PARTICIPATION RATIO CURVES VS INITIAL VELOCITY (SPHERICAL APPROXIMATION TO CARTESIAN INTERPOLATION)
 
