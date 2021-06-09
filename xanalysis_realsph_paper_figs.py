@@ -353,7 +353,8 @@ if __name__ == "__main__":
     #     ax.plot(aIBi_des * xi, Pcrit_da.sel(mRatio=mRat).values, linestyle='None', marker='D', mec=colorList[indm], mfc=colorList[indm], mew=2, ms=5, label='{0}'.format(mRat))
 
     # xmin = -10.1; xmax = -0.9
-    # ymin = -0.1; ymax = 4.1
+    # # ymin = -0.1; ymax = 4.1
+    # ymin = 0.4; ymax = 4.1
     # ax.tick_params(direction='in', right=True, top=True)
     # ax.set_xlabel(r'$a_{\rm IB}^{-1}/\xi^{-1}$', fontsize=labelsize)
     # ax.set_ylabel(r'Total Momentum $P/(m_{I}c)$', fontsize=labelsize)
